@@ -13,7 +13,6 @@ YAML_FILE # path to yaml file
 YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller  
 ```
 
-
 # Example:
 ## build the node
 ```
@@ -107,4 +106,5 @@ You should see:
   
   Congraduations, you updated the parameter!
   
-
+## Sample code
+A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/example/include/parameters/admittance_controller.h
