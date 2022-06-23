@@ -78,7 +78,6 @@ class GenParamStruct:
             if name != self.target:
                 self.struct += "struct "+name+" {\n"
             for key in root_map:
-                # if name != self.target:
                 nested_name.append(name)
                 self.parse_dict(key, root_map[key], nested_name)
                 nested_name.pop()
@@ -90,11 +89,20 @@ class GenParamStruct:
 
     def run(self):
 
-        directory = sys.argv[1]
+        param_gen_directory = sys.argv[0].split("/")
+        param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
+
+        out_directory = sys.argv[1]
+
+        if out_directory[-1] != "/":
+            out_directory += "/"
+        if param_gen_directory[-1] != "/":
+            param_gen_directory += "/"
+
         yaml_file = sys.argv[2]
         self.target = sys.argv[3]
 
-        with open(directory + "/" + yaml_file) as f:
+        with open(yaml_file) as f:
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
             if len(sys.argv) != 4:
                 print("gen_yaml expects three input argument: directory, yaml file name, and target name")
@@ -110,8 +118,7 @@ class GenParamStruct:
         INCLUDES = "#include <rclcpp/node.hpp>\n#include <vector>\n#include <string>"
         NAMESPACE = self.target + "_parameters"
 
-        with open(directory + "/templates/template.txt", "r") as f:
-            f = open(directory + "/templates/template.txt", "r")
+        with open(param_gen_directory + "/templates/template.txt", "r") as f:
             self.contents = f.read()
 
         self.contents = self.contents.replace("**COMMENTS**", COMMENTS)
@@ -122,12 +129,12 @@ class GenParamStruct:
         self.contents = self.contents.replace("**PARAM_SET**", self.param_set)
         self.contents = self.contents.replace("**DECLARE_PARAMS**", self.param_declare)
 
-        paths = [directory + "/include/", directory + "/include/parameters/"]
-        for path in paths:
-            if not os.path.isdir(path):
-                os.mkdir(path)
 
-        with open(paths[-1] + self.target  + ".h", "w") as f:
+        if not os.path.isdir(out_directory):
+            print("The specified output directory: " + out_directory + " does not exist")
+            raise AssertionError()
+
+        with open(out_directory + self.target  + ".h", "w") as f:
             f.write(self.contents)
 
 

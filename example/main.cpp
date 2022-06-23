@@ -35,6 +35,7 @@ int main(int numArgs, const char** args) {
   auto gen_struct = std::make_shared<admittance_controller_parameters::admittance_controller>(node->get_node_parameters_interface());
   node->gen_struct = gen_struct;
 
+
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   executor.spin();
