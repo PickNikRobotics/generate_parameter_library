@@ -39,4 +39,4 @@ namespace **NAMESPACE** {
     };
 
 
-} // namespace admittance_controller
+} // namespace **NAMESPACE**
