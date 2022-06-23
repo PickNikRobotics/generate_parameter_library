@@ -106,5 +106,5 @@ You should see:
   
   Congraduations, you updated the parameter!
   
-## Sample code
+## Sample output
 A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/example/include/parameters/admittance_controller.h
