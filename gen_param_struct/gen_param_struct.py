@@ -32,50 +32,58 @@ class GenParamStruct:
 
         nested_name = "".join(x + "_." for x in nested_name_list[1:])
 
-        if isinstance(value, list) and isinstance(value[0], str):
-            self.struct += "std::vector<std::string> %s = {" % name
-            for ind, val in enumerate(value[:-1]):
-                self.struct += "\"%s\", " % val
-            self.struct += "\"%s\"};\n" % value[-1]
-
-            self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
-            self.param_set += "%s = param.as_string_array();\n" % (nested_name + name)
-            self.param_set += "}\n"
-
-        elif isinstance(value, list) and isinstance(value[0], float):
-            self.struct += "std::vector<double> %s = {" % name
-            for ind, val in enumerate(value[:-1]):
-                self.struct += "\"%s\", " % val
-            self.struct += "\"%s\"};\n" % value[-1]
-
-            self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
-            self.param_set += "%s = param.as_double_array();\n" % (nested_name + name)
-            self.param_set += "}\n"
-
-        elif isinstance(value, str):
-            self.struct += "std::string %s = \"%s\";\n" % (name, value)
-
-            self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
-            self.param_set += "%s = param.as_string();\n" % (nested_name + name)
-            self.param_set += "}\n"
-
-        elif isinstance(value, float):
-            self.struct += "double %s = %s;\n" % (name, str(value))
-
-            self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
-            self.param_set += "%s = param.as_double();\n" % (nested_name + name)
-            self.param_set += "}\n"
-
-        elif isinstance(value, bool):
-            if value:
-                tmp = "true"
+        if isinstance(value, list):
+            if isinstance(value[0], str):
+                data_type = "std::string"
+                conversion_func = "as_string_array()"
+                def str_fun(s): return "\"%s\"" % s
+            elif isinstance(value[0], float):
+                data_type = "double"
+                conversion_func = "as_double_array()"
+                def str_fun(s): return str(s)
+            elif isinstance(value[0], int) and not isinstance(value, bool):
+                data_type = "int"
+                conversion_func = "as_integer_array()"
+                def str_fun(s): return str(s)
+            elif isinstance(value[0], bool):
+                data_type = "bool"
+                conversion_func = "as_bool_array()"
+                def str_fun(cond): return "true" if cond else "false"
             else:
-                tmp = "false"
-            self.struct += "bool %s = %s;\n" % (name, tmp)
+                print("invalid yaml type: %s", type(value[0]))
+                raise AssertionError()
 
-            self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
-            self.param_set += "%s = param.as_bool();\n" % (nested_name + name)
-            self.param_set += "}\n"
+            self.struct += "std::vector<%s> %s = {" % (data_type, name)
+            for ind, val in enumerate(value[:-1]):
+                self.struct += "%s, " % str_fun(val)
+            self.struct += "%s};\n" % str_fun(value[-1])
+
+        else:
+            if isinstance(value, str):
+                data_type = "std::string"
+                conversion_func = "as_string()"
+                def str_fun(s): return "\"%s\"" % s
+            elif isinstance(value, float):
+                data_type = "double"
+                conversion_func = "as_double()"
+                def str_fun(s): return str(s)
+            elif isinstance(value, int) and not isinstance(value, bool):
+                data_type = "int"
+                conversion_func = "as_int()"
+                def str_fun(s): return str(s)
+            elif isinstance(value, bool):
+                data_type = "bool"
+                conversion_func = "as_bool()"
+                def str_fun(cond): return "true" if cond else "false"
+            else:
+                print("invalid yaml type: %s", type(value))
+                raise AssertionError()
+
+            self.struct += "%s %s = %s;\n" % (data_type, name, str_fun(value))
+
+        self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
+        self.param_set += "%s = param.%s;\n" % (nested_name + name, conversion_func)
+        self.param_set += "}\n"
 
         param_prefix = "p_"
         param_prefix += "".join(x + "_" for x in nested_name_list[1:])
