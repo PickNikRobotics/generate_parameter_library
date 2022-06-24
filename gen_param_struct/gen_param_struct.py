@@ -115,11 +115,14 @@ class GenParamStruct:
         param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
 
         out_directory = sys.argv[1]
-
         if out_directory[-1] != "/":
             out_directory += "/"
         if param_gen_directory[-1] != "/":
             param_gen_directory += "/"
+
+        if not os.path.isdir(out_directory):
+            print("The specified output directory: " + out_directory + " does not exist")
+            raise AssertionError()
 
         yaml_file = sys.argv[2]
         self.target = sys.argv[3]
@@ -127,7 +130,7 @@ class GenParamStruct:
         with open(yaml_file) as f:
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
             if len(sys.argv) != 4:
-                print("gen_yaml expects three input argument: directory, yaml file name, and target name")
+                print("gen_yaml expects three input argument: output directory, yaml file path, and yaml root name")
                 raise AssertionError()
 
             for doc in docs:
@@ -149,10 +152,6 @@ class GenParamStruct:
         self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
         self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
         self.contents = self.contents.replace("**DECLARE_PARAMS**", str(self.param_declare))
-
-        if not os.path.isdir(out_directory):
-            print("The specified output directory: " + out_directory + " does not exist")
-            raise AssertionError()
 
         with open(out_directory + self.target + ".h", "w") as f:
             f.write(self.contents)
