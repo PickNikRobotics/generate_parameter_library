@@ -89,9 +89,11 @@ class GenParamStruct:
         param_prefix += "".join(x + "_" for x in nested_name_list[1:])
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
+        self.param_declare += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
         self.param_declare += "auto %s = rclcpp::ParameterValue(%s);\n" % (param_prefix + name, nested_name + name)
         self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s);\n" % (
             param_name, param_prefix + name)
+        self.param_declare += "}\n"
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict):

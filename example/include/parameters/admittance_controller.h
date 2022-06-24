@@ -258,106 +258,204 @@ namespace admittance_controller_parameters {
     }
 
     void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> &parameters_interface) {
-      auto p_joints = rclcpp::ParameterValue(joints);
-      parameters_interface->declare_parameter("joints", p_joints);
-      auto p_command_interfaces = rclcpp::ParameterValue(command_interfaces);
-      parameters_interface->declare_parameter("command_interfaces", p_command_interfaces);
-      auto p_state_interfaces = rclcpp::ParameterValue(state_interfaces);
-      parameters_interface->declare_parameter("state_interfaces", p_state_interfaces);
-      auto p_chainable_command_interfaces = rclcpp::ParameterValue(chainable_command_interfaces);
-      parameters_interface->declare_parameter("chainable_command_interfaces", p_chainable_command_interfaces);
-      auto p_kinematics_plugin_name = rclcpp::ParameterValue(kinematics_.plugin_name);
-      parameters_interface->declare_parameter("kinematics.plugin_name", p_kinematics_plugin_name);
-      auto p_kinematics_base = rclcpp::ParameterValue(kinematics_.base);
-      parameters_interface->declare_parameter("kinematics.base", p_kinematics_base);
-      auto p_kinematics_tip = rclcpp::ParameterValue(kinematics_.tip);
-      parameters_interface->declare_parameter("kinematics.tip", p_kinematics_tip);
-      auto p_kinematics_group_name = rclcpp::ParameterValue(kinematics_.group_name);
-      parameters_interface->declare_parameter("kinematics.group_name", p_kinematics_group_name);
-      auto p_ft_sensor_name = rclcpp::ParameterValue(ft_sensor_.name);
-      parameters_interface->declare_parameter("ft_sensor.name", p_ft_sensor_name);
-      auto p_ft_sensor_frame_id = rclcpp::ParameterValue(ft_sensor_.frame_id);
-      parameters_interface->declare_parameter("ft_sensor.frame_id", p_ft_sensor_frame_id);
-      auto p_ft_sensor_frame_external = rclcpp::ParameterValue(ft_sensor_.frame_external);
-      parameters_interface->declare_parameter("ft_sensor.frame_external", p_ft_sensor_frame_external);
-      auto p_control_open_loop_control = rclcpp::ParameterValue(control_.open_loop_control);
-      parameters_interface->declare_parameter("control.open_loop_control", p_control_open_loop_control);
-      auto p_control_frame_id = rclcpp::ParameterValue(control_.frame_id);
-      parameters_interface->declare_parameter("control.frame_id", p_control_frame_id);
-      auto p_control_frame_external = rclcpp::ParameterValue(control_.frame_external);
-      parameters_interface->declare_parameter("control.frame_external", p_control_frame_external);
-      auto p_fixed_world_frame_id = rclcpp::ParameterValue(fixed_world_frame_.id);
-      parameters_interface->declare_parameter("fixed_world_frame.id", p_fixed_world_frame_id);
-      auto p_fixed_world_frame_external = rclcpp::ParameterValue(fixed_world_frame_.external);
-      parameters_interface->declare_parameter("fixed_world_frame.external", p_fixed_world_frame_external);
-      auto p_gravity_compensation_frame_id = rclcpp::ParameterValue(gravity_compensation_.frame_id);
-      parameters_interface->declare_parameter("gravity_compensation.frame_id", p_gravity_compensation_frame_id);
-      auto p_gravity_compensation_external = rclcpp::ParameterValue(gravity_compensation_.external);
-      parameters_interface->declare_parameter("gravity_compensation.external", p_gravity_compensation_external);
-      auto p_gravity_compensation_CoG_x = rclcpp::ParameterValue(gravity_compensation_.CoG_.x);
-      parameters_interface->declare_parameter("gravity_compensation.CoG.x", p_gravity_compensation_CoG_x);
-      auto p_gravity_compensation_CoG_y = rclcpp::ParameterValue(gravity_compensation_.CoG_.y);
-      parameters_interface->declare_parameter("gravity_compensation.CoG.y", p_gravity_compensation_CoG_y);
-      auto p_gravity_compensation_CoG_z = rclcpp::ParameterValue(gravity_compensation_.CoG_.z);
-      parameters_interface->declare_parameter("gravity_compensation.CoG.z", p_gravity_compensation_CoG_z);
-      auto p_gravity_compensation_CoG_force = rclcpp::ParameterValue(gravity_compensation_.CoG_.force);
-      parameters_interface->declare_parameter("gravity_compensation.CoG.force", p_gravity_compensation_CoG_force);
-      auto p_admittance_selected_axes_x = rclcpp::ParameterValue(admittance_.selected_axes_.x);
-      parameters_interface->declare_parameter("admittance.selected_axes.x", p_admittance_selected_axes_x);
-      auto p_admittance_selected_axes_y = rclcpp::ParameterValue(admittance_.selected_axes_.y);
-      parameters_interface->declare_parameter("admittance.selected_axes.y", p_admittance_selected_axes_y);
-      auto p_admittance_selected_axes_z = rclcpp::ParameterValue(admittance_.selected_axes_.z);
-      parameters_interface->declare_parameter("admittance.selected_axes.z", p_admittance_selected_axes_z);
-      auto p_admittance_selected_axes_rx = rclcpp::ParameterValue(admittance_.selected_axes_.rx);
-      parameters_interface->declare_parameter("admittance.selected_axes.rx", p_admittance_selected_axes_rx);
-      auto p_admittance_selected_axes_ry = rclcpp::ParameterValue(admittance_.selected_axes_.ry);
-      parameters_interface->declare_parameter("admittance.selected_axes.ry", p_admittance_selected_axes_ry);
-      auto p_admittance_selected_axes_rz = rclcpp::ParameterValue(admittance_.selected_axes_.rz);
-      parameters_interface->declare_parameter("admittance.selected_axes.rz", p_admittance_selected_axes_rz);
-      auto p_admittance_mass_x = rclcpp::ParameterValue(admittance_.mass_.x);
-      parameters_interface->declare_parameter("admittance.mass.x", p_admittance_mass_x);
-      auto p_admittance_mass_y = rclcpp::ParameterValue(admittance_.mass_.y);
-      parameters_interface->declare_parameter("admittance.mass.y", p_admittance_mass_y);
-      auto p_admittance_mass_z = rclcpp::ParameterValue(admittance_.mass_.z);
-      parameters_interface->declare_parameter("admittance.mass.z", p_admittance_mass_z);
-      auto p_admittance_mass_rx = rclcpp::ParameterValue(admittance_.mass_.rx);
-      parameters_interface->declare_parameter("admittance.mass.rx", p_admittance_mass_rx);
-      auto p_admittance_mass_ry = rclcpp::ParameterValue(admittance_.mass_.ry);
-      parameters_interface->declare_parameter("admittance.mass.ry", p_admittance_mass_ry);
-      auto p_admittance_mass_rz = rclcpp::ParameterValue(admittance_.mass_.rz);
-      parameters_interface->declare_parameter("admittance.mass.rz", p_admittance_mass_rz);
-      auto p_admittance_damping_ratio_x = rclcpp::ParameterValue(admittance_.damping_ratio_.x);
-      parameters_interface->declare_parameter("admittance.damping_ratio.x", p_admittance_damping_ratio_x);
-      auto p_admittance_damping_ratio_y = rclcpp::ParameterValue(admittance_.damping_ratio_.y);
-      parameters_interface->declare_parameter("admittance.damping_ratio.y", p_admittance_damping_ratio_y);
-      auto p_admittance_damping_ratio_z = rclcpp::ParameterValue(admittance_.damping_ratio_.z);
-      parameters_interface->declare_parameter("admittance.damping_ratio.z", p_admittance_damping_ratio_z);
-      auto p_admittance_damping_ratio_rx = rclcpp::ParameterValue(admittance_.damping_ratio_.rx);
-      parameters_interface->declare_parameter("admittance.damping_ratio.rx", p_admittance_damping_ratio_rx);
-      auto p_admittance_damping_ratio_ry = rclcpp::ParameterValue(admittance_.damping_ratio_.ry);
-      parameters_interface->declare_parameter("admittance.damping_ratio.ry", p_admittance_damping_ratio_ry);
-      auto p_admittance_damping_ratio_rz = rclcpp::ParameterValue(admittance_.damping_ratio_.rz);
-      parameters_interface->declare_parameter("admittance.damping_ratio.rz", p_admittance_damping_ratio_rz);
-      auto p_admittance_stiffness_x = rclcpp::ParameterValue(admittance_.stiffness_.x);
-      parameters_interface->declare_parameter("admittance.stiffness.x", p_admittance_stiffness_x);
-      auto p_admittance_stiffness_y = rclcpp::ParameterValue(admittance_.stiffness_.y);
-      parameters_interface->declare_parameter("admittance.stiffness.y", p_admittance_stiffness_y);
-      auto p_admittance_stiffness_z = rclcpp::ParameterValue(admittance_.stiffness_.z);
-      parameters_interface->declare_parameter("admittance.stiffness.z", p_admittance_stiffness_z);
-      auto p_admittance_stiffness_rx = rclcpp::ParameterValue(admittance_.stiffness_.rx);
-      parameters_interface->declare_parameter("admittance.stiffness.rx", p_admittance_stiffness_rx);
-      auto p_admittance_stiffness_ry = rclcpp::ParameterValue(admittance_.stiffness_.ry);
-      parameters_interface->declare_parameter("admittance.stiffness.ry", p_admittance_stiffness_ry);
-      auto p_admittance_stiffness_rz = rclcpp::ParameterValue(admittance_.stiffness_.rz);
-      parameters_interface->declare_parameter("admittance.stiffness.rz", p_admittance_stiffness_rz);
-      auto p_enable_parameter_update_without_reactivation = rclcpp::ParameterValue(
-          enable_parameter_update_without_reactivation);
-      parameters_interface->declare_parameter("enable_parameter_update_without_reactivation",
-                                              p_enable_parameter_update_without_reactivation);
-      auto p_joint_limiter_type = rclcpp::ParameterValue(joint_limiter_type);
-      parameters_interface->declare_parameter("joint_limiter_type", p_joint_limiter_type);
-      auto p_state_publish_rate = rclcpp::ParameterValue(state_publish_rate);
-      parameters_interface->declare_parameter("state_publish_rate", p_state_publish_rate);
+      if (!parameters_interface->has_parameter("joints")) {
+        auto p_joints = rclcpp::ParameterValue(joints);
+        parameters_interface->declare_parameter("joints", p_joints);
+      }
+      if (!parameters_interface->has_parameter("command_interfaces")) {
+        auto p_command_interfaces = rclcpp::ParameterValue(command_interfaces);
+        parameters_interface->declare_parameter("command_interfaces", p_command_interfaces);
+      }
+      if (!parameters_interface->has_parameter("state_interfaces")) {
+        auto p_state_interfaces = rclcpp::ParameterValue(state_interfaces);
+        parameters_interface->declare_parameter("state_interfaces", p_state_interfaces);
+      }
+      if (!parameters_interface->has_parameter("chainable_command_interfaces")) {
+        auto p_chainable_command_interfaces = rclcpp::ParameterValue(chainable_command_interfaces);
+        parameters_interface->declare_parameter("chainable_command_interfaces", p_chainable_command_interfaces);
+      }
+      if (!parameters_interface->has_parameter("kinematics.plugin_name")) {
+        auto p_kinematics_plugin_name = rclcpp::ParameterValue(kinematics_.plugin_name);
+        parameters_interface->declare_parameter("kinematics.plugin_name", p_kinematics_plugin_name);
+      }
+      if (!parameters_interface->has_parameter("kinematics.base")) {
+        auto p_kinematics_base = rclcpp::ParameterValue(kinematics_.base);
+        parameters_interface->declare_parameter("kinematics.base", p_kinematics_base);
+      }
+      if (!parameters_interface->has_parameter("kinematics.tip")) {
+        auto p_kinematics_tip = rclcpp::ParameterValue(kinematics_.tip);
+        parameters_interface->declare_parameter("kinematics.tip", p_kinematics_tip);
+      }
+      if (!parameters_interface->has_parameter("kinematics.group_name")) {
+        auto p_kinematics_group_name = rclcpp::ParameterValue(kinematics_.group_name);
+        parameters_interface->declare_parameter("kinematics.group_name", p_kinematics_group_name);
+      }
+      if (!parameters_interface->has_parameter("ft_sensor.name")) {
+        auto p_ft_sensor_name = rclcpp::ParameterValue(ft_sensor_.name);
+        parameters_interface->declare_parameter("ft_sensor.name", p_ft_sensor_name);
+      }
+      if (!parameters_interface->has_parameter("ft_sensor.frame_id")) {
+        auto p_ft_sensor_frame_id = rclcpp::ParameterValue(ft_sensor_.frame_id);
+        parameters_interface->declare_parameter("ft_sensor.frame_id", p_ft_sensor_frame_id);
+      }
+      if (!parameters_interface->has_parameter("ft_sensor.frame_external")) {
+        auto p_ft_sensor_frame_external = rclcpp::ParameterValue(ft_sensor_.frame_external);
+        parameters_interface->declare_parameter("ft_sensor.frame_external", p_ft_sensor_frame_external);
+      }
+      if (!parameters_interface->has_parameter("control.open_loop_control")) {
+        auto p_control_open_loop_control = rclcpp::ParameterValue(control_.open_loop_control);
+        parameters_interface->declare_parameter("control.open_loop_control", p_control_open_loop_control);
+      }
+      if (!parameters_interface->has_parameter("control.frame_id")) {
+        auto p_control_frame_id = rclcpp::ParameterValue(control_.frame_id);
+        parameters_interface->declare_parameter("control.frame_id", p_control_frame_id);
+      }
+      if (!parameters_interface->has_parameter("control.frame_external")) {
+        auto p_control_frame_external = rclcpp::ParameterValue(control_.frame_external);
+        parameters_interface->declare_parameter("control.frame_external", p_control_frame_external);
+      }
+      if (!parameters_interface->has_parameter("fixed_world_frame.id")) {
+        auto p_fixed_world_frame_id = rclcpp::ParameterValue(fixed_world_frame_.id);
+        parameters_interface->declare_parameter("fixed_world_frame.id", p_fixed_world_frame_id);
+      }
+      if (!parameters_interface->has_parameter("fixed_world_frame.external")) {
+        auto p_fixed_world_frame_external = rclcpp::ParameterValue(fixed_world_frame_.external);
+        parameters_interface->declare_parameter("fixed_world_frame.external", p_fixed_world_frame_external);
+      }
+      if (!parameters_interface->has_parameter("gravity_compensation.frame_id")) {
+        auto p_gravity_compensation_frame_id = rclcpp::ParameterValue(gravity_compensation_.frame_id);
+        parameters_interface->declare_parameter("gravity_compensation.frame_id", p_gravity_compensation_frame_id);
+      }
+      if (!parameters_interface->has_parameter("gravity_compensation.external")) {
+        auto p_gravity_compensation_external = rclcpp::ParameterValue(gravity_compensation_.external);
+        parameters_interface->declare_parameter("gravity_compensation.external", p_gravity_compensation_external);
+      }
+      if (!parameters_interface->has_parameter("gravity_compensation.CoG.x")) {
+        auto p_gravity_compensation_CoG_x = rclcpp::ParameterValue(gravity_compensation_.CoG_.x);
+        parameters_interface->declare_parameter("gravity_compensation.CoG.x", p_gravity_compensation_CoG_x);
+      }
+      if (!parameters_interface->has_parameter("gravity_compensation.CoG.y")) {
+        auto p_gravity_compensation_CoG_y = rclcpp::ParameterValue(gravity_compensation_.CoG_.y);
+        parameters_interface->declare_parameter("gravity_compensation.CoG.y", p_gravity_compensation_CoG_y);
+      }
+      if (!parameters_interface->has_parameter("gravity_compensation.CoG.z")) {
+        auto p_gravity_compensation_CoG_z = rclcpp::ParameterValue(gravity_compensation_.CoG_.z);
+        parameters_interface->declare_parameter("gravity_compensation.CoG.z", p_gravity_compensation_CoG_z);
+      }
+      if (!parameters_interface->has_parameter("gravity_compensation.CoG.force")) {
+        auto p_gravity_compensation_CoG_force = rclcpp::ParameterValue(gravity_compensation_.CoG_.force);
+        parameters_interface->declare_parameter("gravity_compensation.CoG.force", p_gravity_compensation_CoG_force);
+      }
+      if (!parameters_interface->has_parameter("admittance.selected_axes.x")) {
+        auto p_admittance_selected_axes_x = rclcpp::ParameterValue(admittance_.selected_axes_.x);
+        parameters_interface->declare_parameter("admittance.selected_axes.x", p_admittance_selected_axes_x);
+      }
+      if (!parameters_interface->has_parameter("admittance.selected_axes.y")) {
+        auto p_admittance_selected_axes_y = rclcpp::ParameterValue(admittance_.selected_axes_.y);
+        parameters_interface->declare_parameter("admittance.selected_axes.y", p_admittance_selected_axes_y);
+      }
+      if (!parameters_interface->has_parameter("admittance.selected_axes.z")) {
+        auto p_admittance_selected_axes_z = rclcpp::ParameterValue(admittance_.selected_axes_.z);
+        parameters_interface->declare_parameter("admittance.selected_axes.z", p_admittance_selected_axes_z);
+      }
+      if (!parameters_interface->has_parameter("admittance.selected_axes.rx")) {
+        auto p_admittance_selected_axes_rx = rclcpp::ParameterValue(admittance_.selected_axes_.rx);
+        parameters_interface->declare_parameter("admittance.selected_axes.rx", p_admittance_selected_axes_rx);
+      }
+      if (!parameters_interface->has_parameter("admittance.selected_axes.ry")) {
+        auto p_admittance_selected_axes_ry = rclcpp::ParameterValue(admittance_.selected_axes_.ry);
+        parameters_interface->declare_parameter("admittance.selected_axes.ry", p_admittance_selected_axes_ry);
+      }
+      if (!parameters_interface->has_parameter("admittance.selected_axes.rz")) {
+        auto p_admittance_selected_axes_rz = rclcpp::ParameterValue(admittance_.selected_axes_.rz);
+        parameters_interface->declare_parameter("admittance.selected_axes.rz", p_admittance_selected_axes_rz);
+      }
+      if (!parameters_interface->has_parameter("admittance.mass.x")) {
+        auto p_admittance_mass_x = rclcpp::ParameterValue(admittance_.mass_.x);
+        parameters_interface->declare_parameter("admittance.mass.x", p_admittance_mass_x);
+      }
+      if (!parameters_interface->has_parameter("admittance.mass.y")) {
+        auto p_admittance_mass_y = rclcpp::ParameterValue(admittance_.mass_.y);
+        parameters_interface->declare_parameter("admittance.mass.y", p_admittance_mass_y);
+      }
+      if (!parameters_interface->has_parameter("admittance.mass.z")) {
+        auto p_admittance_mass_z = rclcpp::ParameterValue(admittance_.mass_.z);
+        parameters_interface->declare_parameter("admittance.mass.z", p_admittance_mass_z);
+      }
+      if (!parameters_interface->has_parameter("admittance.mass.rx")) {
+        auto p_admittance_mass_rx = rclcpp::ParameterValue(admittance_.mass_.rx);
+        parameters_interface->declare_parameter("admittance.mass.rx", p_admittance_mass_rx);
+      }
+      if (!parameters_interface->has_parameter("admittance.mass.ry")) {
+        auto p_admittance_mass_ry = rclcpp::ParameterValue(admittance_.mass_.ry);
+        parameters_interface->declare_parameter("admittance.mass.ry", p_admittance_mass_ry);
+      }
+      if (!parameters_interface->has_parameter("admittance.mass.rz")) {
+        auto p_admittance_mass_rz = rclcpp::ParameterValue(admittance_.mass_.rz);
+        parameters_interface->declare_parameter("admittance.mass.rz", p_admittance_mass_rz);
+      }
+      if (!parameters_interface->has_parameter("admittance.damping_ratio.x")) {
+        auto p_admittance_damping_ratio_x = rclcpp::ParameterValue(admittance_.damping_ratio_.x);
+        parameters_interface->declare_parameter("admittance.damping_ratio.x", p_admittance_damping_ratio_x);
+      }
+      if (!parameters_interface->has_parameter("admittance.damping_ratio.y")) {
+        auto p_admittance_damping_ratio_y = rclcpp::ParameterValue(admittance_.damping_ratio_.y);
+        parameters_interface->declare_parameter("admittance.damping_ratio.y", p_admittance_damping_ratio_y);
+      }
+      if (!parameters_interface->has_parameter("admittance.damping_ratio.z")) {
+        auto p_admittance_damping_ratio_z = rclcpp::ParameterValue(admittance_.damping_ratio_.z);
+        parameters_interface->declare_parameter("admittance.damping_ratio.z", p_admittance_damping_ratio_z);
+      }
+      if (!parameters_interface->has_parameter("admittance.damping_ratio.rx")) {
+        auto p_admittance_damping_ratio_rx = rclcpp::ParameterValue(admittance_.damping_ratio_.rx);
+        parameters_interface->declare_parameter("admittance.damping_ratio.rx", p_admittance_damping_ratio_rx);
+      }
+      if (!parameters_interface->has_parameter("admittance.damping_ratio.ry")) {
+        auto p_admittance_damping_ratio_ry = rclcpp::ParameterValue(admittance_.damping_ratio_.ry);
+        parameters_interface->declare_parameter("admittance.damping_ratio.ry", p_admittance_damping_ratio_ry);
+      }
+      if (!parameters_interface->has_parameter("admittance.damping_ratio.rz")) {
+        auto p_admittance_damping_ratio_rz = rclcpp::ParameterValue(admittance_.damping_ratio_.rz);
+        parameters_interface->declare_parameter("admittance.damping_ratio.rz", p_admittance_damping_ratio_rz);
+      }
+      if (!parameters_interface->has_parameter("admittance.stiffness.x")) {
+        auto p_admittance_stiffness_x = rclcpp::ParameterValue(admittance_.stiffness_.x);
+        parameters_interface->declare_parameter("admittance.stiffness.x", p_admittance_stiffness_x);
+      }
+      if (!parameters_interface->has_parameter("admittance.stiffness.y")) {
+        auto p_admittance_stiffness_y = rclcpp::ParameterValue(admittance_.stiffness_.y);
+        parameters_interface->declare_parameter("admittance.stiffness.y", p_admittance_stiffness_y);
+      }
+      if (!parameters_interface->has_parameter("admittance.stiffness.z")) {
+        auto p_admittance_stiffness_z = rclcpp::ParameterValue(admittance_.stiffness_.z);
+        parameters_interface->declare_parameter("admittance.stiffness.z", p_admittance_stiffness_z);
+      }
+      if (!parameters_interface->has_parameter("admittance.stiffness.rx")) {
+        auto p_admittance_stiffness_rx = rclcpp::ParameterValue(admittance_.stiffness_.rx);
+        parameters_interface->declare_parameter("admittance.stiffness.rx", p_admittance_stiffness_rx);
+      }
+      if (!parameters_interface->has_parameter("admittance.stiffness.ry")) {
+        auto p_admittance_stiffness_ry = rclcpp::ParameterValue(admittance_.stiffness_.ry);
+        parameters_interface->declare_parameter("admittance.stiffness.ry", p_admittance_stiffness_ry);
+      }
+      if (!parameters_interface->has_parameter("admittance.stiffness.rz")) {
+        auto p_admittance_stiffness_rz = rclcpp::ParameterValue(admittance_.stiffness_.rz);
+        parameters_interface->declare_parameter("admittance.stiffness.rz", p_admittance_stiffness_rz);
+      }
+      if (!parameters_interface->has_parameter("enable_parameter_update_without_reactivation")) {
+        auto p_enable_parameter_update_without_reactivation = rclcpp::ParameterValue(
+            enable_parameter_update_without_reactivation);
+        parameters_interface->declare_parameter("enable_parameter_update_without_reactivation",
+                                                p_enable_parameter_update_without_reactivation);
+      }
+      if (!parameters_interface->has_parameter("joint_limiter_type")) {
+        auto p_joint_limiter_type = rclcpp::ParameterValue(joint_limiter_type);
+        parameters_interface->declare_parameter("joint_limiter_type", p_joint_limiter_type);
+      }
+      if (!parameters_interface->has_parameter("state_publish_rate")) {
+        auto p_state_publish_rate = rclcpp::ParameterValue(state_publish_rate);
+        parameters_interface->declare_parameter("state_publish_rate", p_state_publish_rate);
+      }
 
     }
   };
