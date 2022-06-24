@@ -6,7 +6,7 @@ You must include the gen_param_struct pakcage in your cmake project.
 
 `find_package(gen_param_struct REQUIRED)`
 
-You then need call the `generate_param_struct_header` function with the follwing arguments parameters:
+You then need call the `generate_param_struct_header` function with the following arguments:
 ```
 OUT_DIR # output directory for generated struct
 YAML_FILE # path to yaml file
@@ -104,7 +104,7 @@ You should see:
   
   `[INFO] [1656019001.515820371] [minimal_publisher]: Joint 0 is: 'new value'`
   
-  Congraduations, you updated the parameter!
+  Congratulations, you updated the parameter!
   
 ## Sample output
 A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/example/include/parameters/admittance_controller.h
