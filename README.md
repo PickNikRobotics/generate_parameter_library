@@ -16,16 +16,16 @@ YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller
 # Example:
 ## build the node
 ```
+ mkdir colcon_ws
+ mkdir colcon_ws/src
+ cd colcon_ws/src 
  git clone https://github.com/pac48/gen_param_struct.git
- cd gen_param_struct/
- mkdir build/
- cd build/
- cmake ..
- make
+ cd ..
+ colcon build
 ```
 
 ## run the node
-`./example/test_node`
+`ros2 run gen_param_struct_example test_node`
 
 You should see an output like this:
 `[INFO] [1656018676.015816509] [minimal_publisher]: Joint 0 is: 'shoulder_pan_joint'`
