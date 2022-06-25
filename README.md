@@ -110,4 +110,4 @@ You should see:
   Congratulations, you updated the parameter!
   
 ## Sample output
-A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/example/include/parameters/admittance_controller.h
+A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/gen_param_struct_example/include/config/admittance_controller.h
