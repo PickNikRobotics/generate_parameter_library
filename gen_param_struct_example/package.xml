@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>gen_param_struct_example</name>
+  <version>0.0.0</version>
+  <description>Example use case to generate a ROS parameter struct in C++ using gen_param_struct.</description>
+  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+  <license>TODO: License declaration</license>
+  <author email="paul.gesel@picknik.ai">Paul Gesel</author>
+
+
+  <depend>rclcpp</depend>
+  <depend>gen_param_struct</depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <buildtool_export_depend>ament_cmake_core</buildtool_export_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

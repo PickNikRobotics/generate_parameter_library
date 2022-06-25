@@ -1,11 +1,23 @@
+cmake_minimum_required(VERSION 3.5)
+project(gen_param_struct)
 
-function(generate_param_struct_header OUT_DIR YAML_FILE YAML_TARGET)
-    add_custom_target(
-            run ALL
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/gen_param_struct.py ${OUT_DIR} ${YAML_FILE} ${YAML_TARGET}
-            BYPRODUCTS ${YAML_TARGET}.h
-            COMMENT "Generating yaml struct for ${YAML_TARGET}"
-    )
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
 
-endfunction()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+
+install(
+        DIRECTORY scripts/
+        DESTINATION share/gen_param_struct/cmake
+        USE_SOURCE_PERMISSIONS
+)
+
+ament_package(CONFIG_EXTRAS
+        gen_param_struct.cmake
+        )
