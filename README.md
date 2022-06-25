@@ -8,6 +8,7 @@ You must include the gen_param_struct pakcage in your cmake project.
 
 You then need call the `generate_param_struct_header` function with the following arguments:
 ```
+TARGET # target that depends on generated struct 
 OUT_DIR # output directory for generated struct
 YAML_FILE # path to yaml file
 YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller  
