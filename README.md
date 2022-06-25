@@ -25,9 +25,10 @@ YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller
 ```
 
 ## run the node
-`source install/setup.bash`
-
-`ros2 run gen_param_struct_example test_node`
+```
+source install/setup.bash
+ros2 run gen_param_struct_example test_node
+```
 
 You should see an output like this:
 `[INFO] [1656018676.015816509] [minimal_publisher]: Joint 0 is: 'shoulder_pan_joint'`
