@@ -36,19 +36,27 @@ class GenParamStruct:
             if isinstance(value[0], str):
                 data_type = "std::string"
                 conversion_func = "as_string_array()"
-                def str_fun(s): return "\"%s\"" % s
+
+                def str_fun(s):
+                    return "\"%s\"" % s
             elif isinstance(value[0], float):
                 data_type = "double"
                 conversion_func = "as_double_array()"
-                def str_fun(s): return str(s)
+
+                def str_fun(s):
+                    return str(s)
             elif isinstance(value[0], int) and not isinstance(value[0], bool):
                 data_type = "int"
                 conversion_func = "as_integer_array()"
-                def str_fun(s): return str(s)
+
+                def str_fun(s):
+                    return str(s)
             elif isinstance(value[0], bool):
                 data_type = "bool"
                 conversion_func = "as_bool_array()"
-                def str_fun(cond): return "true" if cond else "false"
+
+                def str_fun(cond):
+                    return "true" if cond else "false"
             else:
                 sys.stderr.write("invalid yaml type: %s" % type(value[0]))
                 raise AssertionError()
@@ -62,37 +70,49 @@ class GenParamStruct:
             if isinstance(value, str):
                 data_type = "std::string"
                 conversion_func = "as_string()"
-                def str_fun(s): return "\"%s\"" % s
+
+                def str_fun(s):
+                    return "\"%s\"" % s
             elif isinstance(value, float):
                 data_type = "double"
                 conversion_func = "as_double()"
-                def str_fun(s): return str(s)
+
+                def str_fun(s):
+                    return str(s)
             elif isinstance(value, int) and not isinstance(value, bool):
                 data_type = "int"
                 conversion_func = "as_int()"
-                def str_fun(s): return str(s)
+
+                def str_fun(s):
+                    return str(s)
             elif isinstance(value, bool):
                 data_type = "bool"
                 conversion_func = "as_bool()"
-                def str_fun(cond): return "true" if cond else "false"
+
+                def str_fun(cond):
+                    return "true" if cond else "false"
             else:
                 sys.stderr.write("invalid yaml type: %s" % type(value))
                 raise AssertionError()
 
             self.struct += "%s %s_ = %s;\n" % (data_type, name, str_fun(value))
 
-        self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % name
-        self.param_set += "%s_ = param.%s;\n" % (nested_name + name, conversion_func)
-        self.param_set += "}\n"
-
         param_prefix = "p_"
         param_prefix += "".join(x + "_" for x in nested_name_list[1:])
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
+
+        self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % param_name
+        self.param_set += "%s_ = param.%s;\n" % (nested_name + name, conversion_func)
+        self.param_set += "}\n"
 
         self.param_declare += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
         self.param_declare += "auto %s = rclcpp::ParameterValue(%s_);\n" % (param_prefix + name, nested_name + name)
         self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s);\n" % (
             param_name, param_prefix + name)
+        self.param_declare += "} else {\n"
+        self.param_declare += "%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
+        nested_name + name, param_name, conversion_func)
+
         self.param_declare += "}\n"
 
     def parse_dict(self, name, root_map, nested_name):
@@ -161,3 +181,4 @@ class GenParamStruct:
 if __name__ == "__main__":
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
+
