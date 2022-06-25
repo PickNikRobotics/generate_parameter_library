@@ -26,6 +26,7 @@ YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller
 
 ## run the node
 `source install/setup.bash`
+
 `ros2 run gen_param_struct_example test_node`
 
 You should see an output like this:
