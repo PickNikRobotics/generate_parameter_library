@@ -16,7 +16,9 @@ namespace **NAMESPACE** {
         handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
     }
 
+    struct params {
     **STRUCT_CONTENT**
+    } params_;
 
         rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
           rcl_interfaces::msg::SetParametersResult result;

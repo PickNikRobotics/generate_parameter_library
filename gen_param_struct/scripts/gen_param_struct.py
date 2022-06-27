@@ -102,15 +102,15 @@ class GenParamStruct:
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
         self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % param_name
-        self.param_set += "%s_ = param.%s;\n" % (nested_name + name, conversion_func)
+        self.param_set += "params_.%s_ = param.%s;\n" % (nested_name + name, conversion_func)
         self.param_set += "}\n"
 
         self.param_declare += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
-        self.param_declare += "auto %s = rclcpp::ParameterValue(%s_);\n" % (param_prefix + name, nested_name + name)
+        self.param_declare += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (param_prefix + name, nested_name + name)
         self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s);\n" % (
             param_name, param_prefix + name)
         self.param_declare += "} else {\n"
-        self.param_declare += "%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
+        self.param_declare += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
         nested_name + name, param_name, conversion_func)
 
         self.param_declare += "}\n"

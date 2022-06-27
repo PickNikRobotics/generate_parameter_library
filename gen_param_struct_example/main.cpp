@@ -18,7 +18,7 @@ public:
 private:
   void timer_callback()
   {
-    RCLCPP_INFO(this->get_logger(), "Joint 0 is: '%s'", gen_struct->joints_[0].c_str());
+    RCLCPP_INFO(this->get_logger(), "Joint 0 is: '%s'", gen_struct->params_.joints_[0].c_str());
   }
 
   rclcpp::TimerBase::SharedPtr timer_;
