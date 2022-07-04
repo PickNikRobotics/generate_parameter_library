@@ -11,11 +11,10 @@ You then need call the `generate_param_struct_header` function with the followin
 TARGET # target that depends on generated struct 
 OUT_DIR # output directory for generated struct
 YAML_FILE # path to yaml file
-YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller  
 ```
 
 # Example:
-## build the node
+## Build the node
 ```
  mkdir colcon_ws
  mkdir colcon_ws/src
@@ -25,14 +24,14 @@ YAML_TARGET # root name in yaml file to parse, e.g. joint_trajectory_controller
  colcon build
 ```
 
-## run the node
+## Run the node
 ```
 source install/setup.bash
 ros2 run gen_param_struct_example test_node
 ```
 
 You should see an output like this:
-`[INFO] [1656018676.015816509] [minimal_publisher]: Joint 0 is: 'shoulder_pan_joint'`
+`[INFO] [1656018676.015816509] [admittance_controller]: Control frame is: 'ee_link'`
 
 ## ROS 2 CLI
 Run the following:
@@ -43,52 +42,27 @@ You should see:
 
 
 ```
-  /minimal_publisher:
-  admittance.damping_ratio.rx
-  admittance.damping_ratio.ry
-  admittance.damping_ratio.rz
-  admittance.damping_ratio.x
-  admittance.damping_ratio.y
-  admittance.damping_ratio.z
-  admittance.mass.rx
-  admittance.mass.ry
-  admittance.mass.rz
-  admittance.mass.x
-  admittance.mass.y
-  admittance.mass.z
-  admittance.selected_axes.rx
-  admittance.selected_axes.ry
-  admittance.selected_axes.rz
-  admittance.selected_axes.x
-  admittance.selected_axes.y
-  admittance.selected_axes.z
-  admittance.stiffness.rx
-  admittance.stiffness.ry
-  admittance.stiffness.rz
-  admittance.stiffness.x
-  admittance.stiffness.y
-  admittance.stiffness.z
+  /admittance_controller:
+  admittance.damping_ratio
+  admittance.mass
+  admittance.selected_axes
+  admittance.stiffness
   chainable_command_interfaces
   command_interfaces
-  control.frame_external
-  control.frame_id
-  control.open_loop_control
+  control.frame.external
+  control.frame.id
   enable_parameter_update_without_reactivation
-  fixed_world_frame.external
-  fixed_world_frame.id
-  ft_sensor.frame_external
-  ft_sensor.frame_id
+  fixed_world_frame.frame.external
+  fixed_world_frame.frame.id
+  ft_sensor.frame.external
+  ft_sensor.frame.id
   ft_sensor.name
   gravity_compensation.CoG.force
-  gravity_compensation.CoG.x
-  gravity_compensation.CoG.y
-  gravity_compensation.CoG.z
-  gravity_compensation.external
-  gravity_compensation.frame_id
-  joint_limiter_type
+  gravity_compensation.CoG.pos
+  gravity_compensation.frame.external
+  gravity_compensation.frame.id
   joints
   kinematics.base
-  kinematics.group_name
   kinematics.plugin_name
   kinematics.tip
   qos_overrides./parameter_events.publisher.depth
@@ -96,19 +70,27 @@ You should see:
   qos_overrides./parameter_events.publisher.history
   qos_overrides./parameter_events.publisher.reliability
   state_interfaces
-  state_publish_rate
   use_sim_time
   ```
   
-  All parametter are automatically loaded and callbacks are setup by default. You can set a parameter by typing:
+  All parametter are automatically declared and callbacks are setup by default. You can set a parameter by typing:
   
-  `ros2 param set /minimal_publisher joints ["new value"]`
+  `ros2 param set /admittance_controller control.frame.id new_frame`
   
   You should see:
   
-  `[INFO] [1656019001.515820371] [minimal_publisher]: Joint 0 is: 'new value'`
+  `[INFO] [1656019001.515820371] [admittance_controller]: Control frame is: 'new_frame'`
   
-  Congratulations, you updated the parameter!
+  Congratulations, you updated the parameter! 
+  
+ If you try to set a parameter that is read only, you will get an error. Running the follwing
+  
+  `ros2 param set /admittance_controller joints ["joint_new"]`
+  
+  will result in the message
+  
+  `Setting parameter failed: parameter 'joints' cannot be set because it is read-only`
+  
   
 ## Sample output
 A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/gen_param_struct_example/include/config/admittance_controller.h
