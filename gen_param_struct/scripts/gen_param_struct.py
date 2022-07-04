@@ -33,6 +33,7 @@ class GenParamStruct:
         nested_name = "".join(x + "_." for x in nested_name_list[1:])
 
         default_value = value['default_value']
+        description = value['description']
 
         if isinstance(default_value, list):
             if isinstance(default_value[0], str):
@@ -46,7 +47,10 @@ class GenParamStruct:
                 conversion_func = "as_double_array()"
 
                 def str_fun(s):
-                    return str(s)
+                    str_val = str(s)
+                    if str_val == "nan":
+                        str_val = "std::numeric_limits<double>::quiet_NaN()"
+                    return str_val
             elif isinstance(default_value[0], int) and not isinstance(default_value[0], bool):
                 data_type = "int"
                 conversion_func = "as_integer_array()"
@@ -80,7 +84,11 @@ class GenParamStruct:
                 conversion_func = "as_double()"
 
                 def str_fun(s):
-                    return str(s)
+                    str_val = str(s)
+                    if str_val == "nan":
+                        str_val = "std::numeric_limits<double>::quiet_NaN()"
+                    return str_val
+
             elif isinstance(default_value, int) and not isinstance(default_value, bool):
                 data_type = "int"
                 conversion_func = "as_int()"
@@ -108,17 +116,20 @@ class GenParamStruct:
         self.param_set += "}\n"
 
         self.param_declare += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
-        self.param_declare += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (param_prefix + name, nested_name + name)
-        self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s);\n" % (
+        self.param_declare += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
+        param_prefix + name, nested_name + name)
+        self.param_declare += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
+        self.param_declare += "descriptor.set__description(\"%s\");\n" % description
+        self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
             param_name, param_prefix + name)
-        self.param_declare += "} else {\n"
+        self.param_declare += "} \n"
         self.param_declare += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
-        nested_name + name, param_name, conversion_func)
+            nested_name + name, param_name, conversion_func)
 
-        self.param_declare += "}\n"
+        self.param_declare += "\n"
 
     def parse_dict(self, name, root_map, nested_name):
-        if isinstance(root_map, dict):
+        if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):
             if name != self.target:
                 self.struct += "struct %s {\n" % name
             for key in root_map:
@@ -126,17 +137,16 @@ class GenParamStruct:
                     nested_name.append(name)
                     self.parse_dict(key, root_map[key], nested_name)
                     nested_name.pop()
-                else:
-                    self.parse_params(name, root_map, nested_name)
-                    break
-
-
             if name != self.target:
                 self.struct += "} %s_;\n" % name
-        # else:
-            # self.parse_params(name, root_map, nested_name)
+        else:
+            self.parse_params(name, root_map, nested_name)
 
     def run(self):
+        if len(sys.argv) != 3:
+            sys.stderr.write("generate_param_struct_header expects four input argument: target, output directory, "
+                             " and yaml file path")
+            raise AssertionError()
 
         param_gen_directory = sys.argv[0].split("/")
         param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
@@ -152,24 +162,17 @@ class GenParamStruct:
             raise AssertionError()
 
         yaml_file = sys.argv[2]
-        self.target = sys.argv[3]
+        # self.target = sys.argv[3]
 
         with open(yaml_file) as f:
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
-            if len(sys.argv) != 4:
-                sys.stderr.write("generate_param_struct_header expects four input argument: target, output directory, "
-                                 "yaml file path, and yaml root name")
-                raise AssertionError()
 
             doc = list(docs)[0]
             if len(doc) != 1:
                 sys.stderr.write("the controller yaml definition must only have one root element")
                 raise AssertionError()
-            # doc = docs[0]
-            # for doc in docs:
-                # for k, v in doc.items():
-                #     if k == self.target:
-            self.parse_dict(self.target, doc, [])
+            self.target = list(doc.keys())[0]
+            self.parse_dict(self.target, doc[self.target], [])
 
         COMMENTS = "// this is auto-generated code "
         INCLUDES = "#include <rclcpp/node.hpp>\n#include <vector>\n#include <string>"
@@ -193,4 +196,3 @@ class GenParamStruct:
 if __name__ == "__main__":
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
-

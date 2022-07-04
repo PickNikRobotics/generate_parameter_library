@@ -7,7 +7,7 @@ using namespace std::chrono_literals;
 class MinimalPublisher : public rclcpp::Node
 {
 public:
-  MinimalPublisher() : Node("minimal_publisher")
+  MinimalPublisher() : Node("admittance_controller")
   {
     timer_ = this->create_wall_timer(
         500ms, std::bind(&MinimalPublisher::timer_callback, this));

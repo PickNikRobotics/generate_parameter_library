@@ -1,13 +1,13 @@
 admittance_controller:
   joints: {
-    default_value: "UNDEFINED",
+    default_value: ["UNDEFINED"],
     description: "specifies which joints will be used by the controller",
     configurable: false,
     optional: false
   }
   command_interfaces:
     {
-      default_value: "UNDEFINED",
+      default_value: ["UNDEFINED"],
       description: "specifies which command interfaces to claim",
       configurable: false,
       optional: false
@@ -15,7 +15,7 @@ admittance_controller:
 
   state_interfaces:
     {
-      default_value: "UNDEFINED",
+      default_value: ["UNDEFINED"],
       description: "specifies which state interfaces to claim",
       configurable: false,
       optional: false
@@ -23,7 +23,7 @@ admittance_controller:
 
   chainable_command_interfaces:
     {
-      default_value: "UNDEFINED",
+      default_value: ["UNDEFINED"],
       description: "specifies which chainable interfaces to claim",
       configurable: false,
       optional: false
