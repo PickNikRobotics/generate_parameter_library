@@ -32,70 +32,72 @@ class GenParamStruct:
 
         nested_name = "".join(x + "_." for x in nested_name_list[1:])
 
-        if isinstance(value, list):
-            if isinstance(value[0], str):
+        default_value = value['default_value']
+
+        if isinstance(default_value, list):
+            if isinstance(default_value[0], str):
                 data_type = "std::string"
                 conversion_func = "as_string_array()"
 
                 def str_fun(s):
                     return "\"%s\"" % s
-            elif isinstance(value[0], float):
+            elif isinstance(default_value[0], float):
                 data_type = "double"
                 conversion_func = "as_double_array()"
 
                 def str_fun(s):
                     return str(s)
-            elif isinstance(value[0], int) and not isinstance(value[0], bool):
+            elif isinstance(default_value[0], int) and not isinstance(default_value[0], bool):
                 data_type = "int"
                 conversion_func = "as_integer_array()"
 
                 def str_fun(s):
                     return str(s)
-            elif isinstance(value[0], bool):
+            elif isinstance(default_value[0], bool):
                 data_type = "bool"
                 conversion_func = "as_bool_array()"
 
                 def str_fun(cond):
                     return "true" if cond else "false"
             else:
-                sys.stderr.write("invalid yaml type: %s" % type(value[0]))
+                sys.stderr.write("invalid yaml type: %s" % type(default_value[0]))
                 raise AssertionError()
 
             self.struct += "std::vector<%s> %s_ = {" % (data_type, name)
-            for ind, val in enumerate(value[:-1]):
+            for ind, val in enumerate(default_value[:-1]):
                 self.struct += "%s, " % str_fun(val)
-            self.struct += "%s};\n" % str_fun(value[-1])
+            self.struct += "%s};\n" % str_fun(default_value[-1])
 
         else:
-            if isinstance(value, str):
+            if isinstance(default_value, str):
                 data_type = "std::string"
                 conversion_func = "as_string()"
 
                 def str_fun(s):
                     return "\"%s\"" % s
-            elif isinstance(value, float):
+            elif isinstance(default_value, float):
                 data_type = "double"
                 conversion_func = "as_double()"
 
                 def str_fun(s):
                     return str(s)
-            elif isinstance(value, int) and not isinstance(value, bool):
+            elif isinstance(default_value, int) and not isinstance(default_value, bool):
                 data_type = "int"
                 conversion_func = "as_int()"
 
                 def str_fun(s):
                     return str(s)
-            elif isinstance(value, bool):
+            elif isinstance(default_value, bool):
                 data_type = "bool"
                 conversion_func = "as_bool()"
 
                 def str_fun(cond):
                     return "true" if cond else "false"
             else:
-                sys.stderr.write("invalid yaml type: %s" % type(value))
+                sys.stderr.write("invalid yaml type: %s" % type(default_value))
                 raise AssertionError()
 
-            self.struct += "%s %s_ = %s;\n" % (data_type, name, str_fun(value))
+            self.struct += "%s %s_ = %s;\n" % (data_type, name, str_fun(default_value))
 
         param_prefix = "p_"
         param_prefix += "".join(x + "_" for x in nested_name_list[1:])
@@ -120,14 +122,19 @@ class GenParamStruct:
             if name != self.target:
                 self.struct += "struct %s {\n" % name
             for key in root_map:
-                nested_name.append(name)
-                self.parse_dict(key, root_map[key], nested_name)
-                nested_name.pop()
+                if isinstance(root_map[key], dict):
+                    nested_name.append(name)
+                    self.parse_dict(key, root_map[key], nested_name)
+                    nested_name.pop()
+                else:
+                    self.parse_params(name, root_map, nested_name)
+                    break
+
 
             if name != self.target:
                 self.struct += "} %s_;\n" % name
-        else:
-            self.parse_params(name, root_map, nested_name)
+        # else:
+            # self.parse_params(name, root_map, nested_name)
 
     def run(self):
 
@@ -154,10 +161,15 @@ class GenParamStruct:
                                  "yaml file path, and yaml root name")
                 raise AssertionError()
 
-            for doc in docs:
-                for k, v in doc.items():
-                    if k == self.target:
-                        self.parse_dict(self.target, v['ros__parameters'], [])
+            doc = list(docs)[0]
+            if len(doc) != 1:
+                sys.stderr.write("the controller yaml definition must only have one root element")
+                raise AssertionError()
+            # doc = docs[0]
+            # for doc in docs:
+                # for k, v in doc.items():
+                #     if k == self.target:
+            self.parse_dict(self.target, doc, [])
 
         COMMENTS = "// this is auto-generated code "
         INCLUDES = "#include <rclcpp/node.hpp>\n#include <vector>\n#include <string>"
