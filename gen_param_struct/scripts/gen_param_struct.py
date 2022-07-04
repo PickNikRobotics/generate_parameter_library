@@ -5,6 +5,29 @@ import sys
 import os
 
 
+def bool_to_str(cond):
+    return "true" if cond else "false"
+
+
+def float_to_str(num):
+    str_num = str(num)
+    if str_num == "nan":
+        str_num = "std::numeric_limits<double>::quiet_NaN()"
+    elif str_num == "inf":
+        str_num = "std::numeric_limits<double>::infinity()"
+    elif str_num == "-inf":
+        str_num = "-std::numeric_limits<double>::infinity()"
+    return str_num
+
+
+def int_to_str(num):
+    return str(num)
+
+
+def str_to_str(s):
+    return "\"%s\"" % s
+
+
 # class to help minimize string copies
 class Buffer:
     def __init__(self):
@@ -34,35 +57,33 @@ class GenParamStruct:
 
         default_value = value['default_value']
         description = value['description']
+        configurable = value['configurable']
+        if isinstance(default_value, list):
+            default_value_type = type(default_value[0])
+        else:
+            default_value_type = type(default_value)
 
         if isinstance(default_value, list):
-            if isinstance(default_value[0], str):
+            if default_value_type is str:
                 data_type = "std::string"
                 conversion_func = "as_string_array()"
+                str_fun = str_to_str
 
-                def str_fun(s):
-                    return "\"%s\"" % s
-            elif isinstance(default_value[0], float):
+            elif default_value_type is float:
                 data_type = "double"
                 conversion_func = "as_double_array()"
+                str_fun = float_to_str
 
-                def str_fun(s):
-                    str_val = str(s)
-                    if str_val == "nan":
-                        str_val = "std::numeric_limits<double>::quiet_NaN()"
-                    return str_val
-            elif isinstance(default_value[0], int) and not isinstance(default_value[0], bool):
+            elif default_value_type is int and default_value_type is not bool:
                 data_type = "int"
                 conversion_func = "as_integer_array()"
+                str_fun = int_to_str
 
-                def str_fun(s):
-                    return str(s)
-            elif isinstance(default_value[0], bool):
+            elif default_value_type is bool:
                 data_type = "bool"
                 conversion_func = "as_bool_array()"
+                str_fun = bool_to_str
 
-                def str_fun(cond):
-                    return "true" if cond else "false"
             else:
                 sys.stderr.write("invalid yaml type: %s" % type(default_value[0]))
                 raise AssertionError()
@@ -73,34 +94,27 @@ class GenParamStruct:
             self.struct += "%s};\n" % str_fun(default_value[-1])
 
         else:
-            if isinstance(default_value, str):
+            if default_value_type is str:
                 data_type = "std::string"
                 conversion_func = "as_string()"
+                str_fun = str_to_str
 
-                def str_fun(s):
-                    return "\"%s\"" % s
-            elif isinstance(default_value, float):
+            elif default_value_type is float:
                 data_type = "double"
                 conversion_func = "as_double()"
+                str_fun = float_to_str
 
-                def str_fun(s):
-                    str_val = str(s)
-                    if str_val == "nan":
-                        str_val = "std::numeric_limits<double>::quiet_NaN()"
-                    return str_val
-
-            elif isinstance(default_value, int) and not isinstance(default_value, bool):
+            elif default_value_type is int and default_value_type is not bool:
                 data_type = "int"
                 conversion_func = "as_int()"
+                str_fun = int_to_str
 
-                def str_fun(s):
-                    return str(s)
-            elif isinstance(default_value, bool):
+            elif default_value_type is bool:
                 data_type = "bool"
                 conversion_func = "as_bool()"
 
                 def str_fun(cond):
-                    return "true" if cond else "false"
+                    return bool_to_str(cond)
             else:
                 sys.stderr.write("invalid yaml type: %s" % type(default_value))
                 raise AssertionError()
@@ -117,9 +131,20 @@ class GenParamStruct:
 
         self.param_declare += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
         self.param_declare += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
-        param_prefix + name, nested_name + name)
+            param_prefix + name, nested_name + name)
         self.param_declare += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
-        self.param_declare += "descriptor.set__description(\"%s\");\n" % description
+        self.param_declare += "descriptor.description = \"%s\";\n" % description
+        if "bounds" in value:
+            if default_value_type is not type(value["bounds"][0]):
+                sys.stderr.write("The type of the bounds must be the same as the default value")
+                raise AssertionError()
+            self.param_declare += "rcl_interfaces::msg::FloatingPointRange range;\n"
+            self.param_declare += "range.from_value = %s;\n" % str_fun(value["bounds"][0])
+            self.param_declare += "range.to_value = %s;\n" % str_fun(value["bounds"][1])
+            self.param_declare += "descriptor.floating_point_range.push_back(range);\n"
+
+        self.param_declare += "descriptor.read_only = %s;\n" % bool_to_str(not configurable)
+
         self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
             param_name, param_prefix + name)
         self.param_declare += "} \n"
@@ -162,8 +187,6 @@ class GenParamStruct:
             raise AssertionError()
 
         yaml_file = sys.argv[2]
-        # self.target = sys.argv[3]
-
         with open(yaml_file) as f:
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
 

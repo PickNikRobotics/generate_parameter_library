@@ -120,16 +120,14 @@ admittance_controller:
         description: "position of the center of gravity (CoG) in its frame",
         configurable: true,
         optional: false,
-        upper_bound: [ .Inf, .Inf, .Inf],
-        lower_bound: [-.Inf, -.Inf, -.Inf]
+        bounds: [-.Inf, .Inf]
       }
       force: {
         default_value: .NAN,
         description: "weight of the end effector, e.g mass * 9.81",
         configurable: true,
         optional: false,
-        upper_bound: [ .Inf, .Inf, .Inf ],
-        lower_bound: [ -.Inf, -.Inf, -.Inf ]
+        bounds: [-.Inf, .Inf]
       }
 
   admittance:
@@ -148,8 +146,7 @@ admittance_controller:
       description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
       configurable: true,
       optional: false,
-      upper_bound: [ .Inf, .Inf, .Inf ],
-      lower_bound: [ -.Inf, -.Inf, -.Inf ]
+      bounds: [-.Inf, .Inf]
     }
 
     damping_ratio: {
@@ -158,8 +155,7 @@ admittance_controller:
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
       configurable: true,
       optional: false,
-      upper_bound: [ .Inf, .Inf, .Inf ],
-      lower_bound: [ -.Inf, -.Inf, -.Inf ]
+      bounds: [-.Inf, .Inf]
     }
 
     stiffness: {
@@ -167,8 +163,7 @@ admittance_controller:
       description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
       configurable: true,
       optional: false,
-      upper_bound: [ .Inf, .Inf, .Inf ],
-      lower_bound: [ -.Inf, -.Inf, -.Inf ]
+      bounds: [-.Inf, .Inf]
     }
 
   # general settings
