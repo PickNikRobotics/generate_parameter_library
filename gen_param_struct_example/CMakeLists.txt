@@ -23,7 +23,7 @@ ament_target_dependencies(test_node
         gen_param_struct)
 
 # specify which yaml root name to convert to struct
-set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/config/data.yaml)
+set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/config/definition.yaml)
 # specify which yaml root name to convert to struct
 set(YAML_TARGET admittance_controller)
 # specify which yaml root name to convert to struct
