@@ -6,8 +6,6 @@
 namespace **NAMESPACE** {
 
     struct **STRUCT_NAME** {
-    // if true, prevent parameters from updating
-    bool lock_params_ = false;
     std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
 
     **STRUCT_NAME**(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
@@ -16,17 +14,42 @@ namespace **NAMESPACE** {
         handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
     }
 
+    template<typename T>
+    bool validate_length(const std::string& name, const std::vector<T>& values, size_t len,  rcl_interfaces::msg::SetParametersResult& result){
+        if (values.size() != len){
+            result.reason = std::string("Invalid size for vector parameter ") + name +
+            ". Expected " + std::to_string(len) + " got " + std::to_string(values.size());
+            return false;
+        }
+        return true;
+    }
+
+    template<typename T>
+        bool validate_bounds(const std::string& name, std::vector<T> values, const T& lower_bound, const T& upper_bound,  rcl_interfaces::msg::SetParametersResult& result){
+        for (const auto& val : values){
+            if (!validate_bounds(name, val, lower_bound, upper_bound, result)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    template<typename T>
+        bool validate_bounds(const std::string& name, T value, const T& lower_bound, const T& upper_bound,  rcl_interfaces::msg::SetParametersResult& result){
+            if (value > upper_bound || value < lower_bound){
+                result.reason = std::string("Invalid value for parameter ") + name + ". Value not within the required bounds.";
+                return false;
+        }
+        return true;
+    }
+
+
     struct params {
     **STRUCT_CONTENT**
     } params_;
 
         rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
           rcl_interfaces::msg::SetParametersResult result;
-          result.successful = !lock_params_;
-          if (lock_params_){
-            result.reason = "The parameters can not be updated because they are currently locked.";
-            return result;
-          }
 
           result.reason = "success";
           for (const auto &param: parameters) {

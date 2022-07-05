@@ -17,6 +17,10 @@ def float_to_str(num):
         str_num = "std::numeric_limits<double>::infinity()"
     elif str_num == "-inf":
         str_num = "-std::numeric_limits<double>::infinity()"
+    else:
+        if len(str_num.split('.')) == 1:
+            str_num += ".0"
+
     return str_num
 
 
@@ -58,6 +62,10 @@ class GenParamStruct:
         default_value = value['default_value']
         description = value['description']
         configurable = value['configurable']
+        bounds = []
+        if "bounds" in value:
+            bounds = value["bounds"]
+
         if isinstance(default_value, list):
             default_value_type = type(default_value[0])
         else:
@@ -125,7 +133,15 @@ class GenParamStruct:
         param_prefix += "".join(x + "_" for x in nested_name_list[1:])
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
-        self.param_set += "if (param.get_name() == " + "\"%s\") {\n" % param_name
+        self.param_set += "if (param.get_name() == " + "\"%s\" " % param_name
+        if isinstance(default_value, list):
+            self.param_set += "&& validate_length(\"%s\", param.%s, %s, result) " % (param_name, conversion_func, int_to_str(len(default_value)))
+
+        if len(bounds) > 0:
+            self.param_set += "&& validate_bounds(\"%s\", param.%s, %s, %s, result) " % (param_name, conversion_func, str_fun(bounds[0]), str_fun(bounds[1]) )
+
+        self.param_set += ") {\n"
+
         self.param_set += "params_.%s_ = param.%s;\n" % (nested_name + name, conversion_func)
         self.param_set += "}\n"
 
@@ -134,13 +150,13 @@ class GenParamStruct:
             param_prefix + name, nested_name + name)
         self.param_declare += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
         self.param_declare += "descriptor.description = \"%s\";\n" % description
-        if "bounds" in value:
-            if default_value_type is not type(value["bounds"][0]):
+        if len(bounds) > 0:
+            if default_value_type is not type(bounds[0]):
                 sys.stderr.write("The type of the bounds must be the same as the default value")
                 raise AssertionError()
             self.param_declare += "rcl_interfaces::msg::FloatingPointRange range;\n"
-            self.param_declare += "range.from_value = %s;\n" % str_fun(value["bounds"][0])
-            self.param_declare += "range.to_value = %s;\n" % str_fun(value["bounds"][1])
+            self.param_declare += "range.from_value = %s;\n" % str_fun(bounds[0])
+            self.param_declare += "range.to_value = %s;\n" % str_fun(bounds[1])
             self.param_declare += "descriptor.floating_point_range.push_back(range);\n"
 
         self.param_declare += "descriptor.read_only = %s;\n" % bool_to_str(not configurable)

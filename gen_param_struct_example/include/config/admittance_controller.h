@@ -8,8 +8,6 @@
 namespace admittance_controller_parameters {
 
   struct admittance_controller {
-    // if true, prevent parameters from updating
-    bool lock_params_ = false;
     std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
 
     admittance_controller(
@@ -20,6 +18,39 @@ namespace admittance_controller_parameters {
       };
       handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
     }
+
+    template<typename T>
+    bool validate_length(const std::string &name, const std::vector<T> &values, size_t len,
+                         rcl_interfaces::msg::SetParametersResult &result) {
+      if (values.size() != len) {
+        result.reason = std::string("Invalid size for vector parameter ") + name +
+                        ". Expected " + std::to_string(len) + " got " + std::to_string(values.size());
+        return false;
+      }
+      return true;
+    }
+
+    template<typename T>
+    bool validate_bounds(const std::string &name, std::vector<T> values, const T &lower_bound, const T &upper_bound,
+                         rcl_interfaces::msg::SetParametersResult &result) {
+      for (const auto &val: values) {
+        if (!validate_bounds(name, val, lower_bound, upper_bound, result)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    template<typename T>
+    bool validate_bounds(const std::string &name, T value, const T &lower_bound, const T &upper_bound,
+                         rcl_interfaces::msg::SetParametersResult &result) {
+      if (value > upper_bound || value < lower_bound) {
+        result.reason = std::string("Invalid value for parameter ") + name + ". Value not within required bounds.";
+        return false;
+      }
+      return true;
+    }
+
 
     struct params {
       std::vector<std::string> joints_ = {"UNDEFINED"};
@@ -86,24 +117,22 @@ namespace admittance_controller_parameters {
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       rcl_interfaces::msg::SetParametersResult result;
-      result.successful = !lock_params_;
-      if (lock_params_) {
-        result.reason = "The parameters can not be updated because they are currently locked.";
-        return result;
-      }
 
       result.reason = "success";
       for (const auto &param: parameters) {
-        if (param.get_name() == "joints") {
+        if (param.get_name() == "joints" && validate_length("joints", param.as_string_array(), 1, result)) {
           params_.joints_ = param.as_string_array();
         }
-        if (param.get_name() == "command_interfaces") {
+        if (param.get_name() == "command_interfaces" &&
+            validate_length("command_interfaces", param.as_string_array(), 1, result)) {
           params_.command_interfaces_ = param.as_string_array();
         }
-        if (param.get_name() == "state_interfaces") {
+        if (param.get_name() == "state_interfaces" &&
+            validate_length("state_interfaces", param.as_string_array(), 1, result)) {
           params_.state_interfaces_ = param.as_string_array();
         }
-        if (param.get_name() == "chainable_command_interfaces") {
+        if (param.get_name() == "chainable_command_interfaces" &&
+            validate_length("chainable_command_interfaces", param.as_string_array(), 1, result)) {
           params_.chainable_command_interfaces_ = param.as_string_array();
         }
         if (param.get_name() == "kinematics.plugin_name") {
@@ -142,22 +171,29 @@ namespace admittance_controller_parameters {
         if (param.get_name() == "gravity_compensation.frame.external") {
           params_.gravity_compensation_.frame_.external_ = param.as_bool();
         }
-        if (param.get_name() == "gravity_compensation.CoG.pos") {
+        if (param.get_name() == "gravity_compensation.CoG.pos" &&
+            validate_length("gravity_compensation.CoG.pos", param.as_double_array(), 3, result)) {
           params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();
         }
         if (param.get_name() == "gravity_compensation.CoG.force") {
           params_.gravity_compensation_.CoG_.force_ = param.as_double();
         }
-        if (param.get_name() == "admittance.selected_axes") {
+        if (param.get_name() == "admittance.selected_axes" &&
+            validate_length("admittance.selected_axes", param.as_bool_array(), 6, result)) {
           params_.admittance_.selected_axes_ = param.as_bool_array();
         }
-        if (param.get_name() == "admittance.mass") {
+        if (param.get_name() == "admittance.mass" &&
+            validate_length("admittance.mass", param.as_double_array(), 6, result) &&
+            validate_bounds("admittance.mass", param.as_double_array(), 0.0001, 100000000.0, result)) {
           params_.admittance_.mass_ = param.as_double_array();
         }
-        if (param.get_name() == "admittance.damping_ratio") {
+        if (param.get_name() == "admittance.damping_ratio" &&
+            validate_length("admittance.damping_ratio", param.as_double_array(), 5, result) &&
+            validate_bounds("admittance.damping_ratio", param.as_double_array(), 0.1, 10.0, result)) {
           params_.admittance_.damping_ratio_ = param.as_double_array();
         }
-        if (param.get_name() == "admittance.stiffness") {
+        if (param.get_name() == "admittance.stiffness" &&
+            validate_length("admittance.stiffness", param.as_double_array(), 6, result)) {
           params_.admittance_.stiffness_ = param.as_double_array();
         }
         if (param.get_name() == "enable_parameter_update_without_reactivation") {
@@ -311,10 +347,6 @@ namespace admittance_controller_parameters {
         auto p_gravity_compensation_CoG_pos = rclcpp::ParameterValue(params_.gravity_compensation_.CoG_.pos_);
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "position of the center of gravity (CoG) in its frame";
-        rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = -std::numeric_limits<double>::infinity();
-        range.to_value = std::numeric_limits<double>::infinity();
-        descriptor.floating_point_range.push_back(range);
         descriptor.read_only = false;
         parameters_interface->declare_parameter("gravity_compensation.CoG.pos", p_gravity_compensation_CoG_pos,
                                                 descriptor);
@@ -325,10 +357,6 @@ namespace admittance_controller_parameters {
         auto p_gravity_compensation_CoG_force = rclcpp::ParameterValue(params_.gravity_compensation_.CoG_.force_);
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "weight of the end effector, e.g mass * 9.81";
-        rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = -std::numeric_limits<double>::infinity();
-        range.to_value = std::numeric_limits<double>::infinity();
-        descriptor.floating_point_range.push_back(range);
         descriptor.read_only = false;
         parameters_interface->declare_parameter("gravity_compensation.CoG.force", p_gravity_compensation_CoG_force,
                                                 descriptor);
@@ -349,8 +377,8 @@ namespace admittance_controller_parameters {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation";
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = -std::numeric_limits<double>::infinity();
-        range.to_value = std::numeric_limits<double>::infinity();
+        range.from_value = 0.0001;
+        range.to_value = 100000000.0;
         descriptor.floating_point_range.push_back(range);
         descriptor.read_only = false;
         parameters_interface->declare_parameter("admittance.mass", p_admittance_mass, descriptor);
@@ -361,8 +389,8 @@ namespace admittance_controller_parameters {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation. The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))";
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = -std::numeric_limits<double>::infinity();
-        range.to_value = std::numeric_limits<double>::infinity();
+        range.from_value = 0.1;
+        range.to_value = 10.0;
         descriptor.floating_point_range.push_back(range);
         descriptor.read_only = false;
         parameters_interface->declare_parameter("admittance.damping_ratio", p_admittance_damping_ratio, descriptor);
@@ -373,10 +401,6 @@ namespace admittance_controller_parameters {
         auto p_admittance_stiffness = rclcpp::ParameterValue(params_.admittance_.stiffness_);
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation";
-        rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = -std::numeric_limits<double>::infinity();
-        range.to_value = std::numeric_limits<double>::infinity();
-        descriptor.floating_point_range.push_back(range);
         descriptor.read_only = false;
         parameters_interface->declare_parameter("admittance.stiffness", p_admittance_stiffness, descriptor);
       }
