@@ -320,6 +320,10 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies the damping coefficient for the Jacobian pseudo inverse";
         descriptor.read_only = false;
         desc_map["kinematics.alpha"] = descriptor;
+        if (!parameters_interface->has_parameter("kinematics.alpha")) {
+          auto p_kinematics_alpha = rclcpp::ParameterValue(params_.kinematics_.alpha_);
+          parameters_interface->declare_parameter("kinematics.alpha", p_kinematics_alpha, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -354,6 +358,11 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies the coefficient for the sensor's exponential filter";
         descriptor.read_only = false;
         desc_map["ft_sensor.filter_coefficient"] = descriptor;
+        if (!parameters_interface->has_parameter("ft_sensor.filter_coefficient")) {
+          auto p_ft_sensor_filter_coefficient = rclcpp::ParameterValue(params_.ft_sensor_.filter_coefficient_);
+          parameters_interface->declare_parameter("ft_sensor.filter_coefficient", p_ft_sensor_filter_coefficient,
+                                                  descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
