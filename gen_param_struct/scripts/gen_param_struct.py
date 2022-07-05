@@ -63,6 +63,7 @@ class GenParamStruct:
         default_value = value['default_value']
         description = value['description']
         configurable = value['configurable']
+        optional = value["optional"]
         bounds = []
         if "bounds" in value:
             bounds = value["bounds"]
@@ -144,9 +145,7 @@ class GenParamStruct:
         self.param_set += "params_.%s_ = param.%s;\n" % (nested_name + name, conversion_func)
         self.param_set += "}\n"
 
-        # self.param_describe += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
-        # self.param_describe += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
-        #     param_prefix + name, nested_name + name)
+
         self.param_describe += "{\n"
         self.param_describe += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
         self.param_describe += "descriptor.description = \"%s\";\n" % description
@@ -160,6 +159,15 @@ class GenParamStruct:
             self.param_describe += "descriptor.floating_point_range.push_back(range);\n"
         self.param_describe += "descriptor.read_only = %s;\n" % bool_to_str(not configurable)
         self.param_describe += "desc_map[\"%s\"] = descriptor;\n" % param_name
+
+        if optional:
+            self.param_describe += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
+            self.param_describe += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
+                param_prefix + name, nested_name + name)
+            self.param_describe += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
+                param_name, param_prefix + name)
+            self.param_describe += "}\n"
+
         self.param_describe += "}\n"
 
         # self.param_describe += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (

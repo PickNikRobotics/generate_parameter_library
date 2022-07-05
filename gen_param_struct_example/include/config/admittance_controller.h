@@ -344,6 +344,10 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the force torque sensor is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["ft_sensor.frame.external"] = descriptor;
+        if (!parameters_interface->has_parameter("ft_sensor.frame.external")) {
+          auto p_ft_sensor_frame_external = rclcpp::ParameterValue(params_.ft_sensor_.frame_.external_);
+          parameters_interface->declare_parameter("ft_sensor.frame.external", p_ft_sensor_frame_external, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -362,6 +366,10 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the control frame is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["control.frame.external"] = descriptor;
+        if (!parameters_interface->has_parameter("control.frame.external")) {
+          auto p_control_frame_external = rclcpp::ParameterValue(params_.control_.frame_.external_);
+          parameters_interface->declare_parameter("control.frame.external", p_control_frame_external, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -374,6 +382,11 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the world frame is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["fixed_world_frame.frame.external"] = descriptor;
+        if (!parameters_interface->has_parameter("fixed_world_frame.frame.external")) {
+          auto p_fixed_world_frame_frame_external = rclcpp::ParameterValue(params_.fixed_world_frame_.frame_.external_);
+          parameters_interface->declare_parameter("fixed_world_frame.frame.external",
+                                                  p_fixed_world_frame_frame_external, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -386,6 +399,12 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the center of gravity frame is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["gravity_compensation.frame.external"] = descriptor;
+        if (!parameters_interface->has_parameter("gravity_compensation.frame.external")) {
+          auto p_gravity_compensation_frame_external = rclcpp::ParameterValue(
+              params_.gravity_compensation_.frame_.external_);
+          parameters_interface->declare_parameter("gravity_compensation.frame.external",
+                                                  p_gravity_compensation_frame_external, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -436,12 +455,23 @@ namespace admittance_controller_parameters {
         descriptor.description = "if enabled, configurable parameters will be dynamically updated in the control loop";
         descriptor.read_only = false;
         desc_map["enable_parameter_update_without_reactivation"] = descriptor;
+        if (!parameters_interface->has_parameter("enable_parameter_update_without_reactivation")) {
+          auto p_enable_parameter_update_without_reactivation = rclcpp::ParameterValue(
+              params_.enable_parameter_update_without_reactivation_);
+          parameters_interface->declare_parameter("enable_parameter_update_without_reactivation",
+                                                  p_enable_parameter_update_without_reactivation, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity";
         descriptor.read_only = false;
         desc_map["use_feedforward_commanded_input"] = descriptor;
+        if (!parameters_interface->has_parameter("use_feedforward_commanded_input")) {
+          auto p_use_feedforward_commanded_input = rclcpp::ParameterValue(params_.use_feedforward_commanded_input_);
+          parameters_interface->declare_parameter("use_feedforward_commanded_input", p_use_feedforward_commanded_input,
+                                                  descriptor);
+        }
       }
 
 
