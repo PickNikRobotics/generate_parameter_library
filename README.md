@@ -87,10 +87,40 @@ You should see:
   
   `ros2 param set /admittance_controller joints ["joint_new"]`
   
-  will result in the message
+  will result in the error
   
   `Setting parameter failed: parameter 'joints' cannot be set because it is read-only`
   
+ Running the follwing
+ 
+ `ros2 param describe /admittance_controller admittance.damping_ratio`
+ 
+ will show a parameter's description
+ ```
+ Parameter name: admittance.damping_ratio
+  Type: double array
+  Description: specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation. The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))
+  Constraints:
+    Min value: 0.1
+    Max value: 10.0
+```
+
+If you try to set a value out of the specified bounds, 
+
+`ros2 param set /admittance_controller admittance.damping_ratio [-10.0,-10.0,-10.0,-10.0,-10.0,-10.0]`
+
+you will get the error
+
+`Setting parameter failed: Invalid value for parameter admittance.damping_ratio. Value not within required bounds.`
+
+If you try to set a vector parameter with the wrong length, 
+
+`ros2 param set /admittance_controller admittance.damping_ratio [1.0,1.0,1.0]`
+
+you will get the error
+
+`Setting parameter failed: Invalid size for vector parameter admittance.damping_ratio. Expected 6 got 3`
+
   
 ## Sample output
 A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/gen_param_struct_example/include/config/admittance_controller.h
