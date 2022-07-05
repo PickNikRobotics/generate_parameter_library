@@ -39,9 +39,10 @@ admittance_controller:
         id: ee_link # Admittance calcs (displacement etc) are done in this frame. Usually the tool or end-effector
         external: false # control frame exists within URDF kinematic chain
 
-    fixed_world_frame:   # Gravity points down (neg. Z) in this frame (Usually: world or base_link)
-      id: base_link # Admittance calcs (displacement etc) are done in this frame. Usually the tool or end-effector
-      external: false # control frame exists within URDF kinematic chain
+    fixed_world_frame:
+      frame:   # Gravity points down (neg. Z) in this frame (Usually: world or base_link)
+        id: base_link # Admittance calcs (displacement etc) are done in this frame. Usually the tool or end-effector
+        external: false # control frame exists within URDF kinematic chain
 
     gravity_compensation:
       frame:
@@ -93,5 +94,3 @@ admittance_controller:
     # general settings
     enable_parameter_update_without_reactivation: true
     use_feedforward_commanded_input: true
-    joint_limiter_type: "joint_limits/SimpleJointLimiter"
-    state_publish_rate: 200.0 # Defaults to 50

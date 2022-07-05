@@ -36,6 +36,12 @@ admittance_controller:
       configurable: true, # requires restart
       optional: false
     }
+    plugin_package: {
+      default_value: "UNDEFINED",
+      description: "specifies the package to load the kinematics plugin from",
+      configurable: true, # requires restart
+      optional: false
+    }
     base: {
       default_value: "UNDEFINED",
       description: "specifies the base link of the robot description used by the kinematics plugin",
@@ -45,6 +51,18 @@ admittance_controller:
     tip: {
       default_value: "UNDEFINED",
       description: "specifies the end effector link of the robot description used by the kinematics plugin",
+      configurable: true, # requires restart
+      optional: false
+    }
+    alpha: {
+      default_value: 0.0005,
+      description: "specifies the damping coefficient for the Jacobian pseudo inverse",
+      configurable: true, # requires restart
+      optional: false
+    }
+    group_name: {
+      default_value: "UNDEFINED",
+      description: "specifies the group name for planning with Moveit",
       configurable: true, # requires restart
       optional: false
     }
@@ -69,6 +87,12 @@ admittance_controller:
         configurable: true, # requires restart
         optional: true
       }
+    filter_coefficient: {
+      default_value: 0.005,
+      description: "specifies the coefficient for the sensor's exponential filter",
+      configurable: true, # requires restartF
+      optional: false
+    }
 
   control:
     frame:
@@ -148,7 +172,7 @@ admittance_controller:
     }
 
     damping_ratio: {
-      default_value: [ .NAN, .NAN, .NAN, .NAN, .NAN ],
+      default_value: [ .NAN, .NAN, .NAN, .NAN, .NAN, .NAN],
       description: "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation. 
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
       configurable: true,
@@ -167,6 +191,12 @@ admittance_controller:
   enable_parameter_update_without_reactivation: {
     default_value: true,
     description: "if enabled, configurable parameters will be dynamically updated in the control loop",
+    configurable: true,
+    optional: true
+  }
+  use_feedforward_commanded_input: {
+    default_value: true,
+    description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity",
     configurable: true,
     optional: true
   }

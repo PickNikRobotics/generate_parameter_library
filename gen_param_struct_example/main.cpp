@@ -21,16 +21,19 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
-
 int main(int numArgs, const char **args) {
 
   rclcpp::init(numArgs, args);
+
 
   auto node = std::make_shared<MinimalPublisher>();
   auto gen_struct = std::make_shared<admittance_controller_parameters::admittance_controller>(
       node->get_node_parameters_interface());
   node->gen_struct = gen_struct;
 
+  const std::vector<std::string> prefixes;
+  uint64_t depth = 100;
+  node->get_node_parameters_interface()->list_parameters(prefixes, depth);
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   executor.spin();

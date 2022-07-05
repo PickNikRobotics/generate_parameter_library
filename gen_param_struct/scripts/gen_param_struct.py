@@ -52,7 +52,8 @@ class GenParamStruct:
         self.contents = ""
         self.struct = Buffer()
         self.param_set = Buffer()
-        self.param_declare = Buffer()
+        self.param_describe = Buffer()
+        self.param_get = Buffer()
         self.target = ""
 
     def parse_params(self, name, value, nested_name_list):
@@ -136,38 +137,52 @@ class GenParamStruct:
         self.param_set += "if (param.get_name() == " + "\"%s\" " % param_name
         if isinstance(default_value, list):
             self.param_set += "&& validate_length(\"%s\", param.%s, %s, result) " % (param_name, conversion_func, int_to_str(len(default_value)))
-
         if len(bounds) > 0:
             self.param_set += "&& validate_bounds(\"%s\", param.%s, %s, %s, result) " % (param_name, conversion_func, str_fun(bounds[0]), str_fun(bounds[1]) )
-
         self.param_set += ") {\n"
 
         self.param_set += "params_.%s_ = param.%s;\n" % (nested_name + name, conversion_func)
         self.param_set += "}\n"
 
-        self.param_declare += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
-        self.param_declare += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
-            param_prefix + name, nested_name + name)
-        self.param_declare += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
-        self.param_declare += "descriptor.description = \"%s\";\n" % description
+        # self.param_describe += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
+        # self.param_describe += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
+        #     param_prefix + name, nested_name + name)
+        self.param_describe += "{\n"
+        self.param_describe += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
+        self.param_describe += "descriptor.description = \"%s\";\n" % description
         if len(bounds) > 0:
             if default_value_type is not type(bounds[0]):
                 sys.stderr.write("The type of the bounds must be the same as the default value")
                 raise AssertionError()
-            self.param_declare += "rcl_interfaces::msg::FloatingPointRange range;\n"
-            self.param_declare += "range.from_value = %s;\n" % str_fun(bounds[0])
-            self.param_declare += "range.to_value = %s;\n" % str_fun(bounds[1])
-            self.param_declare += "descriptor.floating_point_range.push_back(range);\n"
+            self.param_describe += "rcl_interfaces::msg::FloatingPointRange range;\n"
+            self.param_describe += "range.from_value = %s;\n" % str_fun(bounds[0])
+            self.param_describe += "range.to_value = %s;\n" % str_fun(bounds[1])
+            self.param_describe += "descriptor.floating_point_range.push_back(range);\n"
+        self.param_describe += "descriptor.read_only = %s;\n" % bool_to_str(not configurable)
+        self.param_describe += "desc_map[\"%s\"] = descriptor;\n" % param_name
+        self.param_describe += "}\n"
 
-        self.param_declare += "descriptor.read_only = %s;\n" % bool_to_str(not configurable)
+        # self.param_describe += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
+        #     param_name, param_prefix + name)
+        # self.param_describe += "}"
 
-        self.param_declare += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
-            param_name, param_prefix + name)
-        self.param_declare += "} \n"
-        self.param_declare += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
+        if (isinstance(default_value, list) and default_value[0] != "UNDEFINED") or len(bounds) > 0:
+            self.param_get += "if ("
+            logical = ""
+            if isinstance(default_value, list) and default_value[0] != "UNDEFINED":
+                self.param_get += "!validate_length(parameters_interface->get_parameter(\"%s\").%s, %s) " % (param_name, conversion_func, int_to_str(len(default_value)))
+                logical = " || "
+            if len(bounds) > 0:
+                self.param_get += "%s !validate_bounds(parameters_interface->get_parameter(\"%s\").%s, %s, %s) " % (logical, param_name, conversion_func, str_fun(bounds[0]), str_fun(bounds[1]) )
+            self.param_get += ") {\n"
+            self.param_get += "throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during initialization for parameter %s \");" % param_name
+            self.param_get += "}\n"
+
+        self.param_get += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
             nested_name + name, param_name, conversion_func)
 
-        self.param_declare += "\n"
+
+        self.param_get += "\n"
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):
@@ -226,7 +241,8 @@ class GenParamStruct:
         self.contents = self.contents.replace("**STRUCT_NAME**", str(self.target))
         self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
         self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
-        self.contents = self.contents.replace("**DECLARE_PARAMS**", str(self.param_declare))
+        self.contents = self.contents.replace("**DESCRIBE_PARAMS**", str(self.param_describe))
+        self.contents = self.contents.replace("**GET_PARAMS**", str(self.param_get))
 
         with open(out_directory + self.target + ".h", "w") as f:
             f.write(self.contents)
