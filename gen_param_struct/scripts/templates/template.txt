@@ -1,5 +1,7 @@
 **COMMENTS**
 
+#pragma once
+
 **INCLUDES**
 
 
@@ -21,7 +23,7 @@ namespace **NAMESPACE** {
 
         rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
           rcl_interfaces::msg::SetParametersResult result;
-          Result validation_result;
+          gen_param_struct_validators::Result validation_result;
 
           result.reason = "success";
           for (const auto &param: parameters) {
@@ -35,7 +37,7 @@ namespace **NAMESPACE** {
             **DESCRIBE_PARAMS**
             // get parameters and fill struct fields
             rclcpp::Parameter param;
-            Result validation_result;
+            gen_param_struct_validators::Result validation_result;
 
             **GET_PARAMS**
         }

@@ -1,110 +1,87 @@
-//
-// Created by paul on 7/5/22.
-//
 
-#ifndef COLCON_WS_VALIDATORS_H
-#define COLCON_WS_VALIDATORS_H
+#pragma once
 
 #include "rclcpp/rclcpp.hpp"
 #include "variant"
 #include <optional>
 
-class Result {
-public:
-  Result(const char* fmt, ...) {
-    const char* tmp = fmt;
-    int counter = 0;
-    while (*tmp){
-      counter+= ('%' == *tmp++);
+namespace gen_param_struct_validators{
+
+  class Result {
+  public:
+    template<typename ... Args>
+    Result( const std::string& format, Args ... args )
+    {
+      int size_s = std::snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
+      if( size_s <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
+      auto size = static_cast<size_t>( size_s );
+      std::unique_ptr<char[]> buf( new char[ size ] );
+      std::snprintf( buf.get(), size, format.c_str(), args ... );
+      msg_ = std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+      success_ = false;
     }
-    va_list args;
-//    va_start(args, fmt);
-    int buffer_size = 1000;
-//    for (int i=0; i < counter; i++){
-//      buffer_size += strlen(va_arg(args, char*));
-//    }
-//    va_end(args);
-    va_start(args, fmt);
-    std::vector<char> buffer(strlen(fmt) + buffer_size);
-    sprintf(buffer.data(), fmt, args);
 
-    msg_ = std::string(buffer.data());
-    success_ = false;
-  }
+    Result() {
+      success_ = true;
+    }
 
-  Result() {
-    success_ = true;
-  }
+    bool success(){
+      return success_;
+    }
 
-  bool success(){
-    return success_;
-  }
+    std::string error_msg(){
+      return msg_;
+    }
 
-  std::string error_msg(){
-    return msg_;
-  }
+  private:
+    std::string msg_;
+    bool success_;
+  };
 
-private:
-  std::string msg_;
-  bool success_;
-};
+  auto OK = Result();
+  using ERROR = Result;
 
-auto OK = Result();
-using ERROR = Result;
-
-Result validate_string_array_len(const rclcpp::Parameter& parameter, size_t size) {
-  const auto& string_array = parameter.as_string_array();
-  if (string_array.size() != size) {
-    return ERROR(
-        "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
-        size, string_array.size());
-  }
-  return OK;
-}
-
-Result validate_double_array_len(const rclcpp::Parameter& parameter, size_t size) {
-  const auto& double_array = parameter.as_double_array();
-  if (double_array.size() != size) {
-    return ERROR(
-        "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
-        size, double_array.size());
-  }
-  return OK;
-}
-
-Result validate_bool_array_len(const rclcpp::Parameter& parameter, size_t size) {
-  const auto& bool_array = parameter.as_bool_array();
-  if (bool_array.size() != size) {
-    return ERROR(
-        "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
-        size, bool_array.size());
-  }
-  return OK;
-}
-
-Result validate_double_array_bounds(const rclcpp::Parameter& parameter, double lower_bound, double upper_bound) {
-  const auto &double_array = parameter.as_double_array();
-  for (auto val: double_array) {
-    if (val < lower_bound || val > upper_bound) {
+  Result validate_string_array_len(const rclcpp::Parameter& parameter, size_t size) {
+    const auto& string_array = parameter.as_string_array();
+    if (string_array.size() != size) {
       return ERROR(
-          "The parameter value (%f) was outside the allowed bounds [(%f), (%f)]",
-          val, lower_bound, upper_bound);
+          "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
+          size, string_array.size());
     }
-
     return OK;
   }
-}
 
+  Result validate_double_array_len(const rclcpp::Parameter& parameter, size_t size) {
+    const auto& double_array = parameter.as_double_array();
+    if (double_array.size() != size) {
+      return ERROR(
+          "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
+          size, double_array.size());
+    }
+    return OK;
+  }
 
-//template<typename T>
-//bool validate_length(const std::string& name, const std::vector<T>& values, size_t len,  rcl_interfaces::msg::SetParametersResult& result){
-//  if (!validate_length(values, len)){
-//    result.reason = std::string("Invalid size for vector parameter ") + name +
-//                    ". Expected " + std::to_string(len) + " got " + std::to_string(values.size());
-//    return false;
-//  }
-//  return true;
-//}
+  Result validate_bool_array_len(const rclcpp::Parameter& parameter, size_t size) {
+    const auto& bool_array = parameter.as_bool_array();
+    if (bool_array.size() != size) {
+      return ERROR(
+          "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
+          size, bool_array.size());
+    }
+    return OK;
+  }
 
+  Result validate_double_array_bounds(const rclcpp::Parameter& parameter, double lower_bound, double upper_bound) {
+    const auto &double_array = parameter.as_double_array();
+    for (auto val: double_array) {
+      if (val < lower_bound || val > upper_bound) {
+        return ERROR(
+            "The parameter value (%f) was outside the allowed bounds [(%f), (%f)]",
+            val, lower_bound, upper_bound);
+      }
+    }
+    return OK;
+  }
 
-#endif //COLCON_WS_VALIDATORS_H
+} // namespace gen_param_struct
+

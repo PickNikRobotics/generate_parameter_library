@@ -134,7 +134,7 @@ admittance_controller:
       type: double_array,
       fixed_size: 6,
       description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
-      bounds: [ 0.0001, 100000000.0]
+      bounds: [ 0.0001, 1000000.0]
     }
 
     damping_ratio: {
@@ -142,9 +142,9 @@ admittance_controller:
       fixed_size: 6,
       description: "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation. 
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
-      bounds: [ 0.1, 10.0 ]
-#      validation:
-#        [validate_length_string, 3, "not_null"]
+      bounds: [ 0.1, 10.0 ],
+      validation:
+        [validate_double_array_custom_func, 20.3, 5.0]
     }
 
     stiffness: {
