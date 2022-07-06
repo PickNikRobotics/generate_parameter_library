@@ -27,7 +27,7 @@ YAML_FILE # path to yaml file
 ## Run the node
 ```
 source install/setup.bash
-ros2 run gen_param_struct_example test_node --ros-args --params-file src/gen_param_struct_example/include/config/implementation.yaml
+ros2 run gen_param_struct_example test_node --ros-args --params-file src/gen_param_struct/gen_param_struct_example/include/config/implementation.yaml
 ```
 
 You should see an output like this:
@@ -121,6 +121,16 @@ you will get the error
 
 `Setting parameter failed: Invalid size for vector parameter admittance.damping_ratio. Expected 6 got 3`
 
-  
+If you try to load a yaml file with missing required parameters
+
+`ros2 run gen_param_struct_example test_node --ros-args --params-file src/gen_param_struct/gen_param_struct_example/include/config/missing_required.yaml`
+
+
+you will get the error
+```
+terminate called after throwing an instance of 'rclcpp::exceptions::ParameterUninitializedException'
+  what():  parameter 'joints' is not initialized
+[ros2run]: Aborted
+```
 ## Sample output
 A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/gen_param_struct_example/include/config/admittance_controller.h
