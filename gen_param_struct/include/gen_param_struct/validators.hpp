@@ -14,20 +14,22 @@ public:
   Result(const char* fmt, ...) {
     const char* tmp = fmt;
     int counter = 0;
-    while (tmp){
+    while (*tmp){
       counter+= ('%' == *tmp++);
     }
     va_list args;
-    va_start(args, fmt);
-    int buffer_size = 1;
-    for (int i=0; i < counter; i++){
-      buffer_size += strlen(va_arg(args, char*));
-    }
-    va_end(args);
+//    va_start(args, fmt);
+    int buffer_size = 1000;
+//    for (int i=0; i < counter; i++){
+//      buffer_size += strlen(va_arg(args, char*));
+//    }
+//    va_end(args);
     va_start(args, fmt);
     std::vector<char> buffer(strlen(fmt) + buffer_size);
     sprintf(buffer.data(), fmt, args);
+
     msg_ = std::string(buffer.data());
+    success_ = false;
   }
 
   Result() {

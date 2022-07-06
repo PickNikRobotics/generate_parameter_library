@@ -309,19 +309,10 @@ class GenParamStruct:
         param_set_effect = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion)]
         param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
         param_set_bool_operators = []
-        # if bounds:
-        #     param_set_conditions.append("validate_bounds(\"%s\", param.%s, %s, %s, result) " % (
-        #         param_name, parameter_conversion, val_to_cpp_str(bounds[0]), val_to_cpp_str(bounds[1])))
-        #     param_set_bool_operators.append("&&")
-        # if fixed_size:
-        #     param_set_conditions.append("validate_length(\"%s\", param.%s, %s, result) " % (
-        #         param_name, parameter_conversion, int_to_str(fixed_size)))
-        #     param_set_bool_operators.append("&&")
-
         tmp = default_validation(param_set_effect, defined_type, fixed_size, bounds)
         self.param_set += if_statement(tmp, param_set_conditions, param_set_bool_operators)
 
-        # create parameter description and add to map
+        # create parameter description
         param_describe_effects = ["rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
                                   "descriptor.description = \"%s\";\n" % description]
         if bounds:
@@ -337,50 +328,41 @@ class GenParamStruct:
         if default_value:
             default_value_str = "rclcpp::ParameterValue(params_.%s_)" % (nested_name + name)
         else:
-            default_value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()    #PARAMETER_STRING_ARRAY
+            default_value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()  # PARAMETER_STRING_ARRAY
 
-        param_describe_effects.extend([
-            "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name,
-            "auto %s = %s;\n" % (
-                param_prefix + name, default_value_str),
-            "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
-                param_name, param_prefix + name),
-            "}\n"
-        ])
+        param_describe_effects_2 = ["auto %s = %s;\n" % (param_prefix + name, default_value_str),
+                                  "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
+                                      param_name, param_prefix + name)]
+        param_describe_conditions = ["!parameters_interface->has_parameter(\"%s\")" % param_name]
+
+        param_describe_effects.append(
+            if_statement(param_describe_effects_2, param_describe_conditions, [])
+        )
         self.param_describe += scoped_codeblock(param_describe_effects)
 
         # get parameter from by calling parameters_interface API
-        param_get_effect_false = ["throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during "
-                            "initialization for parameter %s \");" % param_name]
-
-        # param_get_conditions = []
-        # param_get_bool_operators = []
-        # if fixed_size:
-        #     param_get_conditions.append("!validate_length(parameters_interface->get_parameter(\"%s\").%s, %s) " % (
-        #         param_name, parameter_conversion, int_to_str(fixed_size)))
-        #     param_get_bool_operators.append("||")
-        # if bounds:
-        #     param_get_conditions.append("!validate_bounds(parameters_interface->get_parameter(\"%s\").%s, %s, %s) " % (
-        #         param_name, parameter_conversion, val_to_cpp_str(bounds[0]), val_to_cpp_str(bounds[1])))
-        #     param_get_bool_operators.append("||")
-
-        # if len(param_get_conditions) > 0:
-        #     self.param_get += if_statement(param_get_effect, param_get_conditions, param_get_bool_operators)
-
         self.param_get += "param = parameters_interface->get_parameter(\"%s\");\n" % param_name
-
+        param_get_effect_false = ["throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during "
+                                  "initialization for parameter %s: \" + validation_result.error_msg());" % param_name]
         param_get_effect_true = "params_.%s_ = param.%s;\n" % (
             nested_name + name, parameter_conversion)
-        # tmp = ""
         if fixed_size:
-            tmp = validation_sequence(defined_type, "len", ["param", fixed_size], param_get_effect_true, param_get_effect_false)
+            tmp = validation_sequence(defined_type, "len", ["param", fixed_size], param_get_effect_true,
+                                      param_get_effect_false)
         else:
             tmp = flatten_effects(param_get_effect_true)
 
-        self.param_get += tmp
+        if bounds:
+            args = ["param"]
+            for bound in bounds:
+                args.append(bound)
+            tmp = validation_sequence(defined_type, "bounds", args, tmp,
+                                      param_get_effect_false)
+        else:
+            tmp = flatten_effects(param_get_effect_true)
 
-        # self.param_get += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;\n" % (
-        #     nested_name + name, param_name, parameter_conversion)
+
+        self.param_get += tmp
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):

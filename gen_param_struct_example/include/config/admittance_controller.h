@@ -523,38 +523,41 @@ namespace admittance_controller_parameters {
       param = parameters_interface->get_parameter("gravity_compensation.frame.external");
       params_.gravity_compensation_.frame_.external_ = param.as_bool();
       param = parameters_interface->get_parameter("gravity_compensation.CoG.pos");
-      validation_result = validate_double_array_len(param, 3);
-      if (validation_result.success()) {
-        params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();
-      } else {
-        throw rclcpp::exceptions::InvalidParameterValueException(
-            "Invalid value set during initialization for parameter gravity_compensation.CoG.pos ");
-      }
+      params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();
       param = parameters_interface->get_parameter("gravity_compensation.CoG.force");
       params_.gravity_compensation_.CoG_.force_ = param.as_double();
       param = parameters_interface->get_parameter("admittance.selected_axes");
-      validation_result = validate_bool_array_len(param, 6);
-      if (validation_result.success()) {
-        params_.admittance_.selected_axes_ = param.as_bool_array();
-      } else {
-        throw rclcpp::exceptions::InvalidParameterValueException(
-            "Invalid value set during initialization for parameter admittance.selected_axes ");
-      }
+      params_.admittance_.selected_axes_ = param.as_bool_array();
       param = parameters_interface->get_parameter("admittance.mass");
-      validation_result = validate_double_array_len(param, 6);
+      validation_result = validate_double_array_bounds(param, 0.0001, 100000000.0);
       if (validation_result.success()) {
-        params_.admittance_.mass_ = param.as_double_array();
+        validation_result = validate_double_array_len(param, 6);
+        if (validation_result.success()) {
+          params_.admittance_.mass_ = param.as_double_array();
+        } else {
+          throw rclcpp::exceptions::InvalidParameterValueException(
+              "Invalid value set during initialization for parameter admittance.mass: " +
+              validation_result.error_msg());
+        }
       } else {
         throw rclcpp::exceptions::InvalidParameterValueException(
-            "Invalid value set during initialization for parameter admittance.mass ");
+            "Invalid value set during initialization for parameter admittance.mass: " + validation_result.error_msg());
       }
       param = parameters_interface->get_parameter("admittance.damping_ratio");
-      validation_result = validate_double_array_len(param, 6);
+      validation_result = validate_double_array_bounds(param, 0.1, 10.0);
       if (validation_result.success()) {
-        params_.admittance_.damping_ratio_ = param.as_double_array();
+        validation_result = validate_double_array_len(param, 6);
+        if (validation_result.success()) {
+          params_.admittance_.damping_ratio_ = param.as_double_array();
+        } else {
+          throw rclcpp::exceptions::InvalidParameterValueException(
+              "Invalid value set during initialization for parameter admittance.damping_ratio: " +
+              validation_result.error_msg());
+        }
       } else {
         throw rclcpp::exceptions::InvalidParameterValueException(
-            "Invalid value set during initialization for parameter admittance.damping_ratio ");
+            "Invalid value set during initialization for parameter admittance.damping_ratio: " +
+            validation_result.error_msg());
       }
       param = parameters_interface->get_parameter("admittance.stiffness");
       params_.admittance_.stiffness_ = param.as_double_array();
