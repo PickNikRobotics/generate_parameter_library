@@ -83,87 +83,113 @@ namespace admittance_controller_parameters {
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       rcl_interfaces::msg::SetParametersResult result;
+      result.successful = false;
       gen_param_struct_validators::Result validation_result;
 
       result.reason = "success";
       for (const auto &param: parameters) {
         if (param.get_name() == "joints") {
           params_.joints_ = param.as_string_array();
+          result.successful = true;
         }
         if (param.get_name() == "command_interfaces") {
           params_.command_interfaces_ = param.as_string_array();
+          result.successful = true;
         }
         if (param.get_name() == "state_interfaces") {
           params_.state_interfaces_ = param.as_string_array();
+          result.successful = true;
         }
         if (param.get_name() == "chainable_command_interfaces") {
           params_.chainable_command_interfaces_ = param.as_string_array();
+          result.successful = true;
         }
         if (param.get_name() == "kinematics.plugin_name") {
           params_.kinematics_.plugin_name_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "kinematics.plugin_package") {
           params_.kinematics_.plugin_package_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "kinematics.base") {
           params_.kinematics_.base_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "kinematics.tip") {
           params_.kinematics_.tip_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "kinematics.alpha") {
           params_.kinematics_.alpha_ = param.as_double();
+          result.successful = true;
         }
         if (param.get_name() == "kinematics.group_name") {
           params_.kinematics_.group_name_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "ft_sensor.name") {
           params_.ft_sensor_.name_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "ft_sensor.frame.id") {
           params_.ft_sensor_.frame_.id_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "ft_sensor.frame.external") {
           params_.ft_sensor_.frame_.external_ = param.as_bool();
+          result.successful = true;
         }
         if (param.get_name() == "ft_sensor.filter_coefficient") {
           params_.ft_sensor_.filter_coefficient_ = param.as_double();
+          result.successful = true;
         }
         if (param.get_name() == "control.frame.id") {
           params_.control_.frame_.id_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "control.frame.external") {
           params_.control_.frame_.external_ = param.as_bool();
+          result.successful = true;
         }
         if (param.get_name() == "fixed_world_frame.frame.id") {
           params_.fixed_world_frame_.frame_.id_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "fixed_world_frame.frame.external") {
           params_.fixed_world_frame_.frame_.external_ = param.as_bool();
+          result.successful = true;
         }
         if (param.get_name() == "gravity_compensation.frame.id") {
           params_.gravity_compensation_.frame_.id_ = param.as_string();
+          result.successful = true;
         }
         if (param.get_name() == "gravity_compensation.frame.external") {
           params_.gravity_compensation_.frame_.external_ = param.as_bool();
+          result.successful = true;
         }
         if (param.get_name() == "gravity_compensation.CoG.pos") {
           validation_result = gen_param_struct_validators::validate_double_array_len(param, 3);
           if (validation_result.success()) {
             params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();
+            result.successful = true;
           } else {
             result.reason = validation_result.error_msg();
+            result.successful = false;
           }
         }
         if (param.get_name() == "gravity_compensation.CoG.force") {
           params_.gravity_compensation_.CoG_.force_ = param.as_double();
+          result.successful = true;
         }
         if (param.get_name() == "admittance.selected_axes") {
           validation_result = gen_param_struct_validators::validate_bool_array_len(param, 6);
           if (validation_result.success()) {
             params_.admittance_.selected_axes_ = param.as_bool_array();
+            result.successful = true;
           } else {
             result.reason = validation_result.error_msg();
+            result.successful = false;
           }
         }
         if (param.get_name() == "admittance.mass") {
@@ -172,11 +198,14 @@ namespace admittance_controller_parameters {
             validation_result = gen_param_struct_validators::validate_double_array_len(param, 6);
             if (validation_result.success()) {
               params_.admittance_.mass_ = param.as_double_array();
+              result.successful = true;
             } else {
               result.reason = validation_result.error_msg();
+              result.successful = false;
             }
           } else {
             result.reason = validation_result.error_msg();
+            result.successful = false;
           }
         }
         if (param.get_name() == "admittance.damping_ratio") {
@@ -185,21 +214,27 @@ namespace admittance_controller_parameters {
             validation_result = gen_param_struct_validators::validate_double_array_len(param, 6);
             if (validation_result.success()) {
               params_.admittance_.damping_ratio_ = param.as_double_array();
+              result.successful = true;
             } else {
               result.reason = validation_result.error_msg();
+              result.successful = false;
             }
           } else {
             result.reason = validation_result.error_msg();
+            result.successful = false;
           }
         }
         if (param.get_name() == "admittance.stiffness") {
           params_.admittance_.stiffness_ = param.as_double_array();
+          result.successful = true;
         }
         if (param.get_name() == "enable_parameter_update_without_reactivation") {
           params_.enable_parameter_update_without_reactivation_ = param.as_bool();
+          result.successful = true;
         }
         if (param.get_name() == "use_feedforward_commanded_input") {
           params_.use_feedforward_commanded_input_ = param.as_bool();
+          result.successful = true;
         }
 
       }
@@ -208,6 +243,7 @@ namespace admittance_controller_parameters {
 
     void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> &parameters_interface) {
       // declare all parameters and give default values to non-required ones
+
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies which joints will be used by the controller";

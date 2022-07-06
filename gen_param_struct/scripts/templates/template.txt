@@ -23,6 +23,7 @@ namespace **NAMESPACE** {
 
         rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
           rcl_interfaces::msg::SetParametersResult result;
+          result.successful = false;
           gen_param_struct_validators::Result validation_result;
 
           result.reason = "success";
@@ -34,6 +35,7 @@ namespace **NAMESPACE** {
 
         void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
             // declare all parameters and give default values to non-required ones
+
             **DESCRIBE_PARAMS**
             // get parameters and fill struct fields
             rclcpp::Parameter param;

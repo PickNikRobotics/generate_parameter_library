@@ -265,7 +265,8 @@ def validation_sequence(namespace, func_name, args, effects_true, effects_false)
 
 def default_validation(effects, defined_type, fixed_size, bounds):
     code_str = Buffer()
-    effects_false = "result.reason = validation_result.error_msg();\n"
+    effects_false = ["result.reason = validation_result.error_msg();\n",
+                     "result.successful = false;"]
     if fixed_size:
         effects2 = [
             validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_len", [fixed_size],
@@ -342,10 +343,11 @@ class GenParamStruct:
         self.struct += declare_struct(defined_type, cpp_type, name, default_value)
 
         # set param value if param.name is the parameter being updated
-        param_set_effect = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion)]
+        param_set_effects = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
+                             "result.successful = true;\n"]
         param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
         param_set_bool_operators = []
-        tmp = default_validation(param_set_effect, defined_type, fixed_size, bounds)
+        tmp = default_validation(param_set_effects, defined_type, fixed_size, bounds)
         self.param_set += if_statement(tmp, param_set_conditions, param_set_bool_operators)
 
         # create parameter description
