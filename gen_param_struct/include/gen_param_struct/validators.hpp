@@ -45,7 +45,7 @@ namespace gen_param_struct_validators{
     const auto& string_array = parameter.as_string_array();
     if (string_array.size() != size) {
       return ERROR(
-          "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
+          "The length of the parameter was incorrect. Expected size is %d, actual size is %d",
           size, string_array.size());
     }
     return OK;
@@ -55,7 +55,7 @@ namespace gen_param_struct_validators{
     const auto& double_array = parameter.as_double_array();
     if (double_array.size() != size) {
       return ERROR(
-          "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
+          "The length of the parameter was incorrect. Expected size is %d, actual size is %d",
           size, double_array.size());
     }
     return OK;
@@ -65,7 +65,7 @@ namespace gen_param_struct_validators{
     const auto& bool_array = parameter.as_bool_array();
     if (bool_array.size() != size) {
       return ERROR(
-          "The length of the parameter was incorrect. Expected size is %s, actual size is %s",
+          "The length of the parameter was incorrect. Expected size is %d, actual size is %d",
           size, bool_array.size());
     }
     return OK;
