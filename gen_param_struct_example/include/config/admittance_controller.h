@@ -167,7 +167,7 @@ namespace admittance_controller_parameters {
           }
         }
         if (param.get_name() == "admittance.mass") {
-          validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.0001, 100000000.0);
+          validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.0001, 1000000.0);
           if (validation_result.success()) {
             validation_result = gen_param_struct_validators::validate_double_array_len(param, 6);
             if (validation_result.success()) {
@@ -428,7 +428,7 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation";
         rcl_interfaces::msg::FloatingPointRange range;
         range.from_value = 0.0001;
-        range.to_value = 100000000.0;
+        range.to_value = 1000000.0;
         descriptor.floating_point_range.push_back(range);
         descriptor.read_only = false;
         if (!parameters_interface->has_parameter("admittance.mass")) {
@@ -485,30 +485,67 @@ namespace admittance_controller_parameters {
       gen_param_struct_validators::Result validation_result;
 
       param = parameters_interface->get_parameter("joints");
+      params_.joints_ = param.as_string_array();
       param = parameters_interface->get_parameter("command_interfaces");
+      params_.command_interfaces_ = param.as_string_array();
       param = parameters_interface->get_parameter("state_interfaces");
+      params_.state_interfaces_ = param.as_string_array();
       param = parameters_interface->get_parameter("chainable_command_interfaces");
+      params_.chainable_command_interfaces_ = param.as_string_array();
       param = parameters_interface->get_parameter("kinematics.plugin_name");
+      params_.kinematics_.plugin_name_ = param.as_string();
       param = parameters_interface->get_parameter("kinematics.plugin_package");
+      params_.kinematics_.plugin_package_ = param.as_string();
       param = parameters_interface->get_parameter("kinematics.base");
+      params_.kinematics_.base_ = param.as_string();
       param = parameters_interface->get_parameter("kinematics.tip");
+      params_.kinematics_.tip_ = param.as_string();
       param = parameters_interface->get_parameter("kinematics.alpha");
+      params_.kinematics_.alpha_ = param.as_double();
       param = parameters_interface->get_parameter("kinematics.group_name");
+      params_.kinematics_.group_name_ = param.as_string();
       param = parameters_interface->get_parameter("ft_sensor.name");
+      params_.ft_sensor_.name_ = param.as_string();
       param = parameters_interface->get_parameter("ft_sensor.frame.id");
+      params_.ft_sensor_.frame_.id_ = param.as_string();
       param = parameters_interface->get_parameter("ft_sensor.frame.external");
+      params_.ft_sensor_.frame_.external_ = param.as_bool();
       param = parameters_interface->get_parameter("ft_sensor.filter_coefficient");
+      params_.ft_sensor_.filter_coefficient_ = param.as_double();
       param = parameters_interface->get_parameter("control.frame.id");
+      params_.control_.frame_.id_ = param.as_string();
       param = parameters_interface->get_parameter("control.frame.external");
+      params_.control_.frame_.external_ = param.as_bool();
       param = parameters_interface->get_parameter("fixed_world_frame.frame.id");
+      params_.fixed_world_frame_.frame_.id_ = param.as_string();
       param = parameters_interface->get_parameter("fixed_world_frame.frame.external");
+      params_.fixed_world_frame_.frame_.external_ = param.as_bool();
       param = parameters_interface->get_parameter("gravity_compensation.frame.id");
+      params_.gravity_compensation_.frame_.id_ = param.as_string();
       param = parameters_interface->get_parameter("gravity_compensation.frame.external");
+      params_.gravity_compensation_.frame_.external_ = param.as_bool();
       param = parameters_interface->get_parameter("gravity_compensation.CoG.pos");
+      validation_result = gen_param_struct_validators::validate_double_array_len(param, 3);
+      if (validation_result.success()) {
+        params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();
+      } else {
+        throw rclcpp::exceptions::InvalidParameterValueException(
+            "Invalid value set during initialization for parameter gravity_compensation.CoG.pos: " +
+            validation_result.error_msg());
+      }
       param = parameters_interface->get_parameter("gravity_compensation.CoG.force");
+      params_.gravity_compensation_.CoG_.force_ = param.as_double();
       param = parameters_interface->get_parameter("admittance.selected_axes");
+      validation_result = gen_param_struct_validators::validate_bool_array_len(param, 6);
+      if (validation_result.success()) {
+        params_.admittance_.selected_axes_ = param.as_bool_array();
+      } else {
+        throw rclcpp::exceptions::InvalidParameterValueException(
+            "Invalid value set during initialization for parameter admittance.selected_axes: " +
+            validation_result.error_msg());
+      }
       param = parameters_interface->get_parameter("admittance.mass");
-      validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.0001, 100000000.0);
+      validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.0001, 1000000.0);
       if (validation_result.success()) {
         validation_result = gen_param_struct_validators::validate_double_array_len(param, 6);
         if (validation_result.success()) {
@@ -523,7 +560,7 @@ namespace admittance_controller_parameters {
             "Invalid value set during initialization for parameter admittance.mass: " + validation_result.error_msg());
       }
       param = parameters_interface->get_parameter("admittance.damping_ratio");
-      validation_result = gen_param_struct_validators::validate_double_array_custom_func(param, 10.3, 5.0);
+      validation_result = gen_param_struct_validators::validate_double_array_custom_func(param, 20.3, 5.0);
       if (validation_result.success()) {
         validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.1, 10.0);
         if (validation_result.success()) {
@@ -546,8 +583,11 @@ namespace admittance_controller_parameters {
             validation_result.error_msg());
       }
       param = parameters_interface->get_parameter("admittance.stiffness");
+      params_.admittance_.stiffness_ = param.as_double_array();
       param = parameters_interface->get_parameter("enable_parameter_update_without_reactivation");
+      params_.enable_parameter_update_without_reactivation_ = param.as_bool();
       param = parameters_interface->get_parameter("use_feedforward_commanded_input");
+      params_.use_feedforward_commanded_input_ = param.as_bool();
 
     }
   };

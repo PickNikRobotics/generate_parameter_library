@@ -248,7 +248,7 @@ def function_call(namespace, func_name, args):
 def validation_sequence(namespace, func_name, args, effects_true, effects_false):
     # assumes that the validation function is named validate_{defined_type}_{method}
     if args is None or (isinstance(args, list) and args[0] is None):
-        return ""  # no validation needed
+        return flatten_effects(effects_true)  # no validation needed
     tmp = ["param"]
     tmp.extend(args)
     args = tmp
