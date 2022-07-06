@@ -123,7 +123,7 @@ admittance_controller:
   admittance:
     selected_axes:
       {
-        type: double_array,
+        type: bool_array,
         fixed_size: 6,
         description: "specifies if the axes x, y, z, rx, ry, and rz are enabled"
       }
@@ -143,6 +143,8 @@ admittance_controller:
       description: "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation. 
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
       bounds: [ 0.1, 10.0 ]
+#      validation:
+#        [validate_length_string, 3, "not_null"]
     }
 
     stiffness: {

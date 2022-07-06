@@ -19,6 +19,16 @@ install(
         USE_SOURCE_PERMISSIONS
 )
 
+install(
+    DIRECTORY include/
+    DESTINATION include
+)
+
+
+ament_export_include_directories(
+    include
+)
+
 ament_package(CONFIG_EXTRAS
         gen_param_struct.cmake
         )

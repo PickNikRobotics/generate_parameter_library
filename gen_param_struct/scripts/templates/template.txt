@@ -15,78 +15,13 @@ namespace **NAMESPACE** {
         handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
     }
 
-    void declare_overrides(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> &parameters_interface,
-                           const std::map<std::string, rclcpp::ParameterValue> &overrides,
-                           std::unordered_map<std::string, rcl_interfaces::msg::ParameterDescriptor>& desc_map) {
-
-      for (auto& key: overrides) {
-        if (!parameters_interface->has_parameter(key.first)) {
-          parameters_interface->declare_parameter(key.first, key.second, desc_map[key.first]);
-        }
-      }
-    }
-
-    template<typename T>
-    bool validate_length(const std::vector<T>& values, size_t len){
-        return values.size() == len;
-    }
-
-    template<typename T>
-    bool validate_length(const std::string& name, const std::vector<T>& values, size_t len,  rcl_interfaces::msg::SetParametersResult& result){
-        if (!validate_length(values, len)){
-            result.reason = std::string("Invalid size for vector parameter ") + name +
-            ". Expected " + std::to_string(len) + " got " + std::to_string(values.size());
-            return false;
-        }
-        return true;
-    }
-
-
-    template<typename T>
-            bool validate_bounds(std::vector<T> values, const T& lower_bound, const T& upper_bound){
-            for (const auto& val : values){
-                if (!validate_bounds(val, lower_bound, upper_bound)){
-                    return false;
-                }
-            }
-            return true;
-        }
-
-    template<typename T>
-        bool validate_bounds(const std::string& name, std::vector<T> values, const T& lower_bound, const T& upper_bound,  rcl_interfaces::msg::SetParametersResult& result){
-        for (const auto& val : values){
-            if (!validate_bounds(name, val, lower_bound, upper_bound, result)){
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    template<typename T>
-            bool validate_bounds(T value, const T& lower_bound, const T& upper_bound){
-                if (value > upper_bound || value < lower_bound){
-                    return false;
-            }
-            return true;
-        }
-
-    template<typename T>
-        bool validate_bounds(const std::string& name, T value, const T& lower_bound, const T& upper_bound,  rcl_interfaces::msg::SetParametersResult& result){
-            if (!validate_bounds(value, lower_bound, upper_bound)){
-                result.reason = std::string("Invalid value for parameter ") + name + ". Value not within the required bounds.";
-                return false;
-        }
-        return true;
-    }
-
-
     struct params {
     **STRUCT_CONTENT**
     } params_;
 
         rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
           rcl_interfaces::msg::SetParametersResult result;
+          Result validation_result;
 
           result.reason = "success";
           for (const auto &param: parameters) {
@@ -96,13 +31,11 @@ namespace **NAMESPACE** {
         }
 
         void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
-
-          std::unordered_map<std::string, rcl_interfaces::msg::ParameterDescriptor> desc_map;
-
+            // declare all parameters and give default values to non-required ones
             **DESCRIBE_PARAMS**
-
-            std::map<std::string, rclcpp::ParameterValue> overrides = parameters_interface->get_parameter_overrides();
-                      declare_overrides(parameters_interface, overrides, desc_map);
+            // get parameters and fill struct fields
+            rclcpp::Parameter param;
+            Result validation_result;
 
             **GET_PARAMS**
         }
