@@ -1,9 +1,69 @@
 #!/usr/bin/env python3
 
 import yaml
+from yaml.parser import ParserError
 import sys
 import os
 
+
+# class to help minimize string copies
+class Buffer:
+    def __init__(self):
+        self.data_ = bytearray()
+
+    def __iadd__(self, element):
+        self.data_.extend(element.encode())
+        return self
+
+    def __str__(self):
+        return self.data_.decode()
+
+
+class YAMLSyntaxError(Exception):
+    """Raised when the input value is too large"""
+
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+def compile_error(msg):
+    # sys.stderr.write("ERROR: " + msg)
+    return YAMLSyntaxError("\nERROR: " + msg)
+
+
+def array_type(defined_type):
+    return defined_type.__contains__("array")
+
+
+def validate_type(defined_type, value):
+    type_translation = {"string": str,
+                        "double": float,
+                        "int": int,
+                        "bool": bool,
+                        "string_array": str,
+                        "double_array": float,
+                        "int_array": int,
+                        "bool_array": bool}
+
+    if isinstance(value, list):
+        if not array_type(defined_type):
+            return False
+        for val in value:
+            if type_translation[defined_type] != type(val):
+                return False
+    else:
+        if array_type(defined_type):
+            return False
+        if type_translation[defined_type] != type(value):
+            return False
+
+    return True
+
+
+# value to c++ string conversion functions
 
 def bool_to_str(cond):
     return "true" if cond else "false"
@@ -32,20 +92,96 @@ def str_to_str(s):
     return "\"%s\"" % s
 
 
-# class to help minimize string copies
-class Buffer:
-    def __init__(self):
-        self.data_ = bytearray()
+def get_translation_data(defined_type):
+    if defined_type == 'string_array':
+        cpp_type = 'std::string'
+        parameter_conversion = 'as_string_array()'
+        val_to_cpp_str = str_to_str
 
-    def __iadd__(self, element):
-        self.data_.extend(element.encode())
-        return self
+    elif defined_type == 'double_array':
+        cpp_type = 'double'
+        parameter_conversion = 'as_double_array()'
+        val_to_cpp_str = float_to_str
 
-    def __str__(self):
-        return self.data_.decode()
+    elif defined_type == 'int_array':
+        cpp_type = 'int'
+        parameter_conversion = 'as_integer_array()'
+        val_to_cpp_str = int_to_str
+
+    elif defined_type == 'bool_array':
+        cpp_type = 'bool'
+        parameter_conversion = 'as_bool_array()'
+        val_to_cpp_str = bool_to_str
+
+    elif defined_type == 'string':
+        cpp_type = 'std::string'
+        parameter_conversion = 'as_string()'
+        val_to_cpp_str = str_to_str
+
+    elif defined_type == 'double':
+        cpp_type = 'double'
+        parameter_conversion = 'as_double()'
+        val_to_cpp_str = float_to_str
+
+    elif defined_type == 'integer':
+        cpp_type = 'int'
+        parameter_conversion = 'as_int()'
+        val_to_cpp_str = int_to_str
+
+    elif defined_type == 'bool':
+        cpp_type = 'bool'
+        parameter_conversion = 'as_bool()'
+        val_to_cpp_str = bool_to_str
+
+    else:
+        raise compile_error('invalid yaml type: %s' % type(defined_type))
+
+    return cpp_type, val_to_cpp_str, parameter_conversion
 
 
-# class used to fill template.txt using passed in yaml file
+def declare_struct(defined_type, cpp_type, val_to_cpp_str, name, default_value):
+    code_str = Buffer()
+    if array_type(defined_type):
+        code_str += "std::vector<%s> %s_ " % (cpp_type, name)
+        if default_value:
+            code_str += "= {"
+            for ind, val in enumerate(default_value[:-1]):
+                code_str += "%s, " % val_to_cpp_str(val)
+            code_str += "};\n"
+        else:
+            code_str += ";\n"
+    else:
+        if default_value:
+            code_str += "%s %s_ = %s;\n" % (cpp_type, name, val_to_cpp_str(default_value))
+        else:
+            code_str += "%s %s_;\n" % (cpp_type, name)
+    return str(code_str)
+
+
+def if_statement(effects, conditions, bool_operators):
+    code_str = Buffer()
+    code_str += "if ("
+    code_str += conditions[0]
+    for ind, condition in enumerate(conditions[1:]):
+        code_str += bool_operators[ind]
+        code_str += condition
+    code_str += ") {\n"
+    for effect in effects:
+        code_str += effect
+    code_str += "}\n"
+    return str(code_str)
+
+
+def scoped_codeblock(effects):
+    code_str = Buffer()
+    code_str += "{\n"
+    for effect in effects:
+        code_str += effect
+    code_str += "}\n"
+    return str(code_str)
+
+
+# class used to fill template text file with passed in yaml file
 class GenParamStruct:
 
     def __init__(self):
@@ -57,140 +193,96 @@ class GenParamStruct:
         self.target = ""
 
     def parse_params(self, name, value, nested_name_list):
-
+        # define names for parameters and variables
         nested_name = "".join(x + "_." for x in nested_name_list[1:])
-
-        default_value = value['default_value']
-        description = value['description']
-        configurable = value['configurable']
-        optional = value["optional"]
-        bounds = []
-        if "bounds" in value:
-            bounds = value["bounds"]
-
-        if isinstance(default_value, list):
-            default_value_type = type(default_value[0])
-        else:
-            default_value_type = type(default_value)
-
-        if isinstance(default_value, list):
-            if default_value_type is str:
-                data_type = "std::string"
-                conversion_func = "as_string_array()"
-                str_fun = str_to_str
-
-            elif default_value_type is float:
-                data_type = "double"
-                conversion_func = "as_double_array()"
-                str_fun = float_to_str
-
-            elif default_value_type is int and default_value_type is not bool:
-                data_type = "int"
-                conversion_func = "as_integer_array()"
-                str_fun = int_to_str
-
-            elif default_value_type is bool:
-                data_type = "bool"
-                conversion_func = "as_bool_array()"
-                str_fun = bool_to_str
-
-            else:
-                sys.stderr.write("invalid yaml type: %s" % type(default_value[0]))
-                raise AssertionError()
-
-            self.struct += "std::vector<%s> %s_ = {" % (data_type, name)
-            for ind, val in enumerate(default_value[:-1]):
-                self.struct += "%s, " % str_fun(val)
-            self.struct += "%s};\n" % str_fun(default_value[-1])
-
-        else:
-            if default_value_type is str:
-                data_type = "std::string"
-                conversion_func = "as_string()"
-                str_fun = str_to_str
-
-            elif default_value_type is float:
-                data_type = "double"
-                conversion_func = "as_double()"
-                str_fun = float_to_str
-
-            elif default_value_type is int and default_value_type is not bool:
-                data_type = "int"
-                conversion_func = "as_int()"
-                str_fun = int_to_str
-
-            elif default_value_type is bool:
-                data_type = "bool"
-                conversion_func = "as_bool()"
-
-                def str_fun(cond):
-                    return bool_to_str(cond)
-            else:
-                sys.stderr.write("invalid yaml type: %s" % type(default_value))
-                raise AssertionError()
-
-            self.struct += "%s %s_ = %s;\n" % (data_type, name, str_fun(default_value))
-
-        param_prefix = "p_"
-        param_prefix += "".join(x + "_" for x in nested_name_list[1:])
+        param_prefix = "p_" + "".join(x + "_" for x in nested_name_list[1:])
+        # param_prefix += "".join(x + "_" for x in nested_name_list[1:])
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
-        self.param_set += "if (param.get_name() == " + "\"%s\" " % param_name
-        if isinstance(default_value, list):
-            self.param_set += "&& validate_length(\"%s\", param.%s, %s, result) " % (param_name, conversion_func, int_to_str(len(default_value)))
-        if len(bounds) > 0:
-            self.param_set += "&& validate_bounds(\"%s\", param.%s, %s, %s, result) " % (param_name, conversion_func, str_fun(bounds[0]), str_fun(bounds[1]) )
-        self.param_set += ") {\n"
+        # optional attributes
+        default_value = value.get('default_value')
+        description = value.get('description')
+        read_only = value.get('read_only')
+        bounds = value.get('bounds')
+        fixed_size = value.get('fixed_size')
 
-        self.param_set += "params_.%s_ = param.%s;\n" % (nested_name + name, conversion_func)
-        self.param_set += "}\n"
+        # required attributes
+        try:
+            defined_type = value['type']
+        except KeyError as e:
+            raise compile_error("No type defined for parameter %s" % param_name)
 
+        # validate inputs
+        if bounds and not validate_type(defined_type, bounds):
+            raise compile_error("The type of the bounds must be the same type as the defined type")
+        if default_value and not validate_type(defined_type, default_value):
+            raise compile_error("The type of the default_value must be the same type as the defined type")
+        if fixed_size and not isinstance(fixed_size, int):
+            raise compile_error("The type of the fixed size attribute must be an integer")
 
-        self.param_describe += "{\n"
-        self.param_describe += "rcl_interfaces::msg::ParameterDescriptor descriptor;\n"
-        self.param_describe += "descriptor.description = \"%s\";\n" % description
-        if len(bounds) > 0:
-            if default_value_type is not type(bounds[0]):
-                sys.stderr.write("The type of the bounds must be the same as the default value")
-                raise AssertionError()
-            self.param_describe += "rcl_interfaces::msg::FloatingPointRange range;\n"
-            self.param_describe += "range.from_value = %s;\n" % str_fun(bounds[0])
-            self.param_describe += "range.to_value = %s;\n" % str_fun(bounds[1])
-            self.param_describe += "descriptor.floating_point_range.push_back(range);\n"
-        self.param_describe += "descriptor.read_only = %s;\n" % bool_to_str(not configurable)
-        self.param_describe += "desc_map[\"%s\"] = descriptor;\n" % param_name
+        # get translation variables from defined value type
+        cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(defined_type)
 
-        if optional:
-            self.param_describe += "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name
-            self.param_describe += "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
-                param_prefix + name, nested_name + name)
-            self.param_describe += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
-                param_name, param_prefix + name)
-            self.param_describe += "}\n"
+        self.struct += declare_struct(defined_type, cpp_type, val_to_cpp_str, name, default_value)
 
-        self.param_describe += "}\n"
+        # set param value if param.name if param_name
+        param_set_effect = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion)]
+        param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
+        param_set_bool_operators = []
+        if bounds:
+            param_set_conditions.append("validate_bounds(\"%s\", param.%s, %s, %s, result) " % (
+                param_name, parameter_conversion, val_to_cpp_str(bounds[0]), val_to_cpp_str(bounds[1])))
+            param_set_bool_operators.append("&&")
+        if fixed_size:
+            param_set_conditions.append("validate_length(\"%s\", param.%s, %s, result) " % (
+                param_name, parameter_conversion, int_to_str(fixed_size)))
+            param_set_bool_operators.append("&&")
 
-        # self.param_describe += "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
-        #     param_name, param_prefix + name)
-        # self.param_describe += "}"
+        self.param_set += if_statement(param_set_effect, param_set_conditions, param_set_bool_operators)
 
-        if (isinstance(default_value, list) and default_value[0] != "UNDEFINED") or len(bounds) > 0:
-            self.param_get += "if ("
-            logical = ""
-            if isinstance(default_value, list) and default_value[0] != "UNDEFINED":
-                self.param_get += "!validate_length(parameters_interface->get_parameter(\"%s\").%s, %s) " % (param_name, conversion_func, int_to_str(len(default_value)))
-                logical = " || "
-            if len(bounds) > 0:
-                self.param_get += "%s !validate_bounds(parameters_interface->get_parameter(\"%s\").%s, %s, %s) " % (logical, param_name, conversion_func, str_fun(bounds[0]), str_fun(bounds[1]) )
-            self.param_get += ") {\n"
-            self.param_get += "throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during initialization for parameter %s \");" % param_name
-            self.param_get += "}\n"
+        # create parameter description and add to map
+        param_describe_effects = ["rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
+                                  "descriptor.description = \"%s\";\n" % description]
+        if bounds:
+            param_describe_effects.extend([
+                "rcl_interfaces::msg::FloatingPointRange range;\n",
+                "range.from_value = %s;\n" % val_to_cpp_str(bounds[0]),
+                "range.to_value = %s;\n" % val_to_cpp_str(bounds[1]),
+                "descriptor.floating_point_range.push_back(range);\n"
+            ])
+        param_describe_effects.extend([
+            "descriptor.read_only = %s;\n" % bool_to_str(read_only),
+            "desc_map[\"%s\"] = descriptor;\n" % param_name
+        ])
+        if default_value:
+            param_describe_effects.extend([
+                "if (!parameters_interface->has_parameter(\"%s\")){\n" % param_name,
+                "auto %s = rclcpp::ParameterValue(params_.%s_);\n" % (
+                    param_prefix + name, nested_name + name),
+                "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
+                    param_name, param_prefix + name),
+                "}\n"
+            ])
+        self.param_describe += scoped_codeblock(param_describe_effects)
 
-        self.param_get += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;" % (
-            nested_name + name, param_name, conversion_func)
+        # get parameter from by calling parameters_interface API
+        param_get_effect = ["throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during "
+                            "initialization for parameter %s \");" % param_name]
 
-
-        self.param_get += "\n"
+        param_get_conditions = []
+        param_get_bool_operators = []
+        if fixed_size:
+            param_get_conditions.append("!validate_length(parameters_interface->get_parameter(\"%s\").%s, %s) " % (
+                param_name, parameter_conversion, int_to_str(fixed_size)))
+            param_get_bool_operators.append("||")
+        if bounds:
+            param_get_conditions.append("!validate_bounds(parameters_interface->get_parameter(\"%s\").%s, %s, %s) " % (
+                param_name, parameter_conversion, val_to_cpp_str(bounds[0]), val_to_cpp_str(bounds[1])))
+            param_get_bool_operators.append("||")
+        if len(param_get_conditions) > 0:
+            self.param_get += if_statement(param_get_effect, param_get_conditions, param_get_bool_operators)
+        self.param_get += "params_.%s_ = parameters_interface->get_parameter(\"%s\").%s;\n" % (
+            nested_name + name, param_name, parameter_conversion)
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):
@@ -208,9 +300,8 @@ class GenParamStruct:
 
     def run(self):
         if len(sys.argv) != 3:
-            sys.stderr.write("generate_param_struct_header expects four input argument: target, output directory, "
-                             " and yaml file path")
-            raise AssertionError()
+            raise compile_error("generate_param_struct_header expects three input argument: target, output directory, "
+                                "and yaml file path")
 
         param_gen_directory = sys.argv[0].split("/")
         param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
@@ -222,17 +313,18 @@ class GenParamStruct:
             param_gen_directory += "/"
 
         if not os.path.isdir(out_directory):
-            sys.stderr.write("The specified output directory: %s does not exist" % out_directory)
-            raise AssertionError()
+            raise compile_error("The specified output directory: %s does not exist" % out_directory)
 
         yaml_file = sys.argv[2]
         with open(yaml_file) as f:
-            docs = yaml.load_all(f, Loader=yaml.FullLoader)
+            try:
+                docs = yaml.load_all(f, Loader=yaml.FullLoader)
+                doc = list(docs)[0]
+            except ParserError as e:
+                raise compile_error(str(e))
 
-            doc = list(docs)[0]
             if len(doc) != 1:
-                sys.stderr.write("the controller yaml definition must only have one root element")
-                raise AssertionError()
+                raise compile_error("the controller yaml definition must only have one root element")
             self.target = list(doc.keys())[0]
             self.parse_dict(self.target, doc[self.target], [])
 

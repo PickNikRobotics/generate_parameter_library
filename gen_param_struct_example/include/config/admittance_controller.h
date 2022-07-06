@@ -91,68 +91,57 @@ namespace admittance_controller_parameters {
 
 
     struct params {
-      std::vector<std::string> joints_ = {"UNDEFINED"};
-      std::vector<std::string> command_interfaces_ = {"UNDEFINED"};
-      std::vector<std::string> state_interfaces_ = {"UNDEFINED"};
-      std::vector<std::string> chainable_command_interfaces_ = {"UNDEFINED"};
+      std::vector<std::string> joints_;
+      std::vector<std::string> command_interfaces_;
+      std::vector<std::string> state_interfaces_;
+      std::vector<std::string> chainable_command_interfaces_;
       struct kinematics {
-        std::string plugin_name_ = "UNDEFINED";
-        std::string plugin_package_ = "UNDEFINED";
-        std::string base_ = "UNDEFINED";
-        std::string tip_ = "UNDEFINED";
+        std::string plugin_name_;
+        std::string plugin_package_;
+        std::string base_;
+        std::string tip_;
         double alpha_ = 0.0005;
-        std::string group_name_ = "UNDEFINED";
+        std::string group_name_;
       } kinematics_;
       struct ft_sensor {
-        std::string name_ = "UNDEFINED";
+        std::string name_;
         struct frame {
-          std::string id_ = "UNDEFINED";
-          bool external_ = false;
+          std::string id_;
+          bool external_;
         } frame_;
         double filter_coefficient_ = 0.005;
       } ft_sensor_;
       struct control {
         struct frame {
-          std::string id_ = "UNDEFINED";
-          bool external_ = false;
+          std::string id_;
+          bool external_;
         } frame_;
       } control_;
       struct fixed_world_frame {
         struct frame {
-          std::string id_ = "UNDEFINED";
-          bool external_ = false;
+          std::string id_;
+          bool external_;
         } frame_;
       } fixed_world_frame_;
       struct gravity_compensation {
         struct frame {
-          std::string id_ = "UNDEFINED";
-          bool external_ = false;
+          std::string id_;
+          bool external_;
         } frame_;
         struct CoG {
-          std::vector<double> pos_ = {std::numeric_limits<double>::quiet_NaN(),
-                                      std::numeric_limits<double>::quiet_NaN(),
-                                      std::numeric_limits<double>::quiet_NaN()};
+          std::vector<double> pos_;
           double force_ = std::numeric_limits<double>::quiet_NaN();
         } CoG_;
       } gravity_compensation_;
       struct admittance {
-        std::vector<bool> selected_axes_ = {false, false, false, false, false, false};
-        std::vector<double> mass_ = {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-                                     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-                                     std::numeric_limits<double>::quiet_NaN(),
-                                     std::numeric_limits<double>::quiet_NaN()};
-        std::vector<double> damping_ratio_ = {std::numeric_limits<double>::quiet_NaN(),
-                                              std::numeric_limits<double>::quiet_NaN(),
-                                              std::numeric_limits<double>::quiet_NaN(),
-                                              std::numeric_limits<double>::quiet_NaN(),
-                                              std::numeric_limits<double>::quiet_NaN(),
-                                              std::numeric_limits<double>::quiet_NaN()};
+        std::vector<double> selected_axes_;
+        std::vector<double> mass_;
+        std::vector<double> damping_ratio_;
         std::vector<double> stiffness_ = {std::numeric_limits<double>::quiet_NaN(),
                                           std::numeric_limits<double>::quiet_NaN(),
                                           std::numeric_limits<double>::quiet_NaN(),
                                           std::numeric_limits<double>::quiet_NaN(),
-                                          std::numeric_limits<double>::quiet_NaN(),
-                                          std::numeric_limits<double>::quiet_NaN()};
+                                          std::numeric_limits<double>::quiet_NaN(),};
       } admittance_;
       bool enable_parameter_update_without_reactivation_ = true;
       bool use_feedforward_commanded_input_ = true;
@@ -164,19 +153,16 @@ namespace admittance_controller_parameters {
 
       result.reason = "success";
       for (const auto &param: parameters) {
-        if (param.get_name() == "joints" && validate_length("joints", param.as_string_array(), 1, result)) {
+        if (param.get_name() == "joints") {
           params_.joints_ = param.as_string_array();
         }
-        if (param.get_name() == "command_interfaces" &&
-            validate_length("command_interfaces", param.as_string_array(), 1, result)) {
+        if (param.get_name() == "command_interfaces") {
           params_.command_interfaces_ = param.as_string_array();
         }
-        if (param.get_name() == "state_interfaces" &&
-            validate_length("state_interfaces", param.as_string_array(), 1, result)) {
+        if (param.get_name() == "state_interfaces") {
           params_.state_interfaces_ = param.as_string_array();
         }
-        if (param.get_name() == "chainable_command_interfaces" &&
-            validate_length("chainable_command_interfaces", param.as_string_array(), 1, result)) {
+        if (param.get_name() == "chainable_command_interfaces") {
           params_.chainable_command_interfaces_ = param.as_string_array();
         }
         if (param.get_name() == "kinematics.plugin_name") {
@@ -235,21 +221,20 @@ namespace admittance_controller_parameters {
           params_.gravity_compensation_.CoG_.force_ = param.as_double();
         }
         if (param.get_name() == "admittance.selected_axes" &&
-            validate_length("admittance.selected_axes", param.as_bool_array(), 6, result)) {
-          params_.admittance_.selected_axes_ = param.as_bool_array();
+            validate_length("admittance.selected_axes", param.as_double_array(), 6, result)) {
+          params_.admittance_.selected_axes_ = param.as_double_array();
         }
         if (param.get_name() == "admittance.mass" &&
-            validate_length("admittance.mass", param.as_double_array(), 6, result) &&
-            validate_bounds("admittance.mass", param.as_double_array(), 0.0001, 100000000.0, result)) {
+            validate_bounds("admittance.mass", param.as_double_array(), 0.0001, 100000000.0, result) &&
+            validate_length("admittance.mass", param.as_double_array(), 6, result)) {
           params_.admittance_.mass_ = param.as_double_array();
         }
         if (param.get_name() == "admittance.damping_ratio" &&
-            validate_length("admittance.damping_ratio", param.as_double_array(), 6, result) &&
-            validate_bounds("admittance.damping_ratio", param.as_double_array(), 0.1, 10.0, result)) {
+            validate_bounds("admittance.damping_ratio", param.as_double_array(), 0.1, 10.0, result) &&
+            validate_length("admittance.damping_ratio", param.as_double_array(), 6, result)) {
           params_.admittance_.damping_ratio_ = param.as_double_array();
         }
-        if (param.get_name() == "admittance.stiffness" &&
-            validate_length("admittance.stiffness", param.as_double_array(), 6, result)) {
+        if (param.get_name() == "admittance.stiffness") {
           params_.admittance_.stiffness_ = param.as_double_array();
         }
         if (param.get_name() == "enable_parameter_update_without_reactivation") {
@@ -348,10 +333,6 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the force torque sensor is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["ft_sensor.frame.external"] = descriptor;
-        if (!parameters_interface->has_parameter("ft_sensor.frame.external")) {
-          auto p_ft_sensor_frame_external = rclcpp::ParameterValue(params_.ft_sensor_.frame_.external_);
-          parameters_interface->declare_parameter("ft_sensor.frame.external", p_ft_sensor_frame_external, descriptor);
-        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -375,10 +356,6 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the control frame is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["control.frame.external"] = descriptor;
-        if (!parameters_interface->has_parameter("control.frame.external")) {
-          auto p_control_frame_external = rclcpp::ParameterValue(params_.control_.frame_.external_);
-          parameters_interface->declare_parameter("control.frame.external", p_control_frame_external, descriptor);
-        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -391,11 +368,6 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the world frame is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["fixed_world_frame.frame.external"] = descriptor;
-        if (!parameters_interface->has_parameter("fixed_world_frame.frame.external")) {
-          auto p_fixed_world_frame_frame_external = rclcpp::ParameterValue(params_.fixed_world_frame_.frame_.external_);
-          parameters_interface->declare_parameter("fixed_world_frame.frame.external",
-                                                  p_fixed_world_frame_frame_external, descriptor);
-        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -408,12 +380,6 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies if the center of gravity frame is contained in the kinematics chain from the base to the tip";
         descriptor.read_only = false;
         desc_map["gravity_compensation.frame.external"] = descriptor;
-        if (!parameters_interface->has_parameter("gravity_compensation.frame.external")) {
-          auto p_gravity_compensation_frame_external = rclcpp::ParameterValue(
-              params_.gravity_compensation_.frame_.external_);
-          parameters_interface->declare_parameter("gravity_compensation.frame.external",
-                                                  p_gravity_compensation_frame_external, descriptor);
-        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -426,6 +392,11 @@ namespace admittance_controller_parameters {
         descriptor.description = "weight of the end effector, e.g mass * 9.81";
         descriptor.read_only = false;
         desc_map["gravity_compensation.CoG.force"] = descriptor;
+        if (!parameters_interface->has_parameter("gravity_compensation.CoG.force")) {
+          auto p_gravity_compensation_CoG_force = rclcpp::ParameterValue(params_.gravity_compensation_.CoG_.force_);
+          parameters_interface->declare_parameter("gravity_compensation.CoG.force", p_gravity_compensation_CoG_force,
+                                                  descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
@@ -458,10 +429,14 @@ namespace admittance_controller_parameters {
         descriptor.description = "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation";
         descriptor.read_only = false;
         desc_map["admittance.stiffness"] = descriptor;
+        if (!parameters_interface->has_parameter("admittance.stiffness")) {
+          auto p_admittance_stiffness = rclcpp::ParameterValue(params_.admittance_.stiffness_);
+          parameters_interface->declare_parameter("admittance.stiffness", p_admittance_stiffness, descriptor);
+        }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
-        descriptor.description = "if enabled, configurable parameters will be dynamically updated in the control loop";
+        descriptor.description = "if enabled, read_only parameters will be dynamically updated in the control loop";
         descriptor.read_only = false;
         desc_map["enable_parameter_update_without_reactivation"] = descriptor;
         if (!parameters_interface->has_parameter("enable_parameter_update_without_reactivation")) {
@@ -522,12 +497,12 @@ namespace admittance_controller_parameters {
           "gravity_compensation.CoG.pos").as_double_array();
       params_.gravity_compensation_.CoG_.force_ = parameters_interface->get_parameter(
           "gravity_compensation.CoG.force").as_double();
-      if (!validate_length(parameters_interface->get_parameter("admittance.selected_axes").as_bool_array(), 6)) {
+      if (!validate_length(parameters_interface->get_parameter("admittance.selected_axes").as_double_array(), 6)) {
         throw rclcpp::exceptions::InvalidParameterValueException(
             "Invalid value set during initialization for parameter admittance.selected_axes ");
       }
       params_.admittance_.selected_axes_ = parameters_interface->get_parameter(
-          "admittance.selected_axes").as_bool_array();
+          "admittance.selected_axes").as_double_array();
       if (!validate_length(parameters_interface->get_parameter("admittance.mass").as_double_array(), 6) ||
           !validate_bounds(parameters_interface->get_parameter("admittance.mass").as_double_array(), 0.0001,
                            100000000.0)) {
@@ -543,10 +518,6 @@ namespace admittance_controller_parameters {
       }
       params_.admittance_.damping_ratio_ = parameters_interface->get_parameter(
           "admittance.damping_ratio").as_double_array();
-      if (!validate_length(parameters_interface->get_parameter("admittance.stiffness").as_double_array(), 6)) {
-        throw rclcpp::exceptions::InvalidParameterValueException(
-            "Invalid value set during initialization for parameter admittance.stiffness ");
-      }
       params_.admittance_.stiffness_ = parameters_interface->get_parameter("admittance.stiffness").as_double_array();
       params_.enable_parameter_update_without_reactivation_ = parameters_interface->get_parameter(
           "enable_parameter_update_without_reactivation").as_bool();
