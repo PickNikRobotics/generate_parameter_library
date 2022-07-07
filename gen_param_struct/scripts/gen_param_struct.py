@@ -321,12 +321,6 @@ class GenParamStruct:
         bounds = value.get('bounds')
         fixed_size = value.get('fixed_size')
         validation = value.get('validation')
-        if validation:
-            if not isinstance(validation[0], list):
-                validation = [validation]
-            validation = get_validation_translation(validation)
-        else:
-            validation = []
 
         # required attributes
         try:
@@ -345,7 +339,7 @@ class GenParamStruct:
         # get translation variables from defined value type
         cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(defined_type)
 
-        # convert python types to lists of strings
+        # convert python types to lists of inputs
         if default_value:
             if array_type(defined_type):
                 for i in range(len(default_value)):
@@ -367,16 +361,22 @@ class GenParamStruct:
             read_only = [read_only]
         else:
             read_only = []
+        if validation:
+            if not isinstance(validation[0], list):
+                validation = [validation]
+            validation = get_validation_translation(validation)
+        else:
+            validation = []
 
+        # define struct
         self.struct += declare_struct(defined_type, cpp_type, name, default_value)
 
         # set param value if param.name is the parameter being updated
         param_set_effects = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
                              "result.successful = true;\n"]
         param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
-        param_set_bool_operators = []
-        tmp = default_validation(param_set_effects, defined_type, fixed_size, bounds)
-        self.param_set += if_statement(tmp, param_set_conditions, param_set_bool_operators)
+        code_str = default_validation(param_set_effects, defined_type, fixed_size, bounds)
+        self.param_set += if_statement(code_str, param_set_conditions, [])
 
         # create parameter description
         param_describe_effects = ["rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
