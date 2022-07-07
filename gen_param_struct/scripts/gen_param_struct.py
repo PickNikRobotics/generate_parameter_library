@@ -75,8 +75,6 @@ def bool_to_str(cond: bool):
 
 @typechecked
 def float_to_str(num: float):
-    if num is None:
-        return None
     str_num = str(num)
     if str_num == "nan":
         str_num = "std::numeric_limits<double>::quiet_NaN()"
@@ -93,15 +91,11 @@ def float_to_str(num: float):
 
 @typechecked
 def int_to_str(num: int):
-    if num is None:
-        return None
     return str(num)
 
 
 @typechecked
 def str_to_str(s: str):
-    if s is None:
-        return None
     return "\"%s\"" % s
 
 
