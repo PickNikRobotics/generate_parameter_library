@@ -70,11 +70,7 @@ namespace admittance_controller_parameters {
         std::vector<bool> selected_axes_;
         std::vector<double> mass_;
         std::vector<double> damping_ratio_;
-        std::vector<double> stiffness_ = {std::numeric_limits<double>::quiet_NaN(),
-                                          std::numeric_limits<double>::quiet_NaN(),
-                                          std::numeric_limits<double>::quiet_NaN(),
-                                          std::numeric_limits<double>::quiet_NaN(),
-                                          std::numeric_limits<double>::quiet_NaN(),};
+        std::vector<double> stiffness_;
       } admittance_;
       bool enable_parameter_update_without_reactivation_ = true;
       bool use_feedforward_commanded_input_ = true;
@@ -225,8 +221,14 @@ namespace admittance_controller_parameters {
           }
         }
         if (param.get_name() == "admittance.stiffness") {
-          params_.admittance_.stiffness_ = param.as_double_array();
-          result.successful = true;
+          validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.0001, 100000.0);
+          if (validation_result.success()) {
+            params_.admittance_.stiffness_ = param.as_double_array();
+            result.successful = true;
+          } else {
+            result.reason = validation_result.error_msg();
+            result.successful = false;
+          }
         }
         if (param.get_name() == "enable_parameter_update_without_reactivation") {
           params_.enable_parameter_update_without_reactivation_ = param.as_bool();
@@ -284,7 +286,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies which kinematics plugin to load";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("kinematics.plugin_name")) {
           auto p_kinematics_plugin_name = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("kinematics.plugin_name", p_kinematics_plugin_name, descriptor);
@@ -293,7 +294,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies the package to load the kinematics plugin from";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("kinematics.plugin_package")) {
           auto p_kinematics_plugin_package = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("kinematics.plugin_package", p_kinematics_plugin_package, descriptor);
@@ -302,7 +302,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies the base link of the robot description used by the kinematics plugin";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("kinematics.base")) {
           auto p_kinematics_base = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("kinematics.base", p_kinematics_base, descriptor);
@@ -311,7 +310,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies the end effector link of the robot description used by the kinematics plugin";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("kinematics.tip")) {
           auto p_kinematics_tip = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("kinematics.tip", p_kinematics_tip, descriptor);
@@ -320,7 +318,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies the damping coefficient for the Jacobian pseudo inverse";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("kinematics.alpha")) {
           auto p_kinematics_alpha = rclcpp::ParameterValue(params_.kinematics_.alpha_);
           parameters_interface->declare_parameter("kinematics.alpha", p_kinematics_alpha, descriptor);
@@ -329,7 +326,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies the group name for planning with Moveit";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("kinematics.group_name")) {
           auto p_kinematics_group_name = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("kinematics.group_name", p_kinematics_group_name, descriptor);
@@ -338,7 +334,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "name of the force torque sensor in the robot description";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("ft_sensor.name")) {
           auto p_ft_sensor_name = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("ft_sensor.name", p_ft_sensor_name, descriptor);
@@ -347,7 +342,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "frame of the force torque sensor";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("ft_sensor.frame.id")) {
           auto p_ft_sensor_frame_id = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("ft_sensor.frame.id", p_ft_sensor_frame_id, descriptor);
@@ -356,7 +350,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies if the force torque sensor is contained in the kinematics chain from the base to the tip";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("ft_sensor.frame.external")) {
           auto p_ft_sensor_frame_external = rclcpp::ParameterType::PARAMETER_BOOL;
           parameters_interface->declare_parameter("ft_sensor.frame.external", p_ft_sensor_frame_external, descriptor);
@@ -365,7 +358,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies the coefficient for the sensor's exponential filter";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("ft_sensor.filter_coefficient")) {
           auto p_ft_sensor_filter_coefficient = rclcpp::ParameterValue(params_.ft_sensor_.filter_coefficient_);
           parameters_interface->declare_parameter("ft_sensor.filter_coefficient", p_ft_sensor_filter_coefficient,
@@ -375,7 +367,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "control frame used for admittance control";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("control.frame.id")) {
           auto p_control_frame_id = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("control.frame.id", p_control_frame_id, descriptor);
@@ -384,7 +375,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies if the control frame is contained in the kinematics chain from the base to the tip";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("control.frame.external")) {
           auto p_control_frame_external = rclcpp::ParameterType::PARAMETER_BOOL;
           parameters_interface->declare_parameter("control.frame.external", p_control_frame_external, descriptor);
@@ -393,7 +383,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "world frame, gravity points down (neg. Z) in this frame";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("fixed_world_frame.frame.id")) {
           auto p_fixed_world_frame_frame_id = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("fixed_world_frame.frame.id", p_fixed_world_frame_frame_id,
@@ -403,7 +392,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies if the world frame is contained in the kinematics chain from the base to the tip";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("fixed_world_frame.frame.external")) {
           auto p_fixed_world_frame_frame_external = rclcpp::ParameterType::PARAMETER_BOOL;
           parameters_interface->declare_parameter("fixed_world_frame.frame.external",
@@ -413,7 +401,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "frame which center of gravity (CoG) is defined in";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("gravity_compensation.frame.id")) {
           auto p_gravity_compensation_frame_id = rclcpp::ParameterType::PARAMETER_STRING;
           parameters_interface->declare_parameter("gravity_compensation.frame.id", p_gravity_compensation_frame_id,
@@ -423,7 +410,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies if the center of gravity frame is contained in the kinematics chain from the base to the tip";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("gravity_compensation.frame.external")) {
           auto p_gravity_compensation_frame_external = rclcpp::ParameterType::PARAMETER_BOOL;
           parameters_interface->declare_parameter("gravity_compensation.frame.external",
@@ -433,7 +419,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "position of the center of gravity (CoG) in its frame";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("gravity_compensation.CoG.pos")) {
           auto p_gravity_compensation_CoG_pos = rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
           parameters_interface->declare_parameter("gravity_compensation.CoG.pos", p_gravity_compensation_CoG_pos,
@@ -443,7 +428,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "weight of the end effector, e.g mass * 9.81";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("gravity_compensation.CoG.force")) {
           auto p_gravity_compensation_CoG_force = rclcpp::ParameterValue(params_.gravity_compensation_.CoG_.force_);
           parameters_interface->declare_parameter("gravity_compensation.CoG.force", p_gravity_compensation_CoG_force,
@@ -453,7 +437,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies if the axes x, y, z, rx, ry, and rz are enabled";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("admittance.selected_axes")) {
           auto p_admittance_selected_axes = rclcpp::ParameterType::PARAMETER_BOOL_ARRAY;
           parameters_interface->declare_parameter("admittance.selected_axes", p_admittance_selected_axes, descriptor);
@@ -466,7 +449,6 @@ namespace admittance_controller_parameters {
         range.from_value = 0.0001;
         range.to_value = 1000000.0;
         descriptor.floating_point_range.push_back(range);
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("admittance.mass")) {
           auto p_admittance_mass = rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
           parameters_interface->declare_parameter("admittance.mass", p_admittance_mass, descriptor);
@@ -479,7 +461,6 @@ namespace admittance_controller_parameters {
         range.from_value = 0.1;
         range.to_value = 10.0;
         descriptor.floating_point_range.push_back(range);
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("admittance.damping_ratio")) {
           auto p_admittance_damping_ratio = rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
           parameters_interface->declare_parameter("admittance.damping_ratio", p_admittance_damping_ratio, descriptor);
@@ -488,16 +469,18 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation";
-        descriptor.read_only = false;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0001;
+        range.to_value = 100000.0;
+        descriptor.floating_point_range.push_back(range);
         if (!parameters_interface->has_parameter("admittance.stiffness")) {
-          auto p_admittance_stiffness = rclcpp::ParameterValue(params_.admittance_.stiffness_);
+          auto p_admittance_stiffness = rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
           parameters_interface->declare_parameter("admittance.stiffness", p_admittance_stiffness, descriptor);
         }
       }
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "if enabled, read_only parameters will be dynamically updated in the control loop";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("enable_parameter_update_without_reactivation")) {
           auto p_enable_parameter_update_without_reactivation = rclcpp::ParameterValue(
               params_.enable_parameter_update_without_reactivation_);
@@ -508,7 +491,6 @@ namespace admittance_controller_parameters {
       {
         rcl_interfaces::msg::ParameterDescriptor descriptor;
         descriptor.description = "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity";
-        descriptor.read_only = false;
         if (!parameters_interface->has_parameter("use_feedforward_commanded_input")) {
           auto p_use_feedforward_commanded_input = rclcpp::ParameterValue(params_.use_feedforward_commanded_input_);
           parameters_interface->declare_parameter("use_feedforward_commanded_input", p_use_feedforward_commanded_input,
@@ -619,7 +601,14 @@ namespace admittance_controller_parameters {
             validation_result.error_msg());
       }
       param = parameters_interface->get_parameter("admittance.stiffness");
-      params_.admittance_.stiffness_ = param.as_double_array();
+      validation_result = gen_param_struct_validators::validate_double_array_bounds(param, 0.0001, 100000.0);
+      if (validation_result.success()) {
+        params_.admittance_.stiffness_ = param.as_double_array();
+      } else {
+        throw rclcpp::exceptions::InvalidParameterValueException(
+            "Invalid value set during initialization for parameter admittance.stiffness: " +
+            validation_result.error_msg());
+      }
       param = parameters_interface->get_parameter("enable_parameter_update_without_reactivation");
       params_.enable_parameter_update_without_reactivation_ = param.as_bool();
       param = parameters_interface->get_parameter("use_feedforward_commanded_input");
