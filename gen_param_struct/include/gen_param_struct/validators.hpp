@@ -76,8 +76,20 @@ namespace gen_param_struct_validators{
     for (auto val: double_array) {
       if (val < lower_bound || val > upper_bound) {
         return ERROR(
-            "The parameter value (%f) was outside the allowed bounds [(%f), (%f)]",
-            val, lower_bound, upper_bound);
+            "Invalid value '%f' for parameter %s. Required bounds: [%f, %f]",
+            val, parameter.get_name().c_str(),lower_bound, upper_bound);
+      }
+    }
+    return OK;
+  }
+
+  Result validate_int_array_bounds(const rclcpp::Parameter& parameter, int lower_bound, int upper_bound) {
+    const auto &integer_array = parameter.as_integer_array();
+    for (auto val: integer_array) {
+      if (val < lower_bound || val > upper_bound) {
+        return ERROR(
+            "Invalid value '%d' for parameter %s. Required bounds: [%d, %d]",
+            val, parameter.get_name().c_str(), lower_bound, upper_bound);
       }
     }
     return OK;
