@@ -13,6 +13,7 @@ endif()
 # find packages
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(gen_param_struct REQUIRED)
 
 add_executable(test_node main.cpp)
@@ -20,6 +21,7 @@ add_executable(test_node main.cpp)
 target_include_directories(test_node PRIVATE include)
 ament_target_dependencies(test_node
         rclcpp
+    rclcpp_lifecycle
         gen_param_struct)
 
 # specify which yaml root name to convert to struct

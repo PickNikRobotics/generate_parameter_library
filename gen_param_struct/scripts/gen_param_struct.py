@@ -5,8 +5,8 @@ from yaml.parser import ParserError
 import sys
 import os
 from typing import Callable
-from typeguard import typechecked
-
+# from typeguard import typechecked
+import typing
 
 # class to help minimize string copies
 class Buffer:
@@ -31,17 +31,17 @@ class YAMLSyntaxError(Exception):
         return self.msg
 
 
-@typechecked
+# @typechecked
 def compile_error(msg: str):
     return YAMLSyntaxError("\nERROR: " + msg)
 
 
-@typechecked
+# @typechecked
 def array_type(defined_type: str):
     return defined_type.__contains__("array")
 
 
-@typechecked
+# @typechecked
 def validate_type(defined_type: str, value):
     type_translation = {"string": str,
                         "double": float,
@@ -68,12 +68,12 @@ def validate_type(defined_type: str, value):
 
 
 # value to c++ string conversion functions
-@typechecked
+# @typechecked
 def bool_to_str(cond: bool):
     return "true" if cond else "false"
 
 
-@typechecked
+# @typechecked
 def float_to_str(num: float):
     str_num = str(num)
     if str_num == "nan":
@@ -89,18 +89,18 @@ def float_to_str(num: float):
     return str_num
 
 
-@typechecked
+# @typechecked
 def int_to_str(num: int):
     return str(num)
 
 
-@typechecked
+# @typechecked
 def str_to_str(s: str):
     return "\"%s\"" % s
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
-@typechecked
+# @typechecked
 def get_translation_data(defined_type: str) -> (str, Callable, str):
     if defined_type == 'string_array':
         cpp_type = 'std::string'
@@ -148,7 +148,7 @@ def get_translation_data(defined_type: str) -> (str, Callable, str):
     return cpp_type, val_to_cpp_str, parameter_conversion
 
 
-@typechecked
+# @typechecked
 def get_validation_translation(validation_functions: list[list[any]]):
     if not isinstance(validation_functions[0], list):
         validation_functions = [validation_functions]
@@ -179,7 +179,7 @@ def get_validation_translation(validation_functions: list[list[any]]):
     return validation_functions
 
 
-@typechecked
+# @typechecked
 def declare_struct(defined_type: str, cpp_type: str, name: str, default_value: list) -> str:
     code_str = Buffer()
     if array_type(defined_type):
@@ -199,7 +199,7 @@ def declare_struct(defined_type: str, cpp_type: str, name: str, default_value: l
     return str(code_str)
 
 
-@typechecked
+# @typechecked
 def if_else_statement(effects_true, effects_false, conditions, bool_operators) -> str:
     code_str = Buffer()
     code_str += "if ("
@@ -219,12 +219,12 @@ def if_else_statement(effects_true, effects_false, conditions, bool_operators) -
     return str(code_str)
 
 
-@typechecked
+# @typechecked
 def if_statement(effects, conditions, bool_operators) -> str:
     return if_else_statement(effects, [], conditions, bool_operators)
 
 
-@typechecked
+# @typechecked
 def flatten_effects(effects) -> str:
     code_str = Buffer()
     for effect in effects:
@@ -233,7 +233,7 @@ def flatten_effects(effects) -> str:
     return str(code_str)
 
 
-@typechecked
+# @typechecked
 def scoped_codeblock(effects) -> str:
     code_str = Buffer()
     code_str += "{\n"
@@ -242,7 +242,7 @@ def scoped_codeblock(effects) -> str:
     return str(code_str)
 
 
-@typechecked
+# @typechecked
 def function_call(namespace: str, func_name: str, args: list[str]) -> str:
     code_str = Buffer()
     code_str += namespace + "::" + func_name
@@ -256,7 +256,7 @@ def function_call(namespace: str, func_name: str, args: list[str]) -> str:
     return str(code_str)
 
 
-@typechecked
+# @typechecked
 def validation_sequence(namespace: str, func_name: str, args: list, effects_true: list[str], effects_false: list[str]):
     # assumes that the validation function is named validate_{defined_type}_{method}
     if len(args) == 0:
@@ -275,7 +275,7 @@ def validation_sequence(namespace: str, func_name: str, args: list, effects_true
     return str(code_str)
 
 
-@typechecked
+# @typechecked
 def default_validation(effects: list[str], defined_type: str, fixed_size: list, bounds: list) -> str:
     code_str = Buffer()
     effects_false = ["result.reason = validation_result.error_msg();\n",
@@ -473,9 +473,7 @@ class GenParamStruct:
             self.parse_dict(self.target, doc[self.target], [])
 
         COMMENTS = "// this is auto-generated code "
-        INCLUDES = "#include <rclcpp/node.hpp>\n" \
-                   "#include <vector>\n#include <string>\n" \
-                   "#include <gen_param_struct/validators.hpp>"
+        INCLUDES = "#include <gen_param_struct/validators.hpp>"
         NAMESPACE = self.target + "_parameters"
 
         with open(param_gen_directory + "/templates/template.txt", "r") as f:
@@ -484,7 +482,7 @@ class GenParamStruct:
         self.contents = self.contents.replace("**COMMENTS**", COMMENTS)
         self.contents = self.contents.replace("**INCLUDES**", INCLUDES)
         self.contents = self.contents.replace("**NAMESPACE**", NAMESPACE)
-        self.contents = self.contents.replace("**STRUCT_NAME**", str(self.target))
+        self.contents = self.contents.replace("**CLASS_NAME**", str(self.target))
         self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
         self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
         self.contents = self.contents.replace("**DESCRIBE_PARAMS**", str(self.param_describe))

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <rclcpp/node.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <vector>
 #include <string>
 #include <gen_param_struct/validators.hpp>
@@ -10,72 +11,87 @@
 
 namespace admittance_controller_parameters {
 
-  struct admittance_controller {
-    std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
+  struct Params {
+    std::vector<std::string> joints_;
+    std::vector<std::string> command_interfaces_;
+    std::vector<std::string> state_interfaces_;
+    std::vector<std::string> chainable_command_interfaces_;
+    struct kinematics {
+      std::string plugin_name_;
+      std::string plugin_package_;
+      std::string base_;
+      std::string tip_;
+      double alpha_ = 0.0005;
+      std::string group_name_;
+    } kinematics_;
+    struct ft_sensor {
+      std::string name_;
+      struct frame {
+        std::string id_;
+        bool external_;
+      } frame_;
+      double filter_coefficient_ = 0.005;
+    } ft_sensor_;
+    struct control {
+      struct frame {
+        std::string id_;
+        bool external_;
+      } frame_;
+    } control_;
+    struct fixed_world_frame {
+      struct frame {
+        std::string id_;
+        bool external_;
+      } frame_;
+    } fixed_world_frame_;
+    struct gravity_compensation {
+      struct frame {
+        std::string id_;
+        bool external_;
+      } frame_;
+      struct CoG {
+        std::vector<double> pos_;
+        double force_ = std::numeric_limits<double>::quiet_NaN();
+      } CoG_;
+    } gravity_compensation_;
+    struct admittance {
+      std::vector<bool> selected_axes_;
+      std::vector<double> mass_;
+      std::vector<double> damping_ratio_;
+      std::vector<double> stiffness_;
+    } admittance_;
+    bool enable_parameter_update_without_reactivation_ = true;
+    bool use_feedforward_commanded_input_ = true;
 
+    // for detecting if the parameter struct has been updated
+    rclcpp::Time __stamp;
+  };
+
+  class ParamListener {
+  public:
     // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
-    admittance_controller(
-        const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> &parameters_interface) {
+    ParamListener(rclcpp::Node::SharedPtr node)
+        : ParamListener(node->get_node_parameters_interface()) {}
+
+    ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node)
+        : ParamListener(node->get_node_parameters_interface()) {}
+
+    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> &parameters_interface) {
       declare_params(parameters_interface);
       auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters) {
         return this->update(parameters);
       };
       handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
+      clock_ = rclcpp::Clock();
     }
 
-    struct params {
-      std::vector<std::string> joints_;
-      std::vector<std::string> command_interfaces_;
-      std::vector<std::string> state_interfaces_;
-      std::vector<std::string> chainable_command_interfaces_;
-      struct kinematics {
-        std::string plugin_name_;
-        std::string plugin_package_;
-        std::string base_;
-        std::string tip_;
-        double alpha_ = 0.0005;
-        std::string group_name_;
-      } kinematics_;
-      struct ft_sensor {
-        std::string name_;
-        struct frame {
-          std::string id_;
-          bool external_;
-        } frame_;
-        double filter_coefficient_ = 0.005;
-      } ft_sensor_;
-      struct control {
-        struct frame {
-          std::string id_;
-          bool external_;
-        } frame_;
-      } control_;
-      struct fixed_world_frame {
-        struct frame {
-          std::string id_;
-          bool external_;
-        } frame_;
-      } fixed_world_frame_;
-      struct gravity_compensation {
-        struct frame {
-          std::string id_;
-          bool external_;
-        } frame_;
-        struct CoG {
-          std::vector<double> pos_;
-          double force_ = std::numeric_limits<double>::quiet_NaN();
-        } CoG_;
-      } gravity_compensation_;
-      struct admittance {
-        std::vector<bool> selected_axes_;
-        std::vector<double> mass_;
-        std::vector<double> damping_ratio_;
-        std::vector<double> stiffness_;
-      } admittance_;
-      bool enable_parameter_update_without_reactivation_ = true;
-      bool use_feedforward_commanded_input_ = true;
+    Params get_params() const {
+      return params_;
+    }
 
-    } params_;
+    bool is_invalid(Params const &other) const {
+      return params_.__stamp == other.__stamp;
+    }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       rcl_interfaces::msg::SetParametersResult result;
@@ -239,6 +255,9 @@ namespace admittance_controller_parameters {
           result.successful = true;
         }
 
+      }
+      if (result.successful) {
+        params_.__stamp = clock_.now();
       }
       return result;
     }
@@ -614,7 +633,14 @@ namespace admittance_controller_parameters {
       param = parameters_interface->get_parameter("use_feedforward_commanded_input");
       params_.use_feedforward_commanded_input_ = param.as_bool();
 
+      params_.__stamp = clock_.now();
     }
+
+  private:
+    std::mutex mutex_;
+    Params params_;
+    rclcpp::Clock clock_;
+    std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
   };
 
 } // namespace admittance_controller_parameters

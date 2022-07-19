@@ -12,33 +12,29 @@ public:
   MinimalPublisher() : Node("admittance_controller") {
     timer_ = this->create_wall_timer(
         500ms, std::bind(&MinimalPublisher::timer_callback, this));
+    param_listener = std::make_shared<admittance_controller_parameters::ParamListener>(get_node_parameters_interface());
+    params_ = param_listener->get_params();
+    RCLCPP_INFO(this->get_logger(), "Initial control frame parameter is: '%s'", params_.control_.frame_.id_.c_str());
   }
-
-  std::shared_ptr<admittance_controller_parameters::admittance_controller> gen_struct;
 
 private:
   void timer_callback() {
-    RCLCPP_INFO(this->get_logger(), "Control frame is: '%s'", gen_struct->params_.control_.frame_.id_.c_str());
+    if (!param_listener->is_invalid(params_)){
+      params_ = param_listener->get_params();
+      RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'", params_.control_.frame_.id_.c_str());
+    }
   }
 
   rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<admittance_controller_parameters::ParamListener> param_listener;
+  admittance_controller_parameters::Params params_;
 };
 
 int main(int numArgs, const char **args) {
-
   rclcpp::init(numArgs, args);
-
-
-  auto node = std::make_shared<MinimalPublisher>();
-  auto gen_struct = std::make_shared<admittance_controller_parameters::admittance_controller>(
-      node->get_node_parameters_interface());
-  node->gen_struct = gen_struct;
-
-  const std::vector<std::string> prefixes;
-  uint64_t depth = 100;
-  node->get_node_parameters_interface()->list_parameters(prefixes, depth);
+  auto publisher_node = std::make_shared<MinimalPublisher>();
   rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node);
+  executor.add_node(publisher_node);
   executor.spin();
 
   return 0;
