@@ -19,7 +19,7 @@ public:
 
 private:
   void timer_callback() {
-    if (!param_listener->is_invalid(params_)){
+    if (param_listener->is_invalid(params_)){
       params_ = param_listener->get_params();
       RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'", params_.control_.frame_.id_.c_str());
     }

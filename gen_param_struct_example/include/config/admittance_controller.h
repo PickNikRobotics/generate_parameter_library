@@ -90,7 +90,7 @@ namespace admittance_controller_parameters {
     }
 
     bool is_invalid(Params const &other) const {
-      return params_.__stamp == other.__stamp;
+      return params_.__stamp != other.__stamp;
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
