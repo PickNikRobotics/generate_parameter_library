@@ -8,7 +8,7 @@ find_package(gen_param_lib REQUIRED)
 
 gen_param_lib(admittance_controller_parameters
   src/parameters.yaml
-  gen_param_struct_example/validators.hpp
+  include/gen_param_struct_example/validators.hpp
 )
 
 add_executable(test_node
