@@ -96,10 +96,10 @@ namespace gen_param_struct_validators {
     return OK;
   }
 
-} // namespace gen_param_struct
-
 // User defined validators
-**INCLUDES**
+**USER VALIDATORS**
+
+} // namespace gen_param_struct_validators
 
 namespace **NAMESPACE** {
 
@@ -127,7 +127,7 @@ namespace **NAMESPACE** {
         return params_;
     }
 
-    bool is_invalid(Params const& other) const {
+    bool is_old(Params const& other) const {
         return params_.__stamp != other.__stamp;
     }
 

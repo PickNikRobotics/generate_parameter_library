@@ -469,9 +469,11 @@ class GenParamStruct:
             self.namespace = list(doc.keys())[0]
             self.parse_dict(self.namespace, doc[self.namespace], [])
 
-        INCLUDES = ""
+        USER_VALIDATORS = ""
         if (len(sys.argv) > 3):
-            INCLUDES = "#include \"{}\"".format(sys.argv[3])
+            user_validation_file = sys.argv[3]
+            with open(user_validation_file, 'r') as f:
+                USER_VALIDATORS = f.read()
 
         COMMENTS = "// this is auto-generated code "
         NAMESPACE = self.namespace
@@ -483,7 +485,7 @@ class GenParamStruct:
             self.contents = f.read()
 
         self.contents = self.contents.replace("**COMMENTS**", COMMENTS)
-        self.contents = self.contents.replace("**INCLUDES**", INCLUDES)
+        self.contents = self.contents.replace("**USER VALIDATORS**", USER_VALIDATORS)
         self.contents = self.contents.replace("**NAMESPACE**", NAMESPACE)
         self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
         self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
