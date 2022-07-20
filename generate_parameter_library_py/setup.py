@@ -12,7 +12,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
-    install_requires=["setuptools", "pyyaml"],
+    install_requires=["setuptools"],
     package_data={
         "": [
             "templates/template.txt",
@@ -26,12 +26,13 @@ setup(
     keywords=["ROS"],
     classifiers=[
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: TBD",
+        "License :: OSI Approved :: BSD-3-Clause",
         "Programming Language :: Python",
         "Topic :: Software Development",
     ],
     description="Generate the ROS parameter struct in C++ with callbacks for updating.",
-    license="TBD",
+    license="BSD-3-Clause",
+    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "generate_parameter_library_py = generate_parameter_library_py.main:main",
