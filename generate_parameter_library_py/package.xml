@@ -5,10 +5,13 @@
   <version>0.0.0</version>
   <description>Generate the ROS parameter struct in C++ with callbacks for updating.</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
   <exec_depend>python3</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
     <build_type>ament_python</build_type>
