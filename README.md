@@ -1,17 +1,19 @@
 # generate_parameter_library
-This package aims to automate parameter handling within ROS 2. The build script automatically generates a c++ struct from a yaml file input. The generated struct contains all parameters as nested fields. Addtional methods are generated, which enable parameter updating.   
+This package aims to automate parameter handling within ROS 2. The build script automatically generates a c++ library from a yaml file input. The generated library contains a struct with all parameters as nested fields. Addtional methods are generated, which enable parameter updating.   
 
 # Usage
 You must include the generate_parameter_library pakcage in your cmake project.
 
 `find_package(generate_parameter_library REQUIRED)`
 
-You then need call the `generate_param_struct_header` function with the following arguments:
+You then need call the `generate_parameter_library` function with the following arguments:
 ```
-TARGET # target that depends on generated struct 
-OUT_DIR # output directory for generated struct
-YAML_FILE # path to yaml file
+LIB_NAME # cmake target name for the parameter library
+YAML_FILE # path to input yaml file
+VALIDATE_HEADER # Optional path to header containing custom validators
 ```
+
+See [example project](example/CMakeLists.txt) to understand how to use this.
 
 # Example:
 ## Build the node
@@ -133,5 +135,3 @@ terminate called after throwing an instance of 'rclcpp::exceptions::ParameterUni
   what():  parameter 'joints' is not initialized
 [ros2run]: Aborted
 ```
-## Sample output
-A sample generated file is located here: https://github.com/pac48/generate_parameter_library/blob/main/generate_parameter_library_example/include/config/admittance_controller.h
