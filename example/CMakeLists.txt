@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
-project(gen_param_lib_example)
+project(generate_parameter_library_example)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
-find_package(gen_param_lib REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
-gen_param_lib(admittance_controller_parameters
+generate_parameter_library(admittance_controller_parameters
   src/parameters.yaml
-  include/gen_param_struct_example/validators.hpp
+  include/generate_parameter_library_example/validators.hpp
 )
 
 add_executable(test_node

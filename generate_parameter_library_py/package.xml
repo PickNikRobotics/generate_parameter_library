@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>gen_param_lib_py</name>
+  <name>generate_parameter_library_py</name>
   <version>0.0.0</version>
   <description>Generate the ROS parameter struct in C++ with callbacks for updating.</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>

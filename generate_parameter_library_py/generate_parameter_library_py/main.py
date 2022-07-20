@@ -443,7 +443,7 @@ class GenParamStruct:
 
     def run(self):
         if len(sys.argv) < 3 and len(sys.argv) > 4:
-            raise compile_error("generate_param_struct_header expects three input argument: output_file, "
+            raise compile_error("generate_parameter_library_py expects three input argument: output_file, "
                                 "yaml file path, [validate include header]")
 
         param_gen_directory = sys.argv[0].split("/")

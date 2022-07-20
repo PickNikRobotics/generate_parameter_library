@@ -1,7 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-package_name = 'gen_param_lib_py'
+package_name = 'generate_parameter_library_py'
 
 setup(
     name=package_name,
@@ -32,7 +32,7 @@ setup(
     license='TBD',
     entry_points={
         'console_scripts': [
-            'gen_param_lib = gen_param_lib.main:main',
+            'generate_parameter_library_py = generate_parameter_library_py.main:main',
         ],
     },
 )
