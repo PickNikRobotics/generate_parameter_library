@@ -27,7 +27,7 @@ YAML_FILE # path to yaml file
 ## Run the node
 ```
 source install/setup.bash
-ros2 run gen_param_struct_example test_node --ros-args --params-file src/gen_param_struct_example/include/config/implementation.yaml
+ros2 run gen_param_lib_example test_node --ros-args --params-file src/example/config/implementation.yaml
 
 ```
 
