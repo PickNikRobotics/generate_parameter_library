@@ -442,21 +442,19 @@ class GenParamStruct:
             self.parse_params(name, root_map, nested_name)
 
     def run(self):
-        if len(sys.argv) != 3:
-            raise compile_error("generate_param_struct_header expects three input argument: target, output directory, "
-                                "and yaml file path")
+        if len(sys.argv) < 3 and len(sys.argv) > 4:
+            raise compile_error("generate_param_struct_header expects three input argument: output_file, "
+                                "yaml file path, [validate include header]")
 
         param_gen_directory = sys.argv[0].split("/")
         param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
-
-        out_directory = sys.argv[1]
-        if out_directory[-1] != "/":
-            out_directory += "/"
         if param_gen_directory[-1] != "/":
             param_gen_directory += "/"
 
-        if not os.path.isdir(out_directory):
-            raise compile_error("The specified output directory: %s does not exist" % out_directory)
+        output_file = sys.argv[1]
+        output_dir = os.path.dirname(output_file)
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
 
         yaml_file = sys.argv[2]
         with open(yaml_file) as f:
@@ -468,29 +466,37 @@ class GenParamStruct:
 
             if len(doc) != 1:
                 raise compile_error("the controller yaml definition must only have one root element")
-            self.target = list(doc.keys())[0]
-            self.parse_dict(self.target, doc[self.target], [])
+            self.namespace = list(doc.keys())[0]
+            self.parse_dict(self.namespace, doc[self.namespace], [])
+
+        INCLUDES = ""
+        if (len(sys.argv) > 3):
+            INCLUDES = "#include \"{}\"".format(sys.argv[3])
 
         COMMENTS = "// this is auto-generated code "
-        INCLUDES = "#include <gen_param_struct/validators.hpp>"
-        NAMESPACE = self.target + "_parameters"
+        NAMESPACE = self.namespace
 
-        with open(param_gen_directory + "/templates/template.txt", "r") as f:
+        template_file = os.path.join(
+            os.path.dirname(__file__), 'templates', 'template.txt')
+
+        with open(template_file, "r") as f:
             self.contents = f.read()
 
         self.contents = self.contents.replace("**COMMENTS**", COMMENTS)
         self.contents = self.contents.replace("**INCLUDES**", INCLUDES)
         self.contents = self.contents.replace("**NAMESPACE**", NAMESPACE)
-        self.contents = self.contents.replace("**CLASS_NAME**", str(self.target))
         self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
         self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
         self.contents = self.contents.replace("**DESCRIBE_PARAMS**", str(self.param_describe))
         self.contents = self.contents.replace("**GET_PARAMS**", str(self.param_get))
 
-        with open(out_directory + self.target + ".h", "w") as f:
+        with open(output_file, "w") as f:
             f.write(self.contents)
 
 
-if __name__ == "__main__":
+def main():
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
+
+if __name__ == "__main__":
+    sys.exit(main())
