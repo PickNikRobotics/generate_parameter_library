@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>gen_param_lib_example</name>
+  <name>generate_parameter_library_example</name>
   <version>0.0.0</version>
-  <description>Example use case to generate a ROS parameter struct in C++ using gen_param_struct.</description>
+  <description>Example use case to generate a ROS parameter struct in C++ using generate_parameter_library.</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>TODO: License declaration</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
 
   <depend>rclcpp</depend>
-  <depend>gen_param_lib</depend>
+  <depend>generate_parameter_library</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

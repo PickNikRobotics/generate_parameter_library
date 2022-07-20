@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
-project(gen_param_lib NONE)
+project(generate_parameter_library NONE)
 
 # find dependencies
 find_package(ament_cmake_core REQUIRED)
 
 ament_package(
-  CONFIG_EXTRAS "gen_param_lib-extras.cmake"
+  CONFIG_EXTRAS "generate_parameter_library-extras.cmake"
 )
 
 install(

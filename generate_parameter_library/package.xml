@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>gen_param_lib</name>
+  <name>generate_parameter_library</name>
   <version>0.0.0</version>
   <description>The CMake API for generating the ROS parameter struct in C++ with callbacks for updating.</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
@@ -10,7 +10,7 @@
 
   <buildtool_export_depend>ament_cmake_core</buildtool_export_depend>
 
-  <exec_depend>gen_param_lib_py</exec_depend>
+  <exec_depend>generate_parameter_library_py</exec_depend>
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>rclcpp_lifecycle</exec_depend>
 

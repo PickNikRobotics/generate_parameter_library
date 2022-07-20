@@ -1,10 +1,10 @@
-# gen_param_struct
+# generate_parameter_library
 This package aims to automate parameter handling within ROS 2. The build script automatically generates a c++ struct from a yaml file input. The generated struct contains all parameters as nested fields. Addtional methods are generated, which enable parameter updating.   
 
 # Usage
-You must include the gen_param_struct pakcage in your cmake project.
+You must include the generate_parameter_library pakcage in your cmake project.
 
-`find_package(gen_param_struct REQUIRED)`
+`find_package(generate_parameter_library REQUIRED)`
 
 You then need call the `generate_param_struct_header` function with the following arguments:
 ```
@@ -19,7 +19,7 @@ YAML_FILE # path to yaml file
  mkdir colcon_ws
  mkdir colcon_ws/src
  cd colcon_ws/src 
- git clone https://github.com/pac48/gen_param_struct.git
+ git clone https://github.com/picknikrobotics/generate_parameter_library.git
  cd ..
  colcon build
 ```
@@ -124,7 +124,7 @@ you will get the error
 
 If you try to load a yaml file with missing required parameters
 
-`ros2 run gen_param_struct_example test_node --ros-args --params-file src/gen_param_struct/gen_param_struct_example/include/config/missing_required.yaml`
+`ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/generate_parameter_library_example/include/config/missing_required.yaml`
 
 
 you will get the error
@@ -134,4 +134,4 @@ terminate called after throwing an instance of 'rclcpp::exceptions::ParameterUni
 [ros2run]: Aborted
 ```
 ## Sample output
-A sample generated file is located here: https://github.com/pac48/gen_param_struct/blob/main/gen_param_struct_example/include/config/admittance_controller.h
+A sample generated file is located here: https://github.com/pac48/generate_parameter_library/blob/main/generate_parameter_library_example/include/config/admittance_controller.h
