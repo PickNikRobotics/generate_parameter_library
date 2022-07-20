@@ -1,0 +1,6 @@
+if (param.get_name() == "{{parameter_name}}") {
+    result.successful = false;
+    {{declare_param_validations}}
+    params_.{{parameter_name}} = param.{{parameter_as_function}};
+    result.successful = true;
+}

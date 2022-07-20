@@ -6,6 +6,8 @@ import sys
 import os
 from typing import Callable
 from typeguard import typechecked
+from cpptypes import *
+
 
 # class to help minimize string copies
 class Buffer:
@@ -306,6 +308,7 @@ class GenParamStruct:
         self.param_describe = Buffer()
         self.param_get = Buffer()
         self.namespace = ""
+        self.struct_tree = Struct("Params",[])
 
     def parse_params(self, name, value, nested_name_list):
         # define names for parameters and variables
@@ -368,6 +371,8 @@ class GenParamStruct:
             validation = []
 
         # define struct
+        var = VariableDeclaration(defined_type, name, default_value)
+        self.struct_tree.add_field(var)
         self.struct += declare_struct(defined_type, cpp_type, name, default_value)
 
         # set param value if param.name is the parameter being updated
@@ -418,19 +423,25 @@ class GenParamStruct:
                                        param_get_effect_true,
                                        param_get_effect_false)
         code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_bounds", bounds,
-                                      [code_str],
-                                      param_get_effect_false)
+                                       [code_str],
+                                       param_get_effect_false)
         # add custom validation
         for val in validation:
             code_str = validation_sequence("gen_param_struct_validators", val[0], val[1:], [code_str],
-                                          param_get_effect_false)
+                                           param_get_effect_false)
 
         self.param_get += code_str
 
     def parse_dict(self, name, root_map, nested_name):
+
         if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):
+            cur_struct_tree = self.struct_tree
+
             if name != self.namespace:
                 self.struct += "struct %s {\n" % name
+                sub_struct = Struct(name, [])
+                self.struct_tree.add_sub_struct(sub_struct)
+                self.struct_tree = sub_struct
             for key in root_map:
                 if isinstance(root_map[key], dict):
                     nested_name.append(name)
@@ -438,8 +449,11 @@ class GenParamStruct:
                     nested_name.pop()
             if name != self.namespace:
                 self.struct += "} %s_;\n" % name
+
+            self.struct_tree = cur_struct_tree
         else:
             self.parse_params(name, root_map, nested_name)
+
 
     def run(self):
         if len(sys.argv) < 3 and len(sys.argv) > 4:
@@ -499,6 +513,8 @@ class GenParamStruct:
 def main():
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
+    pass
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,0 +1,3 @@
+param = parameters_interface->get_parameter("{{parameter_name}}");
+{{declare_param_validations}}
+params_.{{parameter_name}}_ = param.{{parameter_as_function}};

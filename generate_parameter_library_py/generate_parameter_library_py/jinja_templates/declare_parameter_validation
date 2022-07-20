@@ -1,0 +1,6 @@
+validation_result = {{validation_function_call}};
+if (!validation_result.success()) {
+    throw rclcpp::exceptions::InvalidParameterValueException(
+    "Invalid value set during initialization for parameter {{parameter_name}}: " +
+    validation_result.error_msg());
+}

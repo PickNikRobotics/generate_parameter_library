@@ -1,0 +1,5 @@
+validation_result = {{validation_function_call}};
+if (!validation_result.success()) {
+        result.reason = validation_result.error_msg();
+        break;
+}

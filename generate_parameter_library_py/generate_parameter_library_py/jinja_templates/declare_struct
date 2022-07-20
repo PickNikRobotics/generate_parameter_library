@@ -1,0 +1,4 @@
+struct {{parameter_name}} {
+    {{struct_fields}}
+    {{sub_structs_fields}}
+} {{parameter_name}};

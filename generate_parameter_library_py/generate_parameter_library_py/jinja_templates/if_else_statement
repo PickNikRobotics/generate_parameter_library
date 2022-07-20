@@ -1,0 +1,5 @@
+if ({{ conditional }}){
+    {{ effect_true }}
+} else {
+    {{ effect_false}}
+}
