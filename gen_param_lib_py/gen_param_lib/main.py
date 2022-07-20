@@ -305,7 +305,7 @@ class GenParamStruct:
         self.param_set = Buffer()
         self.param_describe = Buffer()
         self.param_get = Buffer()
-        self.target = ""
+        self.namespace = ""
 
     def parse_params(self, name, value, nested_name_list):
         # define names for parameters and variables
@@ -429,14 +429,14 @@ class GenParamStruct:
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):
-            if name != self.target:
+            if name != self.namespace:
                 self.struct += "struct %s {\n" % name
             for key in root_map:
                 if isinstance(root_map[key], dict):
                     nested_name.append(name)
                     self.parse_dict(key, root_map[key], nested_name)
                     nested_name.pop()
-            if name != self.target:
+            if name != self.namespace:
                 self.struct += "} %s_;\n" % name
         else:
             self.parse_params(name, root_map, nested_name)

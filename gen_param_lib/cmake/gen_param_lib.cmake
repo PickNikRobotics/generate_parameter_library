@@ -5,7 +5,7 @@ function(gen_param_lib LIB_NAME YAML_FILE)
   endif()
 
   # Optional 4th parameter for the user defined validation header
-  set(VALIDATE_HEADER ${ARGV3})
+  set(VALIDATE_HEADER ${ARGV2})
 
   # Set the output parameter header file name
   set(PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/${LIB_NAME}.hpp)
