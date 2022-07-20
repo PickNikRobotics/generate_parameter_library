@@ -1,8 +1,8 @@
 # generate_parameter_library
-This package aims to automate parameter handling within ROS 2. The build script automatically generates a c++ library from a yaml file input. The generated library contains a struct with all parameters as nested fields. Addtional methods are generated, which enable parameter updating.   
+This package aims to automate parameter handling within ROS 2. The build script automatically generates a c++ library from a yaml file input. The generated library contains a struct with all parameters as nested fields. Additional methods are generated, which enable parameter updating.
 
 # Usage
-You must include the generate_parameter_library pakcage in your cmake project.
+You must include the generate_parameter_library package in your cmake project.
 
 `find_package(generate_parameter_library REQUIRED)`
 
@@ -20,7 +20,7 @@ See [example project](example/CMakeLists.txt) to understand how to use this.
 ```
  mkdir colcon_ws
  mkdir colcon_ws/src
- cd colcon_ws/src 
+ cd colcon_ws/src
  git clone https://github.com/picknikrobotics/generate_parameter_library.git
  cd ..
  colcon build
@@ -75,29 +75,29 @@ You should see:
   state_interfaces
   use_sim_time
   ```
-  
-  All parametter are automatically declared and callbacks are setup by default. You can set a parameter by typing:
-  
+
+  All parameter are automatically declared and callbacks are setup by default. You can set a parameter by typing:
+
   `ros2 param set /admittance_controller control.frame.id new_frame`
-  
+
   You should see:
-  
+
   `[INFO] [1656019001.515820371] [admittance_controller]: Control frame is: 'new_frame'`
-  
-  Congratulations, you updated the parameter! 
-  
- If you try to set a parameter that is read only, you will get an error. Running the follwing
-  
+
+  Congratulations, you updated the parameter!
+
+ If you try to set a parameter that is read only, you will get an error. Running the following
+
   `ros2 param set /admittance_controller joints ["joint_new"]`
-  
+
   will result in the error
-  
+
   `Setting parameter failed: parameter 'joints' cannot be set because it is read-only`
-  
- Running the follwing
- 
+
+ Running the following
+
  `ros2 param describe /admittance_controller admittance.damping_ratio`
- 
+
  will show a parameter's description
  ```
  Parameter name: admittance.damping_ratio
@@ -108,7 +108,7 @@ You should see:
     Max value: 10.0
 ```
 
-If you try to set a value out of the specified bounds, 
+If you try to set a value out of the specified bounds,
 
 `ros2 param set /admittance_controller admittance.damping_ratio [-10.0,-10.0,-10.0,-10.0,-10.0,-10.0]`
 
@@ -116,7 +116,7 @@ you will get the error
 
 `Setting parameter failed: Invalid value for parameter admittance.damping_ratio. Value not within required bounds.`
 
-If you try to set a vector parameter with the wrong length, 
+If you try to set a vector parameter with the wrong length,
 
 `ros2 param set /admittance_controller admittance.damping_ratio [1.0,1.0,1.0]`
 

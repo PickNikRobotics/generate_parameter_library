@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import yaml
 from yaml.parser import ParserError
@@ -42,14 +43,16 @@ def array_type(defined_type: str):
 
 @typechecked
 def validate_type(defined_type: str, value):
-    type_translation = {"string": str,
-                        "double": float,
-                        "int": int,
-                        "bool": bool,
-                        "string_array": str,
-                        "double_array": float,
-                        "int_array": int,
-                        "bool_array": bool}
+    type_translation = {
+        "string": str,
+        "double": float,
+        "int": int,
+        "bool": bool,
+        "string_array": str,
+        "double_array": float,
+        "int_array": int,
+        "bool_array": bool,
+    }
 
     if isinstance(value, list):
         if not array_type(defined_type):
@@ -82,7 +85,7 @@ def float_to_str(num: float):
     elif str_num == "-inf":
         str_num = "-std::numeric_limits<double>::infinity()"
     else:
-        if len(str_num.split('.')) == 1:
+        if len(str_num.split(".")) == 1:
             str_num += ".0"
 
     return str_num
@@ -95,54 +98,54 @@ def int_to_str(num: int):
 
 @typechecked
 def str_to_str(s: str):
-    return "\"%s\"" % s
+    return '"%s"' % s
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
 @typechecked
 def get_translation_data(defined_type: str) -> (str, Callable, str):
-    if defined_type == 'string_array':
-        cpp_type = 'std::string'
-        parameter_conversion = 'as_string_array()'
+    if defined_type == "string_array":
+        cpp_type = "std::string"
+        parameter_conversion = "as_string_array()"
         val_to_cpp_str = str_to_str
 
-    elif defined_type == 'double_array':
-        cpp_type = 'double'
-        parameter_conversion = 'as_double_array()'
+    elif defined_type == "double_array":
+        cpp_type = "double"
+        parameter_conversion = "as_double_array()"
         val_to_cpp_str = float_to_str
 
-    elif defined_type == 'int_array':
-        cpp_type = 'int'
-        parameter_conversion = 'as_integer_array()'
+    elif defined_type == "int_array":
+        cpp_type = "int"
+        parameter_conversion = "as_integer_array()"
         val_to_cpp_str = int_to_str
 
-    elif defined_type == 'bool_array':
-        cpp_type = 'bool'
-        parameter_conversion = 'as_bool_array()'
+    elif defined_type == "bool_array":
+        cpp_type = "bool"
+        parameter_conversion = "as_bool_array()"
         val_to_cpp_str = bool_to_str
 
-    elif defined_type == 'string':
-        cpp_type = 'std::string'
-        parameter_conversion = 'as_string()'
+    elif defined_type == "string":
+        cpp_type = "std::string"
+        parameter_conversion = "as_string()"
         val_to_cpp_str = str_to_str
 
-    elif defined_type == 'double':
-        cpp_type = 'double'
-        parameter_conversion = 'as_double()'
+    elif defined_type == "double":
+        cpp_type = "double"
+        parameter_conversion = "as_double()"
         val_to_cpp_str = float_to_str
 
-    elif defined_type == 'integer':
-        cpp_type = 'int'
-        parameter_conversion = 'as_int()'
+    elif defined_type == "integer":
+        cpp_type = "int"
+        parameter_conversion = "as_int()"
         val_to_cpp_str = int_to_str
 
-    elif defined_type == 'bool':
-        cpp_type = 'bool'
-        parameter_conversion = 'as_bool()'
+    elif defined_type == "bool":
+        cpp_type = "bool"
+        parameter_conversion = "as_bool()"
         val_to_cpp_str = bool_to_str
 
     else:
-        raise compile_error('invalid yaml type: %s' % type(defined_type))
+        raise compile_error("invalid yaml type: %s" % type(defined_type))
 
     return cpp_type, val_to_cpp_str, parameter_conversion
 
@@ -154,13 +157,15 @@ def get_validation_translation(validation_functions: list[list[any]]):
     for validation_function in validation_functions:
         if len(validation_function) < 2:
             raise compile_error(
-                "The user yaml defined validation function %s does not have enough input arguments, requires at least 1." %
-                validation_function[0])
+                "The user yaml defined validation function %s does not have enough input arguments, requires at least 1."
+                % validation_function[0]
+            )
         for ind, arg in enumerate(validation_function[1:]):
             if isinstance(arg, list):
                 raise compile_error(
-                    "The user yaml defined validation function %s uses a list input argument which is not supported" %
-                    validation_function[0])
+                    "The user yaml defined validation function %s uses a list input argument which is not supported"
+                    % validation_function[0]
+                )
 
             if isinstance(arg, int):
                 val_to_cpp_str = int_to_str
@@ -171,7 +176,10 @@ def get_validation_translation(validation_functions: list[list[any]]):
             elif isinstance(arg, str):
                 val_to_cpp_str = str_to_str
             else:
-                raise compile_error('invalid python type pass to get_validation_translation, type: %s' % type(arg))
+                raise compile_error(
+                    "invalid python type pass to get_validation_translation, type: %s"
+                    % type(arg)
+                )
 
             validation_function[ind + 1] = val_to_cpp_str(arg)
 
@@ -179,7 +187,9 @@ def get_validation_translation(validation_functions: list[list[any]]):
 
 
 @typechecked
-def declare_struct(defined_type: str, cpp_type: str, name: str, default_value: list) -> str:
+def declare_struct(
+    defined_type: str, cpp_type: str, name: str, default_value: list
+) -> str:
     code_str = Buffer()
     if array_type(defined_type):
         code_str += "std::vector<%s> %s_ " % (cpp_type, name)
@@ -256,7 +266,13 @@ def function_call(namespace: str, func_name: str, args: list[str]) -> str:
 
 
 @typechecked
-def validation_sequence(namespace: str, func_name: str, args: list, effects_true: list[str], effects_false: list[str]):
+def validation_sequence(
+    namespace: str,
+    func_name: str,
+    args: list,
+    effects_true: list[str],
+    effects_false: list[str],
+):
     # assumes that the validation function is named validate_{defined_type}_{method}
     if len(args) == 0:
         return flatten_effects(effects_true)  # no validation needed
@@ -275,21 +291,34 @@ def validation_sequence(namespace: str, func_name: str, args: list, effects_true
 
 
 @typechecked
-def default_validation(effects: list[str], defined_type: str, fixed_size: list, bounds: list) -> str:
+def default_validation(
+    effects: list[str], defined_type: str, fixed_size: list, bounds: list
+) -> str:
     code_str = Buffer()
-    effects_false = ["result.reason = validation_result.error_msg();\n",
-                     "result.successful = false;"]
+    effects_false = [
+        "result.reason = validation_result.error_msg();\n",
+        "result.successful = false;",
+    ]
     if fixed_size:
         effects2 = [
-            validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_len", fixed_size,
-                                effects,
-                                effects_false)]
+            validation_sequence(
+                "gen_param_struct_validators",
+                "validate_" + defined_type + "_len",
+                fixed_size,
+                effects,
+                effects_false,
+            )
+        ]
     else:
         effects2 = effects
     if bounds:
-        code_str += validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_bounds", bounds,
-                                        effects2,
-                                        effects_false)
+        code_str += validation_sequence(
+            "gen_param_struct_validators",
+            "validate_" + defined_type + "_bounds",
+            bounds,
+            effects2,
+            effects_false,
+        )
     else:
         code_str += flatten_effects(effects2)
 
@@ -298,7 +327,6 @@ def default_validation(effects: list[str], defined_type: str, fixed_size: list, 
 
 # class used to fill template text file with passed in yaml file
 class GenParamStruct:
-
     def __init__(self):
         self.contents = ""
         self.struct = Buffer()
@@ -314,29 +342,37 @@ class GenParamStruct:
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
         # optional attributes
-        default_value = value.get('default_value')
-        description = value.get('description')
-        read_only = value.get('read_only')
-        bounds = value.get('bounds')
-        fixed_size = value.get('fixed_size')
-        validation = value.get('validation')
+        default_value = value.get("default_value")
+        description = value.get("description")
+        read_only = value.get("read_only")
+        bounds = value.get("bounds")
+        fixed_size = value.get("fixed_size")
+        validation = value.get("validation")
 
         # required attributes
         try:
-            defined_type = value['type']
+            defined_type = value["type"]
         except KeyError as e:
             raise compile_error("No type defined for parameter %s" % param_name)
 
         # validate inputs
         if bounds and not validate_type(defined_type, bounds):
-            raise compile_error("The type of the bounds must be the same type as the defined type")
+            raise compile_error(
+                "The type of the bounds must be the same type as the defined type"
+            )
         if default_value and not validate_type(defined_type, default_value):
-            raise compile_error("The type of the default_value must be the same type as the defined type")
+            raise compile_error(
+                "The type of the default_value must be the same type as the defined type"
+            )
         if fixed_size and not isinstance(fixed_size, int):
-            raise compile_error("The type of the fixed size attribute must be an integer")
+            raise compile_error(
+                "The type of the fixed size attribute must be an integer"
+            )
 
         # get translation variables from defined value type
-        cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(defined_type)
+        cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(
+            defined_type
+        )
 
         # convert python types to lists of inputs
         if default_value:
@@ -371,35 +407,49 @@ class GenParamStruct:
         self.struct += declare_struct(defined_type, cpp_type, name, default_value)
 
         # set param value if param.name is the parameter being updated
-        param_set_effects = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
-                             "result.successful = true;\n"]
-        param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
-        code_str = default_validation(param_set_effects, defined_type, fixed_size, bounds)
+        param_set_effects = [
+            "params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
+            "result.successful = true;\n",
+        ]
+        param_set_conditions = ["param.get_name() == " + '"%s" ' % param_name]
+        code_str = default_validation(
+            param_set_effects, defined_type, fixed_size, bounds
+        )
         self.param_set += if_statement(code_str, param_set_conditions, [])
 
         # create parameter description
-        param_describe_effects = ["rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
-                                  "descriptor.description = \"%s\";\n" % description]
+        param_describe_effects = [
+            "rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
+            'descriptor.description = "%s";\n' % description,
+        ]
         if len(bounds):
-            param_describe_effects.extend([
-                "rcl_interfaces::msg::FloatingPointRange range;\n",
-                "range.from_value = %s;\n" % bounds[0],
-                "range.to_value = %s;\n" % bounds[1],
-                "descriptor.floating_point_range.push_back(range);\n"
-            ])
+            param_describe_effects.extend(
+                [
+                    "rcl_interfaces::msg::FloatingPointRange range;\n",
+                    "range.from_value = %s;\n" % bounds[0],
+                    "range.to_value = %s;\n" % bounds[1],
+                    "descriptor.floating_point_range.push_back(range);\n",
+                ]
+            )
         if len(read_only):
-            param_describe_effects.extend([
-                "descriptor.read_only = %s;\n" % bool_to_str(read_only[0]),
-            ])
+            param_describe_effects.extend(
+                [
+                    "descriptor.read_only = %s;\n" % bool_to_str(read_only[0]),
+                ]
+            )
         if len(default_value):
             value_str = "rclcpp::ParameterValue(params_.%s_)" % (nested_name + name)
         else:
             value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()
 
-        param_describe_effects_2 = ["auto %s = %s;\n" % (param_prefix + name, value_str),
-                                    "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
-                                        param_name, param_prefix + name)]
-        param_describe_conditions = ["!parameters_interface->has_parameter(\"%s\")" % param_name]
+        param_describe_effects_2 = [
+            "auto %s = %s;\n" % (param_prefix + name, value_str),
+            'parameters_interface->declare_parameter("%s", %s, descriptor);\n'
+            % (param_name, param_prefix + name),
+        ]
+        param_describe_conditions = [
+            '!parameters_interface->has_parameter("%s")' % param_name
+        ]
 
         param_describe_effects.append(
             if_statement(param_describe_effects_2, param_describe_conditions, [])
@@ -407,28 +457,49 @@ class GenParamStruct:
         self.param_describe += scoped_codeblock(param_describe_effects)
 
         # get parameter from by calling parameters_interface API
-        self.param_get += "param = parameters_interface->get_parameter(\"%s\");\n" % param_name
-        param_get_effect_false = ["throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during "
-                                  "initialization for parameter %s: \" + validation_result.error_msg());" % param_name]
-        param_get_effect_true = ["params_.%s_ = param.%s;\n" % (
-            nested_name + name, parameter_conversion)]
+        self.param_get += (
+            'param = parameters_interface->get_parameter("%s");\n' % param_name
+        )
+        param_get_effect_false = [
+            'throw rclcpp::exceptions::InvalidParameterValueException("Invalid value set during '
+            'initialization for parameter %s: " + validation_result.error_msg());'
+            % param_name
+        ]
+        param_get_effect_true = [
+            "params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion)
+        ]
 
         # add default validation
-        code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_len", fixed_size,
-                                       param_get_effect_true,
-                                       param_get_effect_false)
-        code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_bounds", bounds,
-                                      [code_str],
-                                      param_get_effect_false)
+        code_str = validation_sequence(
+            "gen_param_struct_validators",
+            "validate_" + defined_type + "_len",
+            fixed_size,
+            param_get_effect_true,
+            param_get_effect_false,
+        )
+        code_str = validation_sequence(
+            "gen_param_struct_validators",
+            "validate_" + defined_type + "_bounds",
+            bounds,
+            [code_str],
+            param_get_effect_false,
+        )
         # add custom validation
         for val in validation:
-            code_str = validation_sequence("gen_param_struct_validators", val[0], val[1:], [code_str],
-                                          param_get_effect_false)
+            code_str = validation_sequence(
+                "gen_param_struct_validators",
+                val[0],
+                val[1:],
+                [code_str],
+                param_get_effect_false,
+            )
 
         self.param_get += code_str
 
     def parse_dict(self, name, root_map, nested_name):
-        if isinstance(root_map, dict) and isinstance(next(iter(root_map.values())), dict):
+        if isinstance(root_map, dict) and isinstance(
+            next(iter(root_map.values())), dict
+        ):
             if name != self.namespace:
                 self.struct += "struct %s {\n" % name
             for key in root_map:
@@ -443,8 +514,10 @@ class GenParamStruct:
 
     def run(self):
         if len(sys.argv) < 3 and len(sys.argv) > 4:
-            raise compile_error("generate_parameter_library_py expects three input argument: output_file, "
-                                "yaml file path, [validate include header]")
+            raise compile_error(
+                "generate_parameter_library_py expects three input argument: output_file, "
+                "yaml file path, [validate include header]"
+            )
 
         param_gen_directory = sys.argv[0].split("/")
         param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
@@ -465,21 +538,24 @@ class GenParamStruct:
                 raise compile_error(str(e))
 
             if len(doc) != 1:
-                raise compile_error("the controller yaml definition must only have one root element")
+                raise compile_error(
+                    "the controller yaml definition must only have one root element"
+                )
             self.namespace = list(doc.keys())[0]
             self.parse_dict(self.namespace, doc[self.namespace], [])
 
         USER_VALIDATORS = ""
-        if (len(sys.argv) > 3):
+        if len(sys.argv) > 3:
             user_validation_file = sys.argv[3]
-            with open(user_validation_file, 'r') as f:
+            with open(user_validation_file, "r") as f:
                 USER_VALIDATORS = f.read()
 
         COMMENTS = "// this is auto-generated code "
         NAMESPACE = self.namespace
 
         template_file = os.path.join(
-            os.path.dirname(__file__), 'templates', 'template.txt')
+            os.path.dirname(__file__), "templates", "template.txt"
+        )
 
         with open(template_file, "r") as f:
             self.contents = f.read()
@@ -489,7 +565,9 @@ class GenParamStruct:
         self.contents = self.contents.replace("**NAMESPACE**", NAMESPACE)
         self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
         self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
-        self.contents = self.contents.replace("**DESCRIBE_PARAMS**", str(self.param_describe))
+        self.contents = self.contents.replace(
+            "**DESCRIBE_PARAMS**", str(self.param_describe)
+        )
         self.contents = self.contents.replace("**GET_PARAMS**", str(self.param_get))
 
         with open(output_file, "w") as f:
@@ -499,6 +577,7 @@ class GenParamStruct:
 def main():
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,0 +1,17 @@
+---
+BasedOnStyle:  Google
+DerivePointerAlignment: false
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Headers in "" with extension.
+  - Regex:  '"([A-Za-z0-9.\Q/-_\E])+"'
+    Priority: 1
+  # Headers in <> without extension.
+  - Regex:  '<([A-Za-z0-9\Q/-_\E])+>'
+    Priority: 2
+  # Headers in <> from specific external libraries.
+  - Regex:  '<(catch2|boost|rclcpp.*)\/'
+    Priority: 3
+  # Headers in <> with extension.
+  - Regex:  '<([A-Za-z0-9.\Q/-_\E])+>'
+    Priority: 4
