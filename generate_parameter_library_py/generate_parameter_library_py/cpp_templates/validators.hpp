@@ -85,17 +85,20 @@ Result validate_int_array_bounds(const rclcpp::Parameter& parameter,
   return OK;
 }
 
-Result validate_string_one_of(rclcpp::Parameter const& parameter,
-                              std::set<std::string> collection) {
-  auto const& string_param = parameter.as_string();
+template <typename T>
+Result validate_one_of(rclcpp::Parameter const& parameter,
+                       std::set<T> collection) {
+  auto param_value = parameter.get_value<T>();
 
-  if (collection.find(string_param) == collection.end()) {
+  if (collection.find(param_value) == collection.end()) {
     std::stringstream ss;
     for (auto const& c : collection) ss << c << ", ";
-    return ERROR(
-        "The parameter (%s) with the value (%s) not in the valid values: [%s]",
-        parameter.get_name(), string_param, ss.str());
+    return ERROR("The parameter (%s) with the value (%s) not in the set: [%s]",
+                 parameter.get_name(), param_value, ss.str());
   }
 
   return OK;
 }
+
+// using validate_string_one_of = validate_one_of<std::string>;
+// using validate_int_one_of = validate_one_of<int>;

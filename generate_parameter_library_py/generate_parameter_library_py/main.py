@@ -563,7 +563,9 @@ class GenParamStruct:
             validations.append(["validate_" + defined_type + "_len", fixed_size])
 
         if one_of is not None:
-            validations.append(["validate_" + defined_type + "_one_of", one_of])
+            validations.append(
+                [f"validate_one_of<{cpp_type_from_defined_type(defined_type)}>", one_of]
+            )
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
