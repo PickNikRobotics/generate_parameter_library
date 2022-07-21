@@ -6,8 +6,19 @@ import sys
 import os
 from typing import Callable
 from typeguard import typechecked
+from jinja2 import Template
 from cpptypes import *
 
+
+
+def get_all_templates():
+    template_path = os.path.join(os.path.dirname(__file__), 'jinja_templates')
+    template_map = dict()
+    for file_name in [f for f in os.listdir(template_path) if os.path.isfile(os.path.join(template_path, f))]:
+        with open(os.path.join(template_path, file_name)) as file:
+            template_map[file_name] = file.read()
+
+    return template_map
 
 # class to help minimize string copies
 class Buffer:
@@ -147,6 +158,30 @@ def get_translation_data(defined_type: str) -> (str, Callable, str):
         raise compile_error('invalid yaml type: %s' % type(defined_type))
 
     return cpp_type, val_to_cpp_str, parameter_conversion
+
+
+@typechecked
+def get_parameter_conversion_function(defined_type: str) -> str:
+    if defined_type == 'string_array':
+        parameter_conversion = 'as_string_array()'
+    elif defined_type == 'double_array':
+        parameter_conversion = 'as_double_array()'
+    elif defined_type == 'int_array':
+        parameter_conversion = 'as_integer_array()'
+    elif defined_type == 'bool_array':
+        parameter_conversion = 'as_bool_array()'
+    elif defined_type == 'string':
+        parameter_conversion = 'as_string()'
+    elif defined_type == 'double':
+        parameter_conversion = 'as_double()'
+    elif defined_type == 'integer':
+        parameter_conversion = 'as_int()'
+    elif defined_type == 'bool':
+        parameter_conversion = 'as_bool()'
+    else:
+        raise compile_error('invalid yaml type: %s' % type(defined_type))
+
+    return parameter_conversion
 
 
 @typechecked
@@ -300,15 +335,20 @@ def default_validation(effects: list[str], defined_type: str, fixed_size: list, 
 
 # class used to fill template text file with passed in yaml file
 class GenParamStruct:
+    templates = get_all_templates()
 
     def __init__(self):
-        self.contents = ""
+        self.contents = Buffer()
         self.struct = Buffer()
         self.param_set = Buffer()
         self.param_describe = Buffer()
         self.param_get = Buffer()
         self.namespace = ""
-        self.struct_tree = Struct("Params",[])
+        self.struct_tree = Struct("Params", [])
+        self.declare_params = []
+        self.update_parameters = []
+        self.declare_parameters = []
+        self.declare_parameter_sets = []
 
     def parse_params(self, name, value, nested_name_list):
         # define names for parameters and variables
@@ -316,121 +356,158 @@ class GenParamStruct:
         param_prefix = "p_" + "".join(x + "_" for x in nested_name_list[1:])
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
-        # optional attributes
-        default_value = value.get('default_value')
-        description = value.get('description')
-        read_only = value.get('read_only')
-        bounds = value.get('bounds')
-        fixed_size = value.get('fixed_size')
-        validation = value.get('validation')
-
         # required attributes
         try:
             defined_type = value['type']
         except KeyError as e:
             raise compile_error("No type defined for parameter %s" % param_name)
 
-        # validate inputs
-        if bounds and not validate_type(defined_type, bounds):
-            raise compile_error("The type of the bounds must be the same type as the defined type")
-        if default_value and not validate_type(defined_type, default_value):
-            raise compile_error("The type of the default_value must be the same type as the defined type")
-        if fixed_size and not isinstance(fixed_size, int):
-            raise compile_error("The type of the fixed size attribute must be an integer")
+        # optional attributes
+        default_value = value.get('default_value', None)
+        description = value.get('description', '')
+        read_only = bool(value.get('read_only', False))
+        bounds = value.get('bounds', [])
+        fixed_size = value.get('fixed_size', [])
+        validations = value.get('validation', [])
+        if len(validations) > 0 and isinstance(validations[0], str):
+            validations = [validations]
 
-        # get translation variables from defined value type
-        cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(defined_type)
+        # cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(defined_type)
 
-        # convert python types to lists of inputs
-        if default_value:
-            if array_type(defined_type):
-                for i in range(len(default_value)):
-                    default_value[i] = val_to_cpp_str(default_value[i])
-            else:
-                default_value = [val_to_cpp_str(default_value)]
-        else:
-            default_value = []
-        if bounds:
-            for i in range(len(bounds)):
-                bounds[i] = val_to_cpp_str(bounds[i])
-        else:
-            bounds = []
-        if fixed_size:
-            fixed_size = [int_to_str(fixed_size)]
-        else:
-            fixed_size = []
-        if read_only:
-            read_only = [read_only]
-        else:
-            read_only = []
-        if validation:
-            if not isinstance(validation[0], list):
-                validation = [validation]
-            validation = get_validation_translation(validation)
-        else:
-            validation = []
+        parameter_conversion = get_parameter_conversion_function(defined_type)
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
         self.struct_tree.add_field(var)
-        self.struct += declare_struct(defined_type, cpp_type, name, default_value)
 
-        # set param value if param.name is the parameter being updated
-        param_set_effects = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
-                             "result.successful = true;\n"]
-        param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
-        code_str = default_validation(param_set_effects, defined_type, fixed_size, bounds)
-        self.param_set += if_statement(code_str, param_set_conditions, [])
+        declare_parameter = DeclareParameter(param_name, description, read_only, defined_type)
+        self.declare_parameters.append(declare_parameter)
 
-        # create parameter description
-        param_describe_effects = ["rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
-                                  "descriptor.description = \"%s\";\n" % description]
-        if len(bounds):
-            param_describe_effects.extend([
-                "rcl_interfaces::msg::FloatingPointRange range;\n",
-                "range.from_value = %s;\n" % bounds[0],
-                "range.to_value = %s;\n" % bounds[1],
-                "descriptor.floating_point_range.push_back(range);\n"
-            ])
-        if len(read_only):
-            param_describe_effects.extend([
-                "descriptor.read_only = %s;\n" % bool_to_str(read_only[0]),
-            ])
-        if len(default_value):
-            value_str = "rclcpp::ParameterValue(params_.%s_)" % (nested_name + name)
-        else:
-            value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()
+        update_parameter_invalid = "result.successful = false;break;"
+        update_parameter_valid = "result.successful = true;"
+        update_parameter = UpdateParameter(param_name, parameter_conversion)
+        for validation in validations:
+            parameter_validation = ParameterValidation(update_parameter_invalid, update_parameter_valid)
+            validation_function = ValidationFunction(validation[0], validation[1:])
+            parameter_validation.add_validation_function(validation_function)
+            update_parameter.add_parameter_validation(parameter_validation)
 
-        param_describe_effects_2 = ["auto %s = %s;\n" % (param_prefix + name, value_str),
-                                    "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
-                                        param_name, param_prefix + name)]
-        param_describe_conditions = ["!parameters_interface->has_parameter(\"%s\")" % param_name]
+        self.update_parameters.append(update_parameter)
 
-        param_describe_effects.append(
-            if_statement(param_describe_effects_2, param_describe_conditions, [])
-        )
-        self.param_describe += scoped_codeblock(param_describe_effects)
+        # TODO fix these effects
+        declare_parameter_invalid = 'throw rclcpp::exceptions::InvalidParameterValueException("Invalid value set during initialization for parameter gravity_compensation.CoG.pos ");'
+        declare_parameter_valid = "params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();"
+        declare_parameter_set = DeclareParameterSet(param_name, parameter_conversion)
+        for validation in validations:
+            parameter_validation = ParameterValidation(update_parameter_invalid, update_parameter_valid)
+            validation_function = ValidationFunction(validation[0], validation[1:])
+            parameter_validation.add_validation_function(validation_function)
+            declare_parameter_set.add_parameter_validation(parameter_validation)
+
+        self.declare_parameter_sets.append(declare_parameter_set)
+
+        # # validate inputs
+        # if bounds and not validate_type(defined_type, bounds):
+        #     raise compile_error("The type of the bounds must be the same type as the defined type")
+        # if default_value and not validate_type(defined_type, default_value):
+        #     raise compile_error("The type of the default_value must be the same type as the defined type")
+        # if fixed_size and not isinstance(fixed_size, int):
+        #     raise compile_error("The type of the fixed size attribute must be an integer")
+        #
+        # # get translation variables from defined value type
+        # cpp_type, val_to_cpp_str, parameter_conversion = get_translation_data(defined_type)
+        #
+        # # convert python types to lists of inputs
+        # if default_value:
+        #     if array_type(defined_type):
+        #         for i in range(len(default_value)):
+        #             default_value[i] = val_to_cpp_str(default_value[i])
+        #     else:
+        #         default_value = [val_to_cpp_str(default_value)]
+        # else:
+        #     default_value = []
+        # if bounds:
+        #     for i in range(len(bounds)):
+        #         bounds[i] = val_to_cpp_str(bounds[i])
+        # else:
+        #     bounds = []
+        # if fixed_size:
+        #     fixed_size = [int_to_str(fixed_size)]
+        # else:
+        #     fixed_size = []
+        # if read_only:
+        #     read_only = [read_only]
+        # else:
+        #     read_only = []
+        # if validation:
+        #     if not isinstance(validation[0], list):
+        #         validation = [validation]
+        #     validation = get_validation_translation(validation)
+        # else:
+        #     validation = []
+
+        # self.struct += declare_struct(defined_type, cpp_type, name, default_value)
+        #
+        # # set param value if param.name is the parameter being updated
+        # param_set_effects = ["params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
+        #                      "result.successful = true;\n"]
+        # param_set_conditions = ["param.get_name() == " + "\"%s\" " % param_name]
+        # code_str = default_validation(param_set_effects, defined_type, fixed_size, bounds)
+        # self.param_set += if_statement(code_str, param_set_conditions, [])
+        # parameter_name: str, parameter_description: str, parameter_read_only: bool, parameter_type: str):
+
+        # # create parameter description
+        # param_describe_effects = ["rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
+        #                           "descriptor.description = \"%s\";\n" % description]
+        # if len(bounds):
+        #     param_describe_effects.extend([
+        #         "rcl_interfaces::msg::FloatingPointRange range;\n",
+        #         "range.from_value = %s;\n" % bounds[0],
+        #         "range.to_value = %s;\n" % bounds[1],
+        #         "descriptor.floating_point_range.push_back(range);\n"
+        #     ])
+        # if len(read_only):
+        #     param_describe_effects.extend([
+        #         "descriptor.read_only = %s;\n" % bool_to_str(read_only[0]),
+        #     ])
+        # if len(default_value):
+        #     value_str = "rclcpp::ParameterValue(params_.%s_)" % (nested_name + name)
+        # else:
+        #     value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()
+        #
+        # param_describe_effects_2 = ["auto %s = %s;\n" % (param_prefix + name, value_str),
+        #                             "parameters_interface->declare_parameter(\"%s\", %s, descriptor);\n" % (
+        #                                 param_name, param_prefix + name)]
+        # param_describe_conditions = ["!parameters_interface->has_parameter(\"%s\")" % param_name]
+        #
+        # param_describe_effects.append(
+        #     if_statement(param_describe_effects_2, param_describe_conditions, [])
+        # )
+        # self.param_describe += scoped_codeblock(param_describe_effects)
+
+        # UNCOMMENT
+        # self.declare_params.append(DeclareParameter(param_name, description, read_only, defined_type))
 
         # get parameter from by calling parameters_interface API
-        self.param_get += "param = parameters_interface->get_parameter(\"%s\");\n" % param_name
-        param_get_effect_false = ["throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during "
-                                  "initialization for parameter %s: \" + validation_result.error_msg());" % param_name]
-        param_get_effect_true = ["params_.%s_ = param.%s;\n" % (
-            nested_name + name, parameter_conversion)]
-
-        # add default validation
-        code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_len", fixed_size,
-                                       param_get_effect_true,
-                                       param_get_effect_false)
-        code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_bounds", bounds,
-                                       [code_str],
-                                       param_get_effect_false)
-        # add custom validation
-        for val in validation:
-            code_str = validation_sequence("gen_param_struct_validators", val[0], val[1:], [code_str],
-                                           param_get_effect_false)
-
-        self.param_get += code_str
+        # self.param_get += "param = parameters_interface->get_parameter(\"%s\");\n" % param_name
+        # param_get_effect_false = ["throw rclcpp::exceptions::InvalidParameterValueException(\"Invalid value set during "
+        #                           "initialization for parameter %s: \" + validation_result.error_msg());" % param_name]
+        # param_get_effect_true = ["params_.%s_ = param.%s;\n" % (
+        #     nested_name + name, parameter_conversion)]
+        #
+        # # add default validation
+        # code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_len", fixed_size,
+        #                                param_get_effect_true,
+        #                                param_get_effect_false)
+        # code_str = validation_sequence("gen_param_struct_validators", "validate_" + defined_type + "_bounds", bounds,
+        #                                [code_str],
+        #                                param_get_effect_false)
+        # # add custom validation
+        # for val in validation:
+        #     code_str = validation_sequence("gen_param_struct_validators", val[0], val[1:], [code_str],
+        #                                    param_get_effect_false)
+        #
+        # self.param_get += code_str
 
     def parse_dict(self, name, root_map, nested_name):
 
@@ -453,7 +530,6 @@ class GenParamStruct:
             self.struct_tree = cur_struct_tree
         else:
             self.parse_params(name, root_map, nested_name)
-
 
     def run(self):
         if len(sys.argv) < 3 and len(sys.argv) > 4:
@@ -492,22 +568,44 @@ class GenParamStruct:
         COMMENTS = "// this is auto-generated code "
         NAMESPACE = self.namespace
 
-        template_file = os.path.join(
-            os.path.dirname(__file__), 'templates', 'template.txt')
+        # template_file = os.path.join(
+        #     os.path.dirname(__file__), 'cpp_templates', 'template.txt')
+        # with open(template_file, "r") as f:
+        #     self.contents = f.read()
 
-        with open(template_file, "r") as f:
-            self.contents = f.read()
+        validation_functions_file = os.path.join(
+            os.path.dirname(__file__), 'cpp_templates', 'validators.hpp')
+        with open(validation_functions_file, "r") as f:
+            VALIDATION_FUNCTIONS = f.read()
 
-        self.contents = self.contents.replace("**COMMENTS**", COMMENTS)
-        self.contents = self.contents.replace("**USER VALIDATORS**", USER_VALIDATORS)
-        self.contents = self.contents.replace("**NAMESPACE**", NAMESPACE)
-        self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
-        self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
-        self.contents = self.contents.replace("**DESCRIBE_PARAMS**", str(self.param_describe))
-        self.contents = self.contents.replace("**GET_PARAMS**", str(self.param_get))
+        template_path = os.path.join(os.path.dirname(__file__), 'jinja_templates')
+        template_map = dict()
+        for file_name in [f for f in os.listdir(template_path) if os.path.isfile(os.path.join(template_path, f))]:
+            with open(os.path.join(template_path, file_name)) as file:
+                template_map[file_name] = file.read()
 
+        data = {'includes': USER_VALIDATORS,
+                'comments': COMMENTS,
+                'namespace': NAMESPACE,
+                'validation_functions': VALIDATION_FUNCTIONS,
+                'struct_content': self.struct_tree.inner_content(),
+                'update_params_set': ("".join(str(x)) for x in self.update_parameters),
+                'declare_params': ("".join(str(x)) for x in self.declare_parameters),
+                'declare_params_set': ("".join(str(x)) for x in self.declare_parameter_sets)}
+
+        j2_template = Template(template_map['parameter_listener'])
+        # self.contents += j2_template.render(data)
+
+        # self.contents = self.contents.replace("**COMMENTS**", COMMENTS)
+        # self.contents = self.contents.replace("**USER VALIDATORS**", USER_VALIDATORS)
+        # self.contents = self.contents.replace("**NAMESPACE**", NAMESPACE)
+        # self.contents = self.contents.replace("**STRUCT_CONTENT**", str(self.struct))
+        # self.contents = self.contents.replace("**PARAM_SET**", str(self.param_set))
+        # self.contents = self.contents.replace("**DESCRIBE_PARAMS**", str(self.param_describe))
+        # self.contents = self.contents.replace("**GET_PARAMS**", str(self.param_get))
+        code = j2_template.render(data)
         with open(output_file, "w") as f:
-            f.write(self.contents)
+            f.write(code)
 
 
 def main():

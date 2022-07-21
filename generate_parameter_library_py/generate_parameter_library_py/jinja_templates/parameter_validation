@@ -1,0 +1,5 @@
+validation_result = {{validation_function}};
+if (!validation_result.success()) {
+    {{invalid_effect}}
+}
+{{valid_effect}}

@@ -1,4 +1,4 @@
-{{comments}}
+{{COMMENTS}}
 
 #pragma once
 
@@ -6,18 +6,27 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <vector>
 #include <string>
-{{includes}}
+
+namespace gen_param_struct_validators {
+{{validation_functions}}
+{{USER_VALIDATORS}}
+} // namespace gen_param_struct_validators
+
 
 
 namespace {{namespace}} {
 
-    {{validation_functions}}
 
-    struct Params {
-      {{struct_content}}
-      // for detecting if the parameter struct has been updated
-      rclcpp::Time __stamp;
-    };
+
+{%- filter indent(width=2) %}
+struct Params {
+{%- filter indent(width=2) %}
+{{struct_content-}}
+// for detecting if the parameter struct has been updated
+rclcpp::Time __stamp;
+{% endfilter -%}
+};
+{% endfilter -%}
 
     class ParamListener{
     public:
