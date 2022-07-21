@@ -133,7 +133,7 @@ namespace **NAMESPACE** {
 
         rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
           rcl_interfaces::msg::SetParametersResult result;
-          result.successful = false;
+          result.successful = true;
           gen_param_struct_validators::Result validation_result;
 
           result.reason = "success";

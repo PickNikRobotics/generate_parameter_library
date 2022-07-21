@@ -35,7 +35,7 @@ from yaml.parser import ParserError
 import sys
 import os
 from typing import Callable
-from typeguard import typechecked
+from typeguard import typechecked, Optional
 
 # class to help minimize string copies
 class Buffer:
@@ -184,11 +184,6 @@ def get_validation_translation(validation_functions: list[list[any]]):
     if not isinstance(validation_functions[0], list):
         validation_functions = [validation_functions]
     for validation_function in validation_functions:
-        if len(validation_function) < 2:
-            raise compile_error(
-                "The user yaml defined validation function %s does not have enough input arguments, requires at least 1."
-                % validation_function[0]
-            )
         for ind, arg in enumerate(validation_function[1:]):
             if isinstance(arg, list):
                 raise compile_error(
@@ -217,12 +212,12 @@ def get_validation_translation(validation_functions: list[list[any]]):
 
 @typechecked
 def declare_struct(
-    defined_type: str, cpp_type: str, name: str, default_value: list
+    defined_type: str, cpp_type: str, name: str, default_value: Optional[list]
 ) -> str:
     code_str = Buffer()
     if array_type(defined_type):
         code_str += "std::vector<%s> %s " % (cpp_type, name)
-        if len(default_value) > 0:
+        if default_value != None:
             code_str += "= {"
             for ind, val in enumerate(default_value[:-1]):
                 code_str += "%s, " % val
@@ -230,7 +225,7 @@ def declare_struct(
         else:
             code_str += ";\n"
     else:
-        if len(default_value) > 0:
+        if default_value != None:
             code_str += "%s %s = %s;\n" % (cpp_type, name, default_value[0])
         else:
             code_str += "%s %s;\n" % (cpp_type, name)
@@ -298,12 +293,12 @@ def function_call(namespace: str, func_name: str, args: list[str]) -> str:
 def validation_sequence(
     namespace: str,
     func_name: str,
-    args: list,
+    args: Optional[list],
     effects_true: list[str],
     effects_false: list[str],
 ):
     # assumes that the validation function is named validate_{defined_type}_{method}
-    if len(args) == 0:
+    if args == None:
         return flatten_effects(effects_true)  # no validation needed
     tmp = ["param"]
     tmp.extend(args)
@@ -321,14 +316,17 @@ def validation_sequence(
 
 @typechecked
 def default_validation(
-    effects: list[str], defined_type: str, fixed_size: list, bounds: list
+    effects: list[str],
+    defined_type: str,
+    fixed_size: Optional[list],
+    bounds: Optional[list],
 ) -> str:
     code_str = Buffer()
     effects_false = [
         "result.reason = validation_result.error_msg();\n",
         "result.successful = false;",
     ]
-    if fixed_size:
+    if fixed_size != None:
         effects2 = [
             validation_sequence(
                 "gen_param_struct_validators",
@@ -340,7 +338,8 @@ def default_validation(
         ]
     else:
         effects2 = effects
-    if bounds:
+
+    if bounds != None:
         code_str += validation_sequence(
             "gen_param_struct_validators",
             "validate_" + defined_type + "_bounds",
@@ -389,7 +388,7 @@ class GenParamStruct:
             raise compile_error(
                 "The type of the bounds must be the same type as the defined type"
             )
-        if default_value and not validate_type(defined_type, default_value):
+        if default_value != None and not validate_type(defined_type, default_value):
             raise compile_error(
                 "The type of the default_value must be the same type as the defined type"
             )
@@ -404,23 +403,19 @@ class GenParamStruct:
         )
 
         # convert python types to lists of inputs
-        if default_value:
+        if default_value != None:
             if array_type(defined_type):
+                if len(default_value) == 0:
+                    default_value = []
                 for i in range(len(default_value)):
                     default_value[i] = val_to_cpp_str(default_value[i])
             else:
                 default_value = [val_to_cpp_str(default_value)]
-        else:
-            default_value = []
-        if bounds:
+        if bounds != None:
             for i in range(len(bounds)):
                 bounds[i] = val_to_cpp_str(bounds[i])
-        else:
-            bounds = []
-        if fixed_size:
+        if fixed_size != None:
             fixed_size = [int_to_str(fixed_size)]
-        else:
-            fixed_size = []
         if read_only:
             read_only = [read_only]
         else:
@@ -438,20 +433,32 @@ class GenParamStruct:
         # set param value if param.name is the parameter being updated
         param_set_effects = [
             "params_.%s = param.%s;\n" % (nested_name + name, parameter_conversion),
-            "result.successful = true;\n",
         ]
         param_set_conditions = ["param.get_name() == " + '"%s" ' % param_name]
-        code_str = default_validation(
+        param_set_code_str = default_validation(
             param_set_effects, defined_type, fixed_size, bounds
         )
-        self.param_set += if_statement(code_str, param_set_conditions, [])
+        # add custom validation
+        param_set_effects_false = [
+            "result.reason = validation_result.error_msg();\n",
+            "result.successful = false;",
+        ]
+        for val in validation:
+            param_set_code_str = validation_sequence(
+                "gen_param_struct_validators",
+                val[0],
+                val[1:],
+                [param_set_code_str],
+                param_set_effects_false,
+            )
+        self.param_set += if_statement(param_set_code_str, param_set_conditions, [])
 
         # create parameter description
         param_describe_effects = [
             "rcl_interfaces::msg::ParameterDescriptor descriptor;\n",
             'descriptor.description = "%s";\n' % description,
         ]
-        if len(bounds):
+        if bounds != None:
             param_describe_effects.extend(
                 [
                     "rcl_interfaces::msg::FloatingPointRange range;\n",
@@ -466,7 +473,7 @@ class GenParamStruct:
                     "descriptor.read_only = %s;\n" % bool_to_str(read_only[0]),
                 ]
             )
-        if len(default_value):
+        if default_value != None:
             value_str = "rclcpp::ParameterValue(params_.%s)" % (nested_name + name)
         else:
             value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()
@@ -499,31 +506,31 @@ class GenParamStruct:
         ]
 
         # add default validation
-        code_str = validation_sequence(
+        param_get_code_str = validation_sequence(
             "gen_param_struct_validators",
             "validate_" + defined_type + "_len",
             fixed_size,
             param_get_effect_true,
             param_get_effect_false,
         )
-        code_str = validation_sequence(
+        param_get_code_str = validation_sequence(
             "gen_param_struct_validators",
             "validate_" + defined_type + "_bounds",
             bounds,
-            [code_str],
+            [param_get_code_str],
             param_get_effect_false,
         )
         # add custom validation
         for val in validation:
-            code_str = validation_sequence(
+            param_get_code_str = validation_sequence(
                 "gen_param_struct_validators",
                 val[0],
                 val[1:],
-                [code_str],
+                [param_get_code_str],
                 param_get_effect_false,
             )
 
-        self.param_get += code_str
+        self.param_get += param_get_code_str
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict) and isinstance(
