@@ -161,7 +161,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::string"
     elif yaml_type == "double":
         cpp_type = "double"
-    elif yaml_type == "integer":
+    elif yaml_type == "int":
         cpp_type = "int"
     elif yaml_type == "bool":
         cpp_type = "bool"
@@ -178,7 +178,7 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = str_to_str
     elif yaml_type == "double_array":
         val_to_cpp_str = float_to_str
-    elif yaml_type == "int_array":
+    elif yaml_type == "integer_array":
         val_to_cpp_str = int_to_str
     elif yaml_type == "bool_array":
         val_to_cpp_str = bool_to_str
@@ -186,7 +186,7 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = str_to_str
     elif yaml_type == "double":
         val_to_cpp_str = float_to_str
-    elif yaml_type == "integer":
+    elif yaml_type == "int":
         val_to_cpp_str = int_to_str
     elif yaml_type == "bool":
         val_to_cpp_str = bool_to_str
@@ -226,7 +226,7 @@ def get_parameter_as_function_str(yaml_type: str) -> str:
         parameter_conversion = "as_string()"
     elif yaml_type == "double":
         parameter_conversion = "as_double()"
-    elif yaml_type == "integer":
+    elif yaml_type == "int":
         parameter_conversion = "as_int()"
     elif yaml_type == "bool":
         parameter_conversion = "as_bool()"
