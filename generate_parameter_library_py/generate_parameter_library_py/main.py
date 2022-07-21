@@ -196,8 +196,9 @@ def cpp_str_func_from_defined_type(yaml_type: str):
     return val_to_cpp_str
 
 
-@typechecked
-def cpp_str_func_from_python_val(arg: any) -> Callable:
+# TODO type checking fails here
+# @typechecked
+def cpp_str_func_from_python_val(arg):
     if isinstance(arg, int):
         val_func = int_to_str
     elif isinstance(arg, float):
