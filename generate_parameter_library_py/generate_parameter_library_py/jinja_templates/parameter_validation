@@ -1,4 +1,4 @@
-validation_result = {{validation_function}};
+validation_result = gen_param_struct_validators::{{validation_function}};
 if (!validation_result.success()) {
 {%- filter indent(width=2) %}
 {{invalid_effect}}

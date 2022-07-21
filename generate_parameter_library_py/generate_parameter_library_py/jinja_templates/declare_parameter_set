@@ -2,4 +2,4 @@ param = parameters_interface->get_parameter("{{parameter_name}}");
 {% if parameter_validations|length -%}
 {{parameter_validations-}}
 {% endif -%}
-params_.{{parameter_name}}_ = param.{{parameter_as_function}};
+params_.{{parameter_name}} = param.{{parameter_as_function}};

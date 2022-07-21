@@ -13,14 +13,14 @@ public:
         500ms, std::bind(&MinimalPublisher::timer_callback, this));
     param_listener = std::make_shared<admittance_controller::ParamListener>(get_node_parameters_interface());
     params_ = param_listener->get_params();
-    RCLCPP_INFO(this->get_logger(), "Initial control frame parameter is: '%s'", params_.control_.frame_.id_.c_str());
+    RCLCPP_INFO(this->get_logger(), "Initial control frame parameter is: '%s'", params_.control.frame.id.c_str());
   }
 
 private:
   void timer_callback() {
     if (param_listener->is_old(params_)){
       params_ = param_listener->get_params();
-      RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'", params_.control_.frame_.id_.c_str());
+      RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'", params_.control.frame.id.c_str());
     }
   }
 
@@ -38,5 +38,4 @@ int main(int numArgs, const char **args) {
 
   return 0;
 }
-
 

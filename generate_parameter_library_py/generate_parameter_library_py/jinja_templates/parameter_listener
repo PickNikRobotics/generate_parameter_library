@@ -47,7 +47,7 @@ rclcpp::Time __stamp;
       return params_;
     }
 
-    bool is_invalid(Params const& other) const {
+    bool is_old(Params const& other) const {
       return params_.__stamp != other.__stamp;
     }
 
