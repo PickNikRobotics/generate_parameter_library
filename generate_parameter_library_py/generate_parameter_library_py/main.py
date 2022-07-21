@@ -221,7 +221,7 @@ def declare_struct(
 ) -> str:
     code_str = Buffer()
     if array_type(defined_type):
-        code_str += "std::vector<%s> %s_ " % (cpp_type, name)
+        code_str += "std::vector<%s> %s " % (cpp_type, name)
         if len(default_value) > 0:
             code_str += "= {"
             for ind, val in enumerate(default_value[:-1]):
@@ -231,9 +231,9 @@ def declare_struct(
             code_str += ";\n"
     else:
         if len(default_value) > 0:
-            code_str += "%s %s_ = %s;\n" % (cpp_type, name, default_value[0])
+            code_str += "%s %s = %s;\n" % (cpp_type, name, default_value[0])
         else:
-            code_str += "%s %s_;\n" % (cpp_type, name)
+            code_str += "%s %s;\n" % (cpp_type, name)
     return str(code_str)
 
 
@@ -366,8 +366,8 @@ class GenParamStruct:
 
     def parse_params(self, name, value, nested_name_list):
         # define names for parameters and variables
-        nested_name = "".join(x + "_." for x in nested_name_list[1:])
-        param_prefix = "p_" + "".join(x + "_" for x in nested_name_list[1:])
+        nested_name = "".join(x + "." for x in nested_name_list[1:])
+        param_prefix = "p_" + "".join(x for x in nested_name_list[1:])
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
         # optional attributes
@@ -437,7 +437,7 @@ class GenParamStruct:
 
         # set param value if param.name is the parameter being updated
         param_set_effects = [
-            "params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion),
+            "params_.%s = param.%s;\n" % (nested_name + name, parameter_conversion),
             "result.successful = true;\n",
         ]
         param_set_conditions = ["param.get_name() == " + '"%s" ' % param_name]
@@ -467,7 +467,7 @@ class GenParamStruct:
                 ]
             )
         if len(default_value):
-            value_str = "rclcpp::ParameterValue(params_.%s_)" % (nested_name + name)
+            value_str = "rclcpp::ParameterValue(params_.%s)" % (nested_name + name)
         else:
             value_str = "rclcpp::ParameterType::PARAMETER_%s" % defined_type.upper()
 
@@ -495,7 +495,7 @@ class GenParamStruct:
             % param_name
         ]
         param_get_effect_true = [
-            "params_.%s_ = param.%s;\n" % (nested_name + name, parameter_conversion)
+            "params_.%s = param.%s;\n" % (nested_name + name, parameter_conversion)
         ]
 
         # add default validation
@@ -530,14 +530,14 @@ class GenParamStruct:
             next(iter(root_map.values())), dict
         ):
             if name != self.namespace:
-                self.struct += "struct %s {\n" % name
+                self.struct += "struct %s {\n" % name.upper()
             for key in root_map:
                 if isinstance(root_map[key], dict):
                     nested_name.append(name)
                     self.parse_dict(key, root_map[key], nested_name)
                     nested_name.pop()
             if name != self.namespace:
-                self.struct += "} %s_;\n" % name
+                self.struct += "} %s;\n" % name
         else:
             self.parse_params(name, root_map, nested_name)
 

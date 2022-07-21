@@ -40,7 +40,7 @@ class MinimalPublisher : public rclcpp::Node {
         get_node_parameters_interface());
     params_ = param_listener->get_params();
     RCLCPP_INFO(this->get_logger(), "Initial control frame parameter is: '%s'",
-                params_.control_.frame_.id_.c_str());
+                params_.control.frame.id.c_str());
   }
 
  private:
@@ -48,7 +48,7 @@ class MinimalPublisher : public rclcpp::Node {
     if (param_listener->is_old(params_)) {
       params_ = param_listener->get_params();
       RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'",
-                  params_.control_.frame_.id_.c_str());
+                  params_.control.frame.id.c_str());
     }
   }
 
