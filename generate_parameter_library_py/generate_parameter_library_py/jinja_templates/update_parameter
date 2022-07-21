@@ -1,0 +1,8 @@
+if (param.get_name() == "{{parameter_name}}") {
+{%- filter indent(width=2) %}
+{% if parameter_validations|length -%}
+{{parameter_validations-}}
+{% endif -%}
+params_.{{parameter_name}} = param.{{parameter_as_function}};
+{% endfilter -%}
+}

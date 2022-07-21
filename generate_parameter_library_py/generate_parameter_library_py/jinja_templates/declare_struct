@@ -1,0 +1,10 @@
+struct {{struct_name}} {
+{%- filter indent(width=2) %}
+{% if struct_fields|length -%}
+{{struct_fields}}
+{%- endif -%}
+{%- if sub_structs|length %}
+{{-sub_structs-}}
+{% endif -%}
+{% endfilter -%}
+} {{struct_instance}};

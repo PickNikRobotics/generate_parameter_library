@@ -1,6 +1,13 @@
 admittance_controller:
+  interpolation_mode: {
+    type: string,
+    default_value: "spline",
+    description: "specifies which algorithm to use for interpolation.",
+    one_of: ["spline", "linear", "none"]
+  }
   joints: {
     type: string_array,
+    default_value: [],
     description: "specifies which joints will be used by the controller",
     read_only: true
   }
@@ -161,6 +168,6 @@ admittance_controller:
   }
   use_feedforward_commanded_input: {
     type: bool,
-    default_value: true,
+    default_value: false,
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
   }

@@ -15,7 +15,13 @@ setup(
     install_requires=["setuptools"],
     package_data={
         "": [
-            "templates/template.txt",
+            "cpp_templates/validators.hpp",
+            "jinja_templates/declare_parameter",
+            "jinja_templates/declare_parameter_set",
+            "jinja_templates/declare_struct",
+            "jinja_templates/parameter_listener",
+            "jinja_templates/parameter_validation",
+            "jinja_templates/update_parameter",
         ]
     },
     zip_safe=False,
