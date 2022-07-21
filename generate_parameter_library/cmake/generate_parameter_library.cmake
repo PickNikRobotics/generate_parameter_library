@@ -33,18 +33,23 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     message(FATAL_ERROR "generate_parameter_library_py() variable 'generate_parameter_library_py_BIN' must not be empty")
   endif()
 
-  # Optional 4th parameter for the user defined validation header
-  set(VALIDATE_HEADER ${ARGV2})
+  # Optional 3rd parameter for the user defined validation header
+  if (${ARGC} EQUAL 3)
+    set(VALIDATE_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV2})
+  endif()
+
+  # Set the yaml file parameter to be relative to the current source dir
+  set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
   # Set the output parameter header file name
   set(PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/${LIB_NAME}.hpp)
 
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
-    COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/${VALIDATE_HEADER}
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/${VALIDATE_HEADER}
+    COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER}
+    DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
     COMMENT
-    "Running `${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/${VALIDATE_HEADER}`"
+    "Running `${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER}`"
     VERBATIM
   )
 
