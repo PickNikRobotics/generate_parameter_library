@@ -3,7 +3,7 @@ admittance_controller:
     type: string,
     default_value: "spline",
     description: "specifies which algorithm to use for interpolation.",
-    one_of: ["spline", "linear", "none"]
+    one_of: ["spline", "linear"]
   }
   joints: {
     type: string_array,

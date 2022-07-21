@@ -94,7 +94,8 @@ Result validate_one_of(rclcpp::Parameter const& parameter,
     std::stringstream ss;
     for (auto const& c : collection) ss << c << ", ";
     return ERROR("The parameter (%s) with the value (%s) not in the set: [%s]",
-                 parameter.get_name(), param_value, ss.str());
+                 parameter.get_name(), std::string{param_value},
+                 ss.str().c_str());
   }
 
   return OK;
