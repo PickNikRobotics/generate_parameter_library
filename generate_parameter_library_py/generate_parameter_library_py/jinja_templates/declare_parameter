@@ -1,7 +1,14 @@
 if (!parameters_interface->has_parameter("{{parameter_name}}")) {
-    rcl_interfaces::msg::ParameterDescriptor descriptor;
-    descriptor.description = "{{parameter_description}}";
-    descriptor.read_only = {{parameter_read_only}};
-    auto parameter = rclcpp::ParameterType::{{parameter_type}};
-    parameters_interface->declare_parameter("{{parameter_name}}", parameter, descriptor);
+{%- filter indent(width=2) %}
+rcl_interfaces::msg::ParameterDescriptor descriptor;
+descriptor.description = "{{parameter_description}}";
+descriptor.read_only = {{parameter_read_only}};
+{%- if not default_value|length %}
+auto parameter = rclcpp::ParameterType::{{parameter_type}};
+{% endif -%}
+{%- if default_value|length %}
+auto parameter = rclcpp::ParameterValue(params_.{{parameter_name}});
+{% endif -%}
+parameters_interface->declare_parameter("{{parameter_name}}", parameter, descriptor);
+{% endfilter -%}
 }

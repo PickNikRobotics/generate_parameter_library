@@ -8,16 +8,15 @@
 #include <string>
 
 namespace gen_param_struct_validators {
+{%- filter indent(width=2) %}
 {{validation_functions}}
+{% if USER_VALIDATORS|length -%}
 {{USER_VALIDATORS}}
+{%- endif -%}
+{% endfilter -%}
 } // namespace gen_param_struct_validators
 
-
-
 namespace {{namespace}} {
-
-
-
 {%- filter indent(width=2) %}
 struct Params {
 {%- filter indent(width=2) %}
@@ -26,62 +25,71 @@ struct Params {
 rclcpp::Time __stamp;
 {% endfilter -%}
 };
-{% endfilter -%}
+{%- endfilter %}
 
-    class ParamListener{
-    public:
+  class ParamListener{
+  public:
     // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
     ParamListener(rclcpp::Node::SharedPtr node)
     : ParamListener(node->get_node_parameters_interface()) {}
+
     ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node)
     : ParamListener(node->get_node_parameters_interface()) {}
+
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
-        declare_params(parameters_interface);
-        auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
-        handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
-        clock_ = rclcpp::Clock();
+      declare_params(parameters_interface);
+      auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
+      handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
+      clock_ = rclcpp::Clock();
     }
 
     Params get_params() const{
-        return params_;
+      return params_;
     }
 
     bool is_invalid(Params const& other) const {
-        return params_.__stamp != other.__stamp;
+      return params_.__stamp != other.__stamp;
     }
 
-        rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-          rcl_interfaces::msg::SetParametersResult result;
-          result.successful = false;
-          gen_param_struct_validators::Result validation_result;
+    rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
+      rcl_interfaces::msg::SetParametersResult result;
+      result.successful = true;
+      gen_param_struct_validators::Result validation_result;
 
-          result.reason = "success";
-          for (const auto &param: parameters) {
-            {{update_params_set}}
-          }
-          if (result.successful){
-            params_.__stamp = clock_.now();
-          }
-          return result;
-        }
+      result.reason = "success";
+      for (const auto &param: parameters) {
+{%- filter indent(width=8) %}
+{{update_params_set}}
+{%- endfilter %}
+      }
 
-        void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
-            // declare all parameters and give default values to non-required ones
+      if (result.successful){
+        params_.__stamp = clock_.now();
+      }
 
-            {{declare_params}}
-            // get parameters and fill struct fields
-            rclcpp::Parameter param;
-            gen_param_struct_validators::Result validation_result;
+      return result;
+    }
 
-            {{declare_params_set}}
-            params_.__stamp = clock_.now();
-        }
+    void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
+      // declare all parameters and give default values to non-required ones
+{%- filter indent(width=6) %}
+{{declare_params}}
+{%- endfilter %}
+      // get parameters and fill struct fields
+      rclcpp::Parameter param;
+      gen_param_struct_validators::Result validation_result;
 
-        private:
-            std::mutex mutex_;
-            Params params_;
-            rclcpp::Clock clock_;
-            std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
-    };
+{%- filter indent(width=6) %}
+{{declare_params_set}}
+{%- endfilter %}
+      params_.__stamp = clock_.now();
+    }
+
+    private:
+      std::mutex mutex_;
+      Params params_;
+      rclcpp::Clock clock_;
+      std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
+  };
 
 } // namespace **NAMESPACE**

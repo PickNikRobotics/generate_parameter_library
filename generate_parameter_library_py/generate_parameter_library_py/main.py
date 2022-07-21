@@ -4,11 +4,10 @@ import yaml
 from yaml.parser import ParserError
 import sys
 import os
-from typing import Callable
+from typing import Callable, Optional
 from typeguard import typechecked
 from jinja2 import Template
 from cpptypes import *
-
 
 
 def get_all_templates():
@@ -19,6 +18,7 @@ def get_all_templates():
             template_map[file_name] = file.read()
 
     return template_map
+
 
 # class to help minimize string copies
 class Buffer:
@@ -81,12 +81,16 @@ def validate_type(defined_type: str, value):
 
 # value to c++ string conversion functions
 @typechecked
-def bool_to_str(cond: bool):
+def bool_to_str(cond: Optional[bool]):
+    if cond is None:
+        return None
     return "true" if cond else "false"
 
 
 @typechecked
-def float_to_str(num: float):
+def float_to_str(num: Optional[float]):
+    if num is None:
+        return None
     str_num = str(num)
     if str_num == "nan":
         str_num = "std::numeric_limits<double>::quiet_NaN()"
@@ -102,12 +106,16 @@ def float_to_str(num: float):
 
 
 @typechecked
-def int_to_str(num: int):
+def int_to_str(num: Optional[int]):
+    if num is None:
+        return None
     return str(num)
 
 
 @typechecked
-def str_to_str(s: str):
+def str_to_str(s: Optional[str]):
+    if s is None:
+        return None
     return "\"%s\"" % s
 
 
@@ -160,26 +168,76 @@ def get_translation_data(defined_type: str) -> (str, Callable, str):
     return cpp_type, val_to_cpp_str, parameter_conversion
 
 
+# cpp_type, val_to_cpp_str, parameter_conversion
 @typechecked
-def get_parameter_conversion_function(defined_type: str) -> str:
-    if defined_type == 'string_array':
+def get_cpp_type(yaml_type: str) -> (str, Callable, str):
+    if yaml_type == 'string_array':
+        cpp_type = 'std::vector<std::string>'
+    elif yaml_type == 'double_array':
+        cpp_type = 'std::vector<double>'
+    elif yaml_type == 'int_array':
+        cpp_type = 'std::vector<int>'
+    elif yaml_type == 'bool_array':
+        cpp_type = 'std::vector<bool>'
+    elif yaml_type == 'string':
+        cpp_type = 'std::string'
+    elif yaml_type == 'double':
+        cpp_type = 'double'
+    elif yaml_type == 'integer':
+        cpp_type = 'int'
+    elif yaml_type == 'bool':
+        cpp_type = 'bool'
+    else:
+        raise compile_error('invalid yaml type: %s' % type(yaml_type))
+
+    return cpp_type
+
+
+# cpp_type, val_to_cpp_str, parameter_conversion
+@typechecked
+def get_val_to_cpp_str_func(yaml_type: str) -> Callable:
+    if yaml_type == 'string_array':
+        val_to_cpp_str = str_to_str
+    elif yaml_type == 'double_array':
+        val_to_cpp_str = float_to_str
+    elif yaml_type == 'int_array':
+        val_to_cpp_str = int_to_str
+    elif yaml_type == 'bool_array':
+        val_to_cpp_str = bool_to_str
+    elif yaml_type == 'string':
+        val_to_cpp_str = str_to_str
+    elif yaml_type == 'double':
+        val_to_cpp_str = float_to_str
+    elif yaml_type == 'integer':
+        val_to_cpp_str = int_to_str
+    elif yaml_type == 'bool':
+        val_to_cpp_str = bool_to_str
+    else:
+        raise compile_error('invalid yaml type: %s' % type(yaml_type))
+
+    return val_to_cpp_str
+
+
+@typechecked
+def get_parameter_conversion_function(yaml_type: str) -> str:
+    if yaml_type == 'string_array':
         parameter_conversion = 'as_string_array()'
-    elif defined_type == 'double_array':
+    elif yaml_type == 'double_array':
         parameter_conversion = 'as_double_array()'
-    elif defined_type == 'int_array':
+    elif yaml_type == 'int_array':
         parameter_conversion = 'as_integer_array()'
-    elif defined_type == 'bool_array':
+    elif yaml_type == 'bool_array':
         parameter_conversion = 'as_bool_array()'
-    elif defined_type == 'string':
+    elif yaml_type == 'string':
         parameter_conversion = 'as_string()'
-    elif defined_type == 'double':
+    elif yaml_type == 'double':
         parameter_conversion = 'as_double()'
-    elif defined_type == 'integer':
+    elif yaml_type == 'integer':
         parameter_conversion = 'as_int()'
-    elif defined_type == 'bool':
+    elif yaml_type == 'bool':
         parameter_conversion = 'as_bool()'
     else:
-        raise compile_error('invalid yaml type: %s' % type(defined_type))
+        raise compile_error('invalid yaml type: %s' % type(yaml_type))
 
     return parameter_conversion
 
@@ -380,16 +438,15 @@ class GenParamStruct:
         var = VariableDeclaration(defined_type, name, default_value)
         self.struct_tree.add_field(var)
 
-        declare_parameter = DeclareParameter(param_name, description, read_only, defined_type)
+        declare_parameter = DeclareParameter(param_name, description, read_only, defined_type, default_value)
         self.declare_parameters.append(declare_parameter)
 
-        update_parameter_invalid = "result.successful = false;break;"
-        update_parameter_valid = "result.successful = true;"
+        update_parameter_invalid = "result.successful = false;\nbreak;"
+        update_parameter_valid = ""
         update_parameter = UpdateParameter(param_name, parameter_conversion)
         for validation in validations:
-            parameter_validation = ParameterValidation(update_parameter_invalid, update_parameter_valid)
             validation_function = ValidationFunction(validation[0], validation[1:])
-            parameter_validation.add_validation_function(validation_function)
+            parameter_validation = ParameterValidation(update_parameter_invalid, update_parameter_valid, validation_function)
             update_parameter.add_parameter_validation(parameter_validation)
 
         self.update_parameters.append(update_parameter)
@@ -399,9 +456,9 @@ class GenParamStruct:
         declare_parameter_valid = "params_.gravity_compensation_.CoG_.pos_ = param.as_double_array();"
         declare_parameter_set = DeclareParameterSet(param_name, parameter_conversion)
         for validation in validations:
-            parameter_validation = ParameterValidation(update_parameter_invalid, update_parameter_valid)
             validation_function = ValidationFunction(validation[0], validation[1:])
-            parameter_validation.add_validation_function(validation_function)
+            parameter_validation = ParameterValidation(declare_parameter_invalid, declare_parameter_valid,
+                                                       validation_function)
             declare_parameter_set.add_parameter_validation(parameter_validation)
 
         self.declare_parameter_sets.append(declare_parameter_set)
@@ -584,14 +641,14 @@ class GenParamStruct:
             with open(os.path.join(template_path, file_name)) as file:
                 template_map[file_name] = file.read()
 
-        data = {'includes': USER_VALIDATORS,
-                'comments': COMMENTS,
+        data = {'USER_VALIDATORS': USER_VALIDATORS,
+                'COMMENTS': COMMENTS,
                 'namespace': NAMESPACE,
                 'validation_functions': VALIDATION_FUNCTIONS,
                 'struct_content': self.struct_tree.inner_content(),
-                'update_params_set': ("".join(str(x)) for x in self.update_parameters),
-                'declare_params': ("".join(str(x)) for x in self.declare_parameters),
-                'declare_params_set': ("".join(str(x)) for x in self.declare_parameter_sets)}
+                'update_params_set': "\n".join([str(x) for x in self.update_parameters]),
+                'declare_params': "\n".join([str(x) for x in self.declare_parameters]),
+                'declare_params_set': "\n".join([str(x) for x in self.declare_parameter_sets])}
 
         j2_template = Template(template_map['parameter_listener'])
         # self.contents += j2_template.render(data)

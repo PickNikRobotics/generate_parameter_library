@@ -1,6 +1,8 @@
 if (param.get_name() == "{{parameter_name}}") {
-    result.successful = false;
-    {{parameter_validations}}
-    params_.{{parameter_name}} = param.{{parameter_as_function}};
-    result.successful = true;
+{%- filter indent(width=2) %}
+{% if parameter_validations|length -%}
+{{parameter_validations-}}
+{% endif -%}
+params_.{{parameter_name}} = param.{{parameter_as_function}};
+{% endfilter -%}
 }

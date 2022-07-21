@@ -1,6 +1,7 @@
 admittance_controller:
   joints: {
     type: string_array,
+    default_value: [],
     description: "specifies which joints will be used by the controller",
     read_only: true
   }
