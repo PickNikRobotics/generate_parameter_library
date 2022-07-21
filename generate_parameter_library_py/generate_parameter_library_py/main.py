@@ -171,9 +171,9 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
     return cpp_type
 
 
-# cpp_type, val_to_cpp_str, parameter_conversion
-@typechecked
-def cpp_str_func_from_defined_type(yaml_type: str) -> Callable:
+# TODO type checking fails here
+# @typechecked
+def cpp_str_func_from_defined_type(yaml_type: str):
     if yaml_type == "string_array":
         val_to_cpp_str = str_to_str
     elif yaml_type == "double_array":
