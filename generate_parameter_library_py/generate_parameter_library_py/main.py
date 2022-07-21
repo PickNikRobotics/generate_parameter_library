@@ -378,17 +378,26 @@ class Struct:
 class ValidationFunction:
     @typechecked
     def __init__(self, function_name: str, arguments: list[any]):
+        # if isinstance(arguments, list) and isinstance(arguments[0], list):
+        #     pass
         self.function_name = function_name
         self.arguments = arguments
 
     def __str__(self):
         code = self.function_name + "(param"
-        for arg in self.arguments[:-1]:
-            val_func = cpp_str_func_from_python_val(arg)
-            code += ", " + val_func(arg)
-        if len(self.arguments) > 0:
-            val_func = cpp_str_func_from_python_val(self.arguments[-1])
-            code += ", " + val_func(self.arguments[-1])
+        for arg in self.arguments:
+            if isinstance(arg, list):
+                code += ", {"
+                for ind, a in enumerate(arg):
+                    val_func = cpp_str_func_from_python_val(a)
+                    delim = ", "
+                    if ind == len(arg) - 1:
+                        delim = ""
+                    code += val_func(a) + delim
+                code += "}"
+            else:
+                val_func = cpp_str_func_from_python_val(arg)
+                code += ", " + val_func(arg)
         code += ")"
 
         return code
@@ -516,6 +525,7 @@ class GenParamStruct:
         read_only = bool(value.get("read_only", False))
         bounds = value.get("bounds", None)
         fixed_size = value.get("fixed_size", None)
+        one_of = value.get("one_of", None)
         validations = value.get("validation", [])
 
         # # validate inputs
@@ -523,6 +533,8 @@ class GenParamStruct:
             raise compile_error(
                 "The type of the bounds must be the same type as the defined type"
             )
+        if bounds is not None and len(bounds) != 2:
+            raise compile_error("The bounds must have two inputs: [lower, upper]")
         if default_value and not validate_type(defined_type, default_value):
             raise compile_error(
                 "The type of the default_value must be the same type as the defined type"
@@ -531,6 +543,12 @@ class GenParamStruct:
             raise compile_error(
                 "The type of the fixed size attribute must be an integer"
             )
+        if one_of is not None and not all(
+            validate_type(defined_type, x) for x in one_of
+        ):
+            raise compile_error("The type of the one_of attribute must be an list")
+        if one_of is not None and len(one_of) == 2:
+            raise compile_error("The one_of must have at least one input")
 
         # add default validations if applicable
         if len(validations) > 0 and isinstance(validations[0], str):
@@ -543,6 +561,9 @@ class GenParamStruct:
 
         if fixed_size is not None:
             validations.append(["validate_" + defined_type + "_len", fixed_size])
+
+        if one_of is not None:
+            validations.append(["validate_" + defined_type + "_one_of", one_of])
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)

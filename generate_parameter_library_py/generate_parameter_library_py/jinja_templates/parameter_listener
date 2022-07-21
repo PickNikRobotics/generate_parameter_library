@@ -6,6 +6,7 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <vector>
 #include <string>
+#include <set>
 
 namespace gen_param_struct_validators {
 {%- filter indent(width=2) %}
