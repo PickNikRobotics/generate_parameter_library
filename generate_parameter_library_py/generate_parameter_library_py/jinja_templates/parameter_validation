@@ -4,6 +4,6 @@ if (!validation_result.success()) {
 {{invalid_effect}}
 {% endfilter -%}
 }
-{%- if valid_effect|length %}
-{{-valid_effect}}
-{%- endif %}
+{% if valid_effect|length -%}
+{{valid_effect-}}
+{% endif -%}

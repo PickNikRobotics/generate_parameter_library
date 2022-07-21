@@ -4,7 +4,7 @@ rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
 descriptor.read_only = {{parameter_read_only}};
 {%- if not default_value|length %}
-auto parameter = rclcpp::ParameterType::{{parameter_type}};
+auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
 {% endif -%}
 {%- if default_value|length %}
 auto parameter = rclcpp::ParameterValue(params_.{{parameter_name}});

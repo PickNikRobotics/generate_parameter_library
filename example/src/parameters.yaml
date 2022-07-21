@@ -162,6 +162,6 @@ admittance_controller:
   }
   use_feedforward_commanded_input: {
     type: bool,
-    default_value: true,
+    default_value: false,
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
   }
