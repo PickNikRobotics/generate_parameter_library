@@ -548,7 +548,7 @@ class GenParamStruct:
             validate_type(defined_type, x) for x in one_of
         ):
             raise compile_error("The type of the one_of attribute must be an list")
-        if one_of is not None and len(one_of) == 2:
+        if one_of is not None and len(one_of) == 0:
             raise compile_error("The one_of must have at least one input")
 
         # add default validations if applicable
