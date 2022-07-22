@@ -9,6 +9,8 @@
 #include <set>
 #include <sstream>
 
+#include <fmt/format.h>
+
 namespace gen_param_struct_validators {
 {%- filter indent(width=2) %}
 {{validation_functions}}
