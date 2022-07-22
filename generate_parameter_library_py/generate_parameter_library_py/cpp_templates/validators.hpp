@@ -67,10 +67,33 @@ template <typename T>
 Result fixed_size(const rclcpp::Parameter& parameter, size_t size) {
   auto param_value = parameter.get_value<std::vector<T>>();
   if (param_value.size() != size) {
-    return ERROR("Invalid length '{}' for parameter {}. Required length: {}",
+    return ERROR("Invalid length '{}' for parameter '{}'. Required length: {}",
                  param_value.size(), parameter.get_name().c_str(), size);
   }
   return OK;
+}
+
+template <typename T>
+Result size_gt(rclcpp::Parameter const& parameter, size_t size) {
+  auto const& values = parameter.get_value<std::vector<T>>();
+  if (values.size() > size) {
+    return OK;
+  }
+
+  return ERROR(
+      "Invalid length '{}' for parameter '{}'. Required greater than: {}",
+      values.size(), parameter.get_name(), size);
+}
+
+template <typename T>
+Result size_lt(rclcpp::Parameter const& parameter, size_t size) {
+  auto const& values = parameter.get_value<std::vector<T>>();
+  if (values.size() < size) {
+    return OK;
+  }
+
+  return ERROR("Invalid length '{}' for parameter '{}'. Required less than: {}",
+               values.size(), parameter.get_name(), size);
 }
 
 template <typename T>
