@@ -46,8 +46,8 @@ Result validate_bounds(const rclcpp::Parameter& parameter,
   for (auto val : param_value) {
     if (val < lower_bound || val > upper_bound) {
       return ERROR(
-          "Invalid value '%s' for parameter %s. Required bounds: [%s, %s]", to_string(val),
-          parameter.get_name().c_str(), to_string(lower_bound), to_string(upper_bound));
+          "Invalid value '%s' for parameter %s. Required bounds: [%s, %s]", "TODO: print value",
+          parameter.get_name().c_str(), "TODO: print value", "TODO: print value");
     }
   }
   return OK;
@@ -56,13 +56,13 @@ Result validate_bounds(const rclcpp::Parameter& parameter,
 template <typename T>
 Result validate_one_of(rclcpp::Parameter const& parameter,
                        std::set<T> collection) {
-  auto param_value = parameter.get_value<std::vector<T>>();
+  auto param_value = parameter.get_value<T>();
 
   if (collection.find(param_value) == collection.end()) {
     std::stringstream ss;
     for (auto const& c : collection) ss << c << ", ";
     return ERROR("The parameter (%s) with the value (%s) not in the set: [%s]",
-                 parameter.get_name(), std::string{param_value},
+                 parameter.get_name(), "TODO: print value",
                  ss.str().c_str());
   }
 

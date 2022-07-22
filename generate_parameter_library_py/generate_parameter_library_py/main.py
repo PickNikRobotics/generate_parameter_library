@@ -399,10 +399,10 @@ class Struct:
 
 class ValidationFunction:
     @typechecked
-    def __init__(self, function_suffix: str, arguments: list[any], template_type=None):
+    def __init__(self, function_name: str, arguments: list[any], template_type=None):
         # if isinstance(arguments, list) and isinstance(arguments[0], list):
         #     pass
-        self.function_name = "validate_" + function_suffix
+        self.function_name = function_name
         if template_type is not None:
             self.function_name += f"<{template_type}>"
 
@@ -585,14 +585,14 @@ class GenParamStruct:
 
         # add default validations if applicable
         if bounds is not None:
-            validations.append(ValidationFunction("bounds", bounds, cpp_primitive_type_from_defined_type(defined_type))
+            validations.append(ValidationFunction("validate_bounds", bounds, cpp_primitive_type_from_defined_type(defined_type))
                                )
 
         if fixed_size is not None:
-            validations.append(ValidationFunction("len", [fixed_size], cpp_primitive_type_from_defined_type(defined_type)))
+            validations.append(ValidationFunction("validate_len", [fixed_size], cpp_primitive_type_from_defined_type(defined_type)))
 
         if one_of is not None:
-            validations.append(ValidationFunction("one_of", one_of, cpp_type_from_defined_type(defined_type)))
+            validations.append(ValidationFunction("validate_one_of", [one_of], cpp_type_from_defined_type(defined_type)))
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
