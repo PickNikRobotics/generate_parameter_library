@@ -557,9 +557,6 @@ class GenParamStruct:
         default_value = value.get("default_value", None)
         description = value.get("description", "")
         read_only = bool(value.get("read_only", False))
-        # bounds = value.get("bounds", None)
-        # fixed_size = value.get("fixed_size", None)
-        # one_of = value.get("one_of", None)
         validations = []
         validations_dict = value.get("validation", {})
         for func_name in validations_dict:
