@@ -31,7 +31,7 @@ template <typename T>
 Result validate_len(const rclcpp::Parameter& parameter, size_t size) {
   auto param_value = parameter.get_value<std::vector<T>>();
   if (param_value.size() != size) {
-    return ERROR("Invalid length '%d' for parameter %s. Required length: %d",
+    return ERROR("Invalid length '{}' for parameter {}. Required length: {}",
                  param_value.size(), parameter.get_name().c_str(), size);
   }
   return OK;
@@ -44,8 +44,8 @@ Result validate_bounds(const rclcpp::Parameter& parameter,
   for (auto val : param_value) {
     if (val < lower_bound || val > upper_bound) {
       return ERROR(
-          "Invalid value '%s' for parameter %s. Required bounds: [%s, %s]", "TODO: print value",
-          parameter.get_name().c_str(), "TODO: print value", "TODO: print value");
+          "Invalid value '{}' for parameter '{}'. Required bounds: [{}, {}]",
+          val, parameter.get_name(), lower_bound, upper_bound);
     }
   }
   return OK;
