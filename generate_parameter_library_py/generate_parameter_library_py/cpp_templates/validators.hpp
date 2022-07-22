@@ -27,40 +27,57 @@ class Result {
 auto OK = Result();
 using ERROR = Result;
 
-Result validate_string_array_len(const rclcpp::Parameter& parameter,
-                                 size_t size) {
-  const auto& string_array = parameter.as_string_array();
-  if (string_array.size() != size) {
-    return ERROR("Invalid length '{}' for parameter '{}'. Required length: {}",
-                 string_array.size(), parameter.get_name(), size);
+template <typename T>
+bool contains(std::vector<T> const& vec, T const& val) {
+  return std::find(vec.cbegin(), vec.cend(), val) != vec.cend();
+}
+
+template <class T>
+bool is_unique(std::vector<T> const& x) {
+  auto vec = x;
+  std::sort(vec.begin(), vec.end());
+  return std::adjacent_find(vec.cbegin(), vec.cend()) == vec.cend();
+}
+
+template <typename T>
+Result unique(rclcpp::Parameter const& parameter) {
+  if (!is_unique<T>(parameter.get_value<std::vector<T>>())) {
+    return ERROR("Parameter '{}' must only contain unique values",
+                 parameter.get_name());
   }
   return OK;
 }
 
-Result validate_double_array_len(const rclcpp::Parameter& parameter,
-                                 size_t size) {
-  const auto& double_array = parameter.as_double_array();
-  if (double_array.size() != size) {
-    return ERROR("Invalid length '{}' for parameter '{}'. Required length: {}",
-                 double_array.size(), parameter.get_name(), size);
+template <typename T>
+Result subset_of(rclcpp::Parameter const& parameter,
+                 std::vector<T> valid_values) {
+  auto const& input_values = parameter.get_value<std::vector<T>>();
+
+  for (auto const& value : input_values) {
+    if (!contains(valid_values, value)) {
+      return ERROR("Invalid entry '{}' for parameter '{}'. Not in set: {}",
+                   value, parameter.get_name(), valid_values);
+    }
+  }
+
+  return OK;
+}
+
+template <typename T>
+Result fixed_size(const rclcpp::Parameter& parameter, size_t size) {
+  auto param_value = parameter.get_value<std::vector<T>>();
+  if (param_value.size() != size) {
+    return ERROR("Invalid length '{}' for parameter {}. Required length: {}",
+                 param_value.size(), parameter.get_name().c_str(), size);
   }
   return OK;
 }
 
-Result validate_bool_array_len(const rclcpp::Parameter& parameter,
-                               size_t size) {
-  const auto& bool_array = parameter.as_bool_array();
-  if (bool_array.size() != size) {
-    return ERROR("Invalid length '{}' for parameter '{}'. Required length: {}",
-                 bool_array.size(), parameter.get_name(), size);
-  }
-  return OK;
-}
-
-Result validate_double_array_bounds(const rclcpp::Parameter& parameter,
-                                    double lower_bound, double upper_bound) {
-  const auto& double_array = parameter.as_double_array();
-  for (auto val : double_array) {
+template <typename T>
+Result bounds(const rclcpp::Parameter& parameter, T lower_bound,
+              T upper_bound) {
+  auto param_value = parameter.get_value<std::vector<T>>();
+  for (auto val : param_value) {
     if (val < lower_bound || val > upper_bound) {
       return ERROR(
           "Invalid value '{}' for parameter '{}'. Required bounds: [{}, {}]",
@@ -70,22 +87,8 @@ Result validate_double_array_bounds(const rclcpp::Parameter& parameter,
   return OK;
 }
 
-Result validate_int_array_bounds(const rclcpp::Parameter& parameter,
-                                 int lower_bound, int upper_bound) {
-  const auto& integer_array = parameter.as_integer_array();
-  for (auto val : integer_array) {
-    if (val < lower_bound || val > upper_bound) {
-      return ERROR(
-          "Invalid value '%d' for parameter '{}'. Required bounds: [%d, %d]",
-          val, parameter.get_name(), lower_bound, upper_bound);
-    }
-  }
-  return OK;
-}
-
 template <typename T>
-Result validate_one_of(rclcpp::Parameter const& parameter,
-                       std::vector<T> collection) {
+Result one_of(rclcpp::Parameter const& parameter, std::vector<T> collection) {
   auto param_value = parameter.get_value<T>();
 
   if (std::find(collection.cbegin(), collection.cend(), param_value) ==

@@ -66,8 +66,6 @@ class YAMLSyntaxError(Exception):
 
 
 # helper functions
-
-
 @typechecked
 def compile_error(msg: str):
     return YAMLSyntaxError("\nERROR: " + msg)
@@ -171,6 +169,30 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
     return cpp_type
 
 
+@typechecked
+def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
+    if yaml_type == "string_array":
+        cpp_type = "std::string"
+    elif yaml_type == "double_array":
+        cpp_type = "double"
+    elif yaml_type == "int_array":
+        cpp_type = "int"
+    elif yaml_type == "bool_array":
+        cpp_type = "bool"
+    elif yaml_type == "string":
+        cpp_type = "std::string"
+    elif yaml_type == "double":
+        cpp_type = "double"
+    elif yaml_type == "int":
+        cpp_type = "int"
+    elif yaml_type == "bool":
+        cpp_type = "bool"
+    else:
+        raise compile_error("invalid yaml type: %s" % type(yaml_type))
+
+    return cpp_type
+
+
 # TODO type checking fails here
 # @typechecked
 def cpp_str_func_from_defined_type(yaml_type: str):
@@ -207,6 +229,8 @@ def cpp_str_func_from_python_val(arg):
         val_func = bool_to_str
     elif isinstance(arg, str):
         val_func = str_to_str
+    elif arg is None:
+        val_func = lambda x: ""
     else:
         raise compile_error("invalid python arg type: %s" % type(arg))
     return val_func
@@ -378,11 +402,19 @@ class Struct:
 
 class ValidationFunction:
     @typechecked
-    def __init__(self, function_name: str, arguments: list[any]):
-        # if isinstance(arguments, list) and isinstance(arguments[0], list):
-        #     pass
+    def __init__(
+        self, function_name: str, arguments: Optional[list[any]], defined_type: str
+    ):
         self.function_name = function_name
-        self.arguments = arguments
+        if function_name[-2:] == "<>":
+            self.function_name = function_name[:-2]
+            template_type = cpp_primitive_type_from_defined_type(defined_type)
+            self.function_name += f"<{template_type}>"
+
+        if arguments is not None:
+            self.arguments = arguments
+        else:
+            self.arguments = []
 
     def __str__(self):
         code = self.function_name + "(param"
@@ -442,7 +474,7 @@ class UpdateParameter:
     def __str__(self):
         parameter_validations_str = Buffer()
         for parameter_validation in self.parameter_validations:
-            parameter_validations_str += str(parameter_validation)  # + '\n'
+            parameter_validations_str += str(parameter_validation)
 
         data = {
             "parameter_name": self.parameter_name,
@@ -524,49 +556,16 @@ class GenParamStruct:
         default_value = value.get("default_value", None)
         description = value.get("description", "")
         read_only = bool(value.get("read_only", False))
-        bounds = value.get("bounds", None)
-        fixed_size = value.get("fixed_size", None)
-        one_of = value.get("one_of", None)
-        validations = value.get("validation", [])
-
-        # # validate inputs
-        if bounds is not None and not validate_type(defined_type, bounds):
-            raise compile_error(
-                "The type of the bounds must be the same type as the defined type"
-            )
-        if bounds is not None and len(bounds) != 2:
-            raise compile_error("The bounds must have two inputs: [lower, upper]")
-        if default_value and not validate_type(defined_type, default_value):
-            raise compile_error(
-                "The type of the default_value must be the same type as the defined type"
-            )
-        if fixed_size is not None and not isinstance(fixed_size, int):
-            raise compile_error(
-                "The type of the fixed size attribute must be an integer"
-            )
-        if one_of is not None and not all(
-            validate_type(defined_type, x) for x in one_of
-        ):
-            raise compile_error("The type of the one_of attribute must be an list")
-        if one_of is not None and len(one_of) == 0:
-            raise compile_error("The one_of must have at least one input")
-
-        # add default validations if applicable
-        if len(validations) > 0 and isinstance(validations[0], str):
-            validations = [validations]
-
-        if bounds is not None:
-            validations.append(
-                ["validate_" + defined_type + "_bounds", bounds[0], bounds[1]]
-            )
-
-        if fixed_size is not None:
-            validations.append(["validate_" + defined_type + "_len", fixed_size])
-
-        if one_of is not None:
-            validations.append(
-                [f"validate_one_of<{cpp_type_from_defined_type(defined_type)}>", one_of]
-            )
+        # bounds = value.get("bounds", None)
+        # fixed_size = value.get("fixed_size", None)
+        # one_of = value.get("one_of", None)
+        validations = []
+        validations_dict = value.get("validation", {})
+        for func_name in validations_dict:
+            args = validations_dict[func_name]
+            if args is not None and not isinstance(args, list):
+                args = [args]
+            validations.append(ValidationFunction(func_name, args, defined_type))
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
@@ -583,8 +582,7 @@ class GenParamStruct:
         update_parameter_valid = update_parameter_pass_validation()
         parameter_conversion = get_parameter_as_function_str(defined_type)
         update_parameter = UpdateParameter(param_name, parameter_conversion)
-        for validation in validations:
-            validation_function = ValidationFunction(validation[0], validation[1:])
+        for validation_function in validations:
             parameter_validation = ParameterValidation(
                 update_parameter_invalid, update_parameter_valid, validation_function
             )
@@ -598,8 +596,7 @@ class GenParamStruct:
             param_name, parameter_conversion
         )
         declare_parameter_set = DeclareParameterSet(param_name, parameter_conversion)
-        for validation in validations:
-            validation_function = ValidationFunction(validation[0], validation[1:])
+        for validation_function in validations:
             parameter_validation = ParameterValidation(
                 declare_parameter_invalid, declare_parameter_valid, validation_function
             )
@@ -697,7 +694,6 @@ class GenParamStruct:
 def main():
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
-    pass
 
 
 if __name__ == "__main__":

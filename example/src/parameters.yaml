@@ -3,11 +3,14 @@ admittance_controller:
     type: string,
     default_value: "spline",
     description: "specifies which algorithm to use for interpolation.",
-    one_of: ["spline", "linear"]
+    validation: {
+      one_of<>: [["spline", "linear"]],
+      no_args_validator: null
+    }
   }
   joints: {
     type: string_array,
-    default_value: [],
+    default_value: [ ],
     description: "specifies which joints will be used by the controller",
     read_only: true
   }
@@ -118,8 +121,10 @@ admittance_controller:
     CoG: # specifies the center of gravity of the end effector
       pos: {
         type: double_array,
-        fixed_size: 3,
-        description: "position of the center of gravity (CoG) in its frame"
+        description: "position of the center of gravity (CoG) in its frame",
+        validation: {
+          fixed_size<>: 3
+        }
       }
       force: {
         type: double,
@@ -131,33 +136,40 @@ admittance_controller:
     selected_axes:
       {
         type: bool_array,
-        fixed_size: 6,
-        description: "specifies if the axes x, y, z, rx, ry, and rz are enabled"
+        description: "specifies if the axes x, y, z, rx, ry, and rz are enabled",
+        validation: {
+          fixed_size<>: 6
+        }
       }
 
     # Having ".0" at the end is MUST, otherwise there is a loading error
     # F = M*a + D*v + S*(x - x_d)
     mass: {
       type: double_array,
-      fixed_size: 6,
       description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
-      bounds: [ 0.0001, 1000000.0]
+      validation: {
+        fixed_size<>: 6,
+        bounds<>: [ 0.0001, 1000000.0 ]
+      }
     }
 
     damping_ratio: {
       type: double_array,
-      fixed_size: 6,
       description: "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation.
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
-      bounds: [ 0.1, 10.0 ],
-      validation:
-        [validate_double_array_custom_func, 20.3, 5.0]
+      validation: {
+        fixed_size<>: 6,
+        validate_double_array_custom_func: [ 20.3, 5.0 ],
+        bounds<>: [ 0.1, 10.0 ]
+      }
     }
 
     stiffness: {
       type: double_array,
       description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
-      bounds: [ 0.0001, 100000.0 ]
+      validation: {
+        bounds: [ 0.0001, 100000.0 ]
+      }
     }
 
   # general settings
