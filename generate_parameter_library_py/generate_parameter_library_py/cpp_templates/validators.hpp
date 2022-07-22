@@ -29,57 +29,25 @@ class Result {
 auto OK = Result();
 using ERROR = Result;
 
-Result validate_string_array_len(const rclcpp::Parameter& parameter,
-                                 size_t size) {
-  const auto& string_array = parameter.as_string_array();
-  if (string_array.size() != size) {
+template <typename T>
+Result validate_len(const rclcpp::Parameter& parameter, size_t size) {
+  auto param_value = parameter.get_value<std::vector<T>>();
+  if (param_value.size() != size) {
     return ERROR("Invalid length '%d' for parameter %s. Required length: %d",
-                 string_array.size(), parameter.get_name().c_str(), size);
+                 param_value.size(), parameter.get_name().c_str(), size);
   }
   return OK;
 }
 
-Result validate_double_array_len(const rclcpp::Parameter& parameter,
-                                 size_t size) {
-  const auto& double_array = parameter.as_double_array();
-  if (double_array.size() != size) {
-    return ERROR("Invalid length '%d' for parameter %s. Required length: %d",
-                 double_array.size(), parameter.get_name().c_str(), size);
-  }
-  return OK;
-}
-
-Result validate_bool_array_len(const rclcpp::Parameter& parameter,
-                               size_t size) {
-  const auto& bool_array = parameter.as_bool_array();
-  if (bool_array.size() != size) {
-    return ERROR("Invalid length '%d' for parameter %s. Required length: %d",
-                 bool_array.size(), parameter.get_name().c_str(), size);
-  }
-  return OK;
-}
-
-Result validate_double_array_bounds(const rclcpp::Parameter& parameter,
-                                    double lower_bound, double upper_bound) {
-  const auto& double_array = parameter.as_double_array();
-  for (auto val : double_array) {
+template <typename T>
+Result validate_bounds(const rclcpp::Parameter& parameter,
+                                 T lower_bound, T upper_bound) {
+  auto param_value = parameter.get_value<std::vector<T>>();
+  for (auto val : param_value) {
     if (val < lower_bound || val > upper_bound) {
       return ERROR(
-          "Invalid value '%f' for parameter %s. Required bounds: [%f, %f]", val,
-          parameter.get_name().c_str(), lower_bound, upper_bound);
-    }
-  }
-  return OK;
-}
-
-Result validate_int_array_bounds(const rclcpp::Parameter& parameter,
-                                 int lower_bound, int upper_bound) {
-  const auto& integer_array = parameter.as_integer_array();
-  for (auto val : integer_array) {
-    if (val < lower_bound || val > upper_bound) {
-      return ERROR(
-          "Invalid value '%d' for parameter %s. Required bounds: [%d, %d]", val,
-          parameter.get_name().c_str(), lower_bound, upper_bound);
+          "Invalid value '%s' for parameter %s. Required bounds: [%s, %s]", to_string(val),
+          parameter.get_name().c_str(), to_string(lower_bound), to_string(upper_bound));
     }
   }
   return OK;
@@ -88,7 +56,7 @@ Result validate_int_array_bounds(const rclcpp::Parameter& parameter,
 template <typename T>
 Result validate_one_of(rclcpp::Parameter const& parameter,
                        std::set<T> collection) {
-  auto param_value = parameter.get_value<T>();
+  auto param_value = parameter.get_value<std::vector<T>>();
 
   if (collection.find(param_value) == collection.end()) {
     std::stringstream ss;
@@ -100,6 +68,3 @@ Result validate_one_of(rclcpp::Parameter const& parameter,
 
   return OK;
 }
-
-// using validate_string_one_of = validate_one_of<std::string>;
-// using validate_int_one_of = validate_one_of<int>;

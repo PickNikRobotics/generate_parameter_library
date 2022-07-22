@@ -66,8 +66,6 @@ class YAMLSyntaxError(Exception):
 
 
 # helper functions
-
-
 @typechecked
 def compile_error(msg: str):
     return YAMLSyntaxError("\nERROR: " + msg)
@@ -157,6 +155,29 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<int>"
     elif yaml_type == "bool_array":
         cpp_type = "std::vector<bool>"
+    elif yaml_type == "string":
+        cpp_type = "std::string"
+    elif yaml_type == "double":
+        cpp_type = "double"
+    elif yaml_type == "int":
+        cpp_type = "int"
+    elif yaml_type == "bool":
+        cpp_type = "bool"
+    else:
+        raise compile_error("invalid yaml type: %s" % type(yaml_type))
+
+    return cpp_type
+
+@typechecked
+def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
+    if yaml_type == "string_array":
+        cpp_type = "std::string"
+    elif yaml_type == "double_array":
+        cpp_type = "double"
+    elif yaml_type == "int_array":
+        cpp_type = "int"
+    elif yaml_type == "bool_array":
+        cpp_type = "bool"
     elif yaml_type == "string":
         cpp_type = "std::string"
     elif yaml_type == "double":
@@ -271,12 +292,12 @@ def update_parameter_pass_validation() -> str:
 class DeclareParameter:
     @typechecked
     def __init__(
-        self,
-        parameter_name: str,
-        parameter_description: str,
-        parameter_read_only: bool,
-        parameter_type: str,
-        default_value: any,
+            self,
+            parameter_name: str,
+            parameter_description: str,
+            parameter_read_only: bool,
+            parameter_type: str,
+            default_value: any,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
@@ -378,10 +399,13 @@ class Struct:
 
 class ValidationFunction:
     @typechecked
-    def __init__(self, function_name: str, arguments: list[any]):
+    def __init__(self, function_suffix: str, arguments: list[any], template_type=None):
         # if isinstance(arguments, list) and isinstance(arguments[0], list):
         #     pass
-        self.function_name = function_name
+        self.function_name = "validate_" + function_suffix
+        if template_type is not None:
+            self.function_name += f"<{template_type}>"
+
         self.arguments = arguments
 
     def __str__(self):
@@ -407,10 +431,10 @@ class ValidationFunction:
 class ParameterValidation:
     @typechecked
     def __init__(
-        self,
-        invalid_effect: str,
-        valid_effect: str,
-        validation_function: ValidationFunction,
+            self,
+            invalid_effect: str,
+            valid_effect: str,
+            validation_function: ValidationFunction,
     ):
         self.invalid_effect = invalid_effect
         self.valid_effect = valid_effect
@@ -527,7 +551,7 @@ class GenParamStruct:
         bounds = value.get("bounds", None)
         fixed_size = value.get("fixed_size", None)
         one_of = value.get("one_of", None)
-        validations = value.get("validation", [])
+        custom_validations = value.get("validation", [])
 
         # # validate inputs
         if bounds is not None and not validate_type(defined_type, bounds):
@@ -545,28 +569,30 @@ class GenParamStruct:
                 "The type of the fixed size attribute must be an integer"
             )
         if one_of is not None and not all(
-            validate_type(defined_type, x) for x in one_of
+                validate_type(defined_type, x) for x in one_of
         ):
             raise compile_error("The type of the one_of attribute must be an list")
         if one_of is not None and len(one_of) == 0:
             raise compile_error("The one_of must have at least one input")
 
-        # add default validations if applicable
-        if len(validations) > 0 and isinstance(validations[0], str):
-            validations = [validations]
+        validations = []
+        # add custom validations
+        if len(custom_validations) > 0 and isinstance(custom_validations[0], str):
+            validations.append(ValidationFunction(custom_validations[0], custom_validations[1:]))
+        elif len(custom_validations) > 0 and isinstance(custom_validations[0], list):
+            for custom_validation in custom_validations:
+                validations.append(ValidationFunction(custom_validation[0], custom_validation[1:]))
 
+        # add default validations if applicable
         if bounds is not None:
-            validations.append(
-                ["validate_" + defined_type + "_bounds", bounds[0], bounds[1]]
-            )
+            validations.append(ValidationFunction("bounds", bounds, cpp_primitive_type_from_defined_type(defined_type))
+                               )
 
         if fixed_size is not None:
-            validations.append(["validate_" + defined_type + "_len", fixed_size])
+            validations.append(ValidationFunction("len", [fixed_size], cpp_primitive_type_from_defined_type(defined_type)))
 
         if one_of is not None:
-            validations.append(
-                [f"validate_one_of<{cpp_type_from_defined_type(defined_type)}>", one_of]
-            )
+            validations.append(ValidationFunction("one_of", one_of, cpp_type_from_defined_type(defined_type)))
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
@@ -583,8 +609,7 @@ class GenParamStruct:
         update_parameter_valid = update_parameter_pass_validation()
         parameter_conversion = get_parameter_as_function_str(defined_type)
         update_parameter = UpdateParameter(param_name, parameter_conversion)
-        for validation in validations:
-            validation_function = ValidationFunction(validation[0], validation[1:])
+        for validation_function in validations:
             parameter_validation = ParameterValidation(
                 update_parameter_invalid, update_parameter_valid, validation_function
             )
@@ -598,8 +623,7 @@ class GenParamStruct:
             param_name, parameter_conversion
         )
         declare_parameter_set = DeclareParameterSet(param_name, parameter_conversion)
-        for validation in validations:
-            validation_function = ValidationFunction(validation[0], validation[1:])
+        for validation_function in validations:
             parameter_validation = ParameterValidation(
                 declare_parameter_invalid, declare_parameter_valid, validation_function
             )
@@ -610,7 +634,7 @@ class GenParamStruct:
     def parse_dict(self, name, root_map, nested_name):
 
         if isinstance(root_map, dict) and isinstance(
-            next(iter(root_map.values())), dict
+                next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
 
@@ -697,7 +721,6 @@ class GenParamStruct:
 def main():
     gen_param_struct = GenParamStruct()
     gen_param_struct.run()
-    pass
 
 
 if __name__ == "__main__":
