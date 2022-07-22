@@ -28,5 +28,6 @@
 
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
+find_package(fmt REQUIRED)
 
 include("${generate_parameter_library_DIR}/generate_parameter_library.cmake")

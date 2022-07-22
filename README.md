@@ -10,7 +10,7 @@ You then need call the `generate_parameter_library` function with the following 
 ```
 LIB_NAME # cmake target name for the parameter library
 YAML_FILE # path to input yaml file
-VALIDATE_HEADER # Optional path to header containing custom validators
+[VALIDATE_HEADER] # Optional path to header containing custom validators
 ```
 
 See [example project](example/CMakeLists.txt) to understand how to use this.
@@ -29,7 +29,7 @@ See [example project](example/CMakeLists.txt) to understand how to use this.
 ## Run the node
 ```
 source install/setup.bash
-ros2 run gen_param_lib_example test_node --ros-args --params-file src/example/config/implementation.yaml
+ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/example/config/implementation.yaml
 
 ```
 
@@ -126,12 +126,12 @@ you will get the error
 
 If you try to load a yaml file with missing required parameters
 
-`ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/generate_parameter_library_example/include/config/missing_required.yaml`
+`ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/example/config/missing_required.yaml`
 
 
 you will get the error
 ```
 terminate called after throwing an instance of 'rclcpp::exceptions::ParameterUninitializedException'
-  what():  parameter 'joints' is not initialized
+  what():  parameter 'command_interfaces' is not initialized
 [ros2run]: Aborted
 ```

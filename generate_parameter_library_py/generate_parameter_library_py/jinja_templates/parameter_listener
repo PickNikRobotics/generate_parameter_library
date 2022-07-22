@@ -2,12 +2,17 @@
 
 #pragma once
 
+#include <algorithm>
 #include <rclcpp/node.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
-#include <vector>
-#include <string>
 #include <set>
 #include <sstream>
+#include <string>
+#include <vector>
+
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace gen_param_struct_validators {
 {%- filter indent(width=2) %}
@@ -54,22 +59,18 @@ rclcpp::Time __stamp;
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-      rcl_interfaces::msg::SetParametersResult result;
-      result.successful = true;
-      gen_param_struct_validators::Result validation_result;
+      // Copy params_ so we only update it if all validation succeeds
+      Params updated_params = params_;
 
-      result.reason = "success";
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
 {{update_params_set}}
 {%- endfilter %}
       }
 
-      if (result.successful){
-        params_.__stamp = clock_.now();
-      }
-
-      return result;
+      updated_params.__stamp = clock_.now();
+      params_ = updated_params;
+      return gen_param_struct_validators::OK;
     }
 
     void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
