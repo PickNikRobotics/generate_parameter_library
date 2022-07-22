@@ -97,15 +97,73 @@ Result size_lt(rclcpp::Parameter const& parameter, size_t size) {
 }
 
 template <typename T>
-Result bounds(const rclcpp::Parameter& parameter, T lower_bound,
-              T upper_bound) {
+Result element_bounds(const rclcpp::Parameter& parameter, T lower, T upper) {
   auto param_value = parameter.get_value<std::vector<T>>();
   for (auto val : param_value) {
-    if (val < lower_bound || val > upper_bound) {
+    if (val < lower || val > upper) {
       return ERROR(
           "Invalid value '{}' for parameter '{}'. Required bounds: [{}, {}]",
-          val, parameter.get_name(), lower_bound, upper_bound);
+          val, parameter.get_name(), lower, upper);
     }
+  }
+  return OK;
+}
+
+template <typename T>
+Result lower_element_bounds(const rclcpp::Parameter& parameter, T lower) {
+  auto param_value = parameter.get_value<std::vector<T>>();
+  for (auto val : param_value) {
+    if (val < lower) {
+      return ERROR(
+          "Invalid value '{}' for parameter '{}'. Required lower bounds: {}",
+          val, parameter.get_name(), lower);
+    }
+  }
+  return OK;
+}
+
+template <typename T>
+Result upper_element_bounds(const rclcpp::Parameter& parameter, T upper) {
+  auto param_value = parameter.get_value<std::vector<T>>();
+  for (auto val : param_value) {
+    if (val > upper) {
+      return ERROR(
+          "Invalid value '{}' for parameter '{}'. Required upper bounds: {}",
+          val, parameter.get_name(), upper);
+    }
+  }
+  return OK;
+}
+
+template <typename T>
+Result bounds(const rclcpp::Parameter& parameter, T lower, T upper) {
+  auto param_value = parameter.get_value<T>();
+  if (param_value < lower || param_value > upper) {
+    return ERROR(
+        "Invalid value '{}' for parameter '{}'. Required bounds: [{}, {}]",
+        param_value, parameter.get_name(), lower, upper);
+  }
+  return OK;
+}
+
+template <typename T>
+Result lower_bounds(const rclcpp::Parameter& parameter, T lower) {
+  auto param_value = parameter.get_value<T>();
+  if (param_value < lower) {
+    return ERROR(
+        "Invalid value '{}' for parameter '{}'. Required lower bounds: {}",
+        param_value, parameter.get_name(), lower);
+  }
+  return OK;
+}
+
+template <typename T>
+Result upper_bounds(const rclcpp::Parameter& parameter, T upper) {
+  auto param_value = parameter.get_value<T>();
+  if (param_value > upper) {
+    return ERROR(
+        "Invalid value '{}' for parameter '{}'. Required upper bounds: {}",
+        param_value, parameter.get_name(), upper);
   }
   return OK;
 }
