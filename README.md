@@ -140,6 +140,24 @@ validation: {
 ```
 The `validation` maps to a YAML dictionary. Each key in the dictionary refers to a validation function generate and the value of the key specifies the functions input arguments. Validator arguments are specified with a YAML list. If a validation function is templated, then the suffix `<>` needs to be added to the function name. For example, `integer_equal_value` would be chnaged to `integer_equal_value<>`. Alternatively, the template specialization can be explicitly written, e.g `integer_equal_value<int>`.      
 
+
+The following validation functions are provided by default in this package.
+
+| Validation functions | Description                                                                  | Arguments           |
+|----------------------|------------------------------------------------------------------------------|---------------------|
+| unique               | Validates array type parameter contains no duplicates                        | [null]              |
+| subset_of            | Validates every element of array type parameter is contained within argument | [[val1, val2, ...]] |
+| fixed_size           | Validates array type parameter is of specified length                        | [length]            |
+| size_gt              | Validates array type parameter is greater than specified length              | [length]            |
+| size_lt              | Validates array type parameter is greater less specified length              | [length]            |
+| element_bounds       | Validates every element of array type parameter is in bounds (inclusive)     | [[lower, upper]]    |
+| lower_element_bounds | Validates lower bound for every element of array type parameter              | [lower]             |
+| upper_element_bounds | Validates upper bound for every element of array type parameter              | [upper]             |
+| bounds               | Validates scalar type parameter is in bounds (inclusive)                     | [[lower, upper]]    |
+| lower_bounds         | Validates lower bounds for a scalar type parameter                           | [lower]             |
+| upper_bounds         | Validates upper bounds for a scalar type parameter                           | [upper]             |
+| one_of               | Validates scalar type parameter is one of the specified values               | [val1, val2, ...]   |
+
 ### Nested structure
 
 After the top level key, every subsequent non-leaf key will generate a nested c++ struct. The struct instance will have
@@ -203,5 +221,6 @@ target_link_libraries(minimal_node PRIVATE
 The above cmake additional is substituted in place of `# additional libraries ...`. Notably, the third argument of `generate_parameter_library` specifies a user provided header to include in the generated code. Validation functions defined in the header can specified in the YAML validation dictionary and run in the generated code.
 
 ## Integrate generated struct into project source code
+
 
 See [example project](example/) for a complete example of how to use the generate_parameter_library.
