@@ -28,7 +28,43 @@ auto OK = Result();
 using ERROR = Result;
 
 template <typename T>
-Result validate_len(const rclcpp::Parameter& parameter, size_t size) {
+bool contains(std::vector<T> const& vec, T const& val) {
+  return std::find(vec.cbegin(), vec.cend(), val) != vec.cend();
+}
+
+template <class T>
+bool is_unique(std::vector<T> const& x) {
+  auto vec = x;
+  std::sort(vec.begin(), vec.end());
+  return std::adjacent_find(vec.cbegin(), vec.cend()) == vec.cend();
+}
+
+template <typename T>
+Result unique(rclcpp::Parameter const& parameter) {
+  if (!is_unique<T>(parameter.get_value<std::vector<T>>())) {
+    return ERROR("Parameter '{}' must only contain unique values",
+                 parameter.get_name());
+  }
+  return OK;
+}
+
+template <typename T>
+Result subset_of(rclcpp::Parameter const& parameter,
+                 std::vector<T> valid_values) {
+  auto const& input_values = parameter.get_value<std::vector<T>>();
+
+  for (auto const& value : input_values) {
+    if (!contains(valid_values, value)) {
+      return ERROR("Invalid entry '{}' for parameter '{}'. Not in set: {}",
+                   value, parameter.get_name(), valid_values);
+    }
+  }
+
+  return OK;
+}
+
+template <typename T>
+Result fixed_size(const rclcpp::Parameter& parameter, size_t size) {
   auto param_value = parameter.get_value<std::vector<T>>();
   if (param_value.size() != size) {
     return ERROR("Invalid length '{}' for parameter {}. Required length: {}",
@@ -38,8 +74,8 @@ Result validate_len(const rclcpp::Parameter& parameter, size_t size) {
 }
 
 template <typename T>
-Result validate_bounds(const rclcpp::Parameter& parameter,
-                                 T lower_bound, T upper_bound) {
+Result bounds(const rclcpp::Parameter& parameter, T lower_bound,
+              T upper_bound) {
   auto param_value = parameter.get_value<std::vector<T>>();
   for (auto val : param_value) {
     if (val < lower_bound || val > upper_bound) {
@@ -52,8 +88,7 @@ Result validate_bounds(const rclcpp::Parameter& parameter,
 }
 
 template <typename T>
-Result validate_one_of(rclcpp::Parameter const& parameter,
-                       std::vector<T> collection) {
+Result one_of(rclcpp::Parameter const& parameter, std::vector<T> collection) {
   auto param_value = parameter.get_value<T>();
 
   if (std::find(collection.cbegin(), collection.cend(), param_value) ==

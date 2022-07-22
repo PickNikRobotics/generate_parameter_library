@@ -49,3 +49,5 @@ Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
 
   return OK;
 }
+
+Result no_args_validator(const rclcpp::Parameter& parameter) { return OK; }

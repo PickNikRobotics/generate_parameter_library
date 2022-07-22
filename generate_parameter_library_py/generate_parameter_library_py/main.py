@@ -168,6 +168,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
 
     return cpp_type
 
+
 @typechecked
 def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
     if yaml_type == "string_array":
@@ -228,6 +229,8 @@ def cpp_str_func_from_python_val(arg):
         val_func = bool_to_str
     elif isinstance(arg, str):
         val_func = str_to_str
+    elif arg is None:
+        val_func = lambda x: ""
     else:
         raise compile_error("invalid python arg type: %s" % type(arg))
     return val_func
@@ -292,12 +295,12 @@ def update_parameter_pass_validation() -> str:
 class DeclareParameter:
     @typechecked
     def __init__(
-            self,
-            parameter_name: str,
-            parameter_description: str,
-            parameter_read_only: bool,
-            parameter_type: str,
-            default_value: any,
+        self,
+        parameter_name: str,
+        parameter_description: str,
+        parameter_read_only: bool,
+        parameter_type: str,
+        default_value: any,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
@@ -399,14 +402,19 @@ class Struct:
 
 class ValidationFunction:
     @typechecked
-    def __init__(self, function_name: str, arguments: list[any], template_type=None):
-        # if isinstance(arguments, list) and isinstance(arguments[0], list):
-        #     pass
+    def __init__(
+        self, function_name: str, arguments: Optional[list[any]], defined_type: str
+    ):
         self.function_name = function_name
-        if template_type is not None:
+        if function_name[-2:] == "<>":
+            self.function_name = function_name[:-2]
+            template_type = cpp_primitive_type_from_defined_type(defined_type)
             self.function_name += f"<{template_type}>"
 
-        self.arguments = arguments
+        if arguments is not None:
+            self.arguments = arguments
+        else:
+            self.arguments = []
 
     def __str__(self):
         code = self.function_name + "(param"
@@ -431,10 +439,10 @@ class ValidationFunction:
 class ParameterValidation:
     @typechecked
     def __init__(
-            self,
-            invalid_effect: str,
-            valid_effect: str,
-            validation_function: ValidationFunction,
+        self,
+        invalid_effect: str,
+        valid_effect: str,
+        validation_function: ValidationFunction,
     ):
         self.invalid_effect = invalid_effect
         self.valid_effect = valid_effect
@@ -466,7 +474,7 @@ class UpdateParameter:
     def __str__(self):
         parameter_validations_str = Buffer()
         for parameter_validation in self.parameter_validations:
-            parameter_validations_str += str(parameter_validation)  # + '\n'
+            parameter_validations_str += str(parameter_validation)
 
         data = {
             "parameter_name": self.parameter_name,
@@ -548,51 +556,16 @@ class GenParamStruct:
         default_value = value.get("default_value", None)
         description = value.get("description", "")
         read_only = bool(value.get("read_only", False))
-        bounds = value.get("bounds", None)
-        fixed_size = value.get("fixed_size", None)
-        one_of = value.get("one_of", None)
-        custom_validations = value.get("validation", [])
-
-        # # validate inputs
-        if bounds is not None and not validate_type(defined_type, bounds):
-            raise compile_error(
-                "The type of the bounds must be the same type as the defined type"
-            )
-        if bounds is not None and len(bounds) != 2:
-            raise compile_error("The bounds must have two inputs: [lower, upper]")
-        if default_value and not validate_type(defined_type, default_value):
-            raise compile_error(
-                "The type of the default_value must be the same type as the defined type"
-            )
-        if fixed_size is not None and not isinstance(fixed_size, int):
-            raise compile_error(
-                "The type of the fixed size attribute must be an integer"
-            )
-        if one_of is not None and not all(
-                validate_type(defined_type, x) for x in one_of
-        ):
-            raise compile_error("The type of the one_of attribute must be an list")
-        if one_of is not None and len(one_of) == 0:
-            raise compile_error("The one_of must have at least one input")
-
+        # bounds = value.get("bounds", None)
+        # fixed_size = value.get("fixed_size", None)
+        # one_of = value.get("one_of", None)
         validations = []
-        # add custom validations
-        if len(custom_validations) > 0 and isinstance(custom_validations[0], str):
-            validations.append(ValidationFunction(custom_validations[0], custom_validations[1:]))
-        elif len(custom_validations) > 0 and isinstance(custom_validations[0], list):
-            for custom_validation in custom_validations:
-                validations.append(ValidationFunction(custom_validation[0], custom_validation[1:]))
-
-        # add default validations if applicable
-        if bounds is not None:
-            validations.append(ValidationFunction("validate_bounds", bounds, cpp_primitive_type_from_defined_type(defined_type))
-                               )
-
-        if fixed_size is not None:
-            validations.append(ValidationFunction("validate_len", [fixed_size], cpp_primitive_type_from_defined_type(defined_type)))
-
-        if one_of is not None:
-            validations.append(ValidationFunction("validate_one_of", [one_of], cpp_type_from_defined_type(defined_type)))
+        validations_dict = value.get("validation", {})
+        for func_name in validations_dict:
+            args = validations_dict[func_name]
+            if args is not None and not isinstance(args, list):
+                args = [args]
+            validations.append(ValidationFunction(func_name, args, defined_type))
 
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
@@ -634,7 +607,7 @@ class GenParamStruct:
     def parse_dict(self, name, root_map, nested_name):
 
         if isinstance(root_map, dict) and isinstance(
-                next(iter(root_map.values())), dict
+            next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
 
