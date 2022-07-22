@@ -59,5 +59,6 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   target_link_libraries(${LIB_NAME}
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
+    fmt::fmt
   )
 endfunction()

@@ -278,7 +278,7 @@ def initialization_pass_validation(param_name: str, parameter_conversion: str) -
 
 @typechecked
 def update_parameter_fail_validation() -> str:
-    return "result.successful = false;\nbreak;"
+    return "return validation_result;"
 
 
 @typechecked

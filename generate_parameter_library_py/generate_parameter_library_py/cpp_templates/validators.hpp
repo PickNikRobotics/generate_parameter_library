@@ -2,20 +2,18 @@ class Result {
  public:
   template <typename... Args>
   Result(const std::string& format, Args... args) {
-    int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) +
-                 1;  // Extra space for '\0'
-    if (size_s <= 0) {
-      throw std::runtime_error("Error during formatting.");
-    }
-    auto size = static_cast<size_t>(size_s);
-    std::unique_ptr<char[]> buf(new char[size]);
-    std::snprintf(buf.get(), size, format.c_str(), args...);
-    msg_ = std::string(buf.get(),
-                       buf.get() + size - 1);  // We don't want the '\0' inside
+    msg_ = fmt::format(format, args...);
     success_ = false;
   }
 
-  Result() { success_ = true; }
+  Result() = default;
+
+  operator rcl_interfaces::msg::SetParametersResult() const {
+    rcl_interfaces::msg::SetParametersResult result;
+    result.successful = success_;
+    result.reason = msg_;
+    return result;
+  }
 
   bool success() { return success_; }
 
@@ -23,7 +21,7 @@ class Result {
 
  private:
   std::string msg_;
-  bool success_;
+  bool success_ = true;
 };
 
 auto OK = Result();
@@ -55,15 +53,14 @@ Result validate_bounds(const rclcpp::Parameter& parameter,
 
 template <typename T>
 Result validate_one_of(rclcpp::Parameter const& parameter,
-                       std::set<T> collection) {
+                       std::vector<T> collection) {
   auto param_value = parameter.get_value<T>();
 
-  if (collection.find(param_value) == collection.end()) {
-    std::stringstream ss;
-    for (auto const& c : collection) ss << c << ", ";
-    return ERROR("The parameter (%s) with the value (%s) not in the set: [%s]",
-                 parameter.get_name(), "TODO: print value",
-                 ss.str().c_str());
+  if (std::find(collection.cbegin(), collection.cend(), param_value) ==
+      collection.end()) {
+    return ERROR("The parameter '{}' with the value '{}' not in the set: {}",
+                 parameter.get_name(), param_value,
+                 fmt::format("{}", fmt::join(collection, ", ")));
   }
 
   return OK;
