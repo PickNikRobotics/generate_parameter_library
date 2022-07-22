@@ -88,7 +88,6 @@ rclcpp::Time __stamp;
     }
 
     private:
-      std::mutex mutex_;
       Params params_;
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
