@@ -269,8 +269,9 @@ def pascal_case(string: str):
 @typechecked
 def initialization_fail_validation(param_name: str) -> str:
     return (
-        f'throw rclcpp::exceptions::InvalidParameterValueException("Invalid value set during initialization for '
-        f'parameter {param_name}: + validation_result.error_msg());"); '
+        f"throw rclcpp::exceptions::InvalidParameterValueException"
+        f'(fmt::format("Invalid value set during initialization for '
+        f"parameter '{param_name}': \" + validation_result.error_msg()));"
     )
 
 
