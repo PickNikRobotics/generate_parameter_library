@@ -1,13 +1,15 @@
 # generate_parameter_library
 
-This package aims to automate parameter handling within ROS 2 via c++ code generation. A user can specify parameter
-names, types, descriptions, and validation functions all within the YAML syntax. This packages provides a
-straightforward interface to integrate the code generation into cmake builds. The generated library contains a c++
-struct with all specified parameters as nested fields. Additionally, methods are generated, which enable dynamic parameter
-updating, parameter copying, and parameter validation.
+This package aims to automate parameter handling within ROS 2 via c++ code generation.
+A user can specify parameter names, types, descriptions, and validation functions all within the YAML syntax.
+This packages provides a straightforward interface to integrate the code generation into cmake builds.
+The generated library contains a c++ struct with all specified parameters as nested fields. Additionally, methods are generated, which enable dynamic parameter updating, parameter copying, and parameter validation.
 
 ## Generated code interface
-The generated code is primarily consists of two major component: 1) a pure data struct `struct Params` that contains values of all parameters and 2) a class `ParamListener` that handles parameter declaration, updating, and validation. The general structure is shown below.
+The generated code is primarily consists of two major components:
+1) a pure data struct `struct Params` that contains values of all parameters and
+2) a class `ParamListener` that handles parameter declaration, updating, and validation.
+The general structure is shown below.
 
 ```cpp
 namespace cpp_namespace {
@@ -116,33 +118,34 @@ update stage runs an arbitrary number times until the program exits.
 
 ## Create yaml parameter codegen file
 
-YAML should be a familiar language to ROS developers as it is used to specify parameter
-configurations. It also has a minimal and human-readable syntax, which make it a viable candidate for specifying code
-generation. The code generation syntax used by this package is defined in the following subsections.
+YAML has a declarative and human-readable syntax, which we use to declare parameters and their attributes as input to the code generator.
+The YAML syntax used by this package is defined in the following subsections.
 
-### Name space specification
+### C++ namespace
 
-The generated c++ code contains a struct with type `Params` and a class of type `ParamListener`. Each are generated within specified name space. YAML allows key value pairs to be defined in a hierarchical way. The top level key will be used as the name space.
+The root element of the YAML file determines the namespace used in the generated C++ code.
+We use this to put the `Params` struct in the same namespace as your C++ code.
 
 ```yaml
 cpp_name_space:
 # additionally fields  ...
 ```
 
-### Parameter type definition
+### Parameter definition
 
-The YAML syntax can be thought of as a tree since it allows for arbitrary nesting of key value pairs. For clarity, the
-last non-nested value is referred to as a leaf. A leaf has the following required format.
+The YAML syntax can be thought of as a tree since it allows for arbitrary nesting of key-value pairs. For clarity, the last non-nested value is referred to as a leaf.
+A leaf represents a single parameter and has the following format.
 
 ```yaml
 cpp_name_space:
-  param_definition: { # this is a leaf
+  param_definition: {
     type: string_array
   }
 ```
 
-The leaf is a YAML dictionary with the only required key being type. The value of type can be any ROS 2 parameter
-type, e.g. string, string_array, double, etc. Several non-required key value pairs are supported as shown below.
+The leaf is a YAML dictionary with the only required key being `type`.
+The value of type can be any ROS 2 parameter type, e.g. string, string_array, double, etc.
+Several non-required key-value pairs are supported as shown below.
 
 ```yaml
 cpp_name_space:
@@ -157,17 +160,18 @@ cpp_name_space:
 ```
 
 <ol>
-  <li>The `default_value` sets the parameter's value if a value does not already exist.</li>
-  <li>The `read_only` specifies whether a parameter can be changed via the ROS2 API.</li>
+  <li>The `default_value` sets the parameter's value if a value does not already exist. Note that if you do not provide a `default_value` and the user does not provide one an exception will be thrown during initialization.</li>
+  <li>The `read_only` specifies whether a parameter can be changed via the ROS2 API or service for `set_parameter`. These parameters can still be configured with a YAML file passed in through the launch file.</li>
   <li>The `description` specifies the parameter description, which is displayed with `ros2 param describe` tool.</li>
 </ol>
 
-### Validators specification
+### Validators
 
-Parameters are run through validators during both initialization and updating. If a validation fails during initialization,
-an exception will be thrown. If a validation fails during updating, the parameter will simply not be updated and a
-failure message will be returned via the ROS 2 API. Validators are c++ functions defined in a header file with the
-following interface.
+Parameters are run through validators during both initialization and updating.
+If validation fails during initialization, an exception will be thrown.
+If validation fails during updating, the parameter will simply not be updated and a failure message will be returned via the ROS 2 API.
+Validators are functions that return a `Result` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
+Validators are C++ functions defined in a header file similar to the example shown below.
 
 ```c++
 Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
@@ -180,16 +184,22 @@ Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_valu
   return OK;
 }
 ```
-The YAML syntax that adds the above validator to the generated code is shown below.
+To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could add this to the YAML.
 ```yaml
 validation: {
     integer_equal_value: [3]
   }
 ```
-The `validation` is a YAML dictionary, where each key refers to a validation function and each value refers to the functions' input arguments. Validator arguments are specified with a YAML list. If a validation function is templated, then the suffix `<>` is added to the function name. For example, `integer_equal_value` would be changed to `integer_equal_value<>`. Alternatively, the template specialization can be explicitly written, e.g `integer_equal_value<int>`.
+The `validation` is a YAML dictionary, where each key refers to a validation function name and each value refers to the functions' input arguments.
+Validator arguments are specified with a YAML list.
+If a validation function is templated with the C++ type of the parameter, then the suffix `<>` is added to the function name.
+For example, if `integer_equal_value` was a template, `integer_equal_value` would be changed to `integer_equal_value<>`.
+Alternatively, the template specialization can be explicitly written, e.g `integer_equal_value<int>`.
 
 
 The following validation functions are provided by default in this package.
+Note that if a validation function takes no arguments past the `rclcpp::Parameter` argument you have to write `[null]`, `null`, or `[]` in the YAML as the value for the validator entry.
+Also, note that some parameters take a list as their second argument and as a result need to be represented as a list within a list in YAML as the outer list represents the parameters passed in and the inner list represents a list passed into a single parameter.
 
 | Validation functions | Description                                                                  | Arguments           |
 |----------------------|------------------------------------------------------------------------------|---------------------|
@@ -204,7 +214,7 @@ The following validation functions are provided by default in this package.
 | bounds               | Validates scalar type parameter is in bounds (inclusive)                     | [[lower, upper]]    |
 | lower_bounds         | Validates lower bounds for a scalar type parameter                           | [lower]             |
 | upper_bounds         | Validates upper bounds for a scalar type parameter                           | [upper]             |
-| one_of               | Validates scalar type parameter is one of the specified values               | [val1, val2, ...]   |
+| one_of               | Validates scalar type parameter is one of the specified values               | [[val1, val2, ...]]   |
 
 ### Nested structure syntax
 
@@ -223,7 +233,8 @@ cpp_name_space:
 The generated parameter value can then be access with `params.nest1.nest2.param_name`
 
 ### Complete YAML file
-The complete sample file is shown below. By convention, this file should be named the same as the node that uses it with a `_parameter` suffix: `{node_name}_parameters.yaml`.
+The complete sample file is shown below.
+By convention, this file should be named the same as the node that uses it with a `_parameter` suffix: `{node_name}_parameters.yaml`.
 ```yaml
 cpp_name_space:
   param_name: { # this is a leaf
@@ -244,7 +255,9 @@ cpp_name_space:
 
 ## Add parameter library generation to cmake project
 
-To utilize this package, you must include it in a cmake project with `find_package`. Doing so will add a cmake macro called `generate_parameter_library`, which is used to generate the parameter library. In the cmake example, the following should be substituted for `# additional find_package ...`
+To utilize this package, you must include it in a cmake project with `find_package`.
+Doing so will add a cmake macro called `generate_parameter_library`, which is used to generate the parameter library.
+In the cmake example, the following should be substituted for `# additional find_package ...`
 ```cmake
 find_package(generate_parameter_library REQUIRED)
 ```
@@ -266,19 +279,24 @@ target_link_libraries(minimal_node PRIVATE
   minimal_node_parameters
 )
 ```
-The above cmake is substituted in place of `# additional libraries ...`. Notably, the third argument of `generate_parameter_library` specifies a user provided header to include in the generated code. All validation functions defined in this header can be referred to in the YAML validation dictionary.
+The above cmake is substituted in place of `# additional libraries ...`.
+Notably, the third argument of `generate_parameter_library` is optional and specifies a user-provided header to include in the generated code.
+Validation functions defined in this header can be referred to in the YAML.
 
 ## Integrate generated struct into project source code
-Only a few source code changes are needed to integrate the generated parameter library code. First, the library must be included via `#include "minimal_node_parameters.hpp"`. Note that the include name is exactly the same as the generated library name specified for in cmake.
+The generated header file is named based on the target library name you passed as the first argument to the cmake function.
+If you specified it to be `minimal_node_parameters` you can then include the generated code with `#include "minimal_node_parameters.hpp"`.
 ```c++
 #include "minimal_node_parameters.hpp"
 ```
-In the initialization code, an instance of `ParamListener` and `Params` should be created. At this time, parameters will be declared and read. An exception will be thrown if any validation fails or any required parameters were not set.
+In your initialization code, create a `ParamListener` which will declare and get the parameters.
+An exception will be thrown if any validation fails or any required parameters were not set.
+Then call `get_params` on the listener to get a copy of the `Params` struct.
 ```c++
 param_listener = std::make_shared<minimal_node::ParamListener>(node);
 params_ = param_listener->get_params();
 ```
-Finally, the instance of `Params` can be updated dynamically during the main loop as follows.
+If you are using dynamic parameters, you can use the following code to check if any of your parameters have changed and then get a new copy of the `Params` struct.
 ```c++
 if (param_listener->is_old(params_)) {
   params_ = param_listener->get_params();
