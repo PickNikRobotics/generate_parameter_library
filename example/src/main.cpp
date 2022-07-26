@@ -26,7 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "testing/admittance_controller_parameters.hpp"
+#include "admittance_controller_parameters.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 using namespace std::chrono_literals;
@@ -46,6 +46,7 @@ class MinimalPublisher : public rclcpp::Node {
  private:
   void timer_callback() {
     if (param_listener->is_old(params_)) {
+      param_listener->refresh_dynamic_parameters();
       params_ = param_listener->get_params();
       RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'",
                   params_.control.frame.id.c_str());

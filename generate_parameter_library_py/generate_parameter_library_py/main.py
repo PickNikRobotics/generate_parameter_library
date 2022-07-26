@@ -583,6 +583,7 @@ class DynamicDeclareParameter:
         self.parameter_name = parameter_name
         self.parameter_as_function = parameter_as_function
         self.parameter_validations = []
+        self.param_struct_instance = "params_"
 
     @typechecked
     def add_parameter_validation(self, parameter_validation: ParameterValidation):
@@ -615,6 +616,7 @@ class DynamicDeclareParameter:
             "mapped_param_underscore": mapped_param.replace('.', '_'),
             "parameter_field": parameter_field,
             "parameter_map": parameter_map,
+            "param_struct_instance": self.param_struct_instance,
         }
 
         j2_template = Template(GenerateCode.templates["dynamic_declare_parameter"])
@@ -631,18 +633,17 @@ class RemoveDynamicParameter:
         self.dynamic_declare_parameter = dynamic_declare_parameter
 
     def __str__(self):
-        tmp = self.dynamic_declare_parameter.parameter_name.split('.')
-        tmp2 = tmp[-2].split('_')
-        mapped_param = tmp2[-1]
-
-        parameter_map = tmp[:-2]
-        parameter_map.append(mapped_param + '_map')
-        parameter_map = ".".join(parameter_map)
+        parameter_map = get_dynamic_parameter_map(self.dynamic_declare_parameter.parameter_name)
+        struct_name = get_dynamic_struct_name(self.dynamic_declare_parameter.parameter_name)
+        parameter_field = get_dynamic_parameter_field(self.dynamic_declare_parameter.parameter_name)
+        mapped_param = get_dynamic_mapped_parameter(self.dynamic_declare_parameter.parameter_name)
 
         data = {
             "parameter_map": parameter_map,
             "mapped_param": mapped_param,
             "dynamic_declare_parameter": str(self.dynamic_declare_parameter),
+            "struct_name": struct_name,
+            "parameter_field": parameter_field,
         }
 
         j2_template = Template(GenerateCode.templates["remove_dynamic_parameter"])
@@ -676,7 +677,7 @@ class GenerateCode:
         self.declare_dynamic_parameters = []
         self.update_dynamic_parameters = []
         self.update_declare_dynamic_parameter = []
-        self.remove_dynamic_parameter = {}
+        self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.comments = "// auto-generated DO NOT EDIT"
         self.user_validations = ""
@@ -760,8 +761,7 @@ class GenerateCode:
 
         # remove destroyed parameters
         dynamic_update_parameter = RemoveDynamicParameter(dynamic_declare_parameter)
-        key = '_'.join(nested_name_list)
-        self.remove_dynamic_parameter[key] = dynamic_update_parameter
+        self.remove_dynamic_parameter.append(dynamic_update_parameter)
 
         # declare new dynamic parameters
         dynamic_declare_parameter = DynamicDeclareParameter(param_name, description, read_only, defined_type,
@@ -856,8 +856,7 @@ class GenerateCode:
             "declare_params_set": "\n".join([str(x) for x in self.declare_parameter_sets]),
             "declare_set_dynamic_params": "\n".join([str(x) for x in self.declare_dynamic_parameters]),
             "update_declare_dynamic_parameters": "\n".join([str(x) for x in self.update_declare_dynamic_parameter]),
-            "remove_dynamic_parameters": "\n".join(
-                [str(self.remove_dynamic_parameter[x]) for x in self.remove_dynamic_parameter]),
+            "remove_dynamic_parameters": "\n".join([str(x) for x in self.remove_dynamic_parameter]),
         }
 
         j2_template = Template(GenerateCode.templates["parameter_listener"])

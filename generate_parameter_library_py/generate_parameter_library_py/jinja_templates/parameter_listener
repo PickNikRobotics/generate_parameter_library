@@ -59,6 +59,18 @@ rclcpp::Time __stamp;
       return params_.__stamp != other.__stamp;
     }
 
+    bool refresh_dynamic_parameters() {
+    // remove any destroyed dynamic parameters
+{%- filter indent(width=8) %}
+{{remove_dynamic_parameters}}
+{%- endfilter %}
+    // declare any new dynamic parameters
+    rclcpp::Parameter param;
+{%- filter indent(width=8) %}
+{{update_declare_dynamic_parameters}}
+{%- endfilter %}
+    }
+
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       // Copy params_ so we only update it if all validation succeeds
       Params updated_params = params_;
@@ -68,14 +80,7 @@ rclcpp::Time __stamp;
 {{update_params_set}}
 {%- endfilter %}
       }
-      // remove any destroyed dynamic parameters
-{%- filter indent(width=8) %}
-{{remove_dynamic_parameters}}
-{%- endfilter %}
-      // declare any new dynamic parameters
-{%- filter indent(width=8) %}
-{{update_declare_dynamic_parameters}}
-{%- endfilter %}
+
       // update dynamic parameters
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}

@@ -12,7 +12,6 @@ admittance_controller:
     type: string_array,
     default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
-    read_only: true
   }
   pid:
     rate: {
@@ -27,7 +26,7 @@ admittance_controller:
         default_value: 1.0,
         description: "proportional gain term",
         validation: {
-          size_gt<>: [ 0 ],
+          lower_bounds<>: [ 0 ],
         }
       }
       i: {
