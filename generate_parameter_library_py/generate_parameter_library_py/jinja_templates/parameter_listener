@@ -68,15 +68,15 @@ rclcpp::Time __stamp;
 {{update_params_set}}
 {%- endfilter %}
       }
-// remove any destroyed dynamic parameters
+      // remove any destroyed dynamic parameters
 {%- filter indent(width=8) %}
 {{remove_dynamic_parameters}}
 {%- endfilter %}
-// declare any new dynamic parameters
+      // declare any new dynamic parameters
 {%- filter indent(width=8) %}
 {{update_declare_dynamic_parameters}}
 {%- endfilter %}
-// update dynamic parameters
+      // update dynamic parameters
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
 {{update_dynamic_parameters}}
@@ -99,7 +99,7 @@ rclcpp::Time __stamp;
 {{declare_params_set}}
 {%- endfilter %}
 {% filter indent(width=6) %}
-// declare and set all dynamic parameters
+      // declare and set all dynamic parameters
 {{declare_set_dynamic_params}}
 {%- endfilter %}
       params_.__stamp = clock_.now();
@@ -109,7 +109,7 @@ rclcpp::Time __stamp;
       Params params_;
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
-      std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface_;
+      std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
   };
 
 } // namespace {{namespace}}
