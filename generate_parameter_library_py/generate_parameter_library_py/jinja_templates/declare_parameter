@@ -1,4 +1,4 @@
-if (!parameters_interface->has_parameter("{{parameter_name}}")) {
+if (!parameters_interface_->has_parameter("{{parameter_name}}")) {
 {%- filter indent(width=2) %}
 rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
@@ -9,6 +9,6 @@ auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
 {%- if default_value|length %}
 auto parameter = rclcpp::ParameterValue(params_.{{parameter_name}});
 {% endif -%}
-parameters_interface->declare_parameter("{{parameter_name}}", parameter, descriptor);
+parameters_interface_->declare_parameter("{{parameter_name}}", parameter, descriptor);
 {% endfilter -%}
 }

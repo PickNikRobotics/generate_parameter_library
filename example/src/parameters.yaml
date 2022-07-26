@@ -25,7 +25,10 @@ admittance_controller:
       p: {
         type: double,
         default_value: 1.0,
-        description: "proportional gain term"
+        description: "proportional gain term",
+        validation: {
+          size_gt<>: [ 0 ],
+        }
       }
       i: {
         type: double,

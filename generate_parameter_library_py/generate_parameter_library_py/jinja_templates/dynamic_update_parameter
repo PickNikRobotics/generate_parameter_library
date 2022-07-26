@@ -1,0 +1,10 @@
+for (const auto & value : params_.{{mapped_param}}){
+    auto entry = params_.{{parameter_map}}[value];
+    auto param_name = fmt::format("{}.{}.{}", "{{struct_name}}", value, "{{parameter_field}}");
+    if (param.get_name() == param_name) {
+    {% if parameter_validations|length -%}
+    {{parameter_validations-}}
+    {% endif -%}
+    params_.{{parameter_map}}[value].{{parameter_field}} = param.{{parameter_as_function}};
+  }
+}

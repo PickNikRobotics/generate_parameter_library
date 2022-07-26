@@ -1,7 +1,7 @@
-for (auto value : params_.{{mapped_param}}){
-    auto entry = params_.{{parameter_map}}[value].{{parameter_field}};
-    auto param_name = fmt::format("{}.{}", value, "{{parameter_name}}");
-    if (!parameters_interface->has_parameter(param_name)) {
+for (const auto & value : params_.{{mapped_param}}){
+    auto entry = params_.{{parameter_map}}[value];
+    auto param_name = fmt::format("{}.{}.{}", "{{struct_name}}", value, "{{parameter_field}}");
+    if (!parameters_interface_->has_parameter(param_name)) {
      rcl_interfaces::msg::ParameterDescriptor descriptor;
      descriptor.description = "{{parameter_description}}";
      descriptor.read_only = {{parameter_read_only}};
@@ -11,7 +11,7 @@ for (auto value : params_.{{mapped_param}}){
      {%- if default_value|length %}
      auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
      {% endif -%}
-     parameters_interface->declare_parameter(param_name, parameter, descriptor);
+     parameters_interface_->declare_parameter(param_name, parameter, descriptor);
     }
     {% if parameter_validations|length -%}
     {{parameter_validations-}}
