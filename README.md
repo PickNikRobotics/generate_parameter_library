@@ -71,7 +71,7 @@ target_link_libraries(minimal_node PRIVATE
 
 ### Use generated struct into project source code
 ```c++
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include "turtlesim_parameters.hpp"
 
 int main(int argc, char * argv[])
@@ -177,7 +177,7 @@ This will require this string_array to have these properties:
 * Values are only in the set `["position", "velocity", "acceleration", "effort",]`
 
 You will note that some validators have a suffix of `<>`, this tells the code generator to pass the C++ type of the parameter as a function template.
-The built-in validator functions provided by this package are.
+The built-in validator functions provided by this package are:
 
 | Function               | Arguments           | Description                                                           |
 |------------------------|---------------------|-----------------------------------------------------------------------|
@@ -197,6 +197,9 @@ The built-in validator functions provided by this package are.
 ### Custom validator functions
 Validators are functions that return a `Result` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
 Validators are C++ functions defined in a header file similar to the example shown below.
+
+The `Result` type has a alias `OK` that is shorthand for returning a successful validation.
+It also had a function `ERROR` that uses the expressive [fmt format](https://github.com/fmtlib/fmt) for constructing a human readable error.
 
 ```c++
 Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
