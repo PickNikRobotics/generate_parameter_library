@@ -1,4 +1,4 @@
-{{COMMENTS}}
+{{comments}}
 
 #pragma once
 
@@ -17,8 +17,8 @@
 namespace gen_param_struct_validators {
 {%- filter indent(width=2) %}
 {{validation_functions}}
-{% if USER_VALIDATORS|length -%}
-{{USER_VALIDATORS}}
+{% if user_validations|length -%}
+{{user_validations}}
 {%- endif -%}
 {% endfilter -%}
 } // namespace gen_param_struct_validators
@@ -80,7 +80,6 @@ rclcpp::Time __stamp;
 {%- endfilter %}
       // get parameters and fill struct fields
       rclcpp::Parameter param;
-      gen_param_struct_validators::Result validation_result;
 
 {%- filter indent(width=6) %}
 {{declare_params_set}}
@@ -94,4 +93,4 @@ rclcpp::Time __stamp;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
   };
 
-} // namespace **NAMESPACE**
+} // namespace {{namespace}}
