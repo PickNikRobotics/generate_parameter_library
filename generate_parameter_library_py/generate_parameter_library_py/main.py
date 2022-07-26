@@ -33,7 +33,7 @@ import yaml
 from yaml.parser import ParserError
 import sys
 import os
-from typing import Callable, Optional
+from typing import Optional
 from typeguard import typechecked
 from jinja2 import Template
 
@@ -684,33 +684,6 @@ class GenerateCode:
         self.validation_functions = ""
 
     def preprocess_inputs(self, name, value, nested_name_list):
-        # define parameter name
-        param_name = "".join(x + "." for x in nested_name_list[1:]) + name
-
-        # required attributes
-        try:
-            defined_type = value["type"]
-        except KeyError as e:
-            raise compile_error("No type defined for parameter %s" % param_name)
-
-        # optional attributes
-        default_value = value.get("default_value", None)
-        description = value.get("description", "")
-        read_only = bool(value.get("read_only", False))
-        # bounds = value.get("bounds", None)
-        # fixed_size = value.get("fixed_size", None)
-        # one_of = value.get("one_of", None)
-        validations = []
-        validations_dict = value.get("validation", {})
-        for func_name in validations_dict:
-            args = validations_dict[func_name]
-            if args is not None and not isinstance(args, list):
-                args = [args]
-            validations.append(ValidationFunction(func_name, args, defined_type))
-
-        return param_name, defined_type, default_value, description, read_only, validations
-
-    def parse_params(self, name, value, nested_name_list):
         # define parameter name
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
