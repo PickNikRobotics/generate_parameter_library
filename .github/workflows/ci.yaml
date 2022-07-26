@@ -27,8 +27,6 @@ jobs:
 
     env:
       BASEDIR: ${{ github.workspace }}/.work
-      # https://github.com/ros/rosdistro/pull/33894
-      ADDITIONAL_DEBS: python3-typeguard
 
     name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
     runs-on: ubuntu-latest
