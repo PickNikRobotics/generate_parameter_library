@@ -7,4 +7,10 @@ struct {{struct_name}} {
 {{-sub_structs-}}
 {% endif -%}
 {% endfilter -%}
+{% if struct_instance|length -%}
 } {{struct_instance}};
+{%- endif -%}
+{% if not struct_instance|length -%}
+};
+std::map<std::string, {{map_value_type}}> {{map_name -}};
+{%- endif -%}

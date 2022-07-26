@@ -6,10 +6,10 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 
-generate_parameter_library(admittance_controller_parameters
-  src/parameters.yaml
-  include/generate_parameter_library_example/validators.hpp
-)
+#generate_parameter_library(admittance_controller_parameters
+#  src/parameters.yaml
+#  include/generate_parameter_library_example/validators.hpp
+#)
 
 add_executable(test_node
   src/main.cpp
@@ -18,8 +18,11 @@ add_executable(test_node
 target_link_libraries(test_node PRIVATE
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
-  admittance_controller_parameters
+#  admittance_controller_parameters
+    fmt::fmt
 )
+
+target_include_directories(test_node PRIVATE include)
 
 install(
   TARGETS test_node

@@ -85,6 +85,10 @@ rclcpp::Time __stamp;
 {%- filter indent(width=6) %}
 {{declare_params_set}}
 {%- endfilter %}
+{% filter indent(width=6) %}
+// declare and set all dynamic parameters
+{{declare_set_dynamic_params}}
+{%- endfilter %}
       params_.__stamp = clock_.now();
     }
 
