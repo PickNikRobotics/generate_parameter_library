@@ -12,10 +12,10 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
-    install_requires=["setuptools"],
+    install_requires=["setuptools", "typeguard"],
     package_data={
         "": [
-            "cpp_templates/validators.hpp",
+            "validators/validators.hpp",
             "jinja_templates/declare_parameter",
             "jinja_templates/declare_parameter_set",
             "jinja_templates/declare_struct",

@@ -32,32 +32,14 @@
 import yaml
 from yaml.parser import ParserError
 import sys
-
 import os
 from typing import Callable, Optional
 from typeguard import typechecked
 from jinja2 import Template
 
 
-# helper  classes
-
-# Buffer help minimize string copies
-class Buffer:
-    def __init__(self):
-        self.data_ = bytearray()
-
-    def __iadd__(self, element):
-        self.data_.extend(element.encode())
-        return self
-
-    def __str__(self):
-        return self.data_.decode()
-
-
 # YAMLSyntaxError standardizes compiler error messages
 class YAMLSyntaxError(Exception):
-    """Raised when the input value is too large"""
-
     def __init__(self, msg):
         self.msg = msg
 
@@ -274,14 +256,15 @@ def pascal_case(string: str):
 @typechecked
 def initialization_fail_validation(param_name: str) -> str:
     return (
-        f'throw rclcpp::exceptions::InvalidParameterValueException("Invalid value set during initialization for '
-        f'parameter {param_name}: + validation_result.error_msg());"); '
+        f"throw rclcpp::exceptions::InvalidParameterValueException"
+        f'(fmt::format("Invalid value set during initialization for '
+        f"parameter '{param_name}': \" + validation_result.error_msg()));"
     )
 
 
 @typechecked
 def initialization_pass_validation(param_name: str, parameter_conversion: str) -> str:
-    return ""  # f"params_.{param_name} = param.{parameter_conversion};"
+    return ""
 
 
 @typechecked
@@ -362,7 +345,7 @@ class DeclareParameter:
             "default_value": default_value,
         }
 
-        j2_template = Template(GenParamStruct.templates["declare_parameter"])
+        j2_template = Template(GenerateCode.templates["declare_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -381,12 +364,8 @@ class VariableDeclaration:
             declare_str = f"{type_str} {self.variable_name};"
         elif isinstance(self.value, list):
             value_str = "{"
-            for val in self.value[:-1]:
-                value_str += val_func(val) + ", "
-            if len(self.value) > 0:
-                value_str += val_func(self.value[-1])
+            value_str += ", ".join(val_func(x) for x in self.value)
             value_str += "}"
-
             declare_str = f"{type_str} {self.variable_name} = {value_str};"
         else:
             value_str = val_func(self.value)
@@ -400,7 +379,7 @@ class Struct:
         self.struct_name = struct_name
         self.fields = fields
         self.sub_structs = []
-        self.struct_instance = ""
+        self.template = ""
 
     @typechecked
     def add_field(self, field: VariableDeclaration):
@@ -410,22 +389,14 @@ class Struct:
         self.sub_structs.append(sub_struct)
 
     def inner_content(self):
-        content = Buffer()
-        for field in self.fields:
-            content += str(field) + "\n"
-        for sub_struct in self.sub_structs:
-            content += str(sub_struct) + "\n"
+        content = "\n".join(str(x) for x in self.fields) + "\n"
+        content += "\n".join(str(x) for x in self.sub_structs)
 
         return str(content)
 
     def __str__(self):
-        sub_struct_str = Buffer()
-        for sub_struct in self.sub_structs:
-            sub_struct_str += str(sub_struct) + "\n"
-
-        field_str = Buffer()
-        for field in self.fields:
-            field_str += str(field) + "\n"
+        sub_struct_str = "\n".join(str(x) for x in self.sub_structs)
+        field_str = "\n".join(str(x) for x in self.fields)
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
@@ -438,14 +409,14 @@ class Struct:
 
         data = {
             "struct_name": pascal_case(self.struct_name),
-            "struct_instance": self.struct_instance,
+            "struct_instance": self.struct_name,
             "struct_fields": str(field_str),
             "sub_structs": str(sub_struct_str),
             "map_value_type": map_val_type,
             "map_name": map_name,
         }
 
-        j2_template = Template(GenParamStruct.templates["declare_struct"])
+        j2_template = Template(GenerateCode.templates["declare_struct"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -471,12 +442,11 @@ class ValidationFunction:
         for arg in self.arguments:
             if isinstance(arg, list):
                 code += ", {"
-                for ind, a in enumerate(arg):
+                for a in arg[:-1]:
                     val_func = cpp_str_func_from_python_val(a)
-                    delim = ", "
-                    if ind == len(arg) - 1:
-                        delim = ""
-                    code += val_func(a) + delim
+                    code += val_func(a) + ", "
+                val_func = cpp_str_func_from_python_val(arg[-1])
+                code += val_func(arg[-1])
                 code += "}"
             else:
                 val_func = cpp_str_func_from_python_val(arg)
@@ -505,7 +475,7 @@ class ParameterValidation:
             "invalid_effect": self.invalid_effect,
         }
 
-        j2_template = Template(GenParamStruct.templates["parameter_validation"])
+        j2_template = Template(GenerateCode.templates["parameter_validation"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -522,9 +492,7 @@ class UpdateParameter:
         self.parameter_validations.append(parameter_validation)
 
     def __str__(self):
-        parameter_validations_str = Buffer()
-        for parameter_validation in self.parameter_validations:
-            parameter_validations_str += str(parameter_validation)
+        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
         data = {
             "parameter_name": self.parameter_name,
@@ -532,7 +500,7 @@ class UpdateParameter:
             "parameter_as_function": self.parameter_as_function,
         }
 
-        j2_template = Template(GenParamStruct.templates["update_parameter"])
+        j2_template = Template(GenerateCode.templates["update_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -585,9 +553,7 @@ class DeclareParameterSet:
         self.parameter_validations.append(parameter_validation)
 
     def __str__(self):
-        parameter_validations_str = Buffer()
-        for parameter_validation in self.parameter_validations:
-            parameter_validations_str += str(parameter_validation) + "\n"
+        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
         data = {
             "parameter_name": self.parameter_name,
@@ -595,7 +561,7 @@ class DeclareParameterSet:
             "parameter_as_function": self.parameter_as_function,
         }
 
-        j2_template = Template(GenParamStruct.templates["declare_parameter_set"])
+        j2_template = Template(GenerateCode.templates["declare_parameter_set"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -701,8 +667,8 @@ def get_all_templates():
     return template_map
 
 
-# class used to fill template text file with passed in yaml file
-class GenParamStruct:
+# class used to generate c++ code from yaml file
+class GenerateCode:
     templates = get_all_templates()
 
     def __init__(self):
@@ -715,11 +681,11 @@ class GenParamStruct:
         self.update_declare_dynamic_parameter = []
         self.remove_dynamic_parameter = {}
         self.declare_parameter_sets = []
-        self.comments = "// this is auto-generated code "
-        self.user_validation = ""
+        self.comments = "// auto-generated DO NOT EDIT"
+        self.user_validations = ""
         self.validation_functions = ""
 
-    def preprocess_inputs(self, name, value, nested_name_list):
+    def parse_params(self, name, value, nested_name_list):
         # define parameter name
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
@@ -733,9 +699,6 @@ class GenParamStruct:
         default_value = value.get("default_value", None)
         description = value.get("description", "")
         read_only = bool(value.get("read_only", False))
-        # bounds = value.get("bounds", None)
-        # fixed_size = value.get("fixed_size", None)
-        # one_of = value.get("one_of", None)
         validations = []
         validations_dict = value.get("validation", {})
         for func_name in validations_dict:
@@ -867,8 +830,8 @@ class GenParamStruct:
 
     def __str__(self):
         data = {
-            "USER_VALIDATORS": self.user_validation,
-            "COMMENTS": self.comments,
+            "user_validations": self.user_validations,
+            "comments": self.comments,
             "namespace": self.namespace,
             "validation_functions": self.validation_functions,
             "struct_content": self.struct_tree.sub_structs[0].inner_content(),
@@ -882,7 +845,7 @@ class GenParamStruct:
                 [str(self.remove_dynamic_parameter[x]) for x in self.remove_dynamic_parameter]),
         }
 
-        j2_template = Template(GenParamStruct.templates["parameter_listener"])
+        j2_template = Template(GenerateCode.templates["parameter_listener"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -913,7 +876,7 @@ class GenParamStruct:
 
             if len(doc) != 1:
                 raise compile_error(
-                    "the controller yaml definition must only have one root element"
+                    "The yaml definition must only have one root element"
                 )
             self.namespace = list(doc.keys())[0]
             self.parse_dict(self.namespace, doc[self.namespace], [])
@@ -921,10 +884,10 @@ class GenParamStruct:
         if len(sys.argv) > 3:
             user_validation_file = sys.argv[3]
             with open(user_validation_file, "r") as f:
-                self.user_validation = f.read()
+                self.user_validations = f.read()
 
         validation_functions_file = os.path.join(
-            os.path.dirname(__file__), "cpp_templates", "validators.hpp"
+            os.path.dirname(__file__), "validators", "validators.hpp"
         )
         with open(validation_functions_file, "r") as f:
             self.validation_functions = f.read()
@@ -935,7 +898,7 @@ class GenParamStruct:
 
 
 def main():
-    gen_param_struct = GenParamStruct()
+    gen_param_struct = GenerateCode()
     gen_param_struct.run()
 
 

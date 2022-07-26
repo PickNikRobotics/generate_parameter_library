@@ -10,7 +10,7 @@ admittance_controller:
   }
   joints: {
     type: string_array,
-    default_value: [ ],
+    default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
     read_only: true
   }
@@ -174,7 +174,7 @@ admittance_controller:
       description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
       validation: {
         fixed_size<>: 6,
-        bounds<>: [ 0.0001, 1000000.0 ]
+        element_bounds<>: [ 0.0001, 1000000.0 ]
       }
     }
 
@@ -185,7 +185,7 @@ admittance_controller:
       validation: {
         fixed_size<>: 6,
         validate_double_array_custom_func: [ 20.3, 5.0 ],
-        bounds<>: [ 0.1, 10.0 ]
+        element_bounds<>: [ 0.1, 10.0 ]
       }
     }
 
@@ -193,7 +193,7 @@ admittance_controller:
       type: double_array,
       description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
       validation: {
-        bounds: [ 0.0001, 100000.0 ]
+        element_bounds: [ 0.0001, 100000.0 ]
       }
     }
 

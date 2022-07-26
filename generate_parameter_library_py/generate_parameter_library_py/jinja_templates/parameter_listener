@@ -1,4 +1,4 @@
-{{COMMENTS}}
+{{comments}}
 
 #pragma once
 
@@ -17,8 +17,8 @@
 namespace gen_param_struct_validators {
 {%- filter indent(width=2) %}
 {{validation_functions}}
-{% if USER_VALIDATORS|length -%}
-{{USER_VALIDATORS}}
+{% if user_validations|length -%}
+{{user_validations}}
 {%- endif -%}
 {% endfilter -%}
 } // namespace gen_param_struct_validators
@@ -112,4 +112,4 @@ rclcpp::Time __stamp;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface_;
   };
 
-} // namespace **NAMESPACE**
+} // namespace {{namespace}}
