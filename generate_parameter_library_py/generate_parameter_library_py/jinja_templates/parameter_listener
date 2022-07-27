@@ -59,7 +59,7 @@ rclcpp::Time __stamp;
       return params_.__stamp != other.__stamp;
     }
 
-    bool refresh_dynamic_parameters() {
+    void refresh_dynamic_parameters() {
       // TODO remove any destroyed dynamic parameters
 {%- filter indent(width=6) %}
 {{remove_dynamic_parameters}}
@@ -80,13 +80,14 @@ rclcpp::Time __stamp;
 {{update_params_set}}
 {%- endfilter %}
       }
-
+{% if update_dynamic_parameters|length %}
       // update dynamic parameters
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
 {{update_dynamic_parameters}}
 {%- endfilter %}
       }
+{%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
       return gen_param_struct_validators::OK;
@@ -103,10 +104,13 @@ rclcpp::Time __stamp;
 {%- filter indent(width=6) %}
 {{declare_params_set}}
 {%- endfilter %}
+{% if declare_set_dynamic_params|length %}
 {% filter indent(width=6) %}
-      // declare and set all dynamic parameters
+// declare and set all dynamic parameters
 {{declare_set_dynamic_params}}
 {%- endfilter %}
+{%- endif %}
+
       params_.__stamp = clock_.now();
     }
 
