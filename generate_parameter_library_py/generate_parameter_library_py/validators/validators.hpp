@@ -63,37 +63,55 @@ Result subset_of(rclcpp::Parameter const& parameter,
   return OK;
 }
 
-template <typename T>
-Result fixed_size(const rclcpp::Parameter& parameter, size_t size) {
-  auto param_value = parameter.get_value<std::vector<T>>();
-  if (param_value.size() != size) {
-    return ERROR("Invalid length '{}' for parameter '{}'. Required length: {}",
-                 param_value.size(), parameter.get_name().c_str(), size);
+template <typename T, typename F>
+Result size_cmp(rclcpp::Parameter const& parameter, size_t size,
+                std::string const& cmp_str, F cmp) {
+  if (std::is_same<T, std::string>::value) {
+    if (auto value = parameter.get_value<std::string>();
+        !cmp(value.size(), size)) {
+      return ERROR("Invalid length '{}' for parameter '{}'. Required {}: {}",
+                   value.size(), parameter.get_name(), cmp_str, size);
+    }
+  } else {
+    if (auto value = parameter.get_value<std::vector<T>>();
+        !cmp(value.size(), size)) {
+      return ERROR("Invalid length '{}' for parameter '{}'. Required {}: {}",
+                   value.size(), parameter.get_name(), cmp_str, size);
+    }
   }
+
   return OK;
 }
 
 template <typename T>
-Result size_gt(rclcpp::Parameter const& parameter, size_t size) {
-  auto const& values = parameter.get_value<std::vector<T>>();
-  if (values.size() > size) {
-    return OK;
-  }
+Result fixed_size(rclcpp::Parameter const& parameter, size_t size) {
+  return size_cmp<T>(parameter, size, "equal to", std::equal_to<size_t>{});
+}
 
-  return ERROR(
-      "Invalid length '{}' for parameter '{}'. Required greater than: {}",
-      values.size(), parameter.get_name(), size);
+template <typename T>
+Result size_gt(rclcpp::Parameter const& parameter, size_t size) {
+  return size_cmp<T>(parameter, size, "greater than", std::greater<size_t>{});
 }
 
 template <typename T>
 Result size_lt(rclcpp::Parameter const& parameter, size_t size) {
-  auto const& values = parameter.get_value<std::vector<T>>();
-  if (values.size() < size) {
-    return OK;
-  }
+  return size_cmp<T>(parameter, size, "less than", std::less<size_t>{});
+}
 
-  return ERROR("Invalid length '{}' for parameter '{}'. Required less than: {}",
-               values.size(), parameter.get_name(), size);
+template <typename T>
+Result not_empty(rclcpp::Parameter const& parameter) {
+  if (std::is_same<T, std::string>::value) {
+    if (auto param_value = parameter.get_value<std::string>();
+        param_value.empty()) {
+      return ERROR("The parameter '{}' cannot be empty.", parameter.get_name());
+    }
+  } else {
+    if (auto param_value = parameter.get_value<std::vector<T>>();
+        param_value.empty()) {
+      return ERROR("The parameter '{}' cannot be empty.", parameter.get_name());
+    }
+  }
+  return OK;
 }
 
 template <typename T>
@@ -178,6 +196,5 @@ Result one_of(rclcpp::Parameter const& parameter, std::vector<T> collection) {
                  parameter.get_name(), param_value,
                  fmt::format("{}", fmt::join(collection, ", ")));
   }
-
   return OK;
 }

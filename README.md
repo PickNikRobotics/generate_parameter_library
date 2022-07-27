@@ -183,9 +183,10 @@ The built-in validator functions provided by this package are:
 |------------------------|---------------------|-----------------------------------------------------------------------|
 | unique<>               | []                  | Array type parameter contains no duplicates                           |
 | subset_of<>            | [[val1, val2, ...]] | Every element of array type parameter is contained within argument    |
-| fixed_size<>           | [length]            | Length of array is specified length                                   |
-| size_gt<>              | [length]            | Length of array is greater than specified length                      |
-| size_lt<>              | [length]            | Length of array is less less specified length                         |
+| fixed_size<>           | [length]            | Length of array or string is specified length                         |
+| size_gt<>              | [length]            | Length of array or string is greater than specified length            |
+| size_lt<>              | [length]            | Length of array or string is less less specified length               |
+| not_empty<>            | []                  | Array or string parameter is not empty                                |
 | element_bounds<>       | [lower, upper]      | Bounds checking for every element of array type parameter (inclusive) |
 | lower_element_bounds<> | [lower]             | Lower bound for every element of array type parameter (inclusive)     |
 | upper_element_bounds<> | [upper]             | Upper bound for every element of array type parameter (inclusive)     |
