@@ -33,7 +33,7 @@ import yaml
 from yaml.parser import ParserError
 import sys
 import os
-from typing import Callable, Optional
+from typing import Optional
 from typeguard import typechecked
 from jinja2 import Template
 
@@ -56,6 +56,11 @@ def compile_error(msg: str):
 @typechecked
 def array_type(defined_type: str):
     return defined_type.__contains__("array")
+
+
+@typechecked
+def is_mapped_parameter(param_name: str):
+    return param_name.__contains__("__map_")
 
 
 @typechecked
@@ -272,6 +277,42 @@ def update_parameter_pass_validation() -> str:
     return ""
 
 
+def get_dynamic_parameter_field(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    parameter_field = tmp[-1]
+    return parameter_field
+
+
+def get_dynamic_mapped_parameter(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    tmp2 = tmp[-2].split("_")
+    mapped_param = tmp2[-1]
+    return mapped_param
+
+
+def get_dynamic_struct_name(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    struct_name = tmp[:-2]
+    return ".".join(struct_name)
+
+
+def get_dynamic_parameter_name(yaml_parameter_name: str):
+    struct_name = get_dynamic_struct_name(yaml_parameter_name)
+    parameter_field = get_dynamic_parameter_field(yaml_parameter_name)
+    parameter_name = [struct_name, parameter_field]
+    parameter_name = ".".join(parameter_name)
+    return parameter_name
+
+
+def get_dynamic_parameter_map(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    parameter_map = tmp[:-2]
+    mapped_param = get_dynamic_mapped_parameter(yaml_parameter_name)
+    parameter_map.append(mapped_param + "_map")
+    parameter_map = ".".join(parameter_map)
+    return parameter_map
+
+
 # Each template has a corresponding class with the str filling in the template with jinja
 class DeclareParameter:
     @typechecked
@@ -281,20 +322,20 @@ class DeclareParameter:
         parameter_description: str,
         parameter_read_only: bool,
         parameter_type: str,
-        default_value: any,
+        has_default_value: any,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
         self.parameter_type = parameter_type
-        self.default_value = default_value
+        self.has_default_value = has_default_value
 
     def __str__(self):
         parameter_type = self.parameter_type.upper()
-        if self.default_value is None:
-            default_value = ""
-        else:
+        if self.has_default_value:
             default_value = "not_empty"
+        else:
+            default_value = ""
 
         data = {
             "parameter_name": self.parameter_name,
@@ -320,15 +361,15 @@ class VariableDeclaration:
         val_func = cpp_str_func_from_defined_type(self.variable_type)
         type_str = cpp_type_from_defined_type(self.variable_type)
         if self.value is None:
-            declare_str = f"{type_str} {self.variable_name};"
+            declare_str = f"{type_str} {self.variable_name};\n"
         elif isinstance(self.value, list):
             value_str = "{"
             value_str += ", ".join(val_func(x) for x in self.value)
             value_str += "}"
-            declare_str = f"{type_str} {self.variable_name} = {value_str};"
+            declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
         else:
             value_str = val_func(self.value)
-            declare_str = f"{type_str} {self.variable_name} = {value_str};"
+            declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
         return declare_str
 
 
@@ -338,6 +379,7 @@ class Struct:
         self.struct_name = struct_name
         self.fields = fields
         self.sub_structs = []
+        self.struct_instance = ""
 
     @typechecked
     def add_field(self, field: VariableDeclaration):
@@ -347,20 +389,31 @@ class Struct:
         self.sub_structs.append(sub_struct)
 
     def inner_content(self):
-        content = "\n".join(str(x) for x in self.fields) + "\n"
-        content += "\n".join(str(x) for x in self.sub_structs)
+        content = "".join(str(x) for x in self.fields)
+        content += "".join(str(x) for x in self.sub_structs)
 
         return str(content)
 
     def __str__(self):
-        sub_struct_str = "\n".join(str(x) for x in self.sub_structs)
-        field_str = "\n".join(str(x) for x in self.fields)
+        sub_struct_str = "".join(str(x) for x in self.sub_structs)
+        field_str = "".join(str(x) for x in self.fields)
+
+        if is_mapped_parameter(self.struct_name):
+            map_val_type = pascal_case(self.struct_name)
+            map_name = self.struct_name.split("_")[-1] + "_map"
+            map_name = map_name.replace(".", "_")
+        else:
+            map_val_type = ""
+            map_name = ""
+            self.struct_instance = self.struct_name
 
         data = {
             "struct_name": pascal_case(self.struct_name),
-            "struct_instance": self.struct_name,
+            "struct_instance": self.struct_instance,
             "struct_fields": str(field_str),
             "sub_structs": str(sub_struct_str),
+            "map_value_type": map_val_type,
+            "map_name": map_name,
         }
 
         j2_template = Template(GenerateCode.templates["declare_struct"])
@@ -452,6 +505,40 @@ class UpdateParameter:
         return code
 
 
+class DynamicUpdateParameter:
+    @typechecked
+    def __init__(self, parameter_name: str, parameter_as_function: str):
+        self.parameter_name = parameter_name
+        self.parameter_as_function = parameter_as_function
+        self.parameter_validations = []
+
+    @typechecked
+    def add_parameter_validation(self, parameter_validation: ParameterValidation):
+        self.parameter_validations.append(parameter_validation)
+
+    def __str__(self):
+        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+
+        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        parameter_map = get_dynamic_parameter_map(self.parameter_name)
+        parameter_name = get_dynamic_parameter_name(self.parameter_name)
+        struct_name = get_dynamic_struct_name(self.parameter_name)
+        parameter_field = get_dynamic_parameter_field(self.parameter_name)
+
+        data = {
+            "mapped_param": mapped_param,
+            "parameter_map": parameter_map,
+            "struct_name": struct_name,
+            "parameter_field": parameter_field,
+            "parameter_validations": str(parameter_validations_str),
+            "parameter_as_function": self.parameter_as_function,
+        }
+
+        j2_template = Template(GenerateCode.templates["dynamic_update_parameter"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
 class DeclareParameterSet:
     @typechecked
     def __init__(self, parameter_name: str, parameter_as_function: str):
@@ -473,6 +560,98 @@ class DeclareParameterSet:
         }
 
         j2_template = Template(GenerateCode.templates["declare_parameter_set"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class DynamicDeclareParameter:
+    @typechecked
+    def __init__(
+        self,
+        parameter_name: str,
+        parameter_description: str,
+        parameter_read_only: bool,
+        parameter_type: str,
+        has_default_value: any,
+        parameter_as_function: str,
+    ):
+        self.parameter_name = parameter_name
+        self.parameter_description = parameter_description
+        self.parameter_read_only = parameter_read_only
+        self.parameter_type = parameter_type
+        self.has_default_value = has_default_value
+        self.parameter_name = parameter_name
+        self.parameter_as_function = parameter_as_function
+        self.parameter_validations = []
+        self.param_struct_instance = "params_"
+
+    @typechecked
+    def add_parameter_validation(self, parameter_validation: ParameterValidation):
+        self.parameter_validations.append(parameter_validation)
+
+    def __str__(self):
+        parameter_type = self.parameter_type.upper()
+        if self.has_default_value:
+            default_value = "not_empty"
+        else:
+            default_value = ""
+
+        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+
+        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        parameter_map = get_dynamic_parameter_map(self.parameter_name)
+        parameter_name = get_dynamic_parameter_name(self.parameter_name)
+        struct_name = get_dynamic_struct_name(self.parameter_name)
+        parameter_field = get_dynamic_parameter_field(self.parameter_name)
+
+        data = {
+            "struct_name": struct_name,
+            "parameter_type": parameter_type,
+            "parameter_description": self.parameter_description,
+            "parameter_read_only": bool_to_str(self.parameter_read_only),
+            "default_value": default_value,
+            "parameter_validations": str(parameter_validations_str),
+            "parameter_as_function": self.parameter_as_function,
+            "mapped_param": mapped_param,
+            "mapped_param_underscore": mapped_param.replace(".", "_"),
+            "parameter_field": parameter_field,
+            "parameter_map": parameter_map,
+            "param_struct_instance": self.param_struct_instance,
+        }
+
+        j2_template = Template(GenerateCode.templates["dynamic_declare_parameter"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class RemoveDynamicParameter:
+    @typechecked
+    def __init__(self, dynamic_declare_parameter: DynamicDeclareParameter):
+        self.dynamic_declare_parameter = dynamic_declare_parameter
+
+    def __str__(self):
+        parameter_map = get_dynamic_parameter_map(
+            self.dynamic_declare_parameter.parameter_name
+        )
+        struct_name = get_dynamic_struct_name(
+            self.dynamic_declare_parameter.parameter_name
+        )
+        parameter_field = get_dynamic_parameter_field(
+            self.dynamic_declare_parameter.parameter_name
+        )
+        mapped_param = get_dynamic_mapped_parameter(
+            self.dynamic_declare_parameter.parameter_name
+        )
+
+        data = {
+            "parameter_map": parameter_map,
+            "mapped_param": mapped_param,
+            "dynamic_declare_parameter": str(self.dynamic_declare_parameter),
+            "struct_name": struct_name,
+            "parameter_field": parameter_field,
+        }
+
+        j2_template = Template(GenerateCode.templates["remove_dynamic_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -500,12 +679,16 @@ class GenerateCode:
         self.struct_tree = Struct("Params", [])
         self.update_parameters = []
         self.declare_parameters = []
+        self.declare_dynamic_parameters = []
+        self.update_dynamic_parameters = []
+        self.update_declare_dynamic_parameter = []
+        self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.comments = "// auto-generated DO NOT EDIT"
         self.user_validations = ""
         self.validation_functions = ""
 
-    def parse_params(self, name, value, nested_name_list):
+    def preprocess_inputs(self, name, value, nested_name_list):
         # define parameter name
         param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
@@ -527,13 +710,98 @@ class GenerateCode:
                 args = [args]
             validations.append(ValidationFunction(func_name, args, defined_type))
 
+        return (
+            param_name,
+            defined_type,
+            default_value,
+            description,
+            read_only,
+            validations,
+        )
+
+    def parse_dynamic_params(self, name, value, nested_name_list):
+
+        (
+            param_name,
+            defined_type,
+            default_value,
+            description,
+            read_only,
+            validations,
+        ) = self.preprocess_inputs(name, value, nested_name_list)
+
+        # define struct
+        var = VariableDeclaration(defined_type, name, default_value)
+        self.struct_tree.add_field(var)
+
+        # declare and set parameter
+        parameter_conversion = get_parameter_as_function_str(defined_type)
+        declare_parameter_invalid = initialization_fail_validation(param_name)
+        declare_parameter_valid = initialization_pass_validation(
+            param_name, parameter_conversion
+        )
+        dynamic_declare_parameter = DynamicDeclareParameter(
+            param_name,
+            description,
+            read_only,
+            defined_type,
+            default_value is not None,
+            parameter_conversion,
+        )
+        for validation_function in validations:
+            parameter_validation = ParameterValidation(
+                declare_parameter_invalid, declare_parameter_valid, validation_function
+            )
+            dynamic_declare_parameter.add_parameter_validation(parameter_validation)
+
+        self.declare_dynamic_parameters.append(dynamic_declare_parameter)
+
+        # remove destroyed parameters
+        dynamic_update_parameter = RemoveDynamicParameter(dynamic_declare_parameter)
+        self.remove_dynamic_parameter.append(dynamic_update_parameter)
+
+        # declare new dynamic parameters
+        dynamic_declare_parameter = DynamicDeclareParameter(
+            param_name,
+            description,
+            read_only,
+            defined_type,
+            default_value is not None,
+            parameter_conversion,
+        )
+        self.update_declare_dynamic_parameter.append(dynamic_declare_parameter)
+
+        # update dynamic parameter
+        update_parameter_invalid = update_parameter_fail_validation()
+        update_parameter_valid = update_parameter_pass_validation()
+        parameter_conversion = get_parameter_as_function_str(defined_type)
+        update_parameter = DynamicUpdateParameter(param_name, parameter_conversion)
+        for validation_function in validations:
+            parameter_validation = ParameterValidation(
+                update_parameter_invalid, update_parameter_valid, validation_function
+            )
+            update_parameter.add_parameter_validation(parameter_validation)
+
+        self.update_dynamic_parameters.append(update_parameter)
+
+    def parse_params(self, name, value, nested_name_list):
+
+        (
+            param_name,
+            defined_type,
+            default_value,
+            description,
+            read_only,
+            validations,
+        ) = self.preprocess_inputs(name, value, nested_name_list)
+
         # define struct
         var = VariableDeclaration(defined_type, name, default_value)
         self.struct_tree.add_field(var)
 
         # declare parameter
         declare_parameter = DeclareParameter(
-            param_name, description, read_only, defined_type, default_value
+            param_name, description, read_only, defined_type, default_value is not None
         )
         self.declare_parameters.append(declare_parameter)
 
@@ -565,16 +833,14 @@ class GenerateCode:
         self.declare_parameter_sets.append(declare_parameter_set)
 
     def parse_dict(self, name, root_map, nested_name):
-
         if isinstance(root_map, dict) and isinstance(
             next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
 
-            if name != self.namespace:
-                sub_struct = Struct(name, [])
-                self.struct_tree.add_sub_struct(sub_struct)
-                self.struct_tree = sub_struct
+            sub_struct = Struct(name, [])
+            self.struct_tree.add_sub_struct(sub_struct)
+            self.struct_tree = sub_struct
             for key in root_map:
                 if isinstance(root_map[key], dict):
                     nested_name.append(name)
@@ -583,7 +849,10 @@ class GenerateCode:
 
             self.struct_tree = cur_struct_tree
         else:
-            self.parse_params(name, root_map, nested_name)
+            if is_mapped_parameter(self.struct_tree.struct_name):
+                self.parse_dynamic_params(name, root_map, nested_name)
+            else:
+                self.parse_params(name, root_map, nested_name)
 
     def __str__(self):
         data = {
@@ -591,12 +860,25 @@ class GenerateCode:
             "comments": self.comments,
             "namespace": self.namespace,
             "validation_functions": self.validation_functions,
-            "struct_content": self.struct_tree.inner_content(),
+            "struct_content": self.struct_tree.sub_structs[0].inner_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
+            "update_dynamic_parameters": "\n".join(
+                [str(x) for x in self.update_dynamic_parameters]
+            ),
             "declare_params": "\n".join([str(x) for x in self.declare_parameters]),
             "declare_params_set": "\n".join(
                 [str(x) for x in self.declare_parameter_sets]
             ),
+            "declare_set_dynamic_params": "\n".join(
+                [str(x) for x in self.declare_dynamic_parameters]
+            ),
+            "update_declare_dynamic_parameters": "\n".join(
+                [str(x) for x in self.update_declare_dynamic_parameter]
+            ),
+            # TODO support removing runtime parameters
+            # "remove_dynamic_parameters": "\n".join(
+            #     [str(x) for x in self.remove_dynamic_parameter]
+            # ),
         }
 
         j2_template = Template(GenerateCode.templates["parameter_listener"])

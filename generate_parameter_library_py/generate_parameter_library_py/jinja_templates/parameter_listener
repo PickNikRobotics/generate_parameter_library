@@ -15,7 +15,7 @@
 #include <fmt/ranges.h>
 
 namespace gen_param_struct_validators {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 {{validation_functions}}
 {% if user_validations|length -%}
 {{user_validations}}
@@ -24,9 +24,9 @@ namespace gen_param_struct_validators {
 } // namespace gen_param_struct_validators
 
 namespace {{namespace}} {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 struct Params {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 {{struct_content-}}
 // for detecting if the parameter struct has been updated
 rclcpp::Time __stamp;
@@ -44,9 +44,10 @@ rclcpp::Time __stamp;
     : ParamListener(node->get_node_parameters_interface()) {}
 
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
-      declare_params(parameters_interface);
+      parameters_interface_ = parameters_interface;
+      declare_params();
       auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
-      handle_ = parameters_interface->add_on_set_parameters_callback(update_param_cb);
+      handle_ = parameters_interface_->add_on_set_parameters_callback(update_param_cb);
       clock_ = rclcpp::Clock();
     }
 
@@ -58,6 +59,18 @@ rclcpp::Time __stamp;
       return params_.__stamp != other.__stamp;
     }
 
+    void refresh_dynamic_parameters() {
+      // TODO remove any destroyed dynamic parameters
+{%- filter indent(width=6) %}
+{{remove_dynamic_parameters}}
+{%- endfilter %}
+      // declare any new dynamic parameters
+      rclcpp::Parameter param;
+{%- filter indent(width=6) %}
+{{update_declare_dynamic_parameters}}
+{%- endfilter %}
+    }
+
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       // Copy params_ so we only update it if all validation succeeds
       Params updated_params = params_;
@@ -67,13 +80,20 @@ rclcpp::Time __stamp;
 {{update_params_set}}
 {%- endfilter %}
       }
-
+{% if update_dynamic_parameters|length %}
+      // update dynamic parameters
+      for (const auto &param: parameters) {
+{%- filter indent(width=8) %}
+{{update_dynamic_parameters}}
+{%- endfilter %}
+      }
+{%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
       return gen_param_struct_validators::OK;
     }
 
-    void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
+    void declare_params(){
       // declare all parameters and give default values to non-required ones
 {%- filter indent(width=6) %}
 {{declare_params}}
@@ -84,6 +104,13 @@ rclcpp::Time __stamp;
 {%- filter indent(width=6) %}
 {{declare_params_set}}
 {%- endfilter %}
+{% if declare_set_dynamic_params|length %}
+{% filter indent(width=6) %}
+// declare and set all dynamic parameters
+{{declare_set_dynamic_params}}
+{%- endfilter %}
+{%- endif %}
+
       params_.__stamp = clock_.now();
     }
 
@@ -91,6 +118,7 @@ rclcpp::Time __stamp;
       Params params_;
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
+      std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
   };
 
 } // namespace {{namespace}}

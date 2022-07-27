@@ -22,6 +22,9 @@ setup(
             "jinja_templates/parameter_listener",
             "jinja_templates/parameter_validation",
             "jinja_templates/update_parameter",
+            "jinja_templates/dynamic_update_parameter",
+            "jinja_templates/dynamic_declare_parameter",
+            "jinja_templates/remove_dynamic_parameter",
         ]
     },
     zip_safe=False,

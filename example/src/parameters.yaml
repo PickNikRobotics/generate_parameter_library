@@ -4,7 +4,7 @@ admittance_controller:
     default_value: "spline",
     description: "specifies which algorithm to use for interpolation.",
     validation: {
-      one_of<>: [["spline", "linear"]],
+      one_of<>: [ [ "spline", "linear" ] ],
       no_args_validator: null
     }
   }
@@ -12,8 +12,32 @@ admittance_controller:
     type: string_array,
     default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
-    read_only: true
   }
+  pid:
+    rate: {
+      type: double,
+      default_value: 0.005,
+      description: "update loop period in seconds"
+
+    }
+    __map_joints:
+      p: {
+        type: double,
+        default_value: 1.0,
+        description: "proportional gain term",
+        validation: {
+          lower_bounds<>: [ 0 ],
+        }
+      }
+      i: {
+        type: double,
+        description: "integral gain term"
+      }
+      d: {
+        type: double,
+        default_value: 1.0,
+        description: "derivative gain term"
+      }
   command_interfaces:
     {
       type: string_array,

@@ -8,6 +8,20 @@ admittance_controller:
       - wrist_2_joint
       - wrist_3_joint
 
+    pid:
+      shoulder_pan_joint:
+        i: 0.7
+      shoulder_lift_joint:
+        i: 0.5
+      elbow_joint:
+        i: 0.2
+      wrist_1_joint:
+        i: 1.2
+      wrist_2_joint:
+        i: 0.8
+      wrist_3_joint:
+        i: 0.5
+
     command_interfaces:
       - position
 
@@ -40,7 +54,7 @@ admittance_controller:
         external: false # control frame exists within URDF kinematic chain
 
     fixed_world_frame:
-      frame:   # Gravity points down (neg. Z) in this frame (Usually: world or base_link)
+      frame: # Gravity points down (neg. Z) in this frame (Usually: world or base_link)
         id: base_link # Admittance calcs (displacement etc) are done in this frame. Usually the tool or end-effector
         external: false # control frame exists within URDF kinematic chain
 
