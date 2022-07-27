@@ -6,7 +6,7 @@ package_name = "generate_parameter_library_py"
 
 setup(
     name=package_name,
-    version="0.0.0",
+    version="0.1.0",
     packages=find_packages(),
     data_files=[
         ("share/" + package_name, ["package.xml"]),
@@ -30,8 +30,8 @@ setup(
     zip_safe=False,
     author="Paul Gesel",
     author_email="paul.gesel@picknik.ai",
-    url="https://github.com/pac48/gen_param_struct",
-    download_url="https://github.com/pac48/gen_param_struct/releases",
+    url="https://github.com/PickNikRobotics/generate_parameter_library",
+    download_url="https://github.com/PickNikRobotics/generate_parameter_library/releases",
     keywords=["ROS"],
     classifiers=[
         "Intended Audience :: Developers",
