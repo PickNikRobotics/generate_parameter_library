@@ -193,6 +193,7 @@ The built-in validator functions provided by this package are:
 | lower_bounds<>         | [lower]             | Lower bounds for a scalar type parameter (inclusive)                  |
 | upper_bounds<>         | [upper]             | Upper bounds for a scalar type parameter (inclusive)                  |
 | one_of<>               | [[val1, val2, ...]] | Scalar type parameter is one of the specified values                  |
+| not_empty              | []                  | String parameter is not empty                                         |
 
 ### Custom validator functions
 Validators are functions that return a `Result` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.

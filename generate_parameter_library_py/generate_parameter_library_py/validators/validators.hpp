@@ -178,6 +178,13 @@ Result one_of(rclcpp::Parameter const& parameter, std::vector<T> collection) {
                  parameter.get_name(), param_value,
                  fmt::format("{}", fmt::join(collection, ", ")));
   }
+  return OK;
+}
 
+Result not_empty(rclcpp::Parameter const& parameter) {
+  auto param_value = parameter.get_value<std::string>();
+  if (param_value.empty()) {
+    return ERROR("The parameter '{}' cannot be empty.", parameter.get_name());
+  }
   return OK;
 }
