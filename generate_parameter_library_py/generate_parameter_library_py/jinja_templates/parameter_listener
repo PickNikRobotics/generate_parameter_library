@@ -3,11 +3,13 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <rclcpp/node.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <set>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <fmt/core.h>
