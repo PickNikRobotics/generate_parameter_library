@@ -15,7 +15,7 @@
 #include <fmt/ranges.h>
 
 namespace gen_param_struct_validators {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 {{validation_functions}}
 {% if user_validations|length -%}
 {{user_validations}}
@@ -24,9 +24,9 @@ namespace gen_param_struct_validators {
 } // namespace gen_param_struct_validators
 
 namespace {{namespace}} {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 struct Params {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 {{struct_content-}}
 // for detecting if the parameter struct has been updated
 rclcpp::Time __stamp;
@@ -60,13 +60,13 @@ rclcpp::Time __stamp;
     }
 
     bool refresh_dynamic_parameters() {
-    // remove any destroyed dynamic parameters
-{%- filter indent(width=8) %}
+      // TODO remove any destroyed dynamic parameters
+{%- filter indent(width=6) %}
 {{remove_dynamic_parameters}}
 {%- endfilter %}
-    // declare any new dynamic parameters
-    rclcpp::Parameter param;
-{%- filter indent(width=8) %}
+      // declare any new dynamic parameters
+      rclcpp::Parameter param;
+{%- filter indent(width=6) %}
 {{update_declare_dynamic_parameters}}
 {%- endfilter %}
     }

@@ -1,21 +1,25 @@
 for (const auto & value : {{param_struct_instance}}.{{mapped_param}}){
-    auto entry = {{param_struct_instance}}.{{parameter_map}}[value];
-    auto param_name = fmt::format("{}.{}.{}", "{{struct_name}}", value, "{{parameter_field}}");
-    if (!parameters_interface_->has_parameter(param_name)) {
-     rcl_interfaces::msg::ParameterDescriptor descriptor;
-     descriptor.description = "{{parameter_description}}";
-     descriptor.read_only = {{parameter_read_only}};
-     {%- if not default_value|length %}
-     auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
-     {% endif -%}
-     {%- if default_value|length %}
-     auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
-     {% endif -%}
-     parameters_interface_->declare_parameter(param_name, parameter, descriptor);
-    }
-    param = parameters_interface_->get_parameter(param_name);
-    {% if parameter_validations|length -%}
-    {{parameter_validations-}}
-    {% endif -%}
-    entry.{{parameter_field}} = param.{{parameter_as_function}};
+{%- filter indent(width=4) %}
+auto entry = {{param_struct_instance}}.{{parameter_map}}[value];
+auto param_name = fmt::format("{}.{}.{}", "{{struct_name}}", value, "{{parameter_field}}");
+if (!parameters_interface_->has_parameter(param_name)) {
+{%- filter indent(width=4) %}
+rcl_interfaces::msg::ParameterDescriptor descriptor;
+descriptor.description = "{{parameter_description}}";
+descriptor.read_only = {{parameter_read_only}};
+{%- if not default_value|length %}
+auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
+{% endif -%}
+{%- if default_value|length %}
+auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
+{% endif -%}
+parameters_interface_->declare_parameter(param_name, parameter, descriptor);
+{% endfilter -%}
+}
+param = parameters_interface_->get_parameter(param_name);
+{% if parameter_validations|length -%}
+{{parameter_validations-}}
+{% endif -%}
+entry.{{parameter_field}} = param.{{parameter_as_function}};
+{% endfilter -%}
 }

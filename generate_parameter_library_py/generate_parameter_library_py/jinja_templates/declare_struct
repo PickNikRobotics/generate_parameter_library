@@ -1,16 +1,16 @@
 struct {{struct_name}} {
-{%- filter indent(width=2) %}
+{%- filter indent(width=4) %}
 {% if struct_fields|length -%}
-{{struct_fields}}
-{%- endif -%}
-{%- if sub_structs|length %}
-{{-sub_structs-}}
+{{struct_fields-}}
+{% endif -%}
+{%if sub_structs|length -%}
+{{sub_structs-}}
 {% endif -%}
 {% endfilter -%}
 {% if struct_instance|length -%}
 } {{struct_instance}};
-{%- endif -%}
+{% endif -%}
 {% if not struct_instance|length -%}
 };
-std::map<std::string, {{map_value_type}}> {{map_name -}};
-{%- endif -%}
+std::map<std::string, {{map_value_type}}> {{map_name-}};
+{% endif -%}

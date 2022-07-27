@@ -3,11 +3,7 @@
     for (const auto &it: params_.{{parameter_map}}) {
         if ({{mapped_param}}_set.find(it.first) == {{mapped_param}}_set.end()) {
             auto param_name = fmt::format("{}.{}.{}", "{{struct_name}}", it.first, "{{parameter_field}}");
-            try {
-                parameters_interface_->undeclare_parameter(param_name);
-            }catch (...) {
-                // Block of code to handle errors
-              }
+            parameters_interface_->undeclare_parameter(param_name);
         }
     }
 }

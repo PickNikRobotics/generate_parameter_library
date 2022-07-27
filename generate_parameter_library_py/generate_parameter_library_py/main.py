@@ -361,15 +361,15 @@ class VariableDeclaration:
         val_func = cpp_str_func_from_defined_type(self.variable_type)
         type_str = cpp_type_from_defined_type(self.variable_type)
         if self.value is None:
-            declare_str = f"{type_str} {self.variable_name};"
+            declare_str = f"{type_str} {self.variable_name};\n"
         elif isinstance(self.value, list):
             value_str = "{"
             value_str += ", ".join(val_func(x) for x in self.value)
             value_str += "}"
-            declare_str = f"{type_str} {self.variable_name} = {value_str};"
+            declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
         else:
             value_str = val_func(self.value)
-            declare_str = f"{type_str} {self.variable_name} = {value_str};"
+            declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
         return declare_str
 
 
@@ -389,14 +389,14 @@ class Struct:
         self.sub_structs.append(sub_struct)
 
     def inner_content(self):
-        content = "\n".join(str(x) for x in self.fields) + "\n"
-        content += "\n".join(str(x) for x in self.sub_structs)
+        content = "".join(str(x) for x in self.fields)
+        content += "".join(str(x) for x in self.sub_structs)
 
         return str(content)
 
     def __str__(self):
-        sub_struct_str = "\n".join(str(x) for x in self.sub_structs) + "\n"
-        field_str = "\n".join(str(x) for x in self.fields)
+        sub_struct_str = "".join(str(x) for x in self.sub_structs)
+        field_str = "".join(str(x) for x in self.fields)
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
@@ -875,9 +875,10 @@ class GenerateCode:
             "update_declare_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_declare_dynamic_parameter]
             ),
-            "remove_dynamic_parameters": "\n".join(
-                [str(x) for x in self.remove_dynamic_parameter]
-            ),
+            # TODO support removing runtime parameters
+            # "remove_dynamic_parameters": "\n".join(
+            #     [str(x) for x in self.remove_dynamic_parameter]
+            # ),
         }
 
         j2_template = Template(GenerateCode.templates["parameter_listener"])
