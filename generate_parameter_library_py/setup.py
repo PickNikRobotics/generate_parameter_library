@@ -6,29 +6,32 @@ package_name = "generate_parameter_library_py"
 
 setup(
     name=package_name,
-    version="0.0.0",
+    version="0.1.0",
     packages=find_packages(),
     data_files=[
         ("share/" + package_name, ["package.xml"]),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
-    install_requires=["setuptools"],
+    install_requires=["setuptools", "typeguard"],
     package_data={
         "": [
-            "cpp_templates/validators.hpp",
+            "validators/validators.hpp",
             "jinja_templates/declare_parameter",
             "jinja_templates/declare_parameter_set",
             "jinja_templates/declare_struct",
             "jinja_templates/parameter_listener",
             "jinja_templates/parameter_validation",
             "jinja_templates/update_parameter",
+            "jinja_templates/dynamic_update_parameter",
+            "jinja_templates/dynamic_declare_parameter",
+            "jinja_templates/remove_dynamic_parameter",
         ]
     },
     zip_safe=False,
     author="Paul Gesel",
     author_email="paul.gesel@picknik.ai",
-    url="https://github.com/pac48/gen_param_struct",
-    download_url="https://github.com/pac48/gen_param_struct/releases",
+    url="https://github.com/PickNikRobotics/generate_parameter_library",
+    download_url="https://github.com/PickNikRobotics/generate_parameter_library/releases",
     keywords=["ROS"],
     classifiers=[
         "Intended Audience :: Developers",

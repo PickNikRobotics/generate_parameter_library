@@ -4,22 +4,46 @@ admittance_controller:
     default_value: "spline",
     description: "specifies which algorithm to use for interpolation.",
     validation: {
-      one_of<>: [["spline", "linear"]],
+      one_of<>: [ [ "spline", "linear" ] ],
       no_args_validator: null
     }
   }
   joints: {
     type: string_array,
-    default_value: [ ],
+    default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
-    read_only: true
   }
-  fixed_string: {
-    type: fixed_string_25,
-    default_value: "string_value",
-    description: "test code generation for fixed sized string",
-    read_only: true
-  }
+  pid:
+    rate: {
+      type: double,
+      default_value: 0.005,
+      description: "update loop period in seconds"
+
+    }
+    __map_joints:
+      p: {
+        type: double,
+        default_value: 1.0,
+        description: "proportional gain term",
+        validation: {
+          lower_bounds<>: [ 0 ],
+        }
+      }
+      i: {
+        type: double,
+        description: "integral gain term"
+      }
+      d: {
+        type: double,
+        default_value: 1.0,
+        description: "derivative gain term"
+      }
+      fixed_string: {
+        type: fixed_string_25,
+        default_value: "string_value",
+        description: "test code generation for fixed sized string",
+        read_only: true
+      }
   command_interfaces:
     {
       type: string_array,
@@ -155,7 +179,7 @@ admittance_controller:
       description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
       validation: {
         fixed_size<>: 6,
-        bounds<>: [ 0.0001, 1000000.0 ]
+        element_bounds<>: [ 0.0001, 1000000.0 ]
       }
     }
 
@@ -166,7 +190,7 @@ admittance_controller:
       validation: {
         fixed_size<>: 6,
         validate_double_array_custom_func: [ 20.3, 5.0 ],
-        bounds<>: [ 0.1, 10.0 ]
+        element_bounds<>: [ 0.1, 10.0 ]
       }
     }
 
@@ -174,7 +198,7 @@ admittance_controller:
       type: double_array,
       description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
       validation: {
-        bounds: [ 0.0001, 100000.0 ]
+        element_bounds: [ 0.0001, 100000.0 ]
       }
     }
 
