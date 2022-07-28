@@ -9,6 +9,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <string_view>
+#include <array>
+
 
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -33,6 +36,26 @@ rclcpp::Time __stamp;
 {% endfilter -%}
 };
 {%- endfilter %}
+
+template<size_t S>
+class FixedSizeString {
+public:
+  FixedSizeString() = default;
+  FixedSizeString(const std::string& str) {
+    size_t len = std::min(str.size(), S);
+    std::copy(str.cbegin(), str.cbegin()+len, data_.begin());
+    view_ = std::string_view(data_.data(), len);
+  }
+
+  operator std::string_view() const {
+    return view_;
+  }
+
+private:
+  std::string_view view_;
+  std::array<char, S> data_;
+};
+
 
   class ParamListener{
   public:

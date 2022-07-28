@@ -14,6 +14,12 @@ admittance_controller:
     description: "specifies which joints will be used by the controller",
     read_only: true
   }
+  fixed_string: {
+    type: fixed_string_25,
+    default_value: "string_value",
+    description: "test code generation for fixed sized string",
+    read_only: true
+  }
   command_interfaces:
     {
       type: string_array,

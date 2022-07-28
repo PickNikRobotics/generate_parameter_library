@@ -144,6 +144,13 @@ def str_to_str(s: Optional[str]):
     return '"%s"' % s
 
 
+@typechecked
+def str_to_fixed_str(s: Optional[str], size: int):
+    if s is None:
+        return None
+    return f'FixedSizeString<{size}>("{s}")'
+
+
 # cpp_type, val_to_cpp_str, parameter_conversion
 @typechecked
 def cpp_type_from_defined_type(yaml_type: str) -> str:
@@ -157,6 +164,8 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<bool>"
     elif yaml_type == "string":
         cpp_type = "std::string"
+    elif yaml_type.__contains__("fixed_string"):
+        cpp_type = "std::string_view"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
@@ -206,6 +215,10 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = bool_to_str
     elif yaml_type == "string":
         val_to_cpp_str = str_to_str
+    elif yaml_type.__contains__("fixed_string"):
+        tmp = yaml_type.split("_")
+        size = int(tmp[-1])
+        val_to_cpp_str = lambda str_val: str_to_fixed_str(str_val, size)
     elif yaml_type == "double":
         val_to_cpp_str = float_to_str
     elif yaml_type == "int":
@@ -246,7 +259,7 @@ def get_parameter_as_function_str(yaml_type: str) -> str:
         parameter_conversion = "as_integer_array()"
     elif yaml_type == "bool_array":
         parameter_conversion = "as_bool_array()"
-    elif yaml_type == "string":
+    elif yaml_type == "string" or yaml_type.__contains__("fixed_string"):
         parameter_conversion = "as_string()"
     elif yaml_type == "double":
         parameter_conversion = "as_double()"
@@ -295,12 +308,12 @@ def update_parameter_pass_validation() -> str:
 class DeclareParameter:
     @typechecked
     def __init__(
-        self,
-        parameter_name: str,
-        parameter_description: str,
-        parameter_read_only: bool,
-        parameter_type: str,
-        default_value: any,
+            self,
+            parameter_name: str,
+            parameter_description: str,
+            parameter_read_only: bool,
+            parameter_type: str,
+            default_value: any,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
@@ -403,7 +416,7 @@ class Struct:
 class ValidationFunction:
     @typechecked
     def __init__(
-        self, function_name: str, arguments: Optional[list[any]], defined_type: str
+            self, function_name: str, arguments: Optional[list[any]], defined_type: str
     ):
         self.function_name = function_name
         if function_name[-2:] == "<>":
@@ -439,10 +452,10 @@ class ValidationFunction:
 class ParameterValidation:
     @typechecked
     def __init__(
-        self,
-        invalid_effect: str,
-        valid_effect: str,
-        validation_function: ValidationFunction,
+            self,
+            invalid_effect: str,
+            valid_effect: str,
+            validation_function: ValidationFunction,
     ):
         self.invalid_effect = invalid_effect
         self.valid_effect = valid_effect
@@ -607,7 +620,7 @@ class GenParamStruct:
     def parse_dict(self, name, root_map, nested_name):
 
         if isinstance(root_map, dict) and isinstance(
-            next(iter(root_map.values())), dict
+                next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
 
