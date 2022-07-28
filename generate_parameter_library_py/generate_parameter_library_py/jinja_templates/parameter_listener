@@ -16,16 +16,15 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-namespace gen_param_struct_validators {
+namespace {{namespace}} {
 {%- filter indent(width=4) %}
 {{validation_functions}}
 {% if user_validations|length -%}
 {{user_validations}}
 {%- endif -%}
 {% endfilter -%}
-} // namespace gen_param_struct_validators
 
-namespace {{namespace}} {
+
 {%- filter indent(width=4) %}
 struct Params {
 {%- filter indent(width=4) %}
@@ -92,7 +91,7 @@ rclcpp::Time __stamp;
 {%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
-      return gen_param_struct_validators::OK;
+      return OK;
     }
 
     void declare_params(){
