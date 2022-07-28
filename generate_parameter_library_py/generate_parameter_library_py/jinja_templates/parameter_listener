@@ -91,7 +91,7 @@ rclcpp::Time __stamp;
 {%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
-      return gen_param_struct_validators::OK;
+      return OK;
     }
 
     void declare_params(){
