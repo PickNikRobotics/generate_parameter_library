@@ -8,7 +8,7 @@
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
-  <buildtool_export_depend>ament_cmake_core</buildtool_export_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>generate_parameter_library_py</exec_depend>
 
