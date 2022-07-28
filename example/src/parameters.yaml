@@ -39,7 +39,7 @@ admittance_controller:
         description: "derivative gain term"
       }
   fixed_string: {
-    type: fixed_string_25,
+    type: string_fixed_25,
     default_value: "string_value",
     description: "test code generation for fixed sized string",
     read_only: true

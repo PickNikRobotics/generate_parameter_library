@@ -27,17 +27,6 @@ namespace {{namespace}} {
 {%- endif -%}
 {% endfilter -%}
 
-
-{%- filter indent(width=4) %}
-struct Params {
-{%- filter indent(width=4) %}
-{{struct_content-}}
-// for detecting if the parameter struct has been updated
-rclcpp::Time __stamp;
-{% endfilter -%}
-};
-{%- endfilter %}
-
 template<size_t S>
 class FixedSizeString {
 public:
@@ -52,11 +41,24 @@ public:
     return view_;
   }
 
+  operator std::string() const {
+    return view_.data();
+  }
+
 private:
   std::string_view view_;
   std::array<char, S> data_;
 };
 
+{%- filter indent(width=4) %}
+struct Params {
+{%- filter indent(width=4) %}
+{{struct_content-}}
+// for detecting if the parameter struct has been updated
+rclcpp::Time __stamp;
+{% endfilter -%}
+};
+{%- endfilter %}
 
   class ParamListener{
   public:

@@ -64,6 +64,14 @@ def is_mapped_parameter(param_name: str):
 
 
 @typechecked
+def fixed_type(yaml_type: str):
+    tmp = yaml_type.split("_")
+    if len(tmp) < 3:
+        return False
+    return tmp[-2] == "fixed" and tmp[-1].isdigit()
+
+
+@typechecked
 def validate_type(defined_type: str, value):
     type_translation = {
         "string": str,
@@ -151,7 +159,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<bool>"
     elif yaml_type == "string":
         cpp_type = "std::string"
-    elif yaml_type.__contains__("fixed_string"):
+    elif yaml_type.__contains__("string_fixed"):
         cpp_type = "std::string_view"
     elif yaml_type == "double":
         cpp_type = "double"
@@ -202,7 +210,7 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = bool_to_str
     elif yaml_type == "string":
         val_to_cpp_str = str_to_str
-    elif yaml_type.__contains__("fixed_string"):
+    elif yaml_type.__contains__("string_fixed"):
         tmp = yaml_type.split("_")
         size = int(tmp[-1])
         val_to_cpp_str = lambda str_val: str_to_fixed_str(str_val, size)
@@ -246,7 +254,7 @@ def get_parameter_as_function_str(yaml_type: str) -> str:
         parameter_conversion = "as_integer_array()"
     elif yaml_type == "bool_array":
         parameter_conversion = "as_bool_array()"
-    elif yaml_type == "string" or yaml_type.__contains__("fixed_string"):
+    elif yaml_type == "string" or yaml_type.__contains__("string_fixed"):
         parameter_conversion = "as_string()"
     elif yaml_type == "double":
         parameter_conversion = "as_double()"
@@ -352,8 +360,14 @@ class DeclareParameter:
         else:
             default_value = ""
 
+        if fixed_type(self.parameter_type):
+            parameter_value = self.parameter_name + ".data()"
+        else:
+            parameter_value = self.parameter_name
+
         data = {
             "parameter_name": self.parameter_name,
+            "parameter_value": parameter_value,
             "parameter_type": parameter_type,
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
