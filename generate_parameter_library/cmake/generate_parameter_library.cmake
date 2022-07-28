@@ -34,7 +34,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   endif()
 
   # Optional 3rd parameter for the user defined validation header
-  if (${ARGC} EQUAL 3)
+  if(${ARGC} EQUAL 3)
     set(VALIDATE_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV2})
   endif()
 
@@ -54,11 +54,18 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   )
 
   add_library(${LIB_NAME} ${PARAM_HEADER_FILE})
-  target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include)
+  target_include_directories(${LIB_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include>
+    $<INSTALL_INTERFACE:include/>
+  )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME}
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
     fmt::fmt
+  )
+  install(
+    DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/
+    DESTINATION include/
   )
 endfunction()

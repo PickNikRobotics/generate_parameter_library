@@ -2,11 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 project(generate_parameter_library NONE)
 
 # find dependencies
-find_package(ament_cmake_core REQUIRED)
-
-ament_package(
-  CONFIG_EXTRAS "generate_parameter_library-extras.cmake"
-)
+find_package(ament_cmake REQUIRED)
 
 install(
   DIRECTORY cmake
@@ -20,3 +16,7 @@ if(BUILD_TESTING)
   set(ament_cmake_uncrustify_FOUND TRUE) # Conflicts with clang-format
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_package(
+  CONFIG_EXTRAS "generate_parameter_library-extras.cmake"
+)
