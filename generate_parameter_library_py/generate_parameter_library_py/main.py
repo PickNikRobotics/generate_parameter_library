@@ -64,11 +64,18 @@ def is_mapped_parameter(param_name: str):
 
 
 @typechecked
-def fixed_type(yaml_type: str):
+def fixed_type_size(yaml_type: str):
     tmp = yaml_type.split("_")
     if len(tmp) < 3:
-        return False
-    return tmp[-2] == "fixed" and tmp[-1].isdigit()
+        return None
+    if tmp[-2] != "fixed" or not tmp[-1].isdigit():
+        return None
+    return int(tmp[-1])
+
+
+@typechecked
+def fixed_type(yaml_type: str):
+    return fixed_type_size(yaml_type) is not None
 
 
 @typechecked
@@ -143,7 +150,7 @@ def str_to_str(s: Optional[str]):
 def str_to_fixed_str(s: Optional[str], size: int):
     if s is None:
         return None
-    return f'FixedSizeString<{size}>("{s}")'
+    return '{"%s"}' % s
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
@@ -159,8 +166,8 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<bool>"
     elif yaml_type == "string":
         cpp_type = "std::string"
-    elif yaml_type.__contains__("string_fixed"):
-        cpp_type = "std::string_view"
+    elif yaml_type.__contains__("string_fixed_"):
+        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
@@ -175,7 +182,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
 
 @typechecked
 def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
-    if yaml_type == "string_array":
+    if yaml_type == "string_array" or yaml_type.__contains__("string_fixed_"):
         cpp_type = "std::string"
     elif yaml_type == "double_array":
         cpp_type = "double"
@@ -210,7 +217,7 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = bool_to_str
     elif yaml_type == "string":
         val_to_cpp_str = str_to_str
-    elif yaml_type.__contains__("string_fixed"):
+    elif yaml_type.__contains__("string_fixed_"):
         tmp = yaml_type.split("_")
         size = int(tmp[-1])
         val_to_cpp_str = lambda str_val: str_to_fixed_str(str_val, size)
@@ -254,7 +261,7 @@ def get_parameter_as_function_str(yaml_type: str) -> str:
         parameter_conversion = "as_integer_array()"
     elif yaml_type == "bool_array":
         parameter_conversion = "as_bool_array()"
-    elif yaml_type == "string" or yaml_type.__contains__("string_fixed"):
+    elif yaml_type == "string" or yaml_type.__contains__("string_fixed_"):
         parameter_conversion = "as_string()"
     elif yaml_type == "double":
         parameter_conversion = "as_double()"
@@ -360,14 +367,9 @@ class DeclareParameter:
         else:
             default_value = ""
 
-        if fixed_type(self.parameter_type):
-            parameter_value = self.parameter_name + ".data()"
-        else:
-            parameter_value = self.parameter_name
-
         data = {
             "parameter_name": self.parameter_name,
-            "parameter_value": parameter_value,
+            "parameter_value": self.parameter_name,
             "parameter_type": parameter_type,
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
@@ -733,6 +735,9 @@ class GenerateCode:
         read_only = bool(value.get("read_only", False))
         validations = []
         validations_dict = value.get("validation", {})
+        if fixed_type(defined_type):
+            validations_dict["size_lt<>"] = fixed_type_size(defined_type) + 1
+
         for func_name in validations_dict:
             args = validations_dict[func_name]
             if args is not None and not isinstance(args, list):
