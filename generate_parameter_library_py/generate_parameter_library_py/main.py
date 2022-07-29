@@ -79,9 +79,14 @@ def is_fixed_type(yaml_type: str):
 
 
 @typechecked
-def get_fixed_type(yaml_type: str):
+def get_fixed_base_type(yaml_type: str):
     tmp = yaml_type.split("_")
-    return "".join(tmp[:-2])
+    return "_".join(tmp[:-2])
+
+
+@typechecked
+def get_fixed_type(yaml_type: str):
+    return get_fixed_base_type(yaml_type) + "_fixed"
 
 
 @typechecked
@@ -116,14 +121,14 @@ def validate_type(defined_type: str, value):
 @typechecked
 def bool_to_str(cond: Optional[bool]):
     if cond is None:
-        return None
+        return ""
     return "true" if cond else "false"
 
 
 @typechecked
 def float_to_str(num: Optional[float]):
     if num is None:
-        return None
+        return ""
     str_num = str(num)
     if str_num == "nan":
         str_num = "std::numeric_limits<double>::quiet_NaN()"
@@ -141,66 +146,133 @@ def float_to_str(num: Optional[float]):
 @typechecked
 def int_to_str(num: Optional[int]):
     if num is None:
-        return None
+        return ""
     return str(num)
 
 
 @typechecked
 def str_to_str(s: Optional[str]):
     if s is None:
-        return None
-    return '"%s"' % s
+        return ""
+    return f'"{s}"'
 
 
 @typechecked
-def fixed_str_to_str(s: Optional[str]):
+def bool_array_to_str(values: Optional[list]):
+    if values is None:
+        return ""
+    return "{" + ", ".join(bool_to_str(x) for x in values) + "}"
+
+
+@typechecked
+def float_array_to_str(values: Optional[list]):
+    if values is None:
+        return ""
+    return "{" + ", ".join(float_to_str(x) for x in values) + "}"
+
+
+@typechecked
+def int_array_to_str(values: Optional[list]):
+    if values is None:
+        return ""
+    return "{" + ", ".join(int_to_str(x) for x in values) + "}"
+
+
+@typechecked
+def str_array_to_str(s: Optional[list]):
+    if s is None:
+        return ""
+    return "{" + ", ".join(str_to_str(x) for x in s) + "}"
+
+
+@typechecked
+def str_array_fixed_to_str(s: Optional[list]):
+    raise compile_error("not implemented")
+
+
+@typechecked
+def str_fixed_to_str(s: Optional[str]):
+    if s is None:
+        return ""
     return '{%s}' % str_to_str(s)
 
 
 @typechecked
-def fixed_float_to_str(num: Optional[float]):
-    return '{%s}' % float_to_str(num)
+def float_array_fixed_to_str(values: Optional[list]):
+    if values is None:
+        return ""
+    return "{{" + ", ".join(float_to_str(x) for x in values) + "}}"
 
 
 @typechecked
-def fixed_int_to_str(num: Optional[int]):
-    return '{%s}' % int_to_str(num)
+def int_array_fixed_to_str(values: Optional[list]):
+    if values is None:
+        return ""
+    return "{{" + ", ".join(int_to_str(x) for x in values) + "}}"
 
 
 @typechecked
-def fixed_bool_to_str(cond: Optional[bool]):
-    return '{%s}' % bool_to_str(cond)
+def bool_array_fixed_to_str(values: Optional[list]):
+    if values is None:
+        return ""
+    return "{{" + ", ".join(bool_to_str(x) for x in values) + "}}"
+
+
+value_to_string = {
+    "bool": bool_to_str,
+    "double": float_to_str,
+    "int": int_to_str,
+    "string": str_to_str,
+    "bool_array": bool_array_to_str,
+    "double_array": float_array_to_str,
+    "int_array": int_array_to_str,
+    "string_array": str_array_to_str,
+    "bool_array_fixed": bool_array_fixed_to_str,
+    "double_array_fixed": float_array_fixed_to_str,
+    "int_array_fixed": int_array_fixed_to_str,
+    "string_array_fixed": str_array_fixed_to_str,
+    "string_fixed": str_fixed_to_str,
+}
+defined_type_to_cpp_type = {
+    "bool": "bool",
+    "double": "double",
+    "int": "int",
+    "string": "std::string",
+    "bool_array": "std::vector<bool>",
+    "double_array": "std::vector<double>",
+    "int_array": "std::vector<int>",
+    "string_array": "std::vector<std::string>",
+    "bool_array_fixed": "std::vector<std::string>"
+}
+
+defined_type_to_fixed_cpp_type = {
+    "double_array_fixed": "parameter_traits::FixedSizeArray",
+    "int_array_fixed": "parameter_traits::FixedSizeArray",
+    "string_array_fixed": "parameter_traits::FixedSizeArray",
+    "string_fixed": "parameter_traits::FixedSizeString",
+}
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
 @typechecked
 def cpp_type_from_defined_type(yaml_type: str) -> str:
-    if yaml_type == "string_array":
-        cpp_type = "std::vector<std::string>"
-    elif yaml_type == "double_array":
-        cpp_type = "std::vector<double>"
-    elif yaml_type == "int_array":
-        cpp_type = "std::vector<int>"
-    elif yaml_type == "bool_array":
-        cpp_type = "std::vector<bool>"
-    elif yaml_type == "string":
-        cpp_type = "std::string"
-    elif yaml_type.__contains__("string_fixed_"):
-        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
-    elif yaml_type == "double":
-        cpp_type = "double"
-    elif yaml_type == "int":
-        cpp_type = "int"
-    elif yaml_type == "bool":
-        cpp_type = "bool"
-    elif yaml_type.__contains__("string") and is_fixed_type(yaml_type):
-        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
-    elif is_fixed_type(yaml_type):
-        cpp_type = f"FixedSizeArray<{fixed_type_size(yaml_type)}>"
+    if is_fixed_type(yaml_type):
+        size = fixed_type_size(yaml_type)
+        yaml_type = get_fixed_type(yaml_type)
+        if yaml_type in defined_type_to_fixed_cpp_type:
+            cpp_type = defined_type_to_fixed_cpp_type[yaml_type]
+            if yaml_type == "string_fixed":
+                cpp_type = cpp_type + f"<{size}>"
+            else:
+                base_yaml_type = get_fixed_base_type(yaml_type)
+                cpp_template_type = cpp_type_from_defined_type(base_yaml_type)
+                cpp_type = cpp_type + f"<{cpp_template_type}, {size}>"
+            return cpp_type
     else:
-        raise compile_error("invalid yaml type: %s" % type(yaml_type))
+        if yaml_type in defined_type_to_cpp_type:
+            return defined_type_to_cpp_type[yaml_type]
 
-    return cpp_type
+    raise compile_error("invalid yaml type: %s" % type(yaml_type))
 
 
 @typechecked
@@ -230,34 +302,13 @@ def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
 # TODO type checking fails here
 # @typechecked
 def cpp_str_func_from_defined_type(yaml_type: str):
-    if yaml_type == "string_array":
-        val_to_cpp_str = str_to_str
-    elif yaml_type == "double_array":
-        val_to_cpp_str = float_to_str
-    elif yaml_type.__contains__("double_array_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_float_to_str
-    elif yaml_type == "integer_array" or yaml_type.__contains__("integer_array_fixed_"):
-        val_to_cpp_str = int_to_str
-    elif yaml_type.__contains__("integer_array_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_int_to_str
-    elif yaml_type == "bool_array":
-        val_to_cpp_str = bool_to_str
-    elif yaml_type.__contains__("bool_array_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_bool_to_str
-    elif yaml_type == "string":
-        val_to_cpp_str = str_to_str
-    elif yaml_type.__contains__("string_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_str_to_str
-    elif yaml_type == "double":
-        val_to_cpp_str = float_to_str
-    elif yaml_type == "int":
-        val_to_cpp_str = int_to_str
-    elif yaml_type == "bool":
-        val_to_cpp_str = bool_to_str
+    if is_fixed_type(yaml_type):
+        yaml_type = get_fixed_type(yaml_type)
+
+    if yaml_type in value_to_string:
+        return value_to_string[yaml_type]
     else:
         raise compile_error("invalid yaml type: %s" % type(yaml_type))
-
-    return val_to_cpp_str
 
 
 # TODO type checking fails here
@@ -368,6 +419,13 @@ def get_dynamic_parameter_map(yaml_parameter_name: str):
     return parameter_map
 
 
+def get_parameter_type(yaml_type: str):
+    if is_fixed_type(yaml_type):
+        return get_fixed_base_type(yaml_type).upper()
+    else:
+        return yaml_type.upper()
+
+
 # Each template has a corresponding class with the str filling in the template with jinja
 
 
@@ -410,23 +468,25 @@ class DeclareParameter:
 class VariableDeclaration:
     @typechecked
     def __init__(self, variable_type: str, variable_name: str, value: any):
-        self.variable_type = variable_type
+        self.yaml_type = variable_type
         self.variable_name = variable_name
         self.value = value
 
     def __str__(self):
-        val_func = cpp_str_func_from_defined_type(self.variable_type)
-        type_str = cpp_type_from_defined_type(self.variable_type)
-        if self.value is None:
-            declare_str = f"{type_str} {self.variable_name};\n"
-        elif isinstance(self.value, list):
-            value_str = "{"
-            value_str += ", ".join(val_func(x) for x in self.value)
-            value_str += "}"
-            declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
+        val_func = cpp_str_func_from_defined_type(self.yaml_type)
+        type_str = cpp_type_from_defined_type(self.yaml_type)
+        # if self.value is None:
+        #     declare_str = f"{type_str} {self.variable_name};\n"
+        # elif isinstance(self.value, list):
+        #     declare_str = f"{type_str} {self.variable_name} = {val_func(x)};\n"
+        # else:
+        #     value_str = val_func(self.value)
+        #     declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
+        value = val_func(self.value)
+        if len(value) > 0:
+            declare_str = f"{type_str} {self.variable_name} = {value};\n"
         else:
-            value_str = val_func(self.value)
-            declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
+            declare_str = f"{type_str} {self.variable_name};\n"
         return declare_str
 
 

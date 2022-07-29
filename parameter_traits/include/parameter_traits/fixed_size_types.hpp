@@ -30,6 +30,25 @@
 
 namespace parameter_traits {
 
+template <typename T, size_t S>
+class FixedSizeArray {
+ public:
+  FixedSizeArray() = default;
+  FixedSizeArray(const std::vector<T>& values) {
+    len_ = std::min(values.size(), S);
+    std::copy(values.cbegin(), values.cbegin() + len_, data_.begin());
+  }
+
+  operator rclcpp::ParameterValue() const {
+    return rclcpp::ParameterValue(
+        std::vector<T>(data_.cbegin(), data_.cbegin()));
+  }
+
+ private:
+  std::array<T, S> data_;
+  size_t len_;
+};
+
 template <size_t S>
 class FixedSizeString {
  public:
