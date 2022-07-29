@@ -185,6 +185,8 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<bool>"
     elif yaml_type == "string":
         cpp_type = "std::string"
+    elif yaml_type.__contains__("string_fixed_"):
+        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
@@ -364,13 +366,6 @@ def get_dynamic_parameter_map(yaml_parameter_name: str):
     parameter_map.append(mapped_param + "_map")
     parameter_map = ".".join(parameter_map)
     return parameter_map
-
-
-def get_parameter_type(yaml_type: str):
-    if is_fixed_type(yaml_type):
-        return get_fixed_type(yaml_type).upper()
-    else:
-        return yaml_type.upper()
 
 
 # Each template has a corresponding class with the str filling in the template with jinja
