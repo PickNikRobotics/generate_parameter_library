@@ -150,7 +150,7 @@ def str_to_str(s: Optional[str]):
 def str_to_fixed_str(s: Optional[str], size: int):
     if s is None:
         return None
-    return f'FixedSizeString<{size}>("{s}")'
+    return '{"%s"}' % s
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
@@ -167,7 +167,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
     elif yaml_type == "string":
         cpp_type = "std::string"
     elif yaml_type.__contains__("string_fixed_"):
-        cpp_type = "std::string_view"
+        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
@@ -367,14 +367,9 @@ class DeclareParameter:
         else:
             default_value = ""
 
-        if fixed_type(self.parameter_type):
-            parameter_value = self.parameter_name + ".data()"
-        else:
-            parameter_value = self.parameter_name
-
         data = {
             "parameter_name": self.parameter_name,
-            "parameter_value": parameter_value,
+            "parameter_value": self.parameter_name,
             "parameter_type": parameter_type,
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
