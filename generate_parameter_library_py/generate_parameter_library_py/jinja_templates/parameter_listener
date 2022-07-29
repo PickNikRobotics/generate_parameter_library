@@ -27,6 +27,7 @@ namespace {{namespace}} {
 {%- endif -%}
 {% endfilter -%}
 
+{%- filter indent(width=4) %}
 template<size_t S>
 class FixedSizeString {
 public:
@@ -51,7 +52,6 @@ private:
   size_t len_;
 };
 
-{%- filter indent(width=4) %}
 struct Params {
 {%- filter indent(width=4) %}
 {{struct_content-}}
