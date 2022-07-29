@@ -82,7 +82,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME}
     fmt::fmt
-      parameter_traits::parameter_traits
+    parameter_traits::parameter_traits
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
   )
