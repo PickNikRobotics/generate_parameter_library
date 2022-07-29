@@ -3,7 +3,7 @@
 <package format="3">
   <name>parameter_traits</name>
   <version>0.0.0</version>
-  <description>Validator functions for rclcpp::Parameter</description>
+  <description>Functions and types for rclcpp::Parameter</description>
   <maintainer email="maybe@tylerjw.dev">Tyler Weaver</maintainer>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>

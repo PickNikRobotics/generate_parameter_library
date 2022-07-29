@@ -28,41 +28,6 @@
 
 #pragma once
 
-#include <string>
-
-#include <rclcpp/rclcpp.hpp>
-
-#include <fmt/format.h>
-
-namespace parameter_traits {
-
-class Result {
- public:
-  template <typename... Args>
-  Result(const std::string& format, Args... args) {
-    msg_ = fmt::format(format, args...);
-    success_ = false;
-  }
-
-  Result() = default;
-
-  operator rcl_interfaces::msg::SetParametersResult() const {
-    rcl_interfaces::msg::SetParametersResult result;
-    result.successful = success_;
-    result.reason = msg_;
-    return result;
-  }
-
-  bool success() { return success_; }
-
-  std::string error_msg() { return msg_; }
-
- private:
-  std::string msg_;
-  bool success_ = true;
-};
-
-auto static OK = Result();
-using ERROR = Result;
-
-}  // namespace parameter_traits
+#include <parameter_traits/comparison.hpp>
+#include <parameter_traits/result.hpp>
+#include <parameter_traits/validators.hpp>
