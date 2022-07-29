@@ -741,7 +741,7 @@ class GenerateCode:
         validations = []
         validations_dict = value.get("validation", {})
         if fixed_type(defined_type):
-            validations_dict["size_lt<>"] = fixed_type_size(defined_type)+1
+            validations_dict["size_lt<>"] = fixed_type_size(defined_type) + 1
 
         for func_name in validations_dict:
             args = validations_dict[func_name]
