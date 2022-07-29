@@ -201,8 +201,14 @@ Validators are C++ functions defined in a header file similar to the example sho
 
 The `Result` type has a alias `OK` that is shorthand for returning a successful validation.
 It also had a function `ERROR` that uses the expressive [fmt format](https://github.com/fmtlib/fmt) for constructing a human readable error.
+These come from the `parameter_validators` library.
+Note that you need to place your custom validators in the `parameter_validators` namespace.
 
 ```c++
+#include <parameter_validators/parameter_validators.hpp>
+
+namespace parameter_validators {
+
 Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
   int param_value = parameter.as_int();
     if (param_value != expected_value) {
@@ -212,6 +218,8 @@ Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_valu
 
   return OK;
 }
+
+}  // namespace parameter_validators
 ```
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
