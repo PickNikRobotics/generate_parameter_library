@@ -19,7 +19,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include <parameter_validators/parameter_validators.hpp>
+#include <parameter_traits/parameter_validators.hpp>
 
 {% if user_validation_file|length -%}
 #include "{{user_validation_file}}"
@@ -116,7 +116,7 @@ rclcpp::Time __stamp;
 {%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
-      return parameter_validators::OK;
+      return parameter_traits::OK;
     }
 
     void declare_params(){

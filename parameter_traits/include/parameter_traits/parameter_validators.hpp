@@ -35,10 +35,10 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <parameter_validators/comparison.hpp>
-#include <parameter_validators/result.hpp>
+#include <parameter_traits/comparison.hpp>
+#include <parameter_traits/result.hpp>
 
-namespace parameter_validators {
+namespace parameter_traits {
 
 template <typename T>
 Result unique(rclcpp::Parameter const& parameter) {
@@ -200,4 +200,4 @@ Result one_of(rclcpp::Parameter const& parameter, std::vector<T> collection) {
   return OK;
 }
 
-}  // namespace parameter_validators
+}  // namespace parameter_traits

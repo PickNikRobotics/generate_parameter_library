@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.22)
-project(parameter_validators)
+project(parameter_traits)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(fmt REQUIRED)
 find_package(rclcpp REQUIRED)
 
-add_library(parameter_validators INTERFACE)
-target_include_directories(parameter_validators INTERFACE
+add_library(parameter_traits INTERFACE)
+target_include_directories(parameter_traits INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_compile_features(parameter_validators INTERFACE cxx_std_17)
-target_link_libraries(parameter_validators
+target_compile_features(parameter_traits INTERFACE cxx_std_17)
+target_link_libraries(parameter_traits
   INTERFACE
     fmt::fmt
     rclcpp::rclcpp
@@ -20,8 +20,8 @@ target_link_libraries(parameter_validators
 install(DIRECTORY include/ DESTINATION include/)
 
 install(
-  TARGETS parameter_validators
-  EXPORT export_parameter_validators
+  TARGETS parameter_traits
+  EXPORT parameter_traits
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -29,7 +29,7 @@ install(
 )
 
 ament_export_include_directories(include)
-ament_export_targets(export_parameter_validators)
+ament_export_targets(parameter_traits)
 ament_export_dependencies(fmt rclcpp)
 
 if(BUILD_TESTING)

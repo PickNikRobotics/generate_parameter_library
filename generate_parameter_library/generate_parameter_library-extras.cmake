@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 find_package(fmt REQUIRED)
-find_package(parameter_validators REQUIRED)
+find_package(parameter_traits REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 
