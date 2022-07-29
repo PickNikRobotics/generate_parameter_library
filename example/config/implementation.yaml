@@ -8,6 +8,8 @@ admittance_controller:
       - wrist_2_joint
       - wrist_3_joint
 
+    fixed_string_no_default:
+      "happy"
 
     pid:
       shoulder_pan_joint:

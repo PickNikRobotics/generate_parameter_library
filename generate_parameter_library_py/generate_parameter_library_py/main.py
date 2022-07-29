@@ -77,6 +77,7 @@ def fixed_type_size(yaml_type: str):
 def is_fixed_type(yaml_type: str):
     return fixed_type_size(yaml_type) is not None
 
+
 @typechecked
 def get_fixed_type(yaml_type: str):
     tmp = yaml_type.split("_")
@@ -153,7 +154,7 @@ def str_to_str(s: Optional[str]):
 
 @typechecked
 def fixed_str_to_str(s: Optional[str]):
-    return '{%s}' % str_to_str(s)
+    return "{%s}" % str_to_str(s)
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
@@ -189,11 +190,11 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
 def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
     if yaml_type == "string_array" or yaml_type.__contains__("string_fixed_"):
         cpp_type = "std::string"
-    elif yaml_type == "double_array" or yaml_type.__contains__("double_array_fixed_"):
+    elif yaml_type == "double_array":
         cpp_type = "double"
-    elif yaml_type == "int_array" or yaml_type.__contains__("int_array_fixed_"):
+    elif yaml_type == "int_array":
         cpp_type = "int"
-    elif yaml_type == "bool_array" or yaml_type.__contains__("bool_array_fixed_"):
+    elif yaml_type == "bool_array":
         cpp_type = "bool"
     elif yaml_type == "string":
         cpp_type = "std::string"
@@ -216,16 +217,10 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = str_to_str
     elif yaml_type == "double_array":
         val_to_cpp_str = float_to_str
-    elif yaml_type.__contains__("double_array_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_float_to_str
-    elif yaml_type == "integer_array" or yaml_type.__contains__("integer_array_fixed_"):
+    elif yaml_type == "integer_array":
         val_to_cpp_str = int_to_str
-    elif yaml_type.__contains__("integer_array_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_int_to_str
     elif yaml_type == "bool_array":
         val_to_cpp_str = bool_to_str
-    elif yaml_type.__contains__("bool_array_fixed_") and is_fixed_type(yaml_type):
-        val_to_cpp_str = fixed_bool_to_str
     elif yaml_type == "string":
         val_to_cpp_str = str_to_str
     elif yaml_type.__contains__("string_fixed_") and is_fixed_type(yaml_type):
@@ -264,11 +259,11 @@ def cpp_str_func_from_python_val(arg):
 def get_parameter_as_function_str(yaml_type: str) -> str:
     if yaml_type == "string_array":
         parameter_conversion = "as_string_array()"
-    elif yaml_type == "double_array" or yaml_type.__contains__("double_array_fixed_"):
+    elif yaml_type == "double_array":
         parameter_conversion = "as_double_array()"
-    elif yaml_type == "int_array" or yaml_type.__contains__("int_array_fixed_"):
+    elif yaml_type == "int_array":
         parameter_conversion = "as_integer_array()"
-    elif yaml_type == "bool_array" or yaml_type.__contains__("bool_array_fixed_"):
+    elif yaml_type == "bool_array":
         parameter_conversion = "as_bool_array()"
     elif yaml_type == "string" or yaml_type.__contains__("string_fixed_"):
         parameter_conversion = "as_string()"
@@ -363,12 +358,12 @@ def get_parameter_type(yaml_type: str):
 class DeclareParameter:
     @typechecked
     def __init__(
-            self,
-            parameter_name: str,
-            parameter_description: str,
-            parameter_read_only: bool,
-            yaml_type: str,
-            has_default_value: any,
+        self,
+        parameter_name: str,
+        parameter_description: str,
+        parameter_read_only: bool,
+        yaml_type: str,
+        has_default_value: any,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
@@ -470,7 +465,7 @@ class Struct:
 class ValidationFunction:
     @typechecked
     def __init__(
-            self, function_name: str, arguments: Optional[list[any]], defined_type: str
+        self, function_name: str, arguments: Optional[list[any]], defined_type: str
     ):
         self.function_name = function_name
         if function_name[-2:] == "<>":
@@ -505,10 +500,10 @@ class ValidationFunction:
 class ParameterValidation:
     @typechecked
     def __init__(
-            self,
-            invalid_effect: str,
-            valid_effect: str,
-            validation_function: ValidationFunction,
+        self,
+        invalid_effect: str,
+        valid_effect: str,
+        validation_function: ValidationFunction,
     ):
         self.invalid_effect = invalid_effect
         self.valid_effect = valid_effect
@@ -613,13 +608,13 @@ class DeclareParameterSet:
 class DynamicDeclareParameter:
     @typechecked
     def __init__(
-            self,
-            parameter_name: str,
-            parameter_description: str,
-            parameter_read_only: bool,
-            yaml_type: str,
-            has_default_value: any,
-            parameter_as_function: str,
+        self,
+        parameter_name: str,
+        parameter_description: str,
+        parameter_read_only: bool,
+        yaml_type: str,
+        has_default_value: any,
+        parameter_as_function: str,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
@@ -881,7 +876,7 @@ class GenerateCode:
     def parse_dict(self, name, root_map, nested_name):
 
         if isinstance(root_map, dict) and isinstance(
-                next(iter(root_map.values())), dict
+            next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
 
