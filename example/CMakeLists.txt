@@ -8,7 +8,7 @@ find_package(generate_parameter_library REQUIRED)
 
 generate_parameter_library(admittance_controller_parameters
   src/parameters.yaml
-  include/generate_parameter_library_example/validators.hpp
+  include/generate_parameter_library_example/example_validators.hpp
 )
 
 add_executable(test_node

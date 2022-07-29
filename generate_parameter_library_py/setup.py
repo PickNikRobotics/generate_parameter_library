@@ -12,7 +12,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
-    install_requires=["setuptools", "typeguard"],
+    install_requires=["setuptools", "typeguard", "jinja2"],
     package_data={
         "": [
             "validators/validators.hpp",
