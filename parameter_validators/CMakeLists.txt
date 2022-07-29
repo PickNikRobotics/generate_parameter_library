@@ -13,8 +13,8 @@ target_include_directories(parameter_validators INTERFACE
 target_compile_features(parameter_validators INTERFACE cxx_std_17)
 target_link_libraries(parameter_validators
   INTERFACE
-    fmt
-    rclcpp
+    fmt::fmt
+    rclcpp::rclcpp
 )
 
 install(DIRECTORY include/ DESTINATION include/)
@@ -38,6 +38,8 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE) # Conflicts with clang-foramt
   set(ament_cmake_uncrustify_FOUND TRUE) # Conflicts with clang-format
   ament_lint_auto_find_test_dependencies()
+
+  add_subdirectory(test)
 endif()
 
 ament_package()
