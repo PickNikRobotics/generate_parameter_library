@@ -8,6 +8,7 @@ admittance_controller:
       - wrist_2_joint
       - wrist_3_joint
 
+
     pid:
       shoulder_pan_joint:
         i: 0.7
