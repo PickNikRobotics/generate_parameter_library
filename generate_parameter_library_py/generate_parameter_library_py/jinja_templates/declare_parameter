@@ -7,7 +7,7 @@ descriptor.read_only = {{parameter_read_only}};
 auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
 {% endif -%}
 {%- if default_value|length %}
-auto parameter = rclcpp::ParameterValue(params_.{{parameter_name}});
+auto parameter = rclcpp::ParameterValue(params_.{{parameter_value}});
 {% endif -%}
 parameters_interface_->declare_parameter("{{parameter_name}}", parameter, descriptor);
 {% endfilter -%}
