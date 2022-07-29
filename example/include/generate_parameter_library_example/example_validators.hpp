@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <parameter_validators/parameter_validators.hpp>
+#include <parameter_traits/parameter_validators.hpp>
 
-namespace parameter_validators {
+namespace parameter_traits {
 
 // User defined parameter validation
 Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
@@ -58,4 +58,4 @@ Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
 
 Result no_args_validator(const rclcpp::Parameter& parameter) { return OK; }
 
-}  // namespace parameter_validators
+}  // namespace parameter_traits

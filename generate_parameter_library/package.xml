@@ -13,7 +13,7 @@
   <exec_depend>generate_parameter_library_py</exec_depend>
 
   <depend>fmt</depend>
-  <depend>parameter_validators</depend>
+  <depend>parameter_traits</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
 
