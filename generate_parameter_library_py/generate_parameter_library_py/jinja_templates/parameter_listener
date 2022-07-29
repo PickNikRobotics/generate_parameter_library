@@ -38,18 +38,11 @@ public:
   }
 
   operator std::string_view() const {
-    return view_;
+    return std::string_view(data_.data(), len_);
   }
 
   operator rclcpp::ParameterValue() const {
     return rclcpp::ParameterValue(view_.data());
-  }
-  FixedSizeString& operator=(const FixedSizeString& other)
-  {
-    data_ = other.data_;
-    len_ = other.len_;
-    view_ = std::string_view(data_.data(), len_);
-    return *this;
   }
 
 private:
