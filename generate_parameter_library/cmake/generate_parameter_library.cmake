@@ -33,39 +33,58 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     message(FATAL_ERROR "generate_parameter_library_py() variable 'generate_parameter_library_py_BIN' must not be empty")
   endif()
 
+  # Make the include directory
+  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/)
+  file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
+
   # Optional 3rd parameter for the user defined validation header
   if(${ARGC} EQUAL 3)
-    set(VALIDATE_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV2})
+    cmake_path(SET IN_VALIDATE_HEADER ${CMAKE_CURRENT_SOURCE_DIR})
+    cmake_path(APPEND IN_VALIDATE_HEADER ${ARGV2})
+
+    cmake_path(GET IN_VALIDATE_HEADER FILENAME VALIDATE_HEADER_FILENAME)
+    cmake_path(SET VALIDATE_HEADER ${LIB_INCLUDE_DIR})
+    cmake_path(APPEND VALIDATE_HEADER ${VALIDATE_HEADER_FILENAME})
+
+    # Copy the header file into the include directory
+    add_custom_command(
+      OUTPUT ${VALIDATE_HEADER}
+      COMMAND ${CMAKE_COMMAND} -E copy ${IN_VALIDATE_HEADER} ${VALIDATE_HEADER}
+      DEPENDS ${IN_VALIDATE_HEADER}
+      COMMENT
+      "Running `${CMAKE_COMMAND} -E copy ${IN_VALIDATE_HEADER} ${VALIDATE_HEADER}`"
+      VERBATIM
+    )
   endif()
 
   # Set the yaml file parameter to be relative to the current source dir
   set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
   # Set the output parameter header file name
-  set(PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/${LIB_NAME}.hpp)
+  set(PARAM_HEADER_FILE ${LIB_INCLUDE_DIR}/${LIB_NAME}.hpp)
 
+  # Generate the header for the library
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
-    COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER}
+    COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
     DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
     COMMENT
-    "Running `${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER}`"
+    "Running `${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
     VERBATIM
   )
 
-  add_library(${LIB_NAME} ${PARAM_HEADER_FILE})
+  # Create the library target
+  add_library(${LIB_NAME} ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
   target_include_directories(${LIB_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include>
+    $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include/>
   )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME}
+    fmt::fmt
+    parameter_validators::parameter_validators
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
-    fmt::fmt
   )
-  install(
-    DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/
-    DESTINATION include/
-  )
+  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/)
 endfunction()

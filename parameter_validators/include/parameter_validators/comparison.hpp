@@ -1,4 +1,4 @@
-// Copyright 2022 PickNik Inc.
+// Copyright (c) 2022, PickNik Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the PickNik Inc. nor the names of its
+//    * Neither the name of the copyright holder nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,28 +26,23 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// User defined parameter validation
-Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
-                                         double max_sum, double max_element) {
-  const auto& double_array = parameter.as_double_array();
-  double sum = 0.0;
-  for (auto val : double_array) {
-    sum += val;
-    if (val > max_element) {
-      return ERROR(
-          "The parameter contained an element greater than the max allowed "
-          "value.  (%f) was greater than (%f)",
-          val, max_element);
-    }
-  }
-  if (sum > max_sum) {
-    return ERROR(
-        "The sum of the parameter vector was greater than the max allowed "
-        "value.  (%f) was greater than (%f)",
-        sum, max_sum);
-  }
+#pragma once
 
-  return OK;
+#include <algorithm>
+#include <vector>
+
+namespace parameter_validators {
+
+template <typename T>
+bool contains(std::vector<T> const& vec, T const& val) {
+  return std::find(vec.cbegin(), vec.cend(), val) != vec.cend();
 }
 
-Result no_args_validator(const rclcpp::Parameter& parameter) { return OK; }
+template <class T>
+bool is_unique(std::vector<T> const& x) {
+  auto vec = x;
+  std::sort(vec.begin(), vec.end());
+  return std::adjacent_find(vec.cbegin(), vec.cend()) == vec.cend();
+}
+
+}  // namespace parameter_validators

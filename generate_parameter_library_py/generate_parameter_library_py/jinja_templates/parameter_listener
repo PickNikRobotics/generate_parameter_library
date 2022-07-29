@@ -19,34 +19,38 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
+#include <parameter_validators/parameter_validators.hpp>
+
+{% if user_validation_file|length -%}
+#include "{{user_validation_file}}"
+{% endif %}
+
 namespace {{namespace}} {
+
 {%- filter indent(width=4) %}
-{{validation_functions}}
-{% if user_validations|length -%}
-{{user_validations}}
-{%- endif -%}
-{% endfilter -%}
 
 template<size_t S>
 class FixedSizeString {
-public:
+ public:
   FixedSizeString() = default;
   FixedSizeString(const std::string& str) {
-    size_t len = std::min(str.size(), S);
-    std::copy(str.cbegin(), str.cbegin()+len, data_.begin());
-    view_ = std::string_view(data_.data(), len);
+    len_ = std::min(str.size(), S);
+    std::copy(str.cbegin(), str.cbegin()+len_, data_.begin());
   }
 
   operator std::string_view() const {
-    return view_;
+    return std::string_view(data_.data(), len_);
   }
 
-private:
-  std::string_view view_;
+  operator rclcpp::ParameterValue() const {
+    return rclcpp::ParameterValue(std::string(data_.cbegin(), data_.cbegin()+len_));
+  }
+
+ private:
   std::array<char, S> data_;
+  size_t len_;
 };
 
-{%- filter indent(width=4) %}
 struct Params {
 {%- filter indent(width=4) %}
 {{struct_content-}}
@@ -112,7 +116,7 @@ rclcpp::Time __stamp;
 {%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
-      return OK;
+      return parameter_validators::OK;
     }
 
     void declare_params(){

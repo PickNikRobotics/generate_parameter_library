@@ -41,6 +41,8 @@ class MinimalPublisher : public rclcpp::Node {
     params_ = param_listener->get_params();
     RCLCPP_INFO(this->get_logger(), "Initial control frame parameter is: '%s'",
                 params_.control.frame.id.c_str());
+    RCLCPP_INFO(this->get_logger(), "fixed string is: '%s'",
+                std::string{params_.fixed_string}.c_str());
   }
 
  private:
@@ -48,11 +50,10 @@ class MinimalPublisher : public rclcpp::Node {
     if (param_listener->is_old(params_)) {
       param_listener->refresh_dynamic_parameters();
       params_ = param_listener->get_params();
-
-      auto f = std::string{params_.fixed_string};
       RCLCPP_INFO(this->get_logger(), "New control frame parameter is: '%s'",
                   params_.control.frame.id.c_str());
-      RCLCPP_INFO(this->get_logger(), "fixed string is: '%s'", f.c_str());
+      RCLCPP_INFO(this->get_logger(), "fixed string is: '%s'",
+                  std::string{params_.fixed_string}.c_str());
     }
   }
 

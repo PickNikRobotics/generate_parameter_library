@@ -150,7 +150,7 @@ def str_to_str(s: Optional[str]):
 def str_to_fixed_str(s: Optional[str], size: int):
     if s is None:
         return None
-    return f'FixedSizeString<{size}>("{s}")'
+    return '{"%s"}' % s
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
@@ -167,7 +167,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
     elif yaml_type == "string":
         cpp_type = "std::string"
     elif yaml_type.__contains__("string_fixed_"):
-        cpp_type = "std::string_view"
+        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
@@ -367,14 +367,9 @@ class DeclareParameter:
         else:
             default_value = ""
 
-        if fixed_type(self.parameter_type):
-            parameter_value = self.parameter_name + ".data()"
-        else:
-            parameter_value = self.parameter_name
-
         data = {
             "parameter_name": self.parameter_name,
-            "parameter_value": parameter_value,
+            "parameter_value": self.parameter_name,
             "parameter_type": parameter_type,
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
@@ -721,8 +716,7 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.comments = "// auto-generated DO NOT EDIT"
-        self.user_validations = ""
-        self.validation_functions = ""
+        self.user_validation_file = ""
 
     def preprocess_inputs(self, name, value, nested_name_list):
         # define parameter name
@@ -896,10 +890,9 @@ class GenerateCode:
 
     def __str__(self):
         data = {
-            "user_validations": self.user_validations,
+            "user_validation_file": self.user_validation_file,
             "comments": self.comments,
             "namespace": self.namespace,
-            "validation_functions": self.validation_functions,
             "struct_content": self.struct_tree.sub_structs[0].inner_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
@@ -958,15 +951,7 @@ class GenerateCode:
             self.parse_dict(self.namespace, doc[self.namespace], [])
 
         if len(sys.argv) > 3:
-            user_validation_file = sys.argv[3]
-            with open(user_validation_file, "r") as f:
-                self.user_validations = f.read()
-
-        validation_functions_file = os.path.join(
-            os.path.dirname(__file__), "validators", "validators.hpp"
-        )
-        with open(validation_functions_file, "r") as f:
-            self.validation_functions = f.read()
+            self.user_validation_file = sys.argv[3]
 
         code = str(self)
         with open(output_file, "w") as f:
