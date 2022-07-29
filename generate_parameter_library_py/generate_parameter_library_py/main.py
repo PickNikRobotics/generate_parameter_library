@@ -170,10 +170,8 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<bool>"
     elif yaml_type == "string":
         cpp_type = "std::string"
-    elif yaml_type.__contains__("string") and is_fixed_type(yaml_type):
-        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
-    elif is_fixed_type(yaml_type):
-        cpp_type = f"FixedSizeArray<{fixed_type_size(yaml_type)}>"
+    elif yaml_type.__contains__("string_fixed_"):
+        cpp_type = f"parameter_traits::FixedSizeString<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":

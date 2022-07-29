@@ -28,7 +28,29 @@
 
 #pragma once
 
-#include <parameter_traits/comparison.hpp>
-#include <parameter_traits/fixed_size_types.hpp>
-#include <parameter_traits/result.hpp>
-#include <parameter_traits/validators.hpp>
+namespace parameter_traits {
+
+template <size_t S>
+class FixedSizeString {
+ public:
+  FixedSizeString() = default;
+  FixedSizeString(const std::string& str) {
+    len_ = std::min(str.size(), S);
+    std::copy(str.cbegin(), str.cbegin() + len_, data_.begin());
+  }
+
+  operator std::string_view() const {
+    return std::string_view(data_.data(), len_);
+  }
+
+  operator rclcpp::ParameterValue() const {
+    return rclcpp::ParameterValue(
+        std::string(data_.cbegin(), data_.cbegin() + len_));
+  }
+
+ private:
+  std::array<char, S> data_;
+  size_t len_;
+};
+
+}  // namespace parameter_traits
