@@ -62,7 +62,7 @@ class Result {
   bool success_ = true;
 };
 
-auto OK = Result();
+auto static OK = Result();
 using ERROR = Result;
 
 }  // namespace parameter_traits

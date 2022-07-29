@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include <parameter_traits/parameter_validators.hpp>
+#include <parameter_traits/validators.hpp>
 
 namespace parameter_traits {
 
