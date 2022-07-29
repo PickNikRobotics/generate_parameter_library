@@ -210,7 +210,7 @@ These come from the `parameter_traits` library.
 Note that you need to place your custom validators in the `parameter_traits` namespace.
 
 ```c++
-#include <parameter_traits/validators.hpp>
+#include <parameter_traits/parameter_traits.hpp>
 
 namespace parameter_traits {
 

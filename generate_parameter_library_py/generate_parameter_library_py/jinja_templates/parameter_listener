@@ -19,7 +19,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include <parameter_traits/validators.hpp>
+#include <parameter_traits/parameter_traits.hpp>
 
 {% if user_validation_file|length -%}
 #include "{{user_validation_file}}"

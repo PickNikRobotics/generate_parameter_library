@@ -1,4 +1,4 @@
-// Copyright 2022 PickNik Inc.
+// Copyright (c) 2022, PickNik Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the PickNik Inc. nor the names of its
+//    * Neither the name of the copyright holder nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -28,34 +28,6 @@
 
 #pragma once
 
-#include <parameter_traits/parameter_traits.hpp>
-
-namespace parameter_traits {
-
-// User defined parameter validation
-Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
-                                         double max_sum, double max_element) {
-  const auto& double_array = parameter.as_double_array();
-  double sum = 0.0;
-  for (auto val : double_array) {
-    sum += val;
-    if (val > max_element) {
-      return ERROR(
-          "The parameter contained an element greater than the max allowed "
-          "value.  (%f) was greater than (%f)",
-          val, max_element);
-    }
-  }
-  if (sum > max_sum) {
-    return ERROR(
-        "The sum of the parameter vector was greater than the max allowed "
-        "value.  (%f) was greater than (%f)",
-        sum, max_sum);
-  }
-
-  return OK;
-}
-
-Result no_args_validator(const rclcpp::Parameter& parameter) { return OK; }
-
-}  // namespace parameter_traits
+#include <parameter_traits/comparison.hpp>
+#include <parameter_traits/result.hpp>
+#include <parameter_traits/validators.hpp>
