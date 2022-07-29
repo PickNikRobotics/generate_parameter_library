@@ -61,8 +61,9 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
   # Set the output parameter header file name
-  set(PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/${LIB_NAME}.hpp)
+  set(PARAM_HEADER_FILE ${LIB_INCLUDE_DIR}/${LIB_NAME}.hpp)
 
+  # Generate the header for the library
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
     COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
@@ -72,9 +73,10 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     VERBATIM
   )
 
+  # Create the library target
   add_library(${LIB_NAME} ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
   target_include_directories(${LIB_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include>
+    $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include/>
   )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
@@ -84,8 +86,5 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
   )
-  install(
-    DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/
-    DESTINATION include/
-  )
+  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/)
 endfunction()
