@@ -41,10 +41,6 @@ public:
     return view_;
   }
 
-  operator std::string() const {
-    return view_.data();
-  }
-
 private:
   std::string_view view_;
   std::array<char, S> data_;
