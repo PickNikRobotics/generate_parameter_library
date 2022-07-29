@@ -1,22 +1,19 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>generate_parameter_library</name>
-  <version>0.1.0</version>
-  <description>CMake to generate ROS parameter library.</description>
+  <name>parameter_validators</name>
+  <version>0.0.0</version>
+  <description>Validator functions for rclcpp::Parameter</description>
+  <maintainer email="maybe@tylerjw.dev">Tyler Weaver</maintainer>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>
-  <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>generate_parameter_library_py</exec_depend>
-
   <depend>fmt</depend>
-  <depend>parameter_validators</depend>
   <depend>rclcpp</depend>
-  <depend>rclcpp_lifecycle</depend>
 
+  <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

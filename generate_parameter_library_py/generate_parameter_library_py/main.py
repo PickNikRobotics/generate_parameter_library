@@ -716,8 +716,7 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.comments = "// auto-generated DO NOT EDIT"
-        self.user_validations = ""
-        self.validation_functions = ""
+        self.user_validation_file = ""
 
     def preprocess_inputs(self, name, value, nested_name_list):
         # define parameter name
@@ -891,10 +890,9 @@ class GenerateCode:
 
     def __str__(self):
         data = {
-            "user_validations": self.user_validations,
+            "user_validation_file": self.user_validation_file,
             "comments": self.comments,
             "namespace": self.namespace,
-            "validation_functions": self.validation_functions,
             "struct_content": self.struct_tree.sub_structs[0].inner_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
@@ -953,15 +951,7 @@ class GenerateCode:
             self.parse_dict(self.namespace, doc[self.namespace], [])
 
         if len(sys.argv) > 3:
-            user_validation_file = sys.argv[3]
-            with open(user_validation_file, "r") as f:
-                self.user_validations = f.read()
-
-        validation_functions_file = os.path.join(
-            os.path.dirname(__file__), "validators", "validators.hpp"
-        )
-        with open(validation_functions_file, "r") as f:
-            self.validation_functions = f.read()
+            self.user_validation_file = sys.argv[3]
 
         code = str(self)
         with open(output_file, "w") as f:

@@ -19,15 +19,16 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
+#include <parameter_validators/parameter_validators.hpp>
+
+{% if user_validation_file|length -%}
+#include "{{user_validation_file}}"
+{% endif %}
+
 namespace {{namespace}} {
-{%- filter indent(width=4) %}
-{{validation_functions}}
-{% if user_validations|length -%}
-{{user_validations}}
-{%- endif -%}
-{% endfilter -%}
 
 {%- filter indent(width=4) %}
+
 template<size_t S>
 class FixedSizeString {
  public:
@@ -115,7 +116,7 @@ rclcpp::Time __stamp;
 {%- endif %}
       updated_params.__stamp = clock_.now();
       params_ = updated_params;
-      return OK;
+      return parameter_validators::OK;
     }
 
     void declare_params(){

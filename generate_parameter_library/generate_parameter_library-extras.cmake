@@ -26,8 +26,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+find_package(fmt REQUIRED)
+find_package(parameter_validators REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
-find_package(fmt REQUIRED)
 
 include("${generate_parameter_library_DIR}/generate_parameter_library.cmake")
