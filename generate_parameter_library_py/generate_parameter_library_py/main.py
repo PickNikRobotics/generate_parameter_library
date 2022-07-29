@@ -77,6 +77,7 @@ def fixed_type_size(yaml_type: str):
 def is_fixed_type(yaml_type: str):
     return fixed_type_size(yaml_type) is not None
 
+
 @typechecked
 def get_fixed_type(yaml_type: str):
     tmp = yaml_type.split("_")
@@ -156,6 +157,21 @@ def fixed_str_to_str(s: Optional[str]):
     return '{%s}' % str_to_str(s)
 
 
+@typechecked
+def fixed_float_to_str(num: Optional[float]):
+    return '{%s}' % float_to_str(num)
+
+
+@typechecked
+def fixed_int_to_str(num: Optional[int]):
+    return '{%s}' % int_to_str(num)
+
+
+@typechecked
+def fixed_bool_to_str(cond: Optional[bool]):
+    return '{%s}' % bool_to_str(cond)
+
+
 # cpp_type, val_to_cpp_str, parameter_conversion
 @typechecked
 def cpp_type_from_defined_type(yaml_type: str) -> str:
@@ -169,16 +185,16 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
         cpp_type = "std::vector<bool>"
     elif yaml_type == "string":
         cpp_type = "std::string"
-    elif yaml_type.__contains__("string") and is_fixed_type(yaml_type):
-        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
-    elif is_fixed_type(yaml_type):
-        cpp_type = f"FixedSizeArray<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
         cpp_type = "int"
     elif yaml_type == "bool":
         cpp_type = "bool"
+    elif yaml_type.__contains__("string") and is_fixed_type(yaml_type):
+        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
+    elif is_fixed_type(yaml_type):
+        cpp_type = f"FixedSizeArray<{fixed_type_size(yaml_type)}>"
     else:
         raise compile_error("invalid yaml type: %s" % type(yaml_type))
 
