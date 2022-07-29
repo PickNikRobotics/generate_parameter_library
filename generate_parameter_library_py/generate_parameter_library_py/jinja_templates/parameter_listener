@@ -19,8 +19,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include <parameter_traits/parameter_validators.hpp>
-#include <parameter_traits/fixed_size_types.hpp>
+#include <parameter_traits/parameter_traits.hpp>
 
 {% if user_validation_file|length -%}
 #include "{{user_validation_file}}"
@@ -29,6 +28,28 @@
 namespace {{namespace}} {
 
 {%- filter indent(width=4) %}
+
+template<size_t S>
+class FixedSizeString {
+ public:
+  FixedSizeString() = default;
+  FixedSizeString(const std::string& str) {
+    len_ = std::min(str.size(), S);
+    std::copy(str.cbegin(), str.cbegin()+len_, data_.begin());
+  }
+
+  operator std::string_view() const {
+    return std::string_view(data_.data(), len_);
+  }
+
+  operator rclcpp::ParameterValue() const {
+    return rclcpp::ParameterValue(std::string(data_.cbegin(), data_.cbegin()+len_));
+  }
+
+ private:
+  std::array<char, S> data_;
+  size_t len_;
+};
 
 struct Params {
 {%- filter indent(width=4) %}
