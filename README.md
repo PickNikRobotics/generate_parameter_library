@@ -139,16 +139,21 @@ A parameter is a YAML dictionary with the only required key being `type`.
 
 The types of parameters in ros2 map to C++ types.
 
-| Parameter Type | C++ Type                   |
-|----------------|----------------------------|
-| string         | `std::string`              |
-| double         | `double`                   |
-| int            | `int`                      |
-| bool           | `bool`                     |
-| string_array   | `std::vector<std::string>` |
-| double_array   | `std::vector<double>`      |
-| int_array      | `std::vector<int>`         |
-| bool_array     | `std::vector<bool>`        |
+| Parameter Type  | C++ Type                    |
+|-----------------|-----------------------------|
+| string          | `std::string`               |
+| double          | `double`                    |
+| int             | `int`                       |
+| bool            | `bool`                      |
+| string_array    | `std::vector<std::string>`  |
+| double_array    | `std::vector<double>`       |
+| int_array       | `std::vector<int>`          |
+| bool_array      | `std::vector<bool>`         |
+| string_fixed_XX | `FixedSizeString<XX>`       |
+
+Fixed size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
+The corresponding C++ type is a data wrapper class for conveniently accessing the data.
+Note that any fixed size type will automatically use a `size_lt` validator. Validators are explained in the next section.
 
 ### Built-In Validators
 Validators are C++ functions that take arguments represented by a key-value pair in yaml.
@@ -272,7 +277,7 @@ See [example project](example/) for a complete example of how to use the generat
 The generated code is primarily consists of two major components:
 1) `struct Params` that contains values of all parameters and
 2) `class ParamListener` that handles parameter declaration, updating, and validation.
-The general structure is shown below.
+   The general structure is shown below.
 
 ```cpp
 namespace cpp_namespace {
