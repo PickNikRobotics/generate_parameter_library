@@ -28,21 +28,41 @@
 
 #pragma once
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
-namespace parameter_validators {
+#include <rclcpp/rclcpp.hpp>
 
-template <typename T>
-bool contains(std::vector<T> const& vec, T const& val) {
-  return std::find(vec.cbegin(), vec.cend(), val) != vec.cend();
-}
+#include <fmt/format.h>
 
-template <class T>
-bool is_unique(std::vector<T> const& x) {
-  auto vec = x;
-  std::sort(vec.begin(), vec.end());
-  return std::adjacent_find(vec.cbegin(), vec.cend()) == vec.cend();
-}
+namespace parameter_traits {
 
-}  // namespace parameter_validators
+class Result {
+ public:
+  template <typename... Args>
+  Result(const std::string& format, Args... args) {
+    msg_ = fmt::format(format, args...);
+    success_ = false;
+  }
+
+  Result() = default;
+
+  operator rcl_interfaces::msg::SetParametersResult() const {
+    rcl_interfaces::msg::SetParametersResult result;
+    result.successful = success_;
+    result.reason = msg_;
+    return result;
+  }
+
+  bool success() { return success_; }
+
+  std::string error_msg() { return msg_; }
+
+ private:
+  std::string msg_;
+  bool success_ = true;
+};
+
+auto OK = Result();
+using ERROR = Result;
+
+}  // namespace parameter_traits

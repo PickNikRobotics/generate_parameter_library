@@ -31,9 +31,9 @@
 #include <string>
 #include <vector>
 
-#include <parameter_validators/comparison.hpp>
+#include <parameter_traits/comparison.hpp>
 
-namespace pv = parameter_validators;
+namespace pv = parameter_traits;
 
 TEST(ComparisonTests, NotContainsEmptyStrVec) {
   EXPECT_FALSE(pv::contains(std::vector<std::string>(), std::string{}));
