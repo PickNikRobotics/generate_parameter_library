@@ -7,10 +7,10 @@ if (!parameters_interface_->has_parameter(param_name)) {
 rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
 descriptor.read_only = {{parameter_read_only}};
-{%- if not parameter_field|length %}
+{%- if not default_value|length %}
 auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
 {% endif -%}
-{%- if parameter_field|length %}
+{%- if default_value|length %}
 auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
 {% endif -%}
 parameters_interface_->declare_parameter(param_name, parameter, descriptor);

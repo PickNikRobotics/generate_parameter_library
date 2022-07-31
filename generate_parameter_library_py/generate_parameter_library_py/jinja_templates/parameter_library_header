@@ -28,29 +28,6 @@
 namespace {{namespace}} {
 
 {%- filter indent(width=4) %}
-
-template<size_t S>
-class FixedSizeString {
- public:
-  FixedSizeString() = default;
-  FixedSizeString(const std::string& str) {
-    len_ = std::min(str.size(), S);
-    std::copy(str.cbegin(), str.cbegin()+len_, data_.begin());
-  }
-
-  operator std::string_view() const {
-    return std::string_view(data_.data(), len_);
-  }
-
-  operator rclcpp::ParameterValue() const {
-    return rclcpp::ParameterValue(std::string(data_.cbegin(), data_.cbegin()+len_));
-  }
-
- private:
-  std::array<char, S> data_;
-  size_t len_;
-};
-
 struct Params {
 {%- filter indent(width=4) %}
 {{struct_content-}}
