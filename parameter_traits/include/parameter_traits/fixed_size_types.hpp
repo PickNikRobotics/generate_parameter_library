@@ -41,7 +41,7 @@ class FixedSizeArray {
 
   operator rclcpp::ParameterValue() const {
     return rclcpp::ParameterValue(
-        std::vector<T>(data_.cbegin(), data_.cbegin()));
+        std::vector<T>(data_.cbegin(), data_.cbegin() + len_));
   }
 
  private:

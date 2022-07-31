@@ -838,6 +838,9 @@ class GenerateCode:
         if is_runtime_parameter:
             self.declare_dynamic_parameters.append(declare_parameter)
             self.update_dynamic_parameters.append(update_parameter)
+            self.update_declare_dynamic_parameter.append(declare_parameter)
+            dynamic_update_parameter = RemoveRuntimeParameter(declare_parameter)
+            self.remove_dynamic_parameter.append(dynamic_update_parameter)
         else:
             self.declare_parameters.append(declare_parameter)
             self.update_parameters.append(update_parameter)
