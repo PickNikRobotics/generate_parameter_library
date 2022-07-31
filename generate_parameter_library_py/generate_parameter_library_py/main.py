@@ -73,6 +73,172 @@ def fixed_type_size(yaml_type: str):
     return int(tmp[-1])
 
 
+# # cpp_type, val_to_cpp_str, parameter_conversion
+# @typechecked
+# def cpp_type_from_defined_type(yaml_type: str) -> str:
+#     if is_fixed_type(yaml_type):
+#         size = fixed_type_size(yaml_type)
+#         yaml_type = get_fixed_type(yaml_type)
+#         if yaml_type in defined_type_to_fixed_cpp_type:
+#             cpp_type = defined_type_to_fixed_cpp_type[yaml_type]
+#             if yaml_type == "string_fixed":
+#                 cpp_type = cpp_type + f"<{size}>"
+#             else:
+#                 base_yaml_type = get_fixed_base_type(yaml_type)
+#                 cpp_template_type = cpp_type_from_defined_type(base_yaml_type)
+#                 cpp_type = cpp_type + f"<{cpp_template_type}, {size}>"
+#             return cpp_type
+#     else:
+#         if yaml_type in defined_type_to_cpp_type:
+#             return defined_type_to_cpp_type[yaml_type]
+#
+#     raise compile_error("invalid yaml type: %s" % type(yaml_type))
+
+
+@typechecked
+def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
+    if yaml_type == "string_array" or yaml_type.__contains__("string_fixed_"):
+        cpp_type = "std::string"
+    elif yaml_type == "double_array" or yaml_type.__contains__("double_array_fixed_"):
+        cpp_type = "double"
+    elif yaml_type == "int_array" or yaml_type.__contains__("int_array_fixed_"):
+        cpp_type = "int"
+    elif yaml_type == "bool_array" or yaml_type.__contains__("bool_array_fixed_"):
+        cpp_type = "bool"
+    elif yaml_type == "string":
+        cpp_type = "std::string"
+    elif yaml_type == "double":
+        cpp_type = "double"
+    elif yaml_type == "int":
+        cpp_type = "int"
+    elif yaml_type == "bool":
+        cpp_type = "bool"
+    else:
+        raise compile_error("invalid yaml type: %s" % type(yaml_type))
+
+    return cpp_type
+
+
+# TODO type checking fails here
+# # @typechecked
+# def cpp_str_func_from_defined_type(yaml_type: str):
+#     if is_fixed_type(yaml_type):
+#         yaml_type = get_fixed_type(yaml_type)
+#
+#     if yaml_type in value_to_string:
+#         return value_to_string[yaml_type]
+#     else:
+#         raise compile_error("invalid yaml type: %s" % type(yaml_type))
+
+
+# TODO type checking fails here
+# @typechecked
+def cpp_str_func_from_python_val(arg):
+    if isinstance(arg, int):
+        val_func = int_to_str
+    elif isinstance(arg, float):
+        val_func = float_to_str
+    elif isinstance(arg, bool):
+        val_func = bool_to_str
+    elif isinstance(arg, str):
+        val_func = str_to_str
+    elif arg is None:
+        val_func = lambda x: ""
+    else:
+        raise compile_error("invalid python arg type: %s" % type(arg))
+    return val_func
+
+
+# @typechecked
+# def get_parameter_as_function_str(yaml_type: str) -> str:
+#     if yaml_type == "string_array":
+#         parameter_conversion = "as_string_array()"
+#     elif yaml_type == "double_array" or yaml_type.__contains__("double_array_fixed_"):
+#         parameter_conversion = "as_double_array()"
+#     elif yaml_type == "int_array" or yaml_type.__contains__("int_array_fixed_"):
+#         parameter_conversion = "as_integer_array()"
+#     elif yaml_type == "bool_array" or yaml_type.__contains__("bool_array_fixed_"):
+#         parameter_conversion = "as_bool_array()"
+#     elif yaml_type == "string" or yaml_type.__contains__("string_fixed_"):
+#         parameter_conversion = "as_string()"
+#     elif yaml_type == "double":
+#         parameter_conversion = "as_double()"
+#     elif yaml_type == "int":
+#         parameter_conversion = "as_int()"
+#     elif yaml_type == "bool":
+#         parameter_conversion = "as_bool()"
+#     else:
+#         raise compile_error("invalid yaml type: %s" % type(yaml_type))
+#
+#     return parameter_conversion
+
+
+@typechecked
+def pascal_case(string: str):
+    words = string.split("_")
+    return "".join(w.title() for w in words)
+
+
+@typechecked
+def initialization_fail_validation(param_name: str) -> str:
+    return (
+        f"throw rclcpp::exceptions::InvalidParameterValueException"
+        f'(fmt::format("Invalid value set during initialization for '
+        f"parameter '{param_name}': \" + validation_result.error_msg()));"
+    )
+
+
+@typechecked
+def initialization_pass_validation(param_name: str, parameter_conversion: str) -> str:
+    return ""
+
+
+@typechecked
+def update_parameter_fail_validation() -> str:
+    return "return validation_result;"
+
+
+@typechecked
+def update_parameter_pass_validation() -> str:
+    return ""
+
+
+def get_dynamic_parameter_field(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    parameter_field = tmp[-1]
+    return parameter_field
+
+
+def get_dynamic_mapped_parameter(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    tmp2 = tmp[-2].split("_")
+    mapped_param = tmp2[-1]
+    return mapped_param
+
+
+def get_dynamic_struct_name(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    struct_name = tmp[:-2]
+    return ".".join(struct_name)
+
+
+def get_dynamic_parameter_name(yaml_parameter_name: str):
+    struct_name = get_dynamic_struct_name(yaml_parameter_name)
+    parameter_field = get_dynamic_parameter_field(yaml_parameter_name)
+    parameter_name = [struct_name, parameter_field]
+    parameter_name = ".".join(parameter_name)
+    return parameter_name
+
+
+def get_dynamic_parameter_map(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split(".")
+    parameter_map = tmp[:-2]
+    mapped_param = get_dynamic_mapped_parameter(yaml_parameter_name)
+    parameter_map.append(mapped_param + "_map")
+    parameter_map = ".".join(parameter_map)
+    return parameter_map
+
+
 @typechecked
 def is_fixed_type(yaml_type: str):
     return fixed_type_size(yaml_type) is not None
@@ -87,34 +253,6 @@ def get_fixed_base_type(yaml_type: str):
 @typechecked
 def get_fixed_type(yaml_type: str):
     return get_fixed_base_type(yaml_type) + "_fixed"
-
-
-@typechecked
-def validate_type(defined_type: str, value):
-    type_translation = {
-        "string": str,
-        "double": float,
-        "int": int,
-        "bool": bool,
-        "string_array": str,
-        "double_array": float,
-        "int_array": int,
-        "bool_array": bool,
-    }
-
-    if isinstance(value, list):
-        if not array_type(defined_type):
-            return False
-        for val in value:
-            if type_translation[defined_type] != type(val):
-                return False
-    else:
-        if array_type(defined_type):
-            return False
-        if type_translation[defined_type] != type(value):
-            return False
-
-    return True
 
 
 # value to c++ string conversion functions
@@ -218,279 +356,113 @@ def bool_array_fixed_to_str(values: Optional[list]):
     return "{{" + ", ".join(bool_to_str(x) for x in values) + "}}"
 
 
-value_to_string = {
-    "bool": bool_to_str,
-    "double": float_to_str,
-    "int": int_to_str,
-    "string": str_to_str,
-    "bool_array": bool_array_to_str,
-    "double_array": float_array_to_str,
-    "int_array": int_array_to_str,
-    "string_array": str_array_to_str,
-    "bool_array_fixed": bool_array_fixed_to_str,
-    "double_array_fixed": float_array_fixed_to_str,
-    "int_array_fixed": int_array_fixed_to_str,
-    "string_array_fixed": str_array_fixed_to_str,
-    "string_fixed": str_fixed_to_str,
-}
-defined_type_to_cpp_type = {
-    "bool": "bool",
-    "double": "double",
-    "int": "int",
-    "string": "std::string",
-    "bool_array": "std::vector<bool>",
-    "double_array": "std::vector<double>",
-    "int_array": "std::vector<int>",
-    "string_array": "std::vector<std::string>",
-    "bool_array_fixed": "std::vector<std::string>"
-}
+class CodeGenVariableBase:
+    defined_type_to_cpp_type = {}
+    cpp_str_value_func = {}
+    parameter_as_function_str = {"string_array": "as_string_array()",
+                                 "double_array": "as_double_array()",
+                                 "int_array": "as_integer_array()",
+                                 "bool_array": "as_bool_array()",
+                                 "string": "as_string()",
+                                 "double": "as_double()",
+                                 "int": "as_int()",
+                                 "bool": "as_bool()",
+                                 "bool_array_fixed": "as_bool_array()",
+                                 "double_array_fixed": "as_double_array()",
+                                 "int_array_fixed": "as_integer_array()",
+                                 "string_array_fixed": "as_string_array()",
+                                 "string_fixed": "as_string()", }
 
-defined_type_to_fixed_cpp_type = {
-    "double_array_fixed": "parameter_traits::FixedSizeArray",
-    "int_array_fixed": "parameter_traits::FixedSizeArray",
-    "string_array_fixed": "parameter_traits::FixedSizeArray",
-    "string_fixed": "parameter_traits::FixedSizeString",
-}
+    @typechecked
+    def __init__(self, name: str, defined_type: str, default_value: any):
+        self.name = name
+        self.default_value = default_value
+        self.name = name
+        self.defined_type, template = self.process_type(defined_type)
+        func = self.defined_type_to_cpp_type[self.defined_type]
+        self.cpp_type = func(self.defined_type, template)
+        func = self.cpp_str_value_func[self.defined_type]
+        self.cpp_str_value = func(default_value)
 
+    def process_type(self, defined_type):
+        return defined_type, None
 
-# cpp_type, val_to_cpp_str, parameter_conversion
-@typechecked
-def cpp_type_from_defined_type(yaml_type: str) -> str:
-    if is_fixed_type(yaml_type):
-        size = fixed_type_size(yaml_type)
-        yaml_type = get_fixed_type(yaml_type)
-        if yaml_type in defined_type_to_fixed_cpp_type:
-            cpp_type = defined_type_to_fixed_cpp_type[yaml_type]
-            if yaml_type == "string_fixed":
-                cpp_type = cpp_type + f"<{size}>"
-            else:
-                base_yaml_type = get_fixed_base_type(yaml_type)
-                cpp_template_type = cpp_type_from_defined_type(base_yaml_type)
-                cpp_type = cpp_type + f"<{cpp_template_type}, {size}>"
-            return cpp_type
-    else:
-        if yaml_type in defined_type_to_cpp_type:
-            return defined_type_to_cpp_type[yaml_type]
+    def get_parameter_as_function_str(self):
+        if self.defined_type not in self.parameter_as_function_str:
+            raise compile_error("invalid yaml type: %s" % type(self.defined_type))
+        return self.parameter_as_function_str[self.defined_type]
 
-    raise compile_error("invalid yaml type: %s" % type(yaml_type))
+    def get_parameter_type(self):
+        return self.defined_type.upper()
 
 
-@typechecked
-def cpp_primitive_type_from_defined_type(yaml_type: str) -> str:
-    if yaml_type == "string_array" or yaml_type.__contains__("string_fixed_"):
-        cpp_type = "std::string"
-    elif yaml_type == "double_array" or yaml_type.__contains__("double_array_fixed_"):
-        cpp_type = "double"
-    elif yaml_type == "int_array" or yaml_type.__contains__("int_array_fixed_"):
-        cpp_type = "int"
-    elif yaml_type == "bool_array" or yaml_type.__contains__("bool_array_fixed_"):
-        cpp_type = "bool"
-    elif yaml_type == "string":
-        cpp_type = "std::string"
-    elif yaml_type == "double":
-        cpp_type = "double"
-    elif yaml_type == "int":
-        cpp_type = "int"
-    elif yaml_type == "bool":
-        cpp_type = "bool"
-    else:
-        raise compile_error("invalid yaml type: %s" % type(yaml_type))
-
-    return cpp_type
-
-
-# TODO type checking fails here
-# @typechecked
-def cpp_str_func_from_defined_type(yaml_type: str):
-    if is_fixed_type(yaml_type):
-        yaml_type = get_fixed_type(yaml_type)
-
-    if yaml_type in value_to_string:
-        return value_to_string[yaml_type]
-    else:
-        raise compile_error("invalid yaml type: %s" % type(yaml_type))
+class CodeGenVariable(CodeGenVariableBase):
+    cpp_str_value_func = {
+        "bool": bool_to_str,
+        "double": float_to_str,
+        "int": int_to_str,
+        "string": str_to_str,
+        "bool_array": bool_array_to_str,
+        "double_array": float_array_to_str,
+        "int_array": int_array_to_str,
+        "string_array": str_array_to_str,
+    }
+    defined_type_to_cpp_type = {
+        "bool": lambda defined_type, templates: "bool",
+        "double": lambda defined_type, templates: "double",
+        "int": lambda defined_type, templates: "int",
+        "string": lambda defined_type, templates: "std::string",
+        "bool_array": lambda defined_type, templates: "std::vector<bool>",
+        "double_array": lambda defined_type, templates: "std::vector<double>",
+        "int_array": lambda defined_type, templates: "std::vector<int>",
+        "string_array": lambda defined_type, templates: "std::vector<std::string>",
+    }
 
 
-# TODO type checking fails here
-# @typechecked
-def cpp_str_func_from_python_val(arg):
-    if isinstance(arg, int):
-        val_func = int_to_str
-    elif isinstance(arg, float):
-        val_func = float_to_str
-    elif isinstance(arg, bool):
-        val_func = bool_to_str
-    elif isinstance(arg, str):
-        val_func = str_to_str
-    elif arg is None:
-        val_func = lambda x: ""
-    else:
-        raise compile_error("invalid python arg type: %s" % type(arg))
-    return val_func
+class CodeGenFixedVariable(CodeGenVariableBase):
+    defined_type_to_cpp_type = {
+        "double_array_fixed": lambda defined_type,
+                                     templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
+        "int_array_fixed": lambda defined_type,
+                                  templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
+        "string_array_fixed": lambda defined_type,
+                                     templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
+        "string_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeString<{templates[0]}>",
+    }
+    cpp_str_value_func = {
+        "bool_array_fixed": bool_array_fixed_to_str,
+        "double_array_fixed": float_array_fixed_to_str,
+        "int_array_fixed": int_array_fixed_to_str,
+        "string_array_fixed": str_array_fixed_to_str,
+        "string_fixed": str_fixed_to_str,
+    }
 
+    def process_type(self, defined_type):
+        size = fixed_type_size(defined_type)
+        cpp_type = get_fixed_base_type(defined_type)
+        defined_type = get_fixed_type(defined_type)
+        return defined_type, (cpp_type, size)
 
-@typechecked
-def get_parameter_as_function_str(yaml_type: str) -> str:
-    if yaml_type == "string_array":
-        parameter_conversion = "as_string_array()"
-    elif yaml_type == "double_array" or yaml_type.__contains__("double_array_fixed_"):
-        parameter_conversion = "as_double_array()"
-    elif yaml_type == "int_array" or yaml_type.__contains__("int_array_fixed_"):
-        parameter_conversion = "as_integer_array()"
-    elif yaml_type == "bool_array" or yaml_type.__contains__("bool_array_fixed_"):
-        parameter_conversion = "as_bool_array()"
-    elif yaml_type == "string" or yaml_type.__contains__("string_fixed_"):
-        parameter_conversion = "as_string()"
-    elif yaml_type == "double":
-        parameter_conversion = "as_double()"
-    elif yaml_type == "int":
-        parameter_conversion = "as_int()"
-    elif yaml_type == "bool":
-        parameter_conversion = "as_bool()"
-    else:
-        raise compile_error("invalid yaml type: %s" % type(yaml_type))
-
-    return parameter_conversion
-
-
-@typechecked
-def pascal_case(string: str):
-    words = string.split("_")
-    return "".join(w.title() for w in words)
-
-
-@typechecked
-def initialization_fail_validation(param_name: str) -> str:
-    return (
-        f"throw rclcpp::exceptions::InvalidParameterValueException"
-        f'(fmt::format("Invalid value set during initialization for '
-        f"parameter '{param_name}': \" + validation_result.error_msg()));"
-    )
-
-
-@typechecked
-def initialization_pass_validation(param_name: str, parameter_conversion: str) -> str:
-    return ""
-
-
-@typechecked
-def update_parameter_fail_validation() -> str:
-    return "return validation_result;"
-
-
-@typechecked
-def update_parameter_pass_validation() -> str:
-    return ""
-
-
-def get_dynamic_parameter_field(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split(".")
-    parameter_field = tmp[-1]
-    return parameter_field
-
-
-def get_dynamic_mapped_parameter(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split(".")
-    tmp2 = tmp[-2].split("_")
-    mapped_param = tmp2[-1]
-    return mapped_param
-
-
-def get_dynamic_struct_name(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split(".")
-    struct_name = tmp[:-2]
-    return ".".join(struct_name)
-
-
-def get_dynamic_parameter_name(yaml_parameter_name: str):
-    struct_name = get_dynamic_struct_name(yaml_parameter_name)
-    parameter_field = get_dynamic_parameter_field(yaml_parameter_name)
-    parameter_name = [struct_name, parameter_field]
-    parameter_name = ".".join(parameter_name)
-    return parameter_name
-
-
-def get_dynamic_parameter_map(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split(".")
-    parameter_map = tmp[:-2]
-    mapped_param = get_dynamic_mapped_parameter(yaml_parameter_name)
-    parameter_map.append(mapped_param + "_map")
-    parameter_map = ".".join(parameter_map)
-    return parameter_map
-
-
-def get_parameter_type(yaml_type: str):
-    if is_fixed_type(yaml_type):
-        return get_fixed_base_type(yaml_type).upper()
-    else:
-        return yaml_type.upper()
+    def get_parameter_type(self):
+        return get_fixed_base_type(self.defined_type).upper()
 
 
 # Each template has a corresponding class with the str filling in the template with jinja
-
-
-class DeclareParameter:
-    @typechecked
-    def __init__(
-            self,
-            parameter_name: str,
-            parameter_description: str,
-            parameter_read_only: bool,
-            yaml_type: str,
-            has_default_value: any,
-    ):
-        self.parameter_name = parameter_name
-        self.parameter_description = parameter_description
-        self.parameter_read_only = parameter_read_only
-        self.parameter_type = get_parameter_type(yaml_type)
-        self.has_default_value = has_default_value
-
-    def __str__(self):
-        if self.has_default_value:
-            default_value = "not_empty"
-        else:
-            default_value = ""
-
-        data = {
-            "parameter_name": self.parameter_name,
-            "parameter_value": self.parameter_name,
-            "parameter_type": self.parameter_type,
-            "parameter_description": self.parameter_description,
-            "parameter_read_only": bool_to_str(self.parameter_read_only),
-            "default_value": default_value,
-        }
-
-        j2_template = Template(GenerateCode.templates["declare_parameter"])
-        code = j2_template.render(data, trim_blocks=True)
-        return code
-
-
 class VariableDeclaration:
     @typechecked
-    def __init__(self, variable_type: str, variable_name: str, value: any):
-        self.yaml_type = variable_type
-        self.variable_name = variable_name
-        self.value = value
+    def __init__(self, code_gen_variable: CodeGenVariableBase):
+        self.code_gen_variable = code_gen_variable
 
     def __str__(self):
-        val_func = cpp_str_func_from_defined_type(self.yaml_type)
-        type_str = cpp_type_from_defined_type(self.yaml_type)
-        # if self.value is None:
-        #     declare_str = f"{type_str} {self.variable_name};\n"
-        # elif isinstance(self.value, list):
-        #     declare_str = f"{type_str} {self.variable_name} = {val_func(x)};\n"
-        # else:
-        #     value_str = val_func(self.value)
-        #     declare_str = f"{type_str} {self.variable_name} = {value_str};\n"
-        value = val_func(self.value)
+        value = self.code_gen_variable.cpp_str_value
         if len(value) > 0:
-            declare_str = f"{type_str} {self.variable_name} = {value};\n"
+            declare_str = f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name} = {value};\n"
         else:
-            declare_str = f"{type_str} {self.variable_name};\n"
+            declare_str = f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name};\n"
         return declare_str
 
 
-class Struct:
+class DeclareStruct:
     @typechecked
     def __init__(self, struct_name: str, fields: list[VariableDeclaration]):
         self.struct_name = struct_name
@@ -597,7 +569,7 @@ class ParameterValidation:
         return code
 
 
-class UpdateParameter:
+class UpdateParameterBase:
     @typechecked
     def __init__(self, parameter_name: str, parameter_as_function: str):
         self.parameter_name = parameter_name
@@ -608,6 +580,8 @@ class UpdateParameter:
     def add_parameter_validation(self, parameter_validation: ParameterValidation):
         self.parameter_validations.append(parameter_validation)
 
+
+class UpdateParameter(UpdateParameterBase):
     def __str__(self):
         parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
@@ -622,23 +596,11 @@ class UpdateParameter:
         return code
 
 
-class DynamicUpdateParameter:
-    @typechecked
-    def __init__(self, parameter_name: str, parameter_as_function: str):
-        self.parameter_name = parameter_name
-        self.parameter_as_function = parameter_as_function
-        self.parameter_validations = []
-
-    @typechecked
-    def add_parameter_validation(self, parameter_validation: ParameterValidation):
-        self.parameter_validations.append(parameter_validation)
-
+class UpdateRuntimeParameter(UpdateParameterBase):
     def __str__(self):
         parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
-
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
-        parameter_name = get_dynamic_parameter_name(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
 
@@ -651,12 +613,12 @@ class DynamicUpdateParameter:
             "parameter_as_function": self.parameter_as_function,
         }
 
-        j2_template = Template(GenerateCode.templates["dynamic_update_parameter"])
+        j2_template = Template(GenerateCode.templates["update_runtime_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
 
-class DeclareParameterSet:
+class SetParameterBase:
     @typechecked
     def __init__(self, parameter_name: str, parameter_as_function: str):
         self.parameter_name = parameter_name
@@ -667,6 +629,8 @@ class DeclareParameterSet:
     def add_parameter_validation(self, parameter_validation: ParameterValidation):
         self.parameter_validations.append(parameter_validation)
 
+
+class SetParameter(SetParameterBase):
     def __str__(self):
         parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
@@ -676,72 +640,113 @@ class DeclareParameterSet:
             "parameter_as_function": self.parameter_as_function,
         }
 
-        j2_template = Template(GenerateCode.templates["declare_parameter_set"])
+        j2_template = Template(GenerateCode.templates["set_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
 
-class DynamicDeclareParameter:
+class SetRuntimeParameter(SetParameterBase):
+    def __str__(self):
+        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+        parameter_field = get_dynamic_parameter_field(self.parameter_name)
+        data = {
+            "parameter_field": parameter_field,
+            "parameter_validations": str(parameter_validations_str),
+            "parameter_as_function": self.parameter_as_function,
+        }
+
+        j2_template = Template(GenerateCode.templates["set_runtime_parameter"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class DeclareParameterBase:
     @typechecked
     def __init__(
             self,
-            parameter_name: str,
+            code_gen_variable: CodeGenVariableBase,
             parameter_description: str,
             parameter_read_only: bool,
-            yaml_type: str,
-            has_default_value: any,
-            parameter_as_function: str,
     ):
-        self.parameter_name = parameter_name
+        self.parameter_name = code_gen_variable.name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
-        self.parameter_type = get_parameter_type(yaml_type)
-        self.has_default_value = has_default_value
-        self.parameter_name = parameter_name
-        self.parameter_as_function = parameter_as_function
-        self.parameter_validations = []
+        self.code_gen_variable = code_gen_variable
+
+
+class DeclareParameter(DeclareParameterBase):
+    def __str__(self):
+        if len(self.code_gen_variable.cpp_str_value) == 0:
+            self.parameter_value = ""
+        else:
+            self.parameter_value = self.parameter_name
+
+        data = {
+            "parameter_name": self.parameter_name,
+            "parameter_value": self.parameter_value,
+            "parameter_type": self.code_gen_variable.get_parameter_type(),
+            "parameter_description": self.parameter_description,
+            "parameter_read_only": bool_to_str(self.parameter_read_only),
+        }
+
+        j2_template = Template(GenerateCode.templates["declare_parameter"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class DeclareRuntimeParameter(DeclareParameterBase):
+    def __init__(
+            self,
+            code_gen_variable: CodeGenVariableBase,
+            parameter_description: str,
+            parameter_read_only: bool,
+    ):
+        super().__init__(code_gen_variable, parameter_description, parameter_read_only)
+        self.set_runtime_parameter = None
         self.param_struct_instance = "params_"
 
     @typechecked
-    def add_parameter_validation(self, parameter_validation: ParameterValidation):
-        self.parameter_validations.append(parameter_validation)
+    def add_set_runtime_parameter(self, set_runtime_parameter: SetRuntimeParameter):
+        self.set_runtime_parameter = set_runtime_parameter
 
     def __str__(self):
-        if self.has_default_value:
-            default_value = "not_empty"
-        else:
-            default_value = ""
+        if self.set_runtime_parameter is None:
+            raise AssertionError("add_set_runtime_parameter was not called before str()")
 
-        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+        # parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+        if self.code_gen_variable.default_value is None:
+            parameter_field = ""
+        else:
+            parameter_field = get_dynamic_parameter_field(
+                self.parameter_name
+            )
 
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
-        parameter_field = get_dynamic_parameter_field(self.parameter_name)
 
         data = {
             "struct_name": struct_name,
-            "parameter_type": self.parameter_type,
+            "parameter_type": self.code_gen_variable.get_parameter_type(),
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
-            "default_value": default_value,
-            "parameter_validations": str(parameter_validations_str),
-            "parameter_as_function": self.parameter_as_function,
+            "parameter_as_function": self.code_gen_variable.get_parameter_as_function_str(),
             "mapped_param": mapped_param,
             "mapped_param_underscore": mapped_param.replace(".", "_"),
-            "parameter_field": parameter_field,
+            "set_runtime_parameter": self.set_runtime_parameter,
             "parameter_map": parameter_map,
             "param_struct_instance": self.param_struct_instance,
+            "parameter_field": parameter_field,
         }
 
-        j2_template = Template(GenerateCode.templates["dynamic_declare_parameter"])
+        j2_template = Template(GenerateCode.templates["declare_runtime_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
 
-class RemoveDynamicParameter:
+class RemoveRuntimeParameter:
     @typechecked
-    def __init__(self, dynamic_declare_parameter: DynamicDeclareParameter):
+    def __init__(self, dynamic_declare_parameter: DeclareRuntimeParameter):
         self.dynamic_declare_parameter = dynamic_declare_parameter
 
     def __str__(self):
@@ -766,9 +771,33 @@ class RemoveDynamicParameter:
             "parameter_field": parameter_field,
         }
 
-        j2_template = Template(GenerateCode.templates["remove_dynamic_parameter"])
+        j2_template = Template(GenerateCode.templates["remove_runtime_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
+
+
+# value_to_string = {
+#     "bool": bool_to_str,
+#     "double": float_to_str,
+#     "int": int_to_str,
+#     "string": str_to_str,
+#     "bool_array": bool_array_to_str,
+#     "double_array": float_array_to_str,
+#     "int_array": int_array_to_str,
+#     "string_array": str_array_to_str,
+#     "bool_array_fixed": bool_array_fixed_to_str,
+#     "double_array_fixed": float_array_fixed_to_str,
+#     "int_array_fixed": int_array_fixed_to_str,
+#     "string_array_fixed": str_array_fixed_to_str,
+#     "string_fixed": str_fixed_to_str,
+# }
+
+# defined_type_to_fixed_cpp_type = {
+#     "double_array_fixed": "parameter_traits::FixedSizeArray",
+#     "int_array_fixed": "parameter_traits::FixedSizeArray",
+#     "string_array_fixed": "parameter_traits::FixedSizeArray",
+#     "string_fixed": "parameter_traits::FixedSizeString",
+# }
 
 
 def get_all_templates():
@@ -785,13 +814,51 @@ def get_all_templates():
     return template_map
 
 
+def preprocess_inputs(name, value, nested_name_list):
+    # define parameter name
+    param_name = "".join(x + "." for x in nested_name_list[1:]) + name
+
+    # required attributes
+    try:
+        defined_type = value["type"]
+    except KeyError as e:
+        raise compile_error("No type defined for parameter %s" % param_name)
+
+    # optional attributes
+    default_value = value.get("default_value", None)
+    if not is_fixed_type(defined_type):
+        code_gen_variable = CodeGenVariable(param_name, defined_type, default_value)
+    else:
+        code_gen_variable = CodeGenFixedVariable(param_name, defined_type, default_value)
+
+    description = value.get("description", "")
+    read_only = bool(value.get("read_only", False))
+    validations = []
+    validations_dict = value.get("validation", {})
+    if is_fixed_type(defined_type):
+        validations_dict["size_lt<>"] = fixed_type_size(defined_type) + 1
+
+    for func_name in validations_dict:
+        args = validations_dict[func_name]
+        if args is not None and not isinstance(args, list):
+            args = [args]
+        validations.append(ValidationFunction(func_name, args, defined_type))
+
+    return (
+        code_gen_variable,
+        description,
+        read_only,
+        validations,
+    )
+
+
 # class used to generate c++ code from yaml file
 class GenerateCode:
     templates = get_all_templates()
 
     def __init__(self):
         self.namespace = ""
-        self.struct_tree = Struct("Params", [])
+        self.struct_tree = DeclareStruct("Params", [])
         self.update_parameters = []
         self.declare_parameters = []
         self.declare_dynamic_parameters = []
@@ -802,67 +869,29 @@ class GenerateCode:
         self.comments = "// auto-generated DO NOT EDIT"
         self.user_validation_file = ""
 
-    def preprocess_inputs(self, name, value, nested_name_list):
-        # define parameter name
-        param_name = "".join(x + "." for x in nested_name_list[1:]) + name
-
-        # required attributes
-        try:
-            defined_type = value["type"]
-        except KeyError as e:
-            raise compile_error("No type defined for parameter %s" % param_name)
-
-        # optional attributes
-        default_value = value.get("default_value", None)
-        description = value.get("description", "")
-        read_only = bool(value.get("read_only", False))
-        validations = []
-        validations_dict = value.get("validation", {})
-        if is_fixed_type(defined_type):
-            validations_dict["size_lt<>"] = fixed_type_size(defined_type) + 1
-
-        for func_name in validations_dict:
-            args = validations_dict[func_name]
-            if args is not None and not isinstance(args, list):
-                args = [args]
-            validations.append(ValidationFunction(func_name, args, defined_type))
-
-        return (
-            param_name,
-            defined_type,
-            default_value,
-            description,
-            read_only,
-            validations,
-        )
-
     def parse_dynamic_params(self, name, value, nested_name_list):
 
         (
-            param_name,
-            defined_type,
-            default_value,
+            code_gen_variable,
             description,
             read_only,
             validations,
-        ) = self.preprocess_inputs(name, value, nested_name_list)
+        ) = preprocess_inputs(name, value, nested_name_list)
 
         # define struct
-        var = VariableDeclaration(defined_type, name, default_value)
+        var = VariableDeclaration(code_gen_variable)
         self.struct_tree.add_field(var)
 
         # declare and set parameter
-        parameter_conversion = get_parameter_as_function_str(defined_type)
-        declare_parameter_invalid = initialization_fail_validation(param_name)
+        parameter_conversion = code_gen_variable.get_parameter_as_function_str()
+        declare_parameter_invalid = initialization_fail_validation(code_gen_variable.name)
         declare_parameter_valid = initialization_pass_validation(
-            param_name, parameter_conversion
+            code_gen_variable.name, parameter_conversion
         )
-        dynamic_declare_parameter = DynamicDeclareParameter(
-            param_name,
+        dynamic_declare_parameter = DeclareAndSetRuntimeParameter(
+            code_gen_variable,
             description,
             read_only,
-            defined_type,
-            default_value is not None,
             parameter_conversion,
         )
         for validation_function in validations:
@@ -874,11 +903,11 @@ class GenerateCode:
         self.declare_dynamic_parameters.append(dynamic_declare_parameter)
 
         # remove destroyed parameters
-        dynamic_update_parameter = RemoveDynamicParameter(dynamic_declare_parameter)
+        dynamic_update_parameter = RemoveRuntimeParameter(dynamic_declare_parameter)
         self.remove_dynamic_parameter.append(dynamic_update_parameter)
 
         # declare new dynamic parameters
-        dynamic_declare_parameter = DynamicDeclareParameter(
+        dynamic_declare_parameter = DeclareAndSetRuntimeParameter(
             param_name,
             description,
             read_only,
@@ -891,8 +920,8 @@ class GenerateCode:
         # update dynamic parameter
         update_parameter_invalid = update_parameter_fail_validation()
         update_parameter_valid = update_parameter_pass_validation()
-        parameter_conversion = get_parameter_as_function_str(defined_type)
-        update_parameter = DynamicUpdateParameter(param_name, parameter_conversion)
+        parameter_conversion = code_gen_variable.get_parameter_as_function_str()
+        update_parameter = UpdateRuntimeParameter(param_name, parameter_conversion)
         for validation_function in validations:
             parameter_validation = ParameterValidation(
                 update_parameter_invalid, update_parameter_valid, validation_function
@@ -902,52 +931,58 @@ class GenerateCode:
         self.update_dynamic_parameters.append(update_parameter)
 
     def parse_params(self, name, value, nested_name_list):
-
         (
-            param_name,
-            defined_type,
-            default_value,
+            code_gen_variable,
             description,
             read_only,
             validations,
-        ) = self.preprocess_inputs(name, value, nested_name_list)
+        ) = preprocess_inputs(name, value, nested_name_list)
 
-        # define struct
-        var = VariableDeclaration(defined_type, name, default_value)
-        self.struct_tree.add_field(var)
-
-        # declare parameter
-        declare_parameter = DeclareParameter(
-            param_name, description, read_only, defined_type, default_value is not None
-        )
-        self.declare_parameters.append(declare_parameter)
-
-        # update parameter
+        param_name = code_gen_variable.name
         update_parameter_invalid = update_parameter_fail_validation()
         update_parameter_valid = update_parameter_pass_validation()
-        parameter_conversion = get_parameter_as_function_str(defined_type)
-        update_parameter = UpdateParameter(param_name, parameter_conversion)
-        for validation_function in validations:
-            parameter_validation = ParameterValidation(
-                update_parameter_invalid, update_parameter_valid, validation_function
-            )
-            update_parameter.add_parameter_validation(parameter_validation)
+        parameter_conversion = code_gen_variable.get_parameter_as_function_str()
+        declare_parameter_invalid = initialization_fail_validation(param_name)
+        declare_parameter_valid = initialization_pass_validation(param_name, parameter_conversion)
 
-        self.update_parameters.append(update_parameter)
+        # add variable to struct
+        var = VariableDeclaration(code_gen_variable)
+
+        # check if runtime parameter
+        is_runtime_parameter = is_mapped_parameter(self.struct_tree.struct_name)
+
+        if is_runtime_parameter:
+            declare_parameter_set = SetRuntimeParameter(param_name, parameter_conversion)
+            declare_parameter = DeclareRuntimeParameter(code_gen_variable, description, read_only)
+            declare_parameter.add_set_runtime_parameter(declare_parameter_set)
+            update_parameter = UpdateRuntimeParameter(param_name, parameter_conversion)
+        else:
+            declare_parameter = DeclareParameter(code_gen_variable, description, read_only)
+            declare_parameter_set = SetParameter(param_name, parameter_conversion)
+            update_parameter = UpdateParameter(param_name, parameter_conversion)
 
         # set parameter
-        declare_parameter_invalid = initialization_fail_validation(param_name)
-        declare_parameter_valid = initialization_pass_validation(
-            param_name, parameter_conversion
-        )
-        declare_parameter_set = DeclareParameterSet(param_name, parameter_conversion)
         for validation_function in validations:
             parameter_validation = ParameterValidation(
                 declare_parameter_invalid, declare_parameter_valid, validation_function
             )
             declare_parameter_set.add_parameter_validation(parameter_validation)
 
-        self.declare_parameter_sets.append(declare_parameter_set)
+        # update parameter
+        for validation_function in validations:
+            parameter_validation = ParameterValidation(
+                update_parameter_invalid, update_parameter_valid, validation_function
+            )
+            update_parameter.add_parameter_validation(parameter_validation)
+
+        self.struct_tree.add_field(var)
+        if is_runtime_parameter:
+            self.declare_dynamic_parameters.append(declare_parameter)
+            self.update_dynamic_parameters.append(update_parameter)
+        else:
+            self.declare_parameters.append(declare_parameter)
+            self.update_parameters.append(update_parameter)
+            self.declare_parameter_sets.append(declare_parameter_set)
 
     def parse_dict(self, name, root_map, nested_name):
 
@@ -956,7 +991,7 @@ class GenerateCode:
         ):
             cur_struct_tree = self.struct_tree
 
-            sub_struct = Struct(name, [])
+            sub_struct = DeclareStruct(name, [])
             self.struct_tree.add_sub_struct(sub_struct)
             self.struct_tree = sub_struct
             for key in root_map:
@@ -967,10 +1002,10 @@ class GenerateCode:
 
             self.struct_tree = cur_struct_tree
         else:
-            if is_mapped_parameter(self.struct_tree.struct_name):
-                self.parse_dynamic_params(name, root_map, nested_name)
-            else:
-                self.parse_params(name, root_map, nested_name)
+            # if is_mapped_parameter(self.struct_tree.struct_name):
+            #     self.parse_dynamic_params(name, root_map, nested_name)
+            # else:
+            self.parse_params(name, root_map, nested_name)
 
     def __str__(self):
         data = {
@@ -998,7 +1033,7 @@ class GenerateCode:
             # ),
         }
 
-        j2_template = Template(GenerateCode.templates["parameter_listener"])
+        j2_template = Template(GenerateCode.templates["parameter_library_header"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
