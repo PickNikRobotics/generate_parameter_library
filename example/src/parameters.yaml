@@ -43,6 +43,10 @@ admittance_controller:
     default_value: "string_value",
     description: "test code generation for fixed sized string",
   }
+  fixed_string_no_default: {
+    type: string_fixed_25,
+    description: "test code generation for fixed sized string with no default",
+  }
   command_interfaces:
     {
       type: string_array,

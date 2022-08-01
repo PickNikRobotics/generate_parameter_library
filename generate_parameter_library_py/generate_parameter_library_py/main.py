@@ -74,8 +74,14 @@ def fixed_type_size(yaml_type: str):
 
 
 @typechecked
-def fixed_type(yaml_type: str):
+def is_fixed_type(yaml_type: str):
     return fixed_type_size(yaml_type) is not None
+
+
+@typechecked
+def get_fixed_type(yaml_type: str):
+    tmp = yaml_type.split("_")
+    return "".join(tmp[:-2])
 
 
 @typechecked
@@ -147,10 +153,8 @@ def str_to_str(s: Optional[str]):
 
 
 @typechecked
-def str_to_fixed_str(s: Optional[str], size: int):
-    if s is None:
-        return None
-    return '{"%s"}' % s
+def fixed_str_to_str(s: Optional[str]):
+    return "{%s}" % str_to_str(s)
 
 
 # cpp_type, val_to_cpp_str, parameter_conversion
@@ -167,7 +171,7 @@ def cpp_type_from_defined_type(yaml_type: str) -> str:
     elif yaml_type == "string":
         cpp_type = "std::string"
     elif yaml_type.__contains__("string_fixed_"):
-        cpp_type = f"FixedSizeString<{fixed_type_size(yaml_type)}>"
+        cpp_type = f"parameter_traits::FixedSizeString<{fixed_type_size(yaml_type)}>"
     elif yaml_type == "double":
         cpp_type = "double"
     elif yaml_type == "int":
@@ -217,10 +221,8 @@ def cpp_str_func_from_defined_type(yaml_type: str):
         val_to_cpp_str = bool_to_str
     elif yaml_type == "string":
         val_to_cpp_str = str_to_str
-    elif yaml_type.__contains__("string_fixed_"):
-        tmp = yaml_type.split("_")
-        size = int(tmp[-1])
-        val_to_cpp_str = lambda str_val: str_to_fixed_str(str_val, size)
+    elif yaml_type.__contains__("string_fixed_") and is_fixed_type(yaml_type):
+        val_to_cpp_str = fixed_str_to_str
     elif yaml_type == "double":
         val_to_cpp_str = float_to_str
     elif yaml_type == "int":
@@ -341,6 +343,13 @@ def get_dynamic_parameter_map(yaml_parameter_name: str):
     return parameter_map
 
 
+def get_parameter_type(yaml_type: str):
+    if is_fixed_type(yaml_type):
+        return get_fixed_type(yaml_type).upper()
+    else:
+        return yaml_type.upper()
+
+
 # Each template has a corresponding class with the str filling in the template with jinja
 
 
@@ -351,17 +360,16 @@ class DeclareParameter:
         parameter_name: str,
         parameter_description: str,
         parameter_read_only: bool,
-        parameter_type: str,
+        yaml_type: str,
         has_default_value: any,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
-        self.parameter_type = parameter_type
+        self.parameter_type = get_parameter_type(yaml_type)
         self.has_default_value = has_default_value
 
     def __str__(self):
-        parameter_type = self.parameter_type.upper()
         if self.has_default_value:
             default_value = "not_empty"
         else:
@@ -370,7 +378,7 @@ class DeclareParameter:
         data = {
             "parameter_name": self.parameter_name,
             "parameter_value": self.parameter_name,
-            "parameter_type": parameter_type,
+            "parameter_type": self.parameter_type,
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
             "default_value": default_value,
@@ -602,14 +610,14 @@ class DynamicDeclareParameter:
         parameter_name: str,
         parameter_description: str,
         parameter_read_only: bool,
-        parameter_type: str,
+        yaml_type: str,
         has_default_value: any,
         parameter_as_function: str,
     ):
         self.parameter_name = parameter_name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
-        self.parameter_type = parameter_type
+        self.parameter_type = get_parameter_type(yaml_type)
         self.has_default_value = has_default_value
         self.parameter_name = parameter_name
         self.parameter_as_function = parameter_as_function
@@ -621,7 +629,6 @@ class DynamicDeclareParameter:
         self.parameter_validations.append(parameter_validation)
 
     def __str__(self):
-        parameter_type = self.parameter_type.upper()
         if self.has_default_value:
             default_value = "not_empty"
         else:
@@ -631,13 +638,12 @@ class DynamicDeclareParameter:
 
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
-        parameter_name = get_dynamic_parameter_name(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
 
         data = {
             "struct_name": struct_name,
-            "parameter_type": parameter_type,
+            "parameter_type": self.parameter_type,
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
             "default_value": default_value,
@@ -734,7 +740,7 @@ class GenerateCode:
         read_only = bool(value.get("read_only", False))
         validations = []
         validations_dict = value.get("validation", {})
-        if fixed_type(defined_type):
+        if is_fixed_type(defined_type):
             validations_dict["size_lt<>"] = fixed_type_size(defined_type) + 1
 
         for func_name in validations_dict:
