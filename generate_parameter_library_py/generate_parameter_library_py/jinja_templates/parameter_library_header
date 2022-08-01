@@ -36,6 +36,14 @@ rclcpp::Time __stamp;
 };
 {%- endfilter %}
 
+{%- filter indent(width=4) %}
+struct StackParams {
+{%- filter indent(width=4) %}
+{{stack_struct_content-}}
+{% endfilter -%}
+};
+{%- endfilter %}
+
   class ParamListener{
   public:
     // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
@@ -59,6 +67,16 @@ rclcpp::Time __stamp;
 
     bool is_old(Params const& other) const {
       return params_.__stamp != other.__stamp;
+    }
+
+    StackParams get_stack_params() {
+      StackParams output;
+
+{%- filter indent(width=6) %}
+{{set_stack_params}}
+{%- endfilter %}
+
+      return output;
     }
 
     void refresh_dynamic_parameters() {

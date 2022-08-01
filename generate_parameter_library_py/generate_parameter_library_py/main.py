@@ -329,6 +329,7 @@ class CodeGenVariableBase:
         self.name = name
         self.param_name = param_name
         self.defined_type, template = self.process_type(defined_type)
+        self.array_type = array_type(self.defined_type)
         func = self.defined_type_to_cpp_type[self.defined_type]
         self.cpp_type = func(self.defined_type, template)
         tmp = defined_type.split("_")
@@ -413,6 +414,8 @@ class DeclareStruct:
     def __str__(self):
         sub_struct_str = "".join(str(x) for x in self.sub_structs)
         field_str = "".join(str(x) for x in self.fields)
+        if field_str == "" and sub_struct_str == "":
+            return ""
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
@@ -544,6 +547,18 @@ class UpdateRuntimeParameter(UpdateParameterBase):
         }
 
         j2_template = Template(GenerateCode.templates["update_runtime_parameter"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class SetStackParams:
+    @typechecked
+    def __init__(self, parameter_name: str):
+        self.parameter_name = parameter_name
+
+    def __str__(self):
+        data = {"parameter_name": self.parameter_name}
+        j2_template = Template(GenerateCode.templates["set_stack_params"])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -771,6 +786,7 @@ class GenerateCode:
     def __init__(self):
         self.namespace = ""
         self.struct_tree = DeclareStruct("Params", [])
+        self.stack_struct_tree = DeclareStruct("StackParams", [])
         self.update_parameters = []
         self.declare_parameters = []
         self.declare_dynamic_parameters = []
@@ -778,6 +794,7 @@ class GenerateCode:
         self.update_declare_dynamic_parameter = []
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
+        self.set_stack_params = []
         self.comments = "// auto-generated DO NOT EDIT"
         self.user_validation_file = ""
 
@@ -835,6 +852,15 @@ class GenerateCode:
             update_parameter.add_parameter_validation(parameter_validation)
 
         self.struct_tree.add_field(var)
+        if not is_runtime_parameter and (
+            isinstance(code_gen_variable, CodeGenFixedVariable)
+            or not (
+                code_gen_variable.array_type
+                or code_gen_variable.defined_type == "string"
+            )
+        ):
+            self.stack_struct_tree.add_field(var)
+            self.set_stack_params.append(SetStackParams(code_gen_variable.param_name))
         if is_runtime_parameter:
             self.declare_dynamic_parameters.append(declare_parameter)
             self.update_dynamic_parameters.append(update_parameter)
@@ -852,10 +878,14 @@ class GenerateCode:
             next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
+            cur_stack_struct_tree = self.stack_struct_tree
 
             sub_struct = DeclareStruct(name, [])
+            sub_stack_struct = DeclareStruct(name, [])
             self.struct_tree.add_sub_struct(sub_struct)
             self.struct_tree = sub_struct
+            self.stack_struct_tree.add_sub_struct(sub_stack_struct)
+            self.stack_struct_tree = sub_stack_struct
             for key in root_map:
                 if isinstance(root_map[key], dict):
                     nested_name.append(name)
@@ -863,6 +893,7 @@ class GenerateCode:
                     nested_name.pop()
 
             self.struct_tree = cur_struct_tree
+            self.stack_struct_tree = cur_stack_struct_tree
         else:
             self.parse_params(name, root_map, nested_name)
 
@@ -872,6 +903,9 @@ class GenerateCode:
             "comments": self.comments,
             "namespace": self.namespace,
             "struct_content": self.struct_tree.sub_structs[0].inner_content(),
+            "stack_struct_content": self.stack_struct_tree.sub_structs[
+                0
+            ].inner_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_dynamic_parameters]
@@ -886,6 +920,7 @@ class GenerateCode:
             "update_declare_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_declare_dynamic_parameter]
             ),
+            "set_stack_params": "\n".join([str(x) for x in self.set_stack_params]),
             # TODO support removing runtime parameters
             # "remove_dynamic_parameters": "\n".join(
             #     [str(x) for x in self.remove_dynamic_parameter]
