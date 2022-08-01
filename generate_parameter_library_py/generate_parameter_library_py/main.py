@@ -284,12 +284,9 @@ class CodeGenVariableBase:
         "double_array": lambda defined_type, templates: "std::vector<double>",
         "int_array": lambda defined_type, templates: "std::vector<int>",
         "string_array": lambda defined_type, templates: "std::vector<std::string>",
-        "double_array_fixed": lambda defined_type,
-                                     templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
-        "int_array_fixed": lambda defined_type,
-                                  templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
-        "string_array_fixed": lambda defined_type,
-                                     templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
+        "double_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
+        "int_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
+        "string_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
         "string_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeString<{templates[1]}>",
     }
     parameter_as_function_str = {
@@ -325,7 +322,7 @@ class CodeGenVariableBase:
 
     @typechecked
     def __init__(
-            self, name: str, param_name: str, defined_type: str, default_value: any
+        self, name: str, param_name: str, defined_type: str, default_value: any
     ):
         self.name = name
         self.default_value = default_value
@@ -446,10 +443,10 @@ class DeclareStruct:
 class ValidationFunction:
     @typechecked
     def __init__(
-            self,
-            function_name: str,
-            arguments: Optional[list[any]],
-            code_gen_variable: CodeGenVariableBase,
+        self,
+        function_name: str,
+        arguments: Optional[list[any]],
+        code_gen_variable: CodeGenVariableBase,
     ):
         self.function_name = function_name
         if function_name[-2:] == "<>":
@@ -484,10 +481,10 @@ class ValidationFunction:
 class ParameterValidation:
     @typechecked
     def __init__(
-            self,
-            invalid_effect: str,
-            valid_effect: str,
-            validation_function: ValidationFunction,
+        self,
+        invalid_effect: str,
+        valid_effect: str,
+        validation_function: ValidationFunction,
     ):
         self.invalid_effect = invalid_effect
         self.valid_effect = valid_effect
@@ -611,10 +608,10 @@ class SetRuntimeParameter(SetParameterBase):
 class DeclareParameterBase:
     @typechecked
     def __init__(
-            self,
-            code_gen_variable: CodeGenVariableBase,
-            parameter_description: str,
-            parameter_read_only: bool,
+        self,
+        code_gen_variable: CodeGenVariableBase,
+        parameter_description: str,
+        parameter_read_only: bool,
     ):
         self.parameter_name = code_gen_variable.param_name
         self.parameter_description = parameter_description
@@ -644,10 +641,10 @@ class DeclareParameter(DeclareParameterBase):
 
 class DeclareRuntimeParameter(DeclareParameterBase):
     def __init__(
-            self,
-            code_gen_variable: CodeGenVariableBase,
-            parameter_description: str,
-            parameter_read_only: bool,
+        self,
+        code_gen_variable: CodeGenVariableBase,
+        parameter_description: str,
+        parameter_read_only: bool,
     ):
         super().__init__(code_gen_variable, parameter_description, parameter_read_only)
         self.set_runtime_parameter = None
@@ -855,8 +852,13 @@ class GenerateCode:
             update_parameter.add_parameter_validation(parameter_validation)
 
         self.struct_tree.add_field(var)
-        if not is_runtime_parameter and (isinstance(code_gen_variable, CodeGenFixedVariable) or not (
-                code_gen_variable.array_type or code_gen_variable.defined_type == "string")):
+        if not is_runtime_parameter and (
+            isinstance(code_gen_variable, CodeGenFixedVariable)
+            or not (
+                code_gen_variable.array_type
+                or code_gen_variable.defined_type == "string"
+            )
+        ):
             self.stack_struct_tree.add_field(var)
             self.set_stack_params.append(SetStackParams(code_gen_variable.param_name))
         if is_runtime_parameter:
@@ -873,7 +875,7 @@ class GenerateCode:
     def parse_dict(self, name, root_map, nested_name):
 
         if isinstance(root_map, dict) and isinstance(
-                next(iter(root_map.values())), dict
+            next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
             cur_stack_struct_tree = self.stack_struct_tree
@@ -901,7 +903,9 @@ class GenerateCode:
             "comments": self.comments,
             "namespace": self.namespace,
             "struct_content": self.struct_tree.sub_structs[0].inner_content(),
-            "stack_struct_content": self.stack_struct_tree.sub_structs[0].inner_content(),
+            "stack_struct_content": self.stack_struct_tree.sub_structs[
+                0
+            ].inner_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_dynamic_parameters]
@@ -916,9 +920,7 @@ class GenerateCode:
             "update_declare_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_declare_dynamic_parameter]
             ),
-            "set_stack_params": "\n".join(
-                [str(x) for x in self.set_stack_params]
-            ),
+            "set_stack_params": "\n".join([str(x) for x in self.set_stack_params]),
             # TODO support removing runtime parameters
             # "remove_dynamic_parameters": "\n".join(
             #     [str(x) for x in self.remove_dynamic_parameter]

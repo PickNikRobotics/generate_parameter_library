@@ -26,6 +26,7 @@ setup(
             "jinja_templates/declare_runtime_parameter",
             "jinja_templates/remove_runtime_parameter",
             "jinja_templates/set_runtime_parameter",
+            "jinja_templates/set_stack_params",
         ]
     },
     zip_safe=False,
