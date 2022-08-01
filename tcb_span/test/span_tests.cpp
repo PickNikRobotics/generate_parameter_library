@@ -1,4 +1,4 @@
-// Copyright (c) 2022, PickNik Inc.
+// Copyright 2022 PickNik Inc
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the copyright holder nor the names of its
+//    * Neither the name of the PickNik Inc nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,56 +26,23 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
-#include "tcb_span/span.hpp"
+#include "gtest/gtest.h"
 
-#include <string_view>
+#include <string>
+#include <vector>
 
-namespace parameter_traits {
+#include <tcb_span/span.hpp>
 
-template <typename T, size_t S>
-class FixedSizeArray {
- public:
-  FixedSizeArray() = default;
-  FixedSizeArray(const std::vector<T>& values) {
-    len_ = std::min(values.size(), S);
-    std::copy(values.cbegin(), values.cbegin() + len_, data_.begin());
-  }
+TEST(SpanTests, NotContainsEmptyStrVec) {
+  std::vector<double> data = {1.0, 2.0, 3.0, 4.0, 5.0};
+  auto span = tcb::span(data.data(), 3);
+  EXPECT_EQ(span.size(), 3);
+  EXPECT_EQ(span[0], data[0]);
+  EXPECT_EQ(span[1], data[1]);
+  EXPECT_EQ(span[2], data[2]);
+}
 
-  operator tcb::span<T>() { return tcb::span<T>(data_.data(), len_); }
-
-  operator rclcpp::ParameterValue() const {
-    return rclcpp::ParameterValue(
-        std::vector<T>(data_.cbegin(), data_.cbegin() + len_));
-  }
-
- private:
-  std::array<T, S> data_;
-  const T* data_ptr_;
-  size_t len_;
-};
-
-template <size_t S>
-class FixedSizeString {
- public:
-  FixedSizeString() = default;
-  FixedSizeString(const std::string& str) {
-    len_ = std::min(str.size(), S);
-    std::copy(str.cbegin(), str.cbegin() + len_, data_.begin());
-  }
-
-  operator std::string_view() const {
-    return std::string_view(data_.data(), len_);
-  }
-
-  operator rclcpp::ParameterValue() const {
-    return rclcpp::ParameterValue(
-        std::string(data_.cbegin(), data_.cbegin() + len_));
-  }
-
- private:
-  std::array<char, S> data_;
-  size_t len_;
-};
-
-}  // namespace parameter_traits
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

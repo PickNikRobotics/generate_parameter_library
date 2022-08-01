@@ -43,6 +43,10 @@ class MinimalPublisher : public rclcpp::Node {
                 params_.control.frame.id.c_str());
     RCLCPP_INFO(this->get_logger(), "fixed string is: '%s'",
                 std::string{params_.fixed_string}.c_str());
+    const tcb::span<double> fixed_array = params_.fixed_array;
+    for (auto d : fixed_array) {
+      RCLCPP_INFO(this->get_logger(), "value: '%s'", std::to_string(d).c_str());
+    }
   }
 
  private:
@@ -54,6 +58,11 @@ class MinimalPublisher : public rclcpp::Node {
                   params_.control.frame.id.c_str());
       RCLCPP_INFO(this->get_logger(), "fixed string is: '%s'",
                   std::string{params_.fixed_string}.c_str());
+      const tcb::span<double> fixed_array = params_.fixed_array;
+      for (auto d : fixed_array) {
+        RCLCPP_INFO(this->get_logger(), "value: '%s'",
+                    std::to_string(d).c_str());
+      }
     }
   }
 

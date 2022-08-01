@@ -23,4 +23,14 @@ install(
 ament_export_include_directories(include)
 ament_export_targets(export_tcb_span)
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following lines skip linters
+  set(ament_cmake_cpplint_FOUND TRUE) # Conflicts with clang-foramt
+  set(ament_cmake_uncrustify_FOUND TRUE) # Conflicts with clang-format
+  ament_lint_auto_find_test_dependencies()
+
+  add_subdirectory(test)
+endif()
+
 ament_package()
