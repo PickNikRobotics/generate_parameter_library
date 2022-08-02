@@ -336,6 +336,7 @@ class CodeGenVariableBase:
         self.defined_base_type = tmp[0]
         func = self.defined_type_to_cpp_type[self.defined_base_type]
         self.cpp_base_type = func(self.defined_base_type, template)
+
         func = self.cpp_str_value_func[self.defined_type]
         self.cpp_str_value = func(default_value)
 

@@ -1,0 +1,7 @@
+admittance_controller:
+  scientific_notation_num: {
+    type: double,
+    default_value: "string type",
+
+    description: "Test scientific notation",
+  }
