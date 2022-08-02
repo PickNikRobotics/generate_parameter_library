@@ -193,7 +193,7 @@ def float_to_str(num: Optional[float]):
     elif str_num == "-inf":
         str_num = "-std::numeric_limits<double>::infinity()"
     else:
-        if len(str_num.split(".")) == 1:
+        if len(str_num.split(".")) == 1 and not str_num.__contains__("e"):
             str_num += ".0"
 
     return str_num

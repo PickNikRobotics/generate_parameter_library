@@ -1,4 +1,9 @@
 admittance_controller:
+  scientific_notation_num: {
+    type: double,
+    default_value: 0.00000000001,
+    description: "Test scientific notation",
+  }
   interpolation_mode: {
     type: string,
     default_value: "spline",
