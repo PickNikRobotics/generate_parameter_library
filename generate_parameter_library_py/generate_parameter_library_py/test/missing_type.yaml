@@ -1,0 +1,4 @@
+namespace:
+  param_name: {
+    description: "Test scientific notation",
+  }
