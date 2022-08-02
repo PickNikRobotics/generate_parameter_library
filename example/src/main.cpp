@@ -39,6 +39,10 @@ class MinimalPublisher : public rclcpp::Node {
     param_listener = std::make_shared<admittance_controller::ParamListener>(
         get_node_parameters_interface());
     params_ = param_listener->get_params();
+
+    admittance_controller::StackParams s_params =
+        param_listener->get_stack_params();
+
     RCLCPP_INFO(this->get_logger(), "Initial control frame parameter is: '%s'",
                 params_.control.frame.id.c_str());
     RCLCPP_INFO(this->get_logger(), "fixed string is: '%s'",

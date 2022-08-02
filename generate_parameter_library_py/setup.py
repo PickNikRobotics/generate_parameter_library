@@ -6,7 +6,7 @@ package_name = "generate_parameter_library_py"
 
 setup(
     name=package_name,
-    version="0.1.0",
+    version="0.2.0",
     packages=find_packages(),
     data_files=[
         ("share/" + package_name, ["package.xml"]),
@@ -26,6 +26,7 @@ setup(
             "jinja_templates/declare_runtime_parameter",
             "jinja_templates/remove_runtime_parameter",
             "jinja_templates/set_runtime_parameter",
+            "jinja_templates/set_stack_params",
         ]
     },
     zip_safe=False,
