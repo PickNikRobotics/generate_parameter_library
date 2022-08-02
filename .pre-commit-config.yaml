@@ -33,6 +33,7 @@ repos:
       - id: check-toml
       - id: check-vcs-permalinks
       - id: check-yaml
+        exclude: generate_parameter_library_py/generate_parameter_library_py/test
       - id: debug-statements
       - id: destroyed-symlinks
       - id: detect-private-key

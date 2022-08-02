@@ -10,6 +10,22 @@ setup(
     packages=find_packages(),
     data_files=[
         ("share/" + package_name, ["package.xml"]),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/wrong_default_type.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/missing_type.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/invalid_syntax.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/invalid_parameter_type.yaml"],
+        ),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
     install_requires=["setuptools", "typeguard", "jinja2"],
