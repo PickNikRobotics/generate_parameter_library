@@ -3,7 +3,9 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <functional>
+#include <mutex>
 #include <rclcpp/node.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <set>
@@ -11,8 +13,6 @@
 #include <string>
 #include <type_traits>
 #include <vector>
-#include <array>
-
 
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -62,14 +62,17 @@ struct StackParams {
     }
 
     Params get_params() const{
+      std::lock_guard<std::mutex> lock(mutex_);
       return params_;
     }
 
     bool is_old(Params const& other) const {
+      std::lock_guard<std::mutex> lock(mutex_);
       return params_.__stamp != other.__stamp;
     }
 
     StackParams get_stack_params() {
+      std::lock_guard<std::mutex> lock(mutex_);
       StackParams output;
 
 {%- filter indent(width=6) %}
@@ -80,6 +83,7 @@ struct StackParams {
     }
 
     void refresh_dynamic_parameters() {
+      std::lock_guard<std::mutex> lock(mutex_);
       // TODO remove any destroyed dynamic parameters
 {%- filter indent(width=6) %}
 {{remove_dynamic_parameters}}
@@ -92,8 +96,12 @@ struct StackParams {
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-      // Copy params_ so we only update it if all validation succeeds
-      Params updated_params = params_;
+      Params updated_params;
+      {
+        // Copy params_ so we only update it if all validation succeeds
+        std::lock_guard<std::mutex> lock(mutex_);
+        updated_params = params_;
+      }
 
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
@@ -109,7 +117,10 @@ struct StackParams {
       }
 {%- endif %}
       updated_params.__stamp = clock_.now();
-      params_ = updated_params;
+      {
+        std::lock_guard<std::mutex> lock(mutex_);
+        params_ = updated_params;
+      }
       return parameter_traits::OK;
     }
 
@@ -139,6 +150,7 @@ struct StackParams {
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
+      std::mutex mutable mutex_;
   };
 
 } // namespace {{namespace}}
