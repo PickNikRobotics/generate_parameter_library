@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.2 (2022-08-03)
+------------------
+
 0.2.1 (2022-08-02)
 ------------------
 * Fix scientific notation (`#46 <https://github.com/PickNikRobotics/generate_parameter_library/issues/46>`_)
