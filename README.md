@@ -1,5 +1,5 @@
 # generate_parameter_library
-Generate C++ for ROS 2 parameter declaration, getting, and validation using delcaritive YAML.
+Generate C++ for ROS 2 parameter declaration, getting, and validation using declarative YAML.
 The generated library contains a C++ struct with specified parameters.
 Additionally, dynamic parameters and custom validation are made easy.
 
@@ -17,6 +17,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 ### Create yaml parameter codegen file
 Write a yaml file to declare your parameters and their attributes.
 
+**src/turtlesim_parameters.yaml**
 ```yaml
 turtlesim:
   background:
@@ -62,7 +63,7 @@ generate_parameter_library(
   src/turtlesim_parameters.yaml # path to input yaml file
 )
 
-add_executable(turtlesim src/turtlesim.cpp)
+add_executable(minimal_node src/turtlesim.cpp)
 target_link_libraries(minimal_node PRIVATE
   rclcpp::rclcpp
   turtlesim_parameters
@@ -70,6 +71,8 @@ target_link_libraries(minimal_node PRIVATE
 ```
 
 ### Use generated struct into project source code
+
+**src/turtlesim.cpp**
 ```c++
 #include <rclcpp/rclcpp.hpp>
 #include "turtlesim_parameters.hpp"
