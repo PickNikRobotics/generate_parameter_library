@@ -257,15 +257,20 @@ def bool_array_fixed_to_str(values: Optional[list]):
     return "{{" + ", ".join(bool_to_str(x) for x in values) + "}}"
 
 
+@typechecked
+def int_to_integer_str(value: str):
+    return value.replace("int", "integer")
+
+
 class CodeGenVariableBase:
     defined_type_to_cpp_type = {
         "bool": lambda defined_type, templates: "bool",
         "double": lambda defined_type, templates: "double",
-        "int": lambda defined_type, templates: "int",
+        "int": lambda defined_type, templates: "int64_t",
         "string": lambda defined_type, templates: "std::string",
         "bool_array": lambda defined_type, templates: "std::vector<bool>",
         "double_array": lambda defined_type, templates: "std::vector<double>",
-        "int_array": lambda defined_type, templates: "std::vector<int>",
+        "int_array": lambda defined_type, templates: "std::vector<int64_t>",
         "string_array": lambda defined_type, templates: "std::vector<std::string>",
         "double_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
         "int_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
@@ -377,7 +382,7 @@ class CodeGenVariable(CodeGenVariableBase):
         return defined_type, None
 
     def get_parameter_type(self):
-        return self.defined_type.upper()
+        return int_to_integer_str(self.defined_type).upper()
 
 
 class CodeGenFixedVariable(CodeGenVariableBase):
@@ -391,7 +396,7 @@ class CodeGenFixedVariable(CodeGenVariableBase):
         return defined_type, (cpp_base_type, size)
 
     def get_parameter_type(self):
-        return get_fixed_base_type(self.defined_type).upper()
+        return int_to_integer_str(get_fixed_base_type(self.defined_type)).upper()
 
 
 # Each template has a corresponding class with the str filling in the template with jinja

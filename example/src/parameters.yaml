@@ -226,3 +226,21 @@ admittance_controller:
     default_value: false,
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
   }
+  one_number: {
+    type: int,
+    default: 14540,
+    readonly: true,
+    validation: {
+      bounds<>: [ 1024, 65535 ]
+    }
+  }
+  three_numbers: {
+    type: int_array,
+    default: [3,4,5],
+    readonly: true,
+  }
+  three_numbers_of_five: {
+    type: int_array_fixed_5,
+    default: [3,3,3],
+    readonly: true,
+  }
