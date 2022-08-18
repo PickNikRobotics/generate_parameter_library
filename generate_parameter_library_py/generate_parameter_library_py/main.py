@@ -31,6 +31,7 @@
 
 import yaml
 from yaml.parser import ParserError
+from yaml.scanner import ScannerError
 import sys
 import os
 from typing import Optional
@@ -71,24 +72,6 @@ def fixed_type_size(yaml_type: str):
     if tmp[-2] != "fixed" or not tmp[-1].isdigit():
         return None
     return int(tmp[-1])
-
-
-# TODO type checking fails here
-# @typechecked
-def cpp_str_func_from_python_val(arg):
-    if isinstance(arg, int):
-        val_func = int_to_str
-    elif isinstance(arg, float):
-        val_func = float_to_str
-    elif isinstance(arg, bool):
-        val_func = bool_to_str
-    elif isinstance(arg, str):
-        val_func = str_to_str
-    elif arg is None:
-        val_func = lambda x: ""
-    else:
-        raise compile_error("invalid python arg type: %s" % type(arg))
-    return val_func
 
 
 @typechecked
@@ -193,7 +176,7 @@ def float_to_str(num: Optional[float]):
     elif str_num == "-inf":
         str_num = "-std::numeric_limits<double>::infinity()"
     else:
-        if len(str_num.split(".")) == 1:
+        if len(str_num.split(".")) == 1 and not str_num.__contains__("e"):
             str_num += ".0"
 
     return str_num
@@ -289,7 +272,7 @@ class CodeGenVariableBase:
         "string_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
         "string_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeString<{templates[1]}>",
     }
-    parameter_as_function_str = {
+    yaml_type_to_as_function = {
         "string_array": "as_string_array()",
         "double_array": "as_double_array()",
         "int_array": "as_integer_array()",
@@ -319,6 +302,24 @@ class CodeGenVariableBase:
         "string_array_fixed": str_array_fixed_to_str,
         "string_fixed": str_fixed_to_str,
     }
+    python_val_to_str_func = {
+        "<class 'bool'>": bool_to_str,
+        "<class 'float'>": float_to_str,
+        "<class 'int'>": int_to_str,
+        "<class 'str'>": str_to_str,
+    }
+    python_val_to_yaml_type = {
+        "<class 'bool'>": "bool",
+        "<class 'float'>": "double",
+        "<class 'int'>": "int",
+        "<class 'str'>": "str",
+    }
+    python_list_to_yaml_type = {
+        "<class 'bool'>": "bool_array",
+        "<class 'float'>": "double_array",
+        "<class 'int'>": "integer_array",
+        "<class 'str'>": "string_array",
+    }
 
     @typechecked
     def __init__(
@@ -330,6 +331,12 @@ class CodeGenVariableBase:
         self.param_name = param_name
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
+        if self.defined_type not in self.defined_type_to_cpp_type:
+            allowed = ", ".join(key for key in self.defined_type_to_cpp_type)
+            raise compile_error(
+                f"Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: "
+                + allowed
+            )
         func = self.defined_type_to_cpp_type[self.defined_type]
         self.cpp_type = func(self.defined_type, template)
         tmp = defined_type.split("_")
@@ -337,12 +344,26 @@ class CodeGenVariableBase:
         func = self.defined_type_to_cpp_type[self.defined_base_type]
         self.cpp_base_type = func(self.defined_base_type, template)
         func = self.cpp_str_value_func[self.defined_type]
-        self.cpp_str_value = func(default_value)
+        try:
+            self.cpp_str_value = func(default_value)
+        except TypeError:
+            raise compile_error(
+                f"Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}"
+            )
 
-    def get_parameter_as_function_str(self):
-        if self.defined_type not in self.parameter_as_function_str:
+    def parameter_as_function_str(self):
+        if self.defined_type not in self.yaml_type_to_as_function:
             raise compile_error("invalid yaml type: %s" % type(self.defined_type))
-        return self.parameter_as_function_str[self.defined_type]
+        return self.yaml_type_to_as_function[self.defined_type]
+
+    def get_python_val_to_str_func(self, arg):
+        return self.python_val_to_str_func[str(type(arg))]
+
+    def get_yaml_type_from_python(self, arg):
+        if isinstance(arg, list):
+            return self.python_list_to_yaml_type[str(type(arg[0]))]
+        else:
+            return self.python_val_to_yaml_type[str(type(arg[0]))]
 
     def process_type(self, defined_type):
         raise NotImplemented()
@@ -448,6 +469,7 @@ class ValidationFunction:
         arguments: Optional[list[any]],
         code_gen_variable: CodeGenVariableBase,
     ):
+        self.code_gen_variable = code_gen_variable
         self.function_name = function_name
         if function_name[-2:] == "<>":
             self.function_name = function_name[:-2]
@@ -465,13 +487,13 @@ class ValidationFunction:
             if isinstance(arg, list):
                 code += ", {"
                 for a in arg[:-1]:
-                    val_func = cpp_str_func_from_python_val(a)
+                    val_func = self.code_gen_variable.get_python_val_to_str_func(a)
                     code += val_func(a) + ", "
-                val_func = cpp_str_func_from_python_val(arg[-1])
+                val_func = self.code_gen_variable.get_python_val_to_str_func(arg[-1])
                 code += val_func(arg[-1])
                 code += "}"
             else:
-                val_func = cpp_str_func_from_python_val(arg)
+                val_func = self.code_gen_variable.get_python_val_to_str_func(arg)
                 code += ", " + val_func(arg)
         code += ")"
 
@@ -676,7 +698,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             "parameter_type": self.code_gen_variable.get_parameter_type(),
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
-            "parameter_as_function": self.code_gen_variable.get_parameter_as_function_str(),
+            "parameter_as_function": self.code_gen_variable.parameter_as_function_str(),
             "mapped_param": mapped_param,
             "mapped_param_underscore": mapped_param.replace(".", "_"),
             "set_runtime_parameter": self.set_runtime_parameter,
@@ -809,7 +831,7 @@ class GenerateCode:
         param_name = code_gen_variable.param_name
         update_parameter_invalid = update_parameter_fail_validation()
         update_parameter_valid = update_parameter_pass_validation()
-        parameter_conversion = code_gen_variable.get_parameter_as_function_str()
+        parameter_conversion = code_gen_variable.parameter_as_function_str()
         declare_parameter_invalid = initialization_fail_validation(param_name)
         declare_parameter_valid = initialization_pass_validation(
             param_name, parameter_conversion
@@ -954,6 +976,8 @@ class GenerateCode:
                 docs = yaml.load_all(f, Loader=yaml.FullLoader)
                 doc = list(docs)[0]
             except ParserError as e:
+                raise compile_error(str(e))
+            except ScannerError as e:
                 raise compile_error(str(e))
 
             if len(doc) != 1:

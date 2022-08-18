@@ -1,0 +1,6 @@
+namespace:
+  param_name: {
+    type: double,
+    default_value: "string type",
+    description: "Test scientific notation",
+  }

@@ -2,6 +2,20 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.3 (2022-08-05)
+------------------
+
+0.2.2 (2022-08-03)
+------------------
+* Add better error messages (`#48 <https://github.com/PickNikRobotics/generate_parameter_library/issues/48>`_)
+* Lock mutex around modifying internal state of ParamListener (`#47 <https://github.com/PickNikRobotics/generate_parameter_library/issues/47>`_)
+* Contributors: Paul Gesel, Tyler Weaver
+
+0.2.1 (2022-08-02)
+------------------
+* Fix scientific notation (`#46 <https://github.com/PickNikRobotics/generate_parameter_library/issues/46>`_)
+* Contributors: Paul Gesel
+
 0.2.0 (2022-08-01)
 ------------------
 * Create stack allocated struct (`#45 <https://github.com/PickNikRobotics/generate_parameter_library/issues/45>`_)

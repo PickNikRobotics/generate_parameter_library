@@ -2,13 +2,15 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>tcb_span</name>
-  <version>0.2.0</version>
+  <version>0.2.3</version>
   <description>Implementation of C++20's std::span</description>
   <maintainer email="maybe@tylerjw.dev">Tyler Weaver</maintainer>
   <license>Boost Software License</license>
   <url>https://github.com/tcbrindle/span</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
