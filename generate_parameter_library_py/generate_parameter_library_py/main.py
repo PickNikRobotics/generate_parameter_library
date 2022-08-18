@@ -377,7 +377,10 @@ class CodeGenVariable(CodeGenVariableBase):
         return defined_type, None
 
     def get_parameter_type(self):
-        return self.defined_type.upper()
+        defined_type_type = self.defined_type.upper()
+        if defined_type_type == "INT":
+            defined_type_type = "INTEGER"
+        return defined_type_type
 
 
 class CodeGenFixedVariable(CodeGenVariableBase):
