@@ -5,6 +5,12 @@ Changelog for package generate_parameter_library_example
 0.2.3 (2022-08-05)
 ------------------
 
+0.2.4 (2022-08-19)
+------------------
+* INTEGER type (`#53 <https://github.com/PickNikRobotics/generate_parameter_library/issues/53>`_)
+* 0.2.3
+* Contributors: Tyler Weaver
+
 0.2.2 (2022-08-03)
 ------------------
 
