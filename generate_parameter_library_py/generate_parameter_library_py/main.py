@@ -774,6 +774,15 @@ def preprocess_inputs(name, value, nested_name_list):
     except KeyError as e:
         raise compile_error("No type defined for parameter %s" % param_name)
 
+    # check for invalid syntax
+    valid_keys = {"default_value", "description", "read_only", "validation", "type"}
+    invalid_keys = value.keys() - valid_keys
+    if len(invalid_keys) > 0:
+        raise compile_error(
+            "Invalid syntax in parameter %s. '%s' is not valid syntax"
+            % (param_name, next(iter(invalid_keys)))
+        )
+
     # optional attributes
     default_value = value.get("default_value", None)
     if not is_fixed_type(defined_type):
