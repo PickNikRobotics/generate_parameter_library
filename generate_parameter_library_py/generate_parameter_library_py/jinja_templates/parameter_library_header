@@ -47,13 +47,18 @@ struct StackParams {
   class ParamListener{
   public:
     // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
-    ParamListener(rclcpp::Node::SharedPtr node)
-    : ParamListener(node->get_node_parameters_interface()) {}
+    ParamListener(rclcpp::Node::SharedPtr node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), prefix) {}
 
-    ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node)
-    : ParamListener(node->get_node_parameters_interface()) {}
+    ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), prefix) {}
 
-    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface){
+    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface, std::string const& prefix = ""){
+      prefix_ = prefix;
+      if (!prefix_.empty() && prefix_.back() != '.') {
+        prefix_ += ".";
+      }
+
       parameters_interface_ = parameters_interface;
       declare_params();
       auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
@@ -146,6 +151,7 @@ struct StackParams {
     }
 
     private:
+      std::string prefix_;
       Params params_;
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
