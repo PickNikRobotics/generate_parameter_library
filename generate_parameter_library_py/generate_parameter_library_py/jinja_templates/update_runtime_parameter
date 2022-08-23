@@ -1,6 +1,6 @@
 for (const auto & value : updated_params.{{mapped_param}}){
 {%- filter indent(width=4) %}
-auto param_name = fmt::format("{}.{}.{}", "{{struct_name}}", value, "{{parameter_field}}");
+auto param_name = fmt::format("{}{}.{}.{}", prefix_, "{{struct_name}}", value, "{{parameter_field}}");
 if (param.get_name() == param_name) {
 {%- filter indent(width=4) %}
 {% if parameter_validations|length -%}
