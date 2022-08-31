@@ -7,6 +7,9 @@ example_test_node:
       - joint6
 
     ft_sensor:
+      name: "ft_sensor"
+      frame:
+        id: "sensor_frame_id"
       filter_coefficient: 0.1
 
 
@@ -28,11 +31,6 @@ example_test_node:
       base: "base_link"
       tip: "tcp"
       group_name: "manip"
-
-    ft_sensor:
-      name: "ft_sensor"
-      frame:
-        id: "sensor_frame_id"
 
     control:
       frame:

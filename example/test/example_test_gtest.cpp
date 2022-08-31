@@ -29,36 +29,31 @@
 // Author: Denis Štogl
 //
 
-#include <memory>
-
-#include "gtest/gtest.h"
-
 #include "admittance_controller_parameters.hpp"
-
+#include "gtest/gtest.h"
 #include "rclcpp/rclcpp.hpp"
 
-class ExampleTest : public ::testing::Test
-{
-public:
-  void SetUp()
-  {
+#include <memory>
+
+class ExampleTest : public ::testing::Test {
+ public:
+  void SetUp() {
     example_test_node_ = std::make_shared<rclcpp::Node>("example_test_node");
 
     std::shared_ptr<admittance_controller::ParamListener> param_listener =
-      std::make_shared<admittance_controller::ParamListener>(
-        example_test_node_->get_node_parameters_interface());
+        std::make_shared<admittance_controller::ParamListener>(
+            example_test_node_->get_node_parameters_interface());
     params_ = param_listener->get_params();
   }
 
   void TearDown() { example_test_node_.reset(); }
 
-protected:
+ protected:
   std::shared_ptr<rclcpp::Node> example_test_node_;
   admittance_controller::Params params_;
 };
 
-TEST_F(ExampleTest, check_parameters)
-{
+TEST_F(ExampleTest, check_parameters) {
   ASSERT_EQ(params_.interpolation_mode, "spline");  // default value
 
   ASSERT_EQ(params_.joints.size(), 3);
@@ -69,8 +64,7 @@ TEST_F(ExampleTest, check_parameters)
   ASSERT_EQ(params_.ft_sensor.filter_coefficient, 0.1);
 }
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
   int result = RUN_ALL_TESTS();
