@@ -15,10 +15,13 @@ add_executable(test_node
   src/main.cpp
 )
 
-target_link_libraries(test_node PRIVATE
-  rclcpp::rclcpp
-  rclcpp_lifecycle::rclcpp_lifecycle
+target_link_libraries(test_node
   admittance_controller_parameters
+)
+
+ament_target_dependencies(test_node
+  rclcpp
+  rclcpp_lifecycle
 )
 
 install(

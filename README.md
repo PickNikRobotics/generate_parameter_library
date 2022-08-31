@@ -65,9 +65,9 @@ generate_parameter_library(
 
 add_executable(minimal_node src/turtlesim.cpp)
 target_link_libraries(minimal_node PRIVATE
-  rclcpp::rclcpp
   turtlesim_parameters
 )
+ament_target_dependencies(minimal_node rclcpp)
 ```
 
 ### Use generated struct into project source code
