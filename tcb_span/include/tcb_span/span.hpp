@@ -252,8 +252,8 @@ template <typename T, typename E>
 struct is_container_element_type_compatible<
     T, E,
     typename std::enable_if<
-        !std::is_same<typename std::remove_cv<decltype(
-                          detail::data(std::declval<T>()))>::type,
+        !std::is_same<typename std::remove_cv<decltype(detail::data(
+                          std::declval<T>()))>::type,
                       void>::value &&
         std::is_convertible<
             remove_pointer_t<decltype(detail::data(std::declval<T>()))> (*)[],
