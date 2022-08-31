@@ -32,6 +32,23 @@ if(BUILD_TESTING)
   set(ament_cmake_flake8_FOUND TRUE) # Conflicts with black
   set(ament_cmake_uncrustify_FOUND TRUE) # Conflicts with clang-format
   ament_lint_auto_find_test_dependencies()
+
+  find_package(generate_parameter_library REQUIRED)
+  find_package(rclcpp REQUIRED)
+
+  find_package(ament_cmake_gtest REQUIRED)
+  add_test_with_yaml_input_gtest(test_example_gtest test/example_test_gtest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
+  target_include_directories(test_example_gtest PRIVATE include)
+  target_link_libraries(test_example_gtest admittance_controller_parameters)
+  ament_target_dependencies(test_example_gtest rclcpp)
+
+  find_package(ament_cmake_gmock REQUIRED)
+  add_test_with_yaml_input_gmock(test_example_gmock test/example_test_gmock.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
+  target_include_directories(test_example_gmock PRIVATE include)
+  target_link_libraries(test_example_gmock admittance_controller_parameters)
+  ament_target_dependencies(test_example_gmock rclcpp)
 endif()
 
 ament_package()
