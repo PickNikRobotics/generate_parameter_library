@@ -93,6 +93,33 @@ int main(int argc, char * argv[])
 }
 ```
 
+### Use example yaml files in tests
+When using parameter library generation it can happen that there are issues when executing tests since parameters are not defined and the library defines them as mandatory.
+To overcome this it is recommended to define example yaml files for tests and use them as follows:
+
+```
+find_package(ament_cmake_gtest REQUIRED)
+add_test_with_yaml_input_gtest(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/example_turtlesim_parameters.yaml)
+target_include_directories(test_turtlesim_parameters PRIVATE include)
+target_link_libraries(test_turtlesim_parameters turtlesim_parameters)
+ament_target_dependencies(test_turtlesim_parameters rclcpp)
+```
+
+when using `gtest`, or:
+
+```
+find_package(ament_cmake_gmock REQUIRED)
+add_test_with_yaml_input_gmock(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/example_turtlesim_parameters.yaml)
+target_include_directories(test_turtlesim_parameters PRIVATE include)
+target_link_libraries(test_turtlesim_parameters turtlesim_parameters)
+ament_target_dependencies(test_turtlesim_parameters rclcpp)
+```
+when using `gmock` test library.
+
+🤖 P.S. having this example yaml files will make your users very grateful because they will always have a working example of a configuration for your node.
+
 ## Detailed Documentation
 * [Cpp namespace](#cpp-namespace)
 * [Parameter definition](#parameter-definition)
