@@ -91,7 +91,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
 endfunction()
 
 # create custom test function to pass yaml file into test main
-function(add_test_with_yaml_input_gtest TARGET SOURCES YAML_FILE)
+function(add_rostest_with_parameters_gtest TARGET SOURCES YAML_FILE)
   add_executable(${TARGET} ${SOURCES})
   _ament_cmake_gtest_find_gtest()
   target_include_directories(${TARGET} PUBLIC "${GTEST_INCLUDE_DIRS}")
@@ -107,7 +107,7 @@ function(add_test_with_yaml_input_gtest TARGET SOURCES YAML_FILE)
   )
 endfunction()
 
-function(add_test_with_yaml_input_gmock TARGET SOURCES YAML_FILE)
+function(add_rostest_with_parameters_gmock TARGET SOURCES YAML_FILE)
   add_executable(${TARGET} ${SOURCES})
   _ament_cmake_gmock_find_gmock()
   target_include_directories(${TARGET} PUBLIC "${GMOCK_INCLUDE_DIRS}")
