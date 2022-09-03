@@ -37,8 +37,7 @@ if(BUILD_TESTING)
   add_rostest_with_parameters_gtest(test_example_gtest test/example_test_gtest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
   target_include_directories(test_example_gtest PRIVATE include)
-  target_link_libraries(test_example_gtest admittance_controller_parameters)
-  ament_target_dependencies(test_example_gtest rclcpp)
+  target_link_libraries (test_example_gtest admittance_controller_parameters rclcpp::rclcpp)
 
   find_package(ament_cmake_gmock REQUIRED)
   add_rostest_with_parameters_gmock(test_example_gmock test/example_test_gmock.cpp
