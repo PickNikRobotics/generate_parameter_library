@@ -26,7 +26,7 @@ turtlesim:
       default_value: 0,
       description: "Red color value for the background, 8-bit",
       validation: {
-        bounds: [0, 255]
+        bounds<>: [0, 255]
       }
     }
     g: {
@@ -34,7 +34,7 @@ turtlesim:
       default_value: 0,
       description: "Green color value for the background, 8-bit",
       validation: {
-        bounds: [0, 255]
+        bounds<>: [0, 255]
       }
     }
     b: {
@@ -42,7 +42,7 @@ turtlesim:
       default_value: 0,
       description: "Blue color value for the background, 8-bit",
       validation: {
-        bounds: [0, 255]
+        bounds<>: [0, 255]
       }
     }
 ```
