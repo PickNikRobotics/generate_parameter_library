@@ -2,23 +2,40 @@ cmake_minimum_required(VERSION 3.22)
 project(generate_parameter_library_example)
 
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
 find_package(generate_parameter_library REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 
 generate_parameter_library(admittance_controller_parameters
   src/parameters.yaml
   include/generate_parameter_library_example/example_validators.hpp
 )
 
-add_executable(test_node
-  src/main.cpp
+add_library(minimal_publisher SHARED
+  src/minimal_publisher.cpp
+)
+target_include_directories(minimal_publisher PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(minimal_publisher
+  PUBLIC
+    admittance_controller_parameters
+    rclcpp::rclcpp
+    rclcpp_components::component
+)
+rclcpp_components_register_node(minimal_publisher
+  PLUGIN "admittance_controller::MinimalPublisher"
+  EXECUTABLE test_node
 )
 
-target_link_libraries(test_node PRIVATE
-  rclcpp::rclcpp
-  rclcpp_lifecycle::rclcpp_lifecycle
-  admittance_controller_parameters
+install(DIRECTORY include/ DESTINATION include/)
+install(TARGETS minimal_publisher admittance_controller_parameters
+  EXPORT generate_parameter_library_example_export
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
 install(
@@ -46,4 +63,5 @@ if(BUILD_TESTING)
   target_link_libraries(test_example_gmock admittance_controller_parameters rclcpp::rclcpp)
 endif()
 
+ament_export_targets(generate_parameter_library_example_export)
 ament_package()

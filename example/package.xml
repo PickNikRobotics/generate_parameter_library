@@ -8,8 +8,9 @@
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
-  <depend>rclcpp</depend>
   <depend>generate_parameter_library</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
