@@ -36,6 +36,7 @@ admittance_controller:
       }
       i: {
         type: double,
+        default_value: 1.0,
         description: "integral gain term"
       }
       d: {
