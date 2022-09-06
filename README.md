@@ -99,7 +99,7 @@ To overcome this it is recommended to define example yaml files for tests and us
 
 ```
 find_package(ament_cmake_gtest REQUIRED)
-add_test_with_yaml_input_gtest(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
+add_rostest_with_parameters_gtest(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/example_turtlesim_parameters.yaml)
 target_include_directories(test_turtlesim_parameters PRIVATE include)
 target_link_libraries(test_turtlesim_parameters turtlesim_parameters)
@@ -110,7 +110,7 @@ when using `gtest`, or:
 
 ```
 find_package(ament_cmake_gmock REQUIRED)
-add_test_with_yaml_input_gmock(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
+add_rostest_with_parameters_gmock(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/example_turtlesim_parameters.yaml)
 target_include_directories(test_turtlesim_parameters PRIVATE include)
 target_link_libraries(test_turtlesim_parameters turtlesim_parameters)
