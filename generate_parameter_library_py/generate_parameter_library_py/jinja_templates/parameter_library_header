@@ -77,7 +77,7 @@ struct StackParams {
     }
 
     StackParams get_stack_params() {
-      std::lock_guard<std::mutex> lock(mutex_);
+      Params params = get_params();
       StackParams output;
 
 {%- filter indent(width=6) %}
@@ -88,7 +88,7 @@ struct StackParams {
     }
 
     void refresh_dynamic_parameters() {
-      std::lock_guard<std::mutex> lock(mutex_);
+      auto updated_params = get_params();
       // TODO remove any destroyed dynamic parameters
 {%- filter indent(width=6) %}
 {{remove_dynamic_parameters}}
@@ -101,12 +101,7 @@ struct StackParams {
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-      Params updated_params;
-      {
-        // Copy params_ so we only update it if all validation succeeds
-        std::lock_guard<std::mutex> lock(mutex_);
-        updated_params = params_;
-      }
+      auto updated_params = get_params();
 
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
@@ -122,14 +117,12 @@ struct StackParams {
       }
 {%- endif %}
       updated_params.__stamp = clock_.now();
-      {
-        std::lock_guard<std::mutex> lock(mutex_);
-        params_ = updated_params;
-      }
+      update_interal_params(updated_params);
       return parameter_traits::OK;
     }
 
     void declare_params(){
+      auto updated_params = get_params();
       // declare all parameters and give default values to non-required ones
 {%- filter indent(width=6) %}
 {{declare_params}}
@@ -147,10 +140,16 @@ struct StackParams {
 {%- endfilter %}
 {%- endif %}
 
-      params_.__stamp = clock_.now();
+      updated_params.__stamp = clock_.now();
+      update_interal_params(updated_params);
     }
 
     private:
+      void update_interal_params(Params updated_params) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        params_ = updated_params;
+      }
+
       std::string prefix_;
       Params params_;
       rclcpp::Clock clock_;

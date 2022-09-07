@@ -675,7 +675,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
     ):
         super().__init__(code_gen_variable, parameter_description, parameter_read_only)
         self.set_runtime_parameter = None
-        self.param_struct_instance = "params_"
+        self.param_struct_instance = "updated_params"
 
     @typechecked
     def add_set_runtime_parameter(self, set_runtime_parameter: SetRuntimeParameter):
