@@ -31,7 +31,7 @@ Run the following:
 You should see:
 
 ```
-  /admittance_controller:
+/admittance_controller:
   admittance.damping_ratio
   admittance.mass
   admittance.selected_axes
@@ -41,8 +41,12 @@ You should see:
   control.frame.external
   control.frame.id
   enable_parameter_update_without_reactivation
+  fixed_array
+  fixed_string
+  fixed_string_no_default
   fixed_world_frame.frame.external
   fixed_world_frame.frame.id
+  ft_sensor.filter_coefficient
   ft_sensor.frame.external
   ft_sensor.frame.id
   ft_sensor.name
@@ -50,15 +54,43 @@ You should see:
   gravity_compensation.CoG.pos
   gravity_compensation.frame.external
   gravity_compensation.frame.id
+  interpolation_mode
   joints
+  kinematics.alpha
   kinematics.base
+  kinematics.group_name
   kinematics.plugin_name
+  kinematics.plugin_package
   kinematics.tip
+  one_number
+  pid.elbow_joint.d
+  pid.elbow_joint.i
+  pid.elbow_joint.p
+  pid.rate
+  pid.shoulder_lift_joint.d
+  pid.shoulder_lift_joint.i
+  pid.shoulder_lift_joint.p
+  pid.shoulder_pan_joint.d
+  pid.shoulder_pan_joint.i
+  pid.shoulder_pan_joint.p
+  pid.wrist_1_joint.d
+  pid.wrist_1_joint.i
+  pid.wrist_1_joint.p
+  pid.wrist_2_joint.d
+  pid.wrist_2_joint.i
+  pid.wrist_2_joint.p
+  pid.wrist_3_joint.d
+  pid.wrist_3_joint.i
+  pid.wrist_3_joint.p
   qos_overrides./parameter_events.publisher.depth
   qos_overrides./parameter_events.publisher.durability
   qos_overrides./parameter_events.publisher.history
   qos_overrides./parameter_events.publisher.reliability
+  scientific_notation_num
   state_interfaces
+  three_numbers
+  three_numbers_of_five
+  use_feedforward_commanded_input
   use_sim_time
   ```
 
@@ -74,11 +106,11 @@ Congratulations, you updated the parameter!
 
 If you try to set a parameter that is read only, you will get an error. Running the following
 
-`ros2 param set /admittance_controller joints ["joint_new"]`
+`ros2 param set /admittance_controller command_interfaces ["velocity"]`
 
 will result in the error
 
-`Setting parameter failed: parameter 'joints' cannot be set because it is read-only`
+`Setting parameter failed: parameter 'command_interfaces' cannot be set because it is read-only`
 
 Running the following
 
@@ -101,7 +133,7 @@ If you try to set a value out of the specified bounds,
 
 you will get the error
 
-`Setting parameter failed: Invalid value for parameter admittance.damping_ratio. Value not within required bounds.`
+`Setting parameter failed: Invalid value '-10' for parameter 'admittance.damping_ratio'. Required bounds: [0.1, 10]`
 
 If you try to set a vector parameter with the wrong length,
 
@@ -109,7 +141,7 @@ If you try to set a vector parameter with the wrong length,
 
 you will get the error
 
-`Setting parameter failed: Invalid size for vector parameter admittance.damping_ratio. Expected 6 got 3`
+`Setting parameter failed: Invalid length '3' for parameter 'admittance.damping_ratio'. Required equal to: 6`
 
 If you try to load a yaml file with missing required parameters
 
@@ -119,6 +151,6 @@ you will get the error
 
 ```
 terminate called after throwing an instance of 'rclcpp::exceptions::ParameterUninitializedException'
-  what():  parameter 'command_interfaces' is not initialized
+  what():  parameter 'fixed_string_no_default' is not initialized
 [ros2run]: Aborted
 ```
