@@ -35,6 +35,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 #include <parameter_traits/comparison.hpp>
 #include <parameter_traits/result.hpp>
 
@@ -56,8 +58,9 @@ Result subset_of(rclcpp::Parameter const& parameter,
 
   for (auto const& value : input_values) {
     if (!contains(valid_values, value)) {
-      return ERROR("Invalid entry '{}' for parameter '{}'. Not in set: {}",
-                   value, parameter.get_name(), valid_values);
+      return ERROR(fmt::format(
+          "Invalid entry '{}' for parameter '{}'. Not in set: {}", value,
+          parameter.get_name(), fmt::join(valid_values, ", ")));
     }
   }
 
@@ -67,7 +70,7 @@ Result subset_of(rclcpp::Parameter const& parameter,
 template <typename T, typename F>
 Result size_cmp(rclcpp::Parameter const& parameter, size_t size,
                 std::string const& cmp_str, F cmp) {
-  if (std::is_same<T, std::string>::value) {
+  if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING) {
     if (auto value = parameter.get_value<std::string>();
         !cmp(value.size(), size)) {
       return ERROR("Invalid length '{}' for parameter '{}'. Required {}: {}",
@@ -101,7 +104,7 @@ Result size_lt(rclcpp::Parameter const& parameter, size_t size) {
 
 template <typename T>
 Result not_empty(rclcpp::Parameter const& parameter) {
-  if (std::is_same<T, std::string>::value) {
+  if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING) {
     if (auto param_value = parameter.get_value<std::string>();
         param_value.empty()) {
       return ERROR("The parameter '{}' cannot be empty.", parameter.get_name());

@@ -31,7 +31,6 @@ setup(
     install_requires=["setuptools", "typeguard", "jinja2"],
     package_data={
         "": [
-            "validators/validators.hpp",
             "jinja_templates/declare_parameter",
             "jinja_templates/set_parameter",
             "jinja_templates/declare_struct",
