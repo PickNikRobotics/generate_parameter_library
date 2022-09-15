@@ -18,6 +18,12 @@ admittance_controller:
     default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
   }
+  dof_names: {
+    type: string_array,
+    default_value: ["x", "y", "rz"],
+    description: "specifies which joints will be used by the controller",
+  }
+
   pid:
     rate: {
       type: double,
@@ -44,6 +50,15 @@ admittance_controller:
         default_value: 1.0,
         description: "derivative gain term"
       }
+
+  gains:
+    __map_dof_names:
+      k: {
+        type: double,
+        default_value: 2.0,
+        description: "general gain"
+      }
+
   fixed_string: {
     type: string_fixed_25,
     default_value: "string_value",

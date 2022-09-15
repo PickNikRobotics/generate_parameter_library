@@ -112,8 +112,8 @@ def get_dynamic_parameter_field(yaml_parameter_name: str):
 
 def get_dynamic_mapped_parameter(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split(".")
-    tmp2 = tmp[-2].split("_")
-    mapped_param = tmp2[-1]
+    tmp2 = tmp[-2]
+    mapped_param = tmp2.replace("__map_", "")
     return mapped_param
 
 
@@ -445,7 +445,7 @@ class DeclareStruct:
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
-            map_name = self.struct_name.split("_")[-1] + "_map"
+            map_name = self.struct_name.replace("__map_", "") + "_map"
             map_name = map_name.replace(".", "_")
         else:
             map_val_type = ""
