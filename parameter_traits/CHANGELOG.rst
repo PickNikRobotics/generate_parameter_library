@@ -2,13 +2,18 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.3 (2022-08-05)
+0.2.5 (2022-09-20)
 ------------------
+* Test validators and fix bugs (`#66 <https://github.com/PickNikRobotics/generate_parameter_library/issues/66>`_)
+* Contributors: Tyler Weaver
 
 0.2.4 (2022-08-19)
 ------------------
 * 0.2.3
 * Contributors: Tyler Weaver
+
+0.2.3 (2022-08-05)
+------------------
 
 0.2.2 (2022-08-03)
 ------------------

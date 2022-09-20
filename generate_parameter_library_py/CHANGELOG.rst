@@ -2,14 +2,23 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.3 (2022-08-05)
+0.2.5 (2022-09-20)
 ------------------
+* 🈵 Support use of '_' in mapped parameters. (`#68 <https://github.com/PickNikRobotics/generate_parameter_library/issues/68>`_)
+* Test validators and fix bugs (`#66 <https://github.com/PickNikRobotics/generate_parameter_library/issues/66>`_)
+* Fix deadlock in update_dynamic_parameters (`#64 <https://github.com/PickNikRobotics/generate_parameter_library/issues/64>`_)
+* Parameter prefix (`#55 <https://github.com/PickNikRobotics/generate_parameter_library/issues/55>`_)
+* Fix example parameters (`#54 <https://github.com/PickNikRobotics/generate_parameter_library/issues/54>`_)
+* Contributors: Denis Štogl, Paul Gesel, Tyler Weaver
 
 0.2.4 (2022-08-19)
 ------------------
 * INTEGER type (`#53 <https://github.com/PickNikRobotics/generate_parameter_library/issues/53>`_)
 * 0.2.3
 * Contributors: Tyler Weaver
+
+0.2.3 (2022-08-05)
+------------------
 
 0.2.2 (2022-08-03)
 ------------------

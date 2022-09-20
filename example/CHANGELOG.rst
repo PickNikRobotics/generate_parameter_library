@@ -2,14 +2,24 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.3 (2022-08-05)
+0.2.5 (2022-09-20)
 ------------------
+* 🈵 Support use of '_' in mapped parameters. (`#68 <https://github.com/PickNikRobotics/generate_parameter_library/issues/68>`_)
+* Component node example (`#60 <https://github.com/PickNikRobotics/generate_parameter_library/issues/60>`_)
+* Update README for example (`#63 <https://github.com/PickNikRobotics/generate_parameter_library/issues/63>`_)
+* 🚀 Add cmake macros for using tests with example yaml files. 🤖 (`#57 <https://github.com/PickNikRobotics/generate_parameter_library/issues/57>`_)
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Fix example parameters (`#54 <https://github.com/PickNikRobotics/generate_parameter_library/issues/54>`_)
+* Contributors: Denis Štogl, Paul Gesel, Tyler Weaver
 
 0.2.4 (2022-08-19)
 ------------------
 * INTEGER type (`#53 <https://github.com/PickNikRobotics/generate_parameter_library/issues/53>`_)
 * 0.2.3
 * Contributors: Tyler Weaver
+
+0.2.3 (2022-08-05)
+------------------
 
 0.2.2 (2022-08-03)
 ------------------

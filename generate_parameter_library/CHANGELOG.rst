@@ -2,13 +2,19 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.3 (2022-08-05)
+0.2.5 (2022-09-20)
 ------------------
+* 🚀 Add cmake macros for using tests with example yaml files. 🤖 (`#57 <https://github.com/PickNikRobotics/generate_parameter_library/issues/57>`_)
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Contributors: Denis Štogl
 
 0.2.4 (2022-08-19)
 ------------------
 * 0.2.3
 * Contributors: Tyler Weaver
+
+0.2.3 (2022-08-05)
+------------------
 
 0.2.2 (2022-08-03)
 ------------------
