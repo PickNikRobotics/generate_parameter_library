@@ -100,7 +100,7 @@ function(add_rostest_with_parameters_gtest TARGET SOURCES YAML_FILE)
   set(result_file "${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.gtest.xml")
   ament_add_test(
     ${TARGET}
-    COMMAND ${executable} --ros-args --params-file ${YAML_FILE}
+    COMMAND ${executable} --ros-args --params-file ${YAML_FILE} --
     --gtest_output=xml:${result_file}
     OUTPUT_FILE ${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.txt
     RESULT_FILE ${result_file}
@@ -116,7 +116,7 @@ function(add_rostest_with_parameters_gmock TARGET SOURCES YAML_FILE)
   set(result_file "${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.gtest.xml")
   ament_add_test(
     ${TARGET}
-    COMMAND ${executable} --ros-args --params-file ${YAML_FILE}
+    COMMAND ${executable} --ros-args --params-file ${YAML_FILE} --
     --gtest_output=xml:${result_file}
     OUTPUT_FILE ${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.txt
     RESULT_FILE ${result_file}
