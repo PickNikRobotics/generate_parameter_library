@@ -51,7 +51,6 @@ class FixedSizeArray {
 
  private:
   std::array<T, S> data_;
-  const T* data_ptr_;
   size_t len_;
 };
 
