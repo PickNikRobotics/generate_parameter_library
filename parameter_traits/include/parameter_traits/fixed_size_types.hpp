@@ -27,9 +27,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
-#include "tcb_span/span.hpp"
 
 #include <string_view>
+
+#include <tcb_span/span.hpp>
 
 namespace parameter_traits {
 

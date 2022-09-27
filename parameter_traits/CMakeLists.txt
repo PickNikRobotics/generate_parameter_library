@@ -5,6 +5,7 @@ project(parameter_traits)
 find_package(ament_cmake REQUIRED)
 find_package(fmt REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(tcb_span REQUIRED)
 
 add_library(parameter_traits INTERFACE)
 target_include_directories(parameter_traits INTERFACE
@@ -15,6 +16,7 @@ target_link_libraries(parameter_traits
   INTERFACE
     fmt::fmt
     rclcpp::rclcpp
+    tcb_span::tcb_span
 )
 
 install(DIRECTORY include/ DESTINATION include/)
