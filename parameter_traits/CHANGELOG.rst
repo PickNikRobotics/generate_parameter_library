@@ -2,6 +2,13 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.6 (2022-09-28)
+------------------
+* Remove unused member variable (`#77 <https://github.com/PickNikRobotics/generate_parameter_library/issues/77>`_)
+* Depend on tcb_span (`#76 <https://github.com/PickNikRobotics/generate_parameter_library/issues/76>`_)
+* Drop requirement for CMake to 3.16 (`#73 <https://github.com/PickNikRobotics/generate_parameter_library/issues/73>`_)
+* Contributors: Tyler Weaver
+
 0.2.5 (2022-09-20)
 ------------------
 * Test validators and fix bugs (`#66 <https://github.com/PickNikRobotics/generate_parameter_library/issues/66>`_)
