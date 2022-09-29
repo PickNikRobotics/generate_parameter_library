@@ -32,7 +32,7 @@ install(
 
 ament_export_include_directories(include)
 ament_export_targets(parameter_traits)
-ament_export_dependencies(fmt rclcpp)
+ament_export_dependencies(fmt rclcpp tcb_span)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
