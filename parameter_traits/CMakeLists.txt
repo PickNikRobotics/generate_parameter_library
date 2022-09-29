@@ -19,21 +19,6 @@ target_link_libraries(parameter_traits
     tcb_span::tcb_span
 )
 
-install(DIRECTORY include/ DESTINATION include/)
-
-install(
-  TARGETS parameter_traits
-  EXPORT parameter_traits
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
-ament_export_include_directories(include)
-ament_export_targets(parameter_traits)
-ament_export_dependencies(fmt rclcpp tcb_span)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following lines skip linters
@@ -44,4 +29,20 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS parameter_traits
+  EXPORT export_parameter_traits
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_parameter_traits)
+ament_export_dependencies(fmt rclcpp tcb_span)
 ament_package()
