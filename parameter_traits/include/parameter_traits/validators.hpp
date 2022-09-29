@@ -168,26 +168,47 @@ Result bounds(const rclcpp::Parameter& parameter, T lower, T upper) {
   return OK;
 }
 
-template <typename T>
-Result lower_bounds(const rclcpp::Parameter& parameter, T lower) {
-  auto param_value = parameter.get_value<T>();
-  if (param_value < lower) {
-    return ERROR(
-        "Invalid value '{}' for parameter '{}'. Required lower bounds: {}",
-        param_value, parameter.get_name(), lower);
+template <typename T, typename Fn>
+Result cmp(rclcpp::Parameter const& parameter, T value,
+           std::string const& cmp_str, Fn predicate) {
+  if (auto const param_value = parameter.get_value<T>();
+      !predicate(param_value, value)) {
+    return ERROR("Invalid value '{}' for parameter '{}'. Required {}: {}",
+                 param_value, parameter.get_name(), cmp_str, value);
   }
+
   return OK;
 }
 
 template <typename T>
-Result upper_bounds(const rclcpp::Parameter& parameter, T upper) {
-  auto param_value = parameter.get_value<T>();
-  if (param_value > upper) {
-    return ERROR(
-        "Invalid value '{}' for parameter '{}'. Required upper bounds: {}",
-        param_value, parameter.get_name(), upper);
-  }
-  return OK;
+Result lower_bounds(rclcpp::Parameter const& parameter, T value) {
+  return cmp(parameter, value, "lower bounds", std::greater_equal<T>{});
+}
+
+template <typename T>
+Result upper_bounds(const rclcpp::Parameter& parameter, T value) {
+  return cmp(parameter, value, "upper bounds", std::less_equal<T>{});
+}
+
+template <typename T>
+Result lt(const rclcpp::Parameter& parameter, T value) {
+  return cmp(parameter, value, "less than", std::less<T>{});
+}
+
+template <typename T>
+Result gt(const rclcpp::Parameter& parameter, T value) {
+  return cmp(parameter, value, "greater than", std::greater<T>{});
+}
+
+template <typename T>
+Result lt_eq(const rclcpp::Parameter& parameter, T value) {
+  return cmp(parameter, value, "less than or equal", std::less_equal<T>{});
+}
+
+template <typename T>
+Result gt_eq(const rclcpp::Parameter& parameter, T value) {
+  return cmp(parameter, value, "greater than or equal",
+             std::greater_equal<T>{});
 }
 
 template <typename T>

@@ -88,6 +88,62 @@ TEST(ValidatorsTests, UpperBounds) {
   EXPECT_TRUE(upper_bounds<bool>(Parameter{"", true}, true).success());
 }
 
+TEST(ValidatorsTests, GreaterThan) {
+  EXPECT_FALSE(gt<double>(Parameter{"", 2.0}, 2.0).success());
+  EXPECT_TRUE(gt<double>(Parameter{"", 4.3}, 1.0).success());
+  EXPECT_FALSE(gt<double>(Parameter{"", -4.3}, 1.0).success());
+
+  EXPECT_FALSE(gt<int64_t>(Parameter{"", 1}, 1).success());
+  EXPECT_TRUE(gt<int64_t>(Parameter{"", 4}, 1).success());
+  EXPECT_FALSE(gt<int64_t>(Parameter{"", -4}, 1).success());
+
+  EXPECT_TRUE(gt<bool>(Parameter{"", true}, false).success());
+  EXPECT_FALSE(gt<bool>(Parameter{"", false}, true).success());
+  EXPECT_FALSE(gt<bool>(Parameter{"", true}, true).success());
+}
+
+TEST(ValidatorsTests, LessThan) {
+  EXPECT_FALSE(lt<double>(Parameter{"", 2.0}, 2.0).success());
+  EXPECT_FALSE(lt<double>(Parameter{"", 4.3}, 1.0).success());
+  EXPECT_TRUE(lt<double>(Parameter{"", -4.3}, 1.0).success());
+
+  EXPECT_FALSE(lt<int64_t>(Parameter{"", 1}, 1).success());
+  EXPECT_FALSE(lt<int64_t>(Parameter{"", 4}, 1).success());
+  EXPECT_TRUE(lt<int64_t>(Parameter{"", -4}, 1).success());
+
+  EXPECT_FALSE(lt<bool>(Parameter{"", true}, false).success());
+  EXPECT_TRUE(lt<bool>(Parameter{"", false}, true).success());
+  EXPECT_FALSE(lt<bool>(Parameter{"", true}, true).success());
+}
+
+TEST(ValidatorsTests, GreaterThanOrEqual) {
+  EXPECT_TRUE(gt_eq<double>(Parameter{"", 2.0}, 2.0).success());
+  EXPECT_TRUE(gt_eq<double>(Parameter{"", 4.3}, 1.0).success());
+  EXPECT_FALSE(gt_eq<double>(Parameter{"", -4.3}, 1.0).success());
+
+  EXPECT_TRUE(gt_eq<int64_t>(Parameter{"", 1}, 1).success());
+  EXPECT_TRUE(gt_eq<int64_t>(Parameter{"", 4}, 1).success());
+  EXPECT_FALSE(gt_eq<int64_t>(Parameter{"", -4}, 1).success());
+
+  EXPECT_TRUE(gt_eq<bool>(Parameter{"", true}, false).success());
+  EXPECT_FALSE(gt_eq<bool>(Parameter{"", false}, true).success());
+  EXPECT_TRUE(gt_eq<bool>(Parameter{"", true}, true).success());
+}
+
+TEST(ValidatorsTests, LessThanOrEqual) {
+  EXPECT_TRUE(lt_eq<double>(Parameter{"", 2.0}, 2.0).success());
+  EXPECT_FALSE(lt_eq<double>(Parameter{"", 4.3}, 1.0).success());
+  EXPECT_TRUE(lt_eq<double>(Parameter{"", -4.3}, 1.0).success());
+
+  EXPECT_TRUE(lt_eq<int64_t>(Parameter{"", 1}, 1).success());
+  EXPECT_FALSE(lt_eq<int64_t>(Parameter{"", 4}, 1).success());
+  EXPECT_TRUE(lt_eq<int64_t>(Parameter{"", -4}, 1).success());
+
+  EXPECT_FALSE(lt_eq<bool>(Parameter{"", true}, false).success());
+  EXPECT_TRUE(lt_eq<bool>(Parameter{"", false}, true).success());
+  EXPECT_TRUE(lt_eq<bool>(Parameter{"", true}, true).success());
+}
+
 TEST(ValidatorsTests, OneOf) {
   EXPECT_TRUE(
       one_of<double>(Parameter{"", 2.0}, std::vector<double>{2.0}).success());
