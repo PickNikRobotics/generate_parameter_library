@@ -43,6 +43,6 @@ install(
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(export_parameter_traits)
+ament_export_targets(export_parameter_traits HAS_LIBRARY_TARGET)
 ament_export_dependencies(fmt rclcpp tcb_span)
 ament_package()
