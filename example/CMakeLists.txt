@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.16)
 project(generate_parameter_library_example)
 
 find_package(ament_cmake REQUIRED)
@@ -29,20 +29,6 @@ rclcpp_components_register_node(minimal_publisher
   EXECUTABLE test_node
 )
 
-install(DIRECTORY include/ DESTINATION include/)
-install(TARGETS minimal_publisher admittance_controller_parameters
-  EXPORT generate_parameter_library_example_export
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
-install(
-  TARGETS test_node
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_cpplint_FOUND TRUE) # Conflicts with clang-foramt
@@ -63,5 +49,24 @@ if(BUILD_TESTING)
   target_link_libraries(test_example_gmock admittance_controller_parameters rclcpp::rclcpp)
 endif()
 
-ament_export_targets(generate_parameter_library_example_export)
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(TARGETS minimal_publisher admittance_controller_parameters
+  EXPORT export_generate_parameter_library_example
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(
+  TARGETS test_node
+  DESTINATION lib/generate_parameter_library_example
+)
+
+ament_export_targets(export_generate_parameter_library_example HAS_LIBRARY_TARGET)
+ament_export_dependencies(rclcpp rclcpp_components)
 ament_package()
