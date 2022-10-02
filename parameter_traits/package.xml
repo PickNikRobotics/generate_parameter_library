@@ -13,6 +13,7 @@
   <depend>fmt</depend>
   <depend>rclcpp</depend>
   <depend>tcb_span</depend>
+  <depend>tl_expected</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
