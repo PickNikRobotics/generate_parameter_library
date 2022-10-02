@@ -42,8 +42,8 @@
 
 namespace parameter_traits {
 
-using ValidateResult = tl::expected<std::monostate, std::string>;
-using ok = std::monostate;
+using ValidateResult = tl::expected<void, std::string>;
+using ok = ValidateResult;
 
 template <typename... Args>
 ValidateResult make_error(std::string const& format, Args... args) {
