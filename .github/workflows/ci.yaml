@@ -1,6 +1,3 @@
-# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
-# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
-
 name: CI
 
 on:
@@ -48,3 +45,33 @@ jobs:
         with:
           name: test-results-${{ matrix.env.NAME }}
           path: ${{ env.BASEDIR }}/target_ws/log/*
+
+  ros:
+    strategy:
+      matrix:
+        ros_distro: [humble, rolling]
+    runs-on: ubuntu-22.04
+    container: ghcr.io/picknikrobotics/generate_parameter_library:upstream-${{ matrix.ros_distro }}
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Cache ccache
+        uses: pat-s/always-upload-cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.ros_distro }}-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ matrix.ros_distro }}-${{ github.sha }}
+            ccache-${{ matrix.ros_distro }}
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          package-name: generate_parameter_library
+          target-ros2-distro: ${{ matrix.ros_distro }}
+          colcon-defaults: |
+            {
+              "build": {
+                "mixin": ["ccache", "lld"]
+              }
+            }

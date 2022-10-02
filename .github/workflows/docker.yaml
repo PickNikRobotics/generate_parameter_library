@@ -1,0 +1,41 @@
+name: docker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+  push:
+    paths:
+      - '.devcontainer/Dockerfile'
+      - '.github/workflows/docker.yaml'
+      - 'package.xml'
+
+jobs:
+  upstream-docker:
+    strategy:
+      matrix:
+        ROS_DISTRO: [humble, rolling]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: .devcontainer/Dockerfile
+          push: true
+          target: upstream
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          tags: ghcr.io/picknikrobotics/generate_parameter_library:upstream-${{ matrix.ROS_DISTRO }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
