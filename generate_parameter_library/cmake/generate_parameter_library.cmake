@@ -86,6 +86,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
     tcb_span::tcb_span
+    tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/)
 endfunction()
