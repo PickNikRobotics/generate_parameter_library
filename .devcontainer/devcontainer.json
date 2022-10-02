@@ -1,0 +1,29 @@
+{
+  "name": "Docker Compose",
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "remoteEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+  },
+  "service": "devcontainer",
+  "workspaceFolder": "/home/dev/generate_parameter_library",
+  "remoteUser": "dev",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "vadimcn.vscode-lldb",
+        "ms-vscode.cpptools-extension-pack",
+        "elagil.pre-commit-helper",
+        "matepek.vscode-catch2-test-adapter",
+        "nonanonno.vscode-ros2"
+      ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    }
+  }
+}

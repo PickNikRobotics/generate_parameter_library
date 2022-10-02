@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  devcontainer:
+    build:
+      context: ../
+      dockerfile: .devcontainer/Dockerfile
+    command: sleep infinity
+    container_name: dev-generate_parameter_library
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - ROS_DOMAIN_ID=99
+    extra_hosts:
+      - generate_parameter_library:127.0.0.1
+    hostname: generate_parameter_library
+    image: generate_parameter_library:latest
+    network_mode: host
+    privileged: true
+    user: dev
+    volumes:
+      - ../:/home/dev/generate_parameter_library
+      - ~/.ssh:/home/dev/.ssh:ro
+      - ~/.gitconfig:/home/dev/.gitconfig:ro
+      - ~/.local/.generate_parameter_library/ccache:/home/dev/.ccache
+      - ~/.local/.generate_parameter_library/log:/home/dev/.ros/log
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+    working_dir: /home/generate_parameter_library
