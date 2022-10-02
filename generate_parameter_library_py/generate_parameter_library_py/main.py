@@ -85,7 +85,7 @@ def initialization_fail_validation(param_name: str) -> str:
     return (
         f"throw rclcpp::exceptions::InvalidParameterValueException"
         f'(fmt::format("Invalid value set during initialization for '
-        f"parameter '{param_name}': \" + validation_result.error_msg()));"
+        f"parameter '{param_name}': \" + validation_result.error()));"
     )
 
 
@@ -96,7 +96,7 @@ def initialization_pass_validation(param_name: str, parameter_conversion: str) -
 
 @typechecked
 def update_parameter_fail_validation() -> str:
-    return "return validation_result;"
+    return "return parameter_traits::to_set_parameters_result(validation_result);"
 
 
 @typechecked

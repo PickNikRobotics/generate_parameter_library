@@ -8,13 +8,15 @@ find_package(rclcpp REQUIRED)
 find_package(tcb_span REQUIRED)
 find_package(tl_expected REQUIRED)
 
-add_library(parameter_traits INTERFACE)
-target_include_directories(parameter_traits INTERFACE
+add_library(parameter_traits
+  src/validators.cpp
+)
+target_include_directories(parameter_traits PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_compile_features(parameter_traits INTERFACE cxx_std_17)
+target_compile_features(parameter_traits PUBLIC cxx_std_17)
 target_link_libraries(parameter_traits
-  INTERFACE
+  PUBLIC
     fmt::fmt
     rclcpp::rclcpp
     tcb_span::tcb_span

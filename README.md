@@ -253,8 +253,8 @@ The built-in validator functions provided by this package are:
 Validators are functions that return a `Result` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
 Validators are C++ functions defined in a header file similar to the example shown below.
 
-The `Result` type has a alias `OK` that is shorthand for returning a successful validation.
-It also had a function `ERROR` that uses the expressive [fmt format](https://github.com/fmtlib/fmt) for constructing a human readable error.
+The `ValidateResult` type has a alias `ok` that is shorthand for returning a successful validation.
+It also had a function `make_error` that uses the expressive [fmt format](https://github.com/fmtlib/fmt) for constructing a human readable error.
 These come from the `parameter_traits` library.
 Note that you need to place your custom validators in the `parameter_traits` namespace.
 
@@ -263,14 +263,14 @@ Note that you need to place your custom validators in the `parameter_traits` nam
 
 namespace parameter_traits {
 
-Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
+ValidateResult integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
   int param_value = parameter.as_int();
     if (param_value != expected_value) {
-        return ERROR("Invalid value {} for parameter {}. Expected {}",
+        return make_error("Invalid value {} for parameter {}. Expected {}",
                param_value, parameter.get_name(), expected_value);
     }
 
-  return OK;
+  return ok();
 }
 
 }  // namespace parameter_traits

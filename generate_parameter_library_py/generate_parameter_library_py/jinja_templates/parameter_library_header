@@ -118,7 +118,7 @@ struct StackParams {
 {%- endif %}
       updated_params.__stamp = clock_.now();
       update_interal_params(updated_params);
-      return parameter_traits::OK;
+      return parameter_traits::to_set_parameters_result(parameter_traits::ok());
     }
 
     void declare_params(){

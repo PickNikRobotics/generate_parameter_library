@@ -1,4 +1,4 @@
-// Copyright (c) 2022, PickNik Inc.
+// Copyright 2022 PickNik Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the copyright holder nor the names of its
+//    * Neither the name of the PickNik Inc. nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,43 +26,17 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
-
-#include <string>
-
-#include <rclcpp/rclcpp.hpp>
-
-#include <fmt/format.h>
+#include <parameter_traits/validators.hpp>
+#include <rcl_interfaces/msg/set_parameters_result.hpp>
 
 namespace parameter_traits {
 
-class Result {
- public:
-  template <typename... Args>
-  Result(const std::string& format, Args... args) {
-    msg_ = fmt::format(format, args...);
-    success_ = false;
-  }
-
-  Result() = default;
-
-  operator rcl_interfaces::msg::SetParametersResult() const {
-    rcl_interfaces::msg::SetParametersResult result;
-    result.successful = success_;
-    result.reason = msg_;
-    return result;
-  }
-
-  bool success() { return success_; }
-
-  std::string error_msg() { return msg_; }
-
- private:
-  std::string msg_;
-  bool success_ = true;
-};
-
-auto static OK = Result();
-using ERROR = Result;
+rcl_interfaces::msg::SetParametersResult to_set_parameters_result(
+    ValidateResult const& res) {
+  rcl_interfaces::msg::SetParametersResult msg;
+  msg.successful = bool{res};
+  msg.reason = res ? "" : res.error();
+  return msg;
+}
 
 }  // namespace parameter_traits

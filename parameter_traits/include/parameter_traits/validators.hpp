@@ -38,190 +38,210 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <parameter_traits/comparison.hpp>
-#include <parameter_traits/result.hpp>
+#include <tl_expected/expected.hpp>
 
 namespace parameter_traits {
 
+using ValidateResult = tl::expected<std::monostate, std::string>;
+using ok = std::monostate;
+
+template <typename... Args>
+ValidateResult make_error(std::string const& format, Args... args) {
+  return tl::make_unexpected(fmt::format(format, args...));
+}
+
+rcl_interfaces::msg::SetParametersResult to_set_parameters_result(
+    ValidateResult const& res);
+
 template <typename T>
-Result unique(rclcpp::Parameter const& parameter) {
+ValidateResult unique(rclcpp::Parameter const& parameter) {
   if (!is_unique<T>(parameter.get_value<std::vector<T>>())) {
-    return ERROR("Parameter '{}' must only contain unique values",
-                 parameter.get_name());
+    return make_error("Parameter '{}' must only contain unique values",
+                      parameter.get_name());
   }
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result subset_of(rclcpp::Parameter const& parameter,
-                 std::vector<T> valid_values) {
+ValidateResult subset_of(rclcpp::Parameter const& parameter,
+                         std::vector<T> valid_values) {
   auto const& input_values = parameter.get_value<std::vector<T>>();
 
   for (auto const& value : input_values) {
     if (!contains(valid_values, value)) {
-      return ERROR(fmt::format(
+      return make_error(fmt::format(
           "Invalid entry '{}' for parameter '{}'. Not in set: {}", value,
           parameter.get_name(), fmt::join(valid_values, ", ")));
     }
   }
 
-  return OK;
+  return ok();
 }
 
 template <typename T, typename F>
-Result size_cmp(rclcpp::Parameter const& parameter, size_t size,
-                std::string const& cmp_str, F cmp) {
+ValidateResult size_cmp(rclcpp::Parameter const& parameter, size_t size,
+                        std::string const& cmp_str, F cmp) {
   if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING) {
     if (auto value = parameter.get_value<std::string>();
         !cmp(value.size(), size)) {
-      return ERROR("Invalid length '{}' for parameter '{}'. Required {}: {}",
-                   value.size(), parameter.get_name(), cmp_str, size);
+      return make_error(
+          "Invalid length '{}' for parameter '{}'. Required {}: {}",
+          value.size(), parameter.get_name(), cmp_str, size);
     }
   } else {
     if (auto value = parameter.get_value<std::vector<T>>();
         !cmp(value.size(), size)) {
-      return ERROR("Invalid length '{}' for parameter '{}'. Required {}: {}",
-                   value.size(), parameter.get_name(), cmp_str, size);
+      return make_error(
+          "Invalid length '{}' for parameter '{}'. Required {}: {}",
+          value.size(), parameter.get_name(), cmp_str, size);
     }
   }
 
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result fixed_size(rclcpp::Parameter const& parameter, size_t size) {
+ValidateResult fixed_size(rclcpp::Parameter const& parameter, size_t size) {
   return size_cmp<T>(parameter, size, "equal to", std::equal_to<size_t>{});
 }
 
 template <typename T>
-Result size_gt(rclcpp::Parameter const& parameter, size_t size) {
+ValidateResult size_gt(rclcpp::Parameter const& parameter, size_t size) {
   return size_cmp<T>(parameter, size, "greater than", std::greater<size_t>{});
 }
 
 template <typename T>
-Result size_lt(rclcpp::Parameter const& parameter, size_t size) {
+ValidateResult size_lt(rclcpp::Parameter const& parameter, size_t size) {
   return size_cmp<T>(parameter, size, "less than", std::less<size_t>{});
 }
 
 template <typename T>
-Result not_empty(rclcpp::Parameter const& parameter) {
+ValidateResult not_empty(rclcpp::Parameter const& parameter) {
   if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING) {
     if (auto param_value = parameter.get_value<std::string>();
         param_value.empty()) {
-      return ERROR("The parameter '{}' cannot be empty.", parameter.get_name());
+      return make_error("The parameter '{}' cannot be empty.",
+                        parameter.get_name());
     }
   } else {
     if (auto param_value = parameter.get_value<std::vector<T>>();
         param_value.empty()) {
-      return ERROR("The parameter '{}' cannot be empty.", parameter.get_name());
+      return make_error("The parameter '{}' cannot be empty.",
+                        parameter.get_name());
     }
   }
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result element_bounds(const rclcpp::Parameter& parameter, T lower, T upper) {
+ValidateResult element_bounds(const rclcpp::Parameter& parameter, T lower,
+                              T upper) {
   auto param_value = parameter.get_value<std::vector<T>>();
   for (auto val : param_value) {
     if (val < lower || val > upper) {
-      return ERROR(
+      return make_error(
           "Invalid value '{}' for parameter '{}'. Required bounds: [{}, {}]",
           val, parameter.get_name(), lower, upper);
     }
   }
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result lower_element_bounds(const rclcpp::Parameter& parameter, T lower) {
+ValidateResult lower_element_bounds(const rclcpp::Parameter& parameter,
+                                    T lower) {
   auto param_value = parameter.get_value<std::vector<T>>();
   for (auto val : param_value) {
     if (val < lower) {
-      return ERROR(
+      return make_error(
           "Invalid value '{}' for parameter '{}'. Required lower bounds: {}",
           val, parameter.get_name(), lower);
     }
   }
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result upper_element_bounds(const rclcpp::Parameter& parameter, T upper) {
+ValidateResult upper_element_bounds(const rclcpp::Parameter& parameter,
+                                    T upper) {
   auto param_value = parameter.get_value<std::vector<T>>();
   for (auto val : param_value) {
     if (val > upper) {
-      return ERROR(
+      return make_error(
           "Invalid value '{}' for parameter '{}'. Required upper bounds: {}",
           val, parameter.get_name(), upper);
     }
   }
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result bounds(const rclcpp::Parameter& parameter, T lower, T upper) {
+ValidateResult bounds(const rclcpp::Parameter& parameter, T lower, T upper) {
   auto param_value = parameter.get_value<T>();
   if (param_value < lower || param_value > upper) {
-    return ERROR(
+    return make_error(
         "Invalid value '{}' for parameter '{}'. Required bounds: [{}, {}]",
         param_value, parameter.get_name(), lower, upper);
   }
-  return OK;
+  return ok();
 }
 
 template <typename T, typename Fn>
-Result cmp(rclcpp::Parameter const& parameter, T value,
-           std::string const& cmp_str, Fn predicate) {
+ValidateResult cmp(rclcpp::Parameter const& parameter, T value,
+                   std::string const& cmp_str, Fn predicate) {
   if (auto const param_value = parameter.get_value<T>();
       !predicate(param_value, value)) {
-    return ERROR("Invalid value '{}' for parameter '{}'. Required {}: {}",
-                 param_value, parameter.get_name(), cmp_str, value);
+    return make_error("Invalid value '{}' for parameter '{}'. Required {}: {}",
+                      param_value, parameter.get_name(), cmp_str, value);
   }
 
-  return OK;
+  return ok();
 }
 
 template <typename T>
-Result lower_bounds(rclcpp::Parameter const& parameter, T value) {
+ValidateResult lower_bounds(rclcpp::Parameter const& parameter, T value) {
   return cmp(parameter, value, "lower bounds", std::greater_equal<T>{});
 }
 
 template <typename T>
-Result upper_bounds(const rclcpp::Parameter& parameter, T value) {
+ValidateResult upper_bounds(const rclcpp::Parameter& parameter, T value) {
   return cmp(parameter, value, "upper bounds", std::less_equal<T>{});
 }
 
 template <typename T>
-Result lt(const rclcpp::Parameter& parameter, T value) {
+ValidateResult lt(const rclcpp::Parameter& parameter, T value) {
   return cmp(parameter, value, "less than", std::less<T>{});
 }
 
 template <typename T>
-Result gt(const rclcpp::Parameter& parameter, T value) {
+ValidateResult gt(const rclcpp::Parameter& parameter, T value) {
   return cmp(parameter, value, "greater than", std::greater<T>{});
 }
 
 template <typename T>
-Result lt_eq(const rclcpp::Parameter& parameter, T value) {
+ValidateResult lt_eq(const rclcpp::Parameter& parameter, T value) {
   return cmp(parameter, value, "less than or equal", std::less_equal<T>{});
 }
 
 template <typename T>
-Result gt_eq(const rclcpp::Parameter& parameter, T value) {
+ValidateResult gt_eq(const rclcpp::Parameter& parameter, T value) {
   return cmp(parameter, value, "greater than or equal",
              std::greater_equal<T>{});
 }
 
 template <typename T>
-Result one_of(rclcpp::Parameter const& parameter, std::vector<T> collection) {
+ValidateResult one_of(rclcpp::Parameter const& parameter,
+                      std::vector<T> collection) {
   auto param_value = parameter.get_value<T>();
 
   if (std::find(collection.cbegin(), collection.cend(), param_value) ==
       collection.end()) {
-    return ERROR("The parameter '{}' with the value '{}' not in the set: {}",
-                 parameter.get_name(), param_value,
-                 fmt::format("{}", fmt::join(collection, ", ")));
+    return make_error(
+        "The parameter '{}' with the value '{}' not in the set: {}",
+        parameter.get_name(), param_value,
+        fmt::format("{}", fmt::join(collection, ", ")));
   }
-  return OK;
+  return ok();
 }
 
 }  // namespace parameter_traits
