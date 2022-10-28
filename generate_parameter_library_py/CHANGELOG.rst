@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.7 (2022-10-28)
+------------------
+
 0.2.6 (2022-09-28)
 ------------------
 * Depend on python dependencies in package.xml (`#74 <https://github.com/PickNikRobotics/generate_parameter_library/issues/74>`_)

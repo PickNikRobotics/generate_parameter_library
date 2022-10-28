@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.7 (2022-10-28)
+------------------
+* Standardize cmake (`#79 <https://github.com/PickNikRobotics/generate_parameter_library/issues/79>`_)
+* Contributors: Tyler Weaver
+
 0.2.6 (2022-09-28)
 ------------------
 * Depend on python package (`#75 <https://github.com/PickNikRobotics/generate_parameter_library/issues/75>`_)

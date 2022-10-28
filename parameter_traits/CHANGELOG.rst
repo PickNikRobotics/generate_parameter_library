@@ -2,6 +2,13 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.7 (2022-10-28)
+------------------
+* lt/gt/lt_eq/gt_eq validators (`#80 <https://github.com/PickNikRobotics/generate_parameter_library/issues/80>`_)
+* Standardize cmake (`#79 <https://github.com/PickNikRobotics/generate_parameter_library/issues/79>`_)
+* Add missing tcb_span ament export dep (`#78 <https://github.com/PickNikRobotics/generate_parameter_library/issues/78>`_)
+* Contributors: Denis Štogl, Tyler Weaver
+
 0.2.6 (2022-09-28)
 ------------------
 * Remove unused member variable (`#77 <https://github.com/PickNikRobotics/generate_parameter_library/issues/77>`_)
