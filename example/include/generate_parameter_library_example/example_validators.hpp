@@ -29,33 +29,38 @@
 #pragma once
 
 #include <parameter_traits/parameter_traits.hpp>
+#include <tl_expected/expected.hpp>
 
 namespace parameter_traits {
 
 // User defined parameter validation
-Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
-                                         double max_sum, double max_element) {
+auto validate_double_array_custom_func(const rclcpp::Parameter& parameter,
+                                       double max_sum, double max_element)
+    -> tl::expected<std::monostate, std::string> {
   const auto& double_array = parameter.as_double_array();
   double sum = 0.0;
   for (auto val : double_array) {
     sum += val;
     if (val > max_element) {
-      return ERROR(
+      return make_validate_help(
           "The parameter contained an element greater than the max allowed "
           "value.  (%f) was greater than (%f)",
           val, max_element);
     }
   }
   if (sum > max_sum) {
-    return ERROR(
+    return make_validate_help(
         "The sum of the parameter vector was greater than the max allowed "
         "value.  (%f) was greater than (%f)",
         sum, max_sum);
   }
 
-  return OK;
+  return ok();
 }
 
-Result no_args_validator(const rclcpp::Parameter& parameter) { return OK; }
+auto no_args_validator(const rclcpp::Parameter& parameter)
+    -> tl::expected<std::monostate, std::string> {
+  return ok();
+}
 
 }  // namespace parameter_traits

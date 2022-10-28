@@ -36,33 +36,42 @@
 
 namespace parameter_traits {
 
-class Result {
+class ParameterResult {
  public:
   template <typename... Args>
-  Result(const std::string& format, Args... args) {
+  ParameterResult(const std::string& format, Args... args) {
     msg_ = fmt::format(format, args...);
     success_ = false;
   }
 
-  Result() = default;
+  ParameterResult() = default;
 
-  operator rcl_interfaces::msg::SetParametersResult() const {
-    rcl_interfaces::msg::SetParametersResult result;
-    result.successful = success_;
-    result.reason = msg_;
-    return result;
-  }
+  bool success() const { return success_; }
 
-  bool success() { return success_; }
+  std::string error_msg() const { return msg_; }
+  std::string error() const { return msg_; }
 
-  std::string error_msg() { return msg_; }
+  operator bool() const { return success(); }
 
  private:
   std::string msg_;
   bool success_ = true;
 };
 
+using Result
+    [[deprecated("Use tl::expected<T, std::string> instead. #include "
+                 "<tl_expected/expected.hpp>")]] = ParameterResult;
+
 auto static OK = Result();
-using ERROR = Result;
+using ERROR
+    [[deprecated("Use tl::expected<T, std::string> instead. #include "
+                 "<tl_expected/expected.hpp>")]] = Result;
+
+auto to_parameter_result_msg(Result const& result) {
+  rcl_interfaces::msg::SetParametersResult msg;
+  msg.successful = bool{result};
+  msg.reason = result.error_msg();
+  return msg;
+}
 
 }  // namespace parameter_traits

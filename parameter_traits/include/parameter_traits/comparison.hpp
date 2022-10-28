@@ -31,18 +31,20 @@
 #include <algorithm>
 #include <vector>
 
+#include <rsl/algorithm.hpp>
+
 namespace parameter_traits {
 
 template <typename T>
-bool contains(std::vector<T> const& vec, T const& val) {
-  return std::find(vec.cbegin(), vec.cend(), val) != vec.cend();
+[[deprecated("Use rsl::contains instead, #include <rsl/algorithm.hpp>")]] bool
+contains(std::vector<T> const& vec, T const& val) {
+  return rsl::contains(vec, val);
 }
 
 template <class T>
-bool is_unique(std::vector<T> const& x) {
-  auto vec = x;
-  std::sort(vec.begin(), vec.end());
-  return std::adjacent_find(vec.cbegin(), vec.cend()) == vec.cend();
+[[deprecated("Use rsl::is_unique instead, #include <rsl/algorithm.hpp>")]] bool
+is_unique(std::vector<T> const& x) {
+  return rsl::is_unique(x);
 }
 
 }  // namespace parameter_traits

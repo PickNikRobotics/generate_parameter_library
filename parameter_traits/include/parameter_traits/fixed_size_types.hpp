@@ -28,54 +28,19 @@
 
 #pragma once
 
-#include <string_view>
-
-#include <tcb_span/span.hpp>
+#include <rsl/static_string.hpp>
+#include <rsl/static_vector.hpp>
 
 namespace parameter_traits {
 
 template <typename T, size_t S>
-class FixedSizeArray {
- public:
-  FixedSizeArray() = default;
-  FixedSizeArray(const std::vector<T>& values) {
-    len_ = std::min(values.size(), S);
-    std::copy(values.cbegin(), values.cbegin() + len_, data_.begin());
-  }
-
-  operator tcb::span<T>() { return tcb::span<T>(data_.data(), len_); }
-
-  operator rclcpp::ParameterValue() const {
-    return rclcpp::ParameterValue(
-        std::vector<T>(data_.cbegin(), data_.cbegin() + len_));
-  }
-
- private:
-  std::array<T, S> data_;
-  size_t len_;
-};
+using FixedSizeArray [[deprecated(
+    "Use rsl::FixedSizeArray instead, #include <rsl/static_vector.hpp>")]] =
+    rsl::StaticVector<T, S>;
 
 template <size_t S>
-class FixedSizeString {
- public:
-  FixedSizeString() = default;
-  FixedSizeString(const std::string& str) {
-    len_ = std::min(str.size(), S);
-    std::copy(str.cbegin(), str.cbegin() + len_, data_.begin());
-  }
-
-  operator std::string_view() const {
-    return std::string_view(data_.data(), len_);
-  }
-
-  operator rclcpp::ParameterValue() const {
-    return rclcpp::ParameterValue(
-        std::string(data_.cbegin(), data_.cbegin() + len_));
-  }
-
- private:
-  std::array<char, S> data_;
-  size_t len_;
-};
+using FixedSizeString [[deprecated(
+    "Use rsl::FixedSizeString instead, #include <rsl/static_string.hpp>")]] =
+    rsl::StaticString<S>;
 
 }  // namespace parameter_traits

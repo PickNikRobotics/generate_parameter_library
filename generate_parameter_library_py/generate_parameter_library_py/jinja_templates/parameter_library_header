@@ -20,6 +20,10 @@
 
 #include <parameter_traits/parameter_traits.hpp>
 
+#include <rsl/static_string.hpp>
+#include <rsl/static_vector.hpp>
+#include <tl_expected/expected.hpp>
+
 {% if user_validation_file|length -%}
 #include "{{user_validation_file}}"
 {% endif %}
@@ -118,7 +122,7 @@ struct StackParams {
 {%- endif %}
       updated_params.__stamp = clock_.now();
       update_interal_params(updated_params);
-      return parameter_traits::OK;
+      return to_parameter_result_msg(parameter_traits::OK);
     }
 
     void declare_params(){
