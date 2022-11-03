@@ -987,7 +987,7 @@ class GenerateCode:
         yaml_file = sys.argv[2]
         with open(yaml_file) as f:
             try:
-                docs = yaml.load_all(f, Loader=yaml.FullLoader)
+                docs = yaml.load_all(f, Loader=yaml.Loader)
                 doc = list(docs)[0]
             except ParserError as e:
                 raise compile_error(str(e))
