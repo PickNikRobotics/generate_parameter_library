@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.8 (2022-11-03)
+------------------
+* Use typing syntax which is compatible with Python 3.6 (`#87 <https://github.com/PickNikRobotics/generate_parameter_library/issues/87>`_)
+* Use YAML loader which is compatible with PyYAML 3.12 (`#88 <https://github.com/PickNikRobotics/generate_parameter_library/issues/88>`_)
+* Contributors: Scott K Logan
+
 0.2.7 (2022-10-28)
 ------------------
 

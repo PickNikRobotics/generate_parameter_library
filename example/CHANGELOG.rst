@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.8 (2022-11-03)
+------------------
+
 0.2.7 (2022-10-28)
 ------------------
 * Standardize cmake (`#79 <https://github.com/PickNikRobotics/generate_parameter_library/issues/79>`_)

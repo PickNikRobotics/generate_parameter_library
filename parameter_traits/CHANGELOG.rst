@@ -2,6 +2,9 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.8 (2022-11-03)
+------------------
+
 0.2.7 (2022-10-28)
 ------------------
 * lt/gt/lt_eq/gt_eq validators (`#80 <https://github.com/PickNikRobotics/generate_parameter_library/issues/80>`_)
