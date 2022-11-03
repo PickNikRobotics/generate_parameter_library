@@ -34,7 +34,7 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import sys
 import os
-from typing import Optional
+from typing import List, Optional
 from typeguard import typechecked
 from jinja2 import Template
 
@@ -418,7 +418,7 @@ class VariableDeclaration:
 
 class DeclareStruct:
     @typechecked
-    def __init__(self, struct_name: str, fields: list[VariableDeclaration]):
+    def __init__(self, struct_name: str, fields: List[VariableDeclaration]):
         self.struct_name = struct_name
         self.fields = fields
         self.sub_structs = []
@@ -471,7 +471,7 @@ class ValidationFunction:
     def __init__(
         self,
         function_name: str,
-        arguments: Optional[list[any]],
+        arguments: Optional[List[any]],
         code_gen_variable: CodeGenVariableBase,
     ):
         self.code_gen_variable = code_gen_variable
