@@ -5,7 +5,9 @@ project(parameter_traits)
 find_package(ament_cmake REQUIRED)
 find_package(fmt REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(tcb_span REQUIRED)
+find_package(tl_expected REQUIRED)
 
 add_library(parameter_traits INTERFACE)
 target_include_directories(parameter_traits INTERFACE
@@ -16,7 +18,9 @@ target_link_libraries(parameter_traits
   INTERFACE
     fmt::fmt
     rclcpp::rclcpp
+    rsl::rsl
     tcb_span::tcb_span
+    tl_expected::tl_expected
 )
 
 if(BUILD_TESTING)
@@ -44,5 +48,5 @@ install(
 )
 
 ament_export_targets(export_parameter_traits HAS_LIBRARY_TARGET)
-ament_export_dependencies(fmt rclcpp tcb_span)
+ament_export_dependencies(fmt rclcpp rsl tcb_span tl_expected)
 ament_package()

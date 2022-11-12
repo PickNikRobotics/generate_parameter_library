@@ -10,7 +10,7 @@ admittance_controller:
     description: "specifies which algorithm to use for interpolation.",
     validation: {
       one_of<>: [ [ "spline", "linear" ] ],
-      no_args_validator: null
+      "custom_validators::no_args_validator": null
     }
   }
   joints: {
@@ -218,7 +218,7 @@ admittance_controller:
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
       validation: {
         fixed_size<>: 6,
-        validate_double_array_custom_func: [ 20.3, 5.0 ],
+        "custom_validators::validate_double_array_custom_func": [ 20.3, 5.0 ],
         element_bounds<>: [ 0.1, 10.0 ]
       }
     }

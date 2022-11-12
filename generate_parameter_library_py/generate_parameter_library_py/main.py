@@ -85,7 +85,7 @@ def initialization_fail_validation(param_name: str) -> str:
     return (
         f"throw rclcpp::exceptions::InvalidParameterValueException"
         f'(fmt::format("Invalid value set during initialization for '
-        f"parameter '{param_name}': \" + validation_result.error_msg()));"
+        f"parameter '{param_name}': \" + validation_result.error()));"
     )
 
 
@@ -96,7 +96,7 @@ def initialization_pass_validation(param_name: str, parameter_conversion: str) -
 
 @typechecked
 def update_parameter_fail_validation() -> str:
-    return "return validation_result;"
+    return "return rsl::to_parameter_result_msg(validation_result);"
 
 
 @typechecked
@@ -272,10 +272,10 @@ class CodeGenVariableBase:
         "double_array": lambda defined_type, templates: "std::vector<double>",
         "int_array": lambda defined_type, templates: "std::vector<int64_t>",
         "string_array": lambda defined_type, templates: "std::vector<std::string>",
-        "double_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
-        "int_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
-        "string_array_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeArray<{templates[0]}, {templates[1]}>",
-        "string_fixed": lambda defined_type, templates: f"parameter_traits::FixedSizeString<{templates[1]}>",
+        "double_array_fixed": lambda defined_type, templates: f"rsl::StaticVector<{templates[0]}, {templates[1]}>",
+        "int_array_fixed": lambda defined_type, templates: f"rsl::StaticVector<{templates[0]}, {templates[1]}>",
+        "string_array_fixed": lambda defined_type, templates: f"rsl::StaticVector<{templates[0]}, {templates[1]}>",
+        "string_fixed": lambda defined_type, templates: f"rsl::StaticString<{templates[1]}>",
     }
     yaml_type_to_as_function = {
         "string_array": "as_string_array()",

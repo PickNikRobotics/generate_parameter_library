@@ -36,33 +36,33 @@
 
 namespace parameter_traits {
 
-class Result {
- public:
-  template <typename... Args>
-  Result(const std::string& format, Args... args) {
-    msg_ = fmt::format(format, args...);
-    success_ = false;
-  }
+// class Result {
+//  public:
+//   template <typename... Args>
+//   Result(const std::string& format, Args... args) {
+//     msg_ = fmt::format(format, args...);
+//     success_ = false;
+//   }
 
-  Result() = default;
+//   Result() = default;
 
-  operator rcl_interfaces::msg::SetParametersResult() const {
-    rcl_interfaces::msg::SetParametersResult result;
-    result.successful = success_;
-    result.reason = msg_;
-    return result;
-  }
+//   operator rcl_interfaces::msg::SetParametersResult() const {
+//     rcl_interfaces::msg::SetParametersResult result;
+//     result.successful = success_;
+//     result.reason = msg_;
+//     return result;
+//   }
 
-  bool success() { return success_; }
+//   bool success() { return success_; }
 
-  std::string error_msg() { return msg_; }
+//   std::string error_msg() { return msg_; }
 
- private:
-  std::string msg_;
-  bool success_ = true;
-};
+//  private:
+//   std::string msg_;
+//   bool success_ = true;
+// };
 
-auto static OK = Result();
-using ERROR = Result;
+// auto static OK = Result();
+// using ERROR = Result;
 
 }  // namespace parameter_traits

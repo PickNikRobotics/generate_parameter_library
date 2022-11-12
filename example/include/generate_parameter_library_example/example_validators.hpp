@@ -28,34 +28,42 @@
 
 #pragma once
 
-#include <parameter_traits/parameter_traits.hpp>
+#include <string>
 
-namespace parameter_traits {
+#include <rclcpp/rclcpp.hpp>
+
+#include <fmt/core.h>
+#include <tl_expected/expected.hpp>
+
+namespace custom_validators {
 
 // User defined parameter validation
-Result validate_double_array_custom_func(const rclcpp::Parameter& parameter,
-                                         double max_sum, double max_element) {
+tl::expected<void, std::string> validate_double_array_custom_func(
+    const rclcpp::Parameter& parameter, double max_sum, double max_element) {
   const auto& double_array = parameter.as_double_array();
   double sum = 0.0;
   for (auto val : double_array) {
     sum += val;
     if (val > max_element) {
-      return ERROR(
+      return tl::make_unexpected(fmt::format(
           "The parameter contained an element greater than the max allowed "
           "value.  (%f) was greater than (%f)",
-          val, max_element);
+          val, max_element));
     }
   }
   if (sum > max_sum) {
-    return ERROR(
+    return tl::make_unexpected(fmt::format(
         "The sum of the parameter vector was greater than the max allowed "
         "value.  (%f) was greater than (%f)",
-        sum, max_sum);
+        sum, max_sum));
   }
 
-  return OK;
+  return {};
 }
 
-Result no_args_validator(const rclcpp::Parameter& parameter) { return OK; }
+tl::expected<void, std::string> no_args_validator(
+    const rclcpp::Parameter& parameter) {
+  return {};
+}
 
-}  // namespace parameter_traits
+}  // namespace custom_validators
