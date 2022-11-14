@@ -29,8 +29,8 @@
 #pragma once
 
 #include <fmt/core.h>
-#include <tl_expected/expected.hpp>
 #include <rsl/algorithm.hpp>
+#include <tl_expected/expected.hpp>
 
 namespace parameter_traits {
 
@@ -54,15 +54,16 @@ auto static OK
         tl::expected<void, std::string>{};
 
 template <typename T>
-[[deprecated("Use rsl::contains instead. `#include <rsl/algorithm.hpp>`")]] 
-bool contains(std::vector<T> const& vec, T const& val) {
-    return rsl::contains(vec, val);
+[[deprecated("Use rsl::contains instead. `#include <rsl/algorithm.hpp>`")]] bool
+contains(std::vector<T> const& vec, T const& val) {
+  return rsl::contains(vec, val);
 }
 
 template <class T>
-[[deprecated("Use rsl::is_unique instead. `#include <rsl/algorithm.hpp>`")]] 
-bool is_unique(std::vector<T> const& x) {
-    return rsl::is_unique(x);
+[[deprecated(
+    "Use rsl::is_unique instead. `#include <rsl/algorithm.hpp>`")]] bool
+is_unique(std::vector<T> const& x) {
+  return rsl::is_unique(x);
 }
 
 }  // namespace parameter_traits
