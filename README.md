@@ -250,35 +250,37 @@ The built-in validator functions provided by this package are:
 | upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)             |
 
 ### Custom validator functions
-Validators are functions that return a `Result` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
+Validators are functions that return a `tl::expected<void, std::string>` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
 Validators are C++ functions defined in a header file similar to the example shown below.
 
-The `Result` type has a alias `OK` that is shorthand for returning a successful validation.
-It also had a function `ERROR` that uses the expressive [fmt format](https://github.com/fmtlib/fmt) for constructing a human readable error.
-These come from the `parameter_traits` library.
-Note that you need to place your custom validators in the `parameter_traits` namespace.
+Here is an example custom allocator.
 
 ```c++
-#include <parameter_traits/parameter_traits.hpp>
+#include <rclcpp/rclcpp.hpp>
 
-namespace parameter_traits {
+#include <fmt/core.h>
+#include <tl_expected/expected.hpp>
 
-Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
+namespace my_project {
+
+tl::expected<void, std::string> integer_equal_value(
+    rclcpp::Parameter const& parameter, int expected_value) {
   int param_value = parameter.as_int();
     if (param_value != expected_value) {
-        return ERROR("Invalid value {} for parameter {}. Expected {}",
-               param_value, parameter.get_name(), expected_value);
+        return tl::make_unexpected(fmt::format(
+            "Invalid value {} for parameter {}. Expected {}",
+            param_value, parameter.get_name(), expected_value);
     }
 
-  return OK;
+  return {};
 }
 
-}  // namespace parameter_traits
+}  // namespace my_project
 ```
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
 validation: {
-  integer_equal_value: [3]
+  "my_project::integer_equal_value": [3]
 }
 ```
 
