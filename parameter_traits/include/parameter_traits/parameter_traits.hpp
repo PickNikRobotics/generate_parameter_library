@@ -28,4 +28,41 @@
 
 #pragma once
 
-#include <parameter_traits/validators.hpp>
+#include <fmt/core.h>
+#include <tl_expected/expected.hpp>
+#include <rsl/algorithm.hpp>
+
+namespace parameter_traits {
+
+using Result
+    [[deprecated("Use tl::expected<void, std::string> for return instead. "
+                 "`#include <tl_expected/expected.hpp>`.")]] =
+        tl::expected<void, std::string>;
+
+template <typename... Args>
+[[deprecated(
+    "When returning tl::expected<void, std::string> you can call fmt::format "
+    "directly.")]] auto
+ERROR(const std::string& format, Args... args)
+    -> tl::expected<void, std::string> {
+  return tl::make_unexpected(fmt::format(format, args...));
+}
+
+auto static OK
+    [[deprecated("When returning tl::expected<void, std::string> default "
+                 "construct for OK with `{}`.")]] =
+        tl::expected<void, std::string>{};
+
+template <typename T>
+[[deprecated("Use rsl::contains instead. `#include <rsl/algorithm.hpp>`")]] 
+bool contains(std::vector<T> const& vec, T const& val) {
+    return rsl::contains(vec, val);
+}
+
+template <class T>
+[[deprecated("Use rsl::is_unique instead. `#include <rsl/algorithm.hpp>`")]] 
+bool is_unique(std::vector<T> const& x) {
+    return rsl::is_unique(x);
+}
+
+}  // namespace parameter_traits
