@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Migrate from parameter_traits to RSL (take 2) (`#91 <https://github.com/PickNikRobotics/generate_parameter_library/issues/91>`_)
+* Add missing dependency on PyYAML (`#89 <https://github.com/PickNikRobotics/generate_parameter_library/issues/89>`_)
+* Contributors: Scott K Logan, Tyler Weaver
+
 0.2.8 (2022-11-03)
 ------------------
 * Use typing syntax which is compatible with Python 3.6 (`#87 <https://github.com/PickNikRobotics/generate_parameter_library/issues/87>`_)
