@@ -15,8 +15,8 @@ add_library(minimal_publisher SHARED
   src/minimal_publisher.cpp
 )
 target_include_directories(minimal_publisher PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/generate_parameter_library_example>
 )
 target_link_libraries(minimal_publisher
   PUBLIC
@@ -51,7 +51,7 @@ endif()
 
 install(
   DIRECTORY include/
-  DESTINATION include
+  DESTINATION include/generate_parameter_library_example
 )
 
 install(TARGETS minimal_publisher admittance_controller_parameters
@@ -59,7 +59,6 @@ install(TARGETS minimal_publisher admittance_controller_parameters
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
 )
 
 install(

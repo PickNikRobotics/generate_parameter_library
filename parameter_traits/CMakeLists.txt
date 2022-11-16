@@ -11,8 +11,8 @@ find_package(tl_expected REQUIRED)
 
 add_library(parameter_traits INTERFACE)
 target_include_directories(parameter_traits INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/parameter_traits>)
 target_compile_features(parameter_traits INTERFACE cxx_std_17)
 target_link_libraries(parameter_traits
   INTERFACE
@@ -33,7 +33,7 @@ endif()
 
 install(
   DIRECTORY include/
-  DESTINATION include
+  DESTINATION include/parameter_traits
 )
 
 install(
@@ -42,7 +42,6 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
 )
 
 ament_export_targets(export_parameter_traits HAS_LIBRARY_TARGET)
