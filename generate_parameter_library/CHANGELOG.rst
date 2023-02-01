@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.1 (2023-02-01)
+------------------
+* Add keyword INTERFACE to fix build error 'ar: no archive members specified' since the generated target is header-only (`#93 <https://github.com/PickNikRobotics/generate_parameter_library/issues/93>`_)
+* Make it easy for users to override (`#92 <https://github.com/PickNikRobotics/generate_parameter_library/issues/92>`_)
+* Contributors: Tyler Weaver, light-tech
+
 0.3.0 (2022-11-15)
 ------------------
 * Migrate from parameter_traits to RSL (take 2) (`#91 <https://github.com/PickNikRobotics/generate_parameter_library/issues/91>`_)
