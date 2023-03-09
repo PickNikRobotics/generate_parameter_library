@@ -26,6 +26,10 @@ setup(
             "share/" + package_name + "/test",
             ["generate_parameter_library_py/test/invalid_parameter_type.yaml"],
         ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/valid_parameters.yaml"],
+        ),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
     install_requires=["setuptools", "typeguard", "jinja2"],
