@@ -197,6 +197,11 @@ def str_to_str(s: Optional[str]):
 
 
 @typechecked
+def no_code(s: Optional[str]):
+    return ""
+
+
+@typechecked
 def bool_array_to_str(values: Optional[list]):
     if values is None:
         return ""
@@ -264,6 +269,7 @@ def int_to_integer_str(value: str):
 
 class CodeGenVariableBase:
     defined_type_to_cpp_type = {
+        "none": lambda defined_type, templates: None,
         "bool": lambda defined_type, templates: "bool",
         "double": lambda defined_type, templates: "double",
         "int": lambda defined_type, templates: "int64_t",
@@ -278,6 +284,7 @@ class CodeGenVariableBase:
         "string_fixed": lambda defined_type, templates: f"rsl::StaticString<{templates[1]}>",
     }
     yaml_type_to_as_function = {
+        "none": None,
         "string_array": "as_string_array()",
         "double_array": "as_double_array()",
         "int_array": "as_integer_array()",
@@ -293,6 +300,7 @@ class CodeGenVariableBase:
         "string_fixed": "as_string()",
     }
     cpp_str_value_func = {
+        "none": no_code,
         "bool": bool_to_str,
         "double": float_to_str,
         "int": int_to_str,
@@ -841,6 +849,9 @@ class GenerateCode:
             read_only,
             validations,
         ) = preprocess_inputs(name, value, nested_name_list)
+        # skip accepted params that do not generate code
+        if code_gen_variable.cpp_type is None:
+            return
 
         param_name = code_gen_variable.param_name
         update_parameter_invalid = update_parameter_fail_validation()

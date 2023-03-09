@@ -60,3 +60,11 @@ def test_parse_valid_parameter_file():
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f"failed to parse valid file, reason:{e}"
+
+
+def test_parse_valid_parameter_file_including_none_type():
+    try:
+        yaml_test_file = "valid_parameters_with_none_type.yaml"
+        set_up(yaml_test_file)
+    except Exception as e:
+        assert False, f"failed to parse valid file, reason:{e}"
