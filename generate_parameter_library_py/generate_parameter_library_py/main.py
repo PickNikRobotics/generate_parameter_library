@@ -639,10 +639,12 @@ class DeclareParameterBase:
         code_gen_variable: CodeGenVariableBase,
         parameter_description: str,
         parameter_read_only: bool,
+        parameter_validations: list
     ):
         self.parameter_name = code_gen_variable.param_name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
+        self.parameter_validations = parameter_validations
         self.code_gen_variable = code_gen_variable
 
 
@@ -653,14 +655,16 @@ class DeclareParameter(DeclareParameterBase):
         else:
             self.parameter_value = self.parameter_name
 
+        #parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+        parameter_validations = self.parameter_validations
         data = {
             "parameter_name": self.parameter_name,
             "parameter_value": self.parameter_value,
             "parameter_type": self.code_gen_variable.get_parameter_type(),
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
+            "parameter_validations": parameter_validations
         }
-
         j2_template = Template(GenerateCode.templates["declare_parameter"])
         code = j2_template.render(data, trim_blocks=True)
         return code
@@ -697,6 +701,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
+        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
         data = {
             "struct_name": struct_name,
@@ -711,6 +716,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             "param_struct_instance": self.param_struct_instance,
             "parameter_field": parameter_field,
             "default_value": default_value,
+            "parameter_validations": str(parameter_validations_str)
         }
 
         j2_template = Template(GenerateCode.templates["declare_runtime_parameter"])
@@ -843,6 +849,7 @@ class GenerateCode:
         ) = preprocess_inputs(name, value, nested_name_list)
 
         param_name = code_gen_variable.param_name
+        param_type = code_gen_variable.defined_type
         update_parameter_invalid = update_parameter_fail_validation()
         update_parameter_valid = update_parameter_pass_validation()
         parameter_conversion = code_gen_variable.parameter_as_function_str()
@@ -862,13 +869,13 @@ class GenerateCode:
                 param_name, parameter_conversion
             )
             declare_parameter = DeclareRuntimeParameter(
-                code_gen_variable, description, read_only
+                code_gen_variable, description, read_only,
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
             update_parameter = UpdateRuntimeParameter(param_name, parameter_conversion)
         else:
             declare_parameter = DeclareParameter(
-                code_gen_variable, description, read_only
+                code_gen_variable, description, read_only, validations
             )
             declare_parameter_set = SetParameter(param_name, parameter_conversion)
             update_parameter = UpdateParameter(param_name, parameter_conversion)

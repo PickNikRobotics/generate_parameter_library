@@ -1,0 +1,58 @@
+admittance_controller:
+  #    # Having ".0" at the end is MUST, otherwise there is a loading error
+  #    # F = M*a + D*v + S*(x - x_d)
+  #    mass: {
+  #      type: double_array,
+  #      description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
+  #      validation: {
+  #        fixed_size<>: 6,
+  #        element_bounds<>: [ 0.0001, 1000000.0 ]
+  #      }
+  #    }
+  #
+  #    damping_ratio: {
+  #      type: double_array,
+  #      description: "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation.
+  #      The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
+  #      validation: {
+  #        fixed_size<>: 6,
+  #        validate_double_array_custom_func: [ 20.3, 5.0 ],
+  #        element_bounds<>: [ 0.1, 10.0 ]
+  #      }
+  #    }
+
+  stiffness: {
+    type: double_array,
+    description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
+    validation: {
+      element_bounds: [ 0.0001, 100000.0 ]
+    }
+  }
+  dankness: {
+    type: int_array,
+    description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
+    validation: {
+      element_bounds: [ 1, 100 ]
+    }
+  }
+
+  mass: {
+    type: double_array,
+    description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
+    validation: {
+      fixed_size<>: 6,
+      element_bounds<>: [ 0.0001, 1000000.0 ]
+    }
+  }
+
+  # general settings
+  enable_parameter_update_without_reactivation: {
+    type: bool,
+    default_value: true,
+    description: "if enabled, read_only parameters will be dynamically updated in the control loop"
+  }
+  use_feedforward_commanded_input: {
+    type: bool,
+    default_value: false,
+    description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
+  }
