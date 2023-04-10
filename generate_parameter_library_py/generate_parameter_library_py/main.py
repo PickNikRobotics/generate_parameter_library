@@ -849,7 +849,6 @@ class GenerateCode:
         ) = preprocess_inputs(name, value, nested_name_list)
 
         param_name = code_gen_variable.param_name
-        param_type = code_gen_variable.defined_type
         update_parameter_invalid = update_parameter_fail_validation()
         update_parameter_valid = update_parameter_pass_validation()
         parameter_conversion = code_gen_variable.parameter_as_function_str()
