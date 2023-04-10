@@ -64,6 +64,11 @@ TEST_F(ExampleTest, check_parameters) {
   ASSERT_EQ(params_.ft_sensor.filter_coefficient, 0.1);
 }
 
+//TEST_F(ExampleTest, check_descriptors) {
+//  ASSERT_EQ(params_.admittance.damping_ratio.descriptor.integer_range[0], 0.1);
+//  //ASSERT_EQ(descriptors_.admittance.damping_ratio.integer_range[0], 0.1);
+//}
+
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
