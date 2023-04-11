@@ -655,7 +655,6 @@ class DeclareParameter(DeclareParameterBase):
         else:
             self.parameter_value = self.parameter_name
 
-        #parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
         parameter_validations = self.parameter_validations
         data = {
             "parameter_name": self.parameter_name,
@@ -692,7 +691,6 @@ class DeclareRuntimeParameter(DeclareParameterBase):
                 "add_set_runtime_parameter was not called before str()"
             )
 
-        # parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
         if self.code_gen_variable.default_value is None:
             default_value = ""
         else:
@@ -702,7 +700,6 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
-        #parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
         data = {
             "struct_name": struct_name,
