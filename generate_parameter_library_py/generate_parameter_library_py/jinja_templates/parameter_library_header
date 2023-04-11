@@ -113,6 +113,11 @@ struct StackParams {
       return params_;
     }
 
+    std::vector<rcl_interfaces::msg::ParameterDescriptor> get_descriptors(const std::vector<std::string> & names) const{
+      std::lock_guard<std::mutex> lock(mutex_);
+      return parameters_interface_->describe_parameters(names);
+    }
+
     bool is_old(Params const& other) const {
       std::lock_guard<std::mutex> lock(mutex_);
       return params_.__stamp != other.__stamp;
