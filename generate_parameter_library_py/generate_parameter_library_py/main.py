@@ -676,8 +676,9 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         code_gen_variable: CodeGenVariableBase,
         parameter_description: str,
         parameter_read_only: bool,
+        parameter_validations: list
     ):
-        super().__init__(code_gen_variable, parameter_description, parameter_read_only)
+        super().__init__(code_gen_variable, parameter_description, parameter_read_only, parameter_validations)
         self.set_runtime_parameter = None
         self.param_struct_instance = "updated_params"
 
@@ -701,7 +702,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
-        parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
+        #parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
 
         data = {
             "struct_name": struct_name,
@@ -716,7 +717,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             "param_struct_instance": self.param_struct_instance,
             "parameter_field": parameter_field,
             "default_value": default_value,
-            "parameter_validations": str(parameter_validations_str)
+            "parameter_validations": self.parameter_validations
         }
 
         j2_template = Template(GenerateCode.templates["declare_runtime_parameter"])
@@ -868,7 +869,7 @@ class GenerateCode:
                 param_name, parameter_conversion
             )
             declare_parameter = DeclareRuntimeParameter(
-                code_gen_variable, description, read_only,
+                code_gen_variable, description, read_only, validations
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
             update_parameter = UpdateRuntimeParameter(param_name, parameter_conversion)

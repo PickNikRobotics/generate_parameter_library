@@ -4,13 +4,13 @@ rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
 descriptor.read_only = {{parameter_read_only}};
 {%- for validation in parameter_validations %}
-{%- if validation.function_name == "element_bounds" %}
+{%- if validation.function_name.startswith("element_bounds") %}
 {%- if parameter_type == "DOUBLE_ARRAY" %}
-descriptor.floating_point_range.from_value = {{parameter_validations[0].arguments[0]}};
-descriptor.floating_point_range.to_value = {{parameter_validations[0].arguments[1]}};
-{%- elif parameter_type =="INTEGER_ARRAY" %}
-descriptor.integer_range.from_value = {{parameter_validations[0].arguments[0]}};
-descriptor.integer_range.to_value = {{parameter_validations[0].arguments[1]}};
+descriptor.floating_point_range.at(0).from_value = {{validation.arguments[0]}};
+descriptor.floating_point_range.at(0).to_value = {{validation.arguments[1]}};
+{%- elif parameter_type == "INTEGER_ARRAY" %}
+descriptor.integer_range.at(0).from_value = {{validation.arguments[0]}};
+descriptor.integer_range.at(0).to_value = {{validation.arguments[1]}};
 {%- endif %}
 {%- endif %}
 {%- endfor %}
