@@ -242,6 +242,13 @@ admittance_controller:
     default_value: false,
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
   }
+  less_than_eq_15: {
+      type: int,
+      default_value: 13,
+      validation: {
+        lt_eq: [15]
+      }
+  }
   one_number: {
     type: int,
     default_value: 14540,
