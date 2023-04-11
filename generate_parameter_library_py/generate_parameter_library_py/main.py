@@ -639,7 +639,7 @@ class DeclareParameterBase:
         code_gen_variable: CodeGenVariableBase,
         parameter_description: str,
         parameter_read_only: bool,
-        parameter_validations: list
+        parameter_validations: list,
     ):
         self.parameter_name = code_gen_variable.param_name
         self.parameter_description = parameter_description
@@ -662,7 +662,7 @@ class DeclareParameter(DeclareParameterBase):
             "parameter_type": self.code_gen_variable.get_parameter_type(),
             "parameter_description": self.parameter_description,
             "parameter_read_only": bool_to_str(self.parameter_read_only),
-            "parameter_validations": parameter_validations
+            "parameter_validations": parameter_validations,
         }
         j2_template = Template(GenerateCode.templates["declare_parameter"])
         code = j2_template.render(data, trim_blocks=True)
@@ -675,9 +675,14 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         code_gen_variable: CodeGenVariableBase,
         parameter_description: str,
         parameter_read_only: bool,
-        parameter_validations: list
+        parameter_validations: list,
     ):
-        super().__init__(code_gen_variable, parameter_description, parameter_read_only, parameter_validations)
+        super().__init__(
+            code_gen_variable,
+            parameter_description,
+            parameter_read_only,
+            parameter_validations,
+        )
         self.set_runtime_parameter = None
         self.param_struct_instance = "updated_params"
 
@@ -714,7 +719,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             "param_struct_instance": self.param_struct_instance,
             "parameter_field": parameter_field,
             "default_value": default_value,
-            "parameter_validations": self.parameter_validations
+            "parameter_validations": self.parameter_validations,
         }
 
         j2_template = Template(GenerateCode.templates["declare_runtime_parameter"])

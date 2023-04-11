@@ -40,7 +40,7 @@ admittance_controller:
       lower_bounds<>: [ 0 ],
     }
   }
-  
+
   p2: {
     type: double,
     default_value: 1.0,
