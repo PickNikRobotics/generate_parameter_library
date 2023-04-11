@@ -7,15 +7,15 @@ if (!parameters_interface_->has_parameter(param_name)) {
 rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
 descriptor.read_only = {{parameter_read_only}};
-{%- for validation in parameter_validations %}
-{%- if validation.function_name.startswith("element_bounds") %}
+{%- for validation in parameter_validations if validation.function_name.startswith("element_bounds") %}
 {%- if parameter_type == "DOUBLE_ARRAY" %}
-descriptor.floating_point_range.at(0).from_value = {{validation.arguments[0]}};
-descriptor.floating_point_range.at(0).to_value = {{validations.arguments[1]}};
+descriptor.floating_point_range.resize({{loop.index}});
+descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
+descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validations.arguments[1]}};
 {%- elif parameter_type =="INTEGER_ARRAY" %}
-descriptor.integer_range.at(0).from_value = {{validations.arguments[0]}};
-descriptor.integer_range.at(0).to_value = {{validation.arguments[1]}};
-{%- endif %}
+descriptor.integer_range.resize({{loop.index}});
+descriptor.integer_range.at({{loop.index0}}).from_value = {{validations.arguments[0]}};
+descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
 {%- endif %}
 {%- endfor %}
 {%- if not default_value|length %}
