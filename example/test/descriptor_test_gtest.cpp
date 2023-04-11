@@ -45,7 +45,7 @@ class DescriptorTest : public ::testing::Test {
         std::make_shared<admittance_controller::ParamListener>(
             example_test_node_->get_node_parameters_interface());
     params_ = param_listener->get_params();
-    std::vector<std::string> names = {"admittance.damping_ratio", "one_number", "pid.joint4.p", "less_than_eq_15"};
+    std::vector<std::string> names = {"admittance.damping_ratio", "one_number", "pid.joint4.p", "lt_eq_fifteen", "gt_fifteen"};
     descriptors_ = param_listener->get_descriptors(names);
   }
 
@@ -57,28 +57,31 @@ class DescriptorTest : public ::testing::Test {
   std::vector<rcl_interfaces::msg::ParameterDescriptor> descriptors_;
 };
 
-// Checks element_bounds<>
+// Checks element_bounds<> on a float
 TEST_F(DescriptorTest, check_floating_point_descriptors) {
   EXPECT_EQ(descriptors_[0].floating_point_range.at(0).from_value, 0.1);
   EXPECT_EQ(descriptors_[0].floating_point_range.at(0).to_value, 10);
 }
 
-// Checks bounds<>
+// Checks bounds<> on an int
 TEST_F(DescriptorTest, check_integer_descriptors) {
   EXPECT_EQ(descriptors_[1].integer_range.at(0).from_value, 1024);
   EXPECT_EQ(descriptors_[1].integer_range.at(0).to_value, 65535);
 }
 
-// Checks lower_bounds
 TEST_F(DescriptorTest, check_lower_upper_bounds) {
   EXPECT_EQ(descriptors_[2].floating_point_range.at(0).from_value, 0.0001);
   EXPECT_EQ(descriptors_[2].floating_point_range.at(0).to_value, std::numeric_limits<double>::max());
 }
 
-// Checks lt_eq
 TEST_F(DescriptorTest, check_lt_eq) {
-  EXPECT_EQ(descriptors_[3].floating_point_range.at(0).from_value, std::numeric_limits<double>::lowest());
-  EXPECT_EQ(descriptors_[3].floating_point_range.at(0).to_value, 15);
+  EXPECT_EQ(descriptors_[3].integer_range.at(0).from_value, std::numeric_limits<int>::lowest());
+  EXPECT_EQ(descriptors_[3].integer_range.at(0).to_value, 15);
+}
+
+TEST_F(DescriptorTest, check_gt) {
+  EXPECT_EQ(descriptors_[4].integer_range.at(0).from_value, 15);
+  EXPECT_EQ(descriptors_[4].integer_range.at(0).to_value, std::numeric_limits<int>::max());
 }
 
 

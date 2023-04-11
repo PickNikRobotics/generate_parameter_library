@@ -3,18 +3,17 @@ if (!parameters_interface_->has_parameter(prefix_ + "{{parameter_name}}")) {
 rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
 descriptor.read_only = {{parameter_read_only}};
-{# TODO: Include lt, gt, lt_eq, and gt_eq rsl validators along with upper and lower bounds. #}
-{%- for validation in parameter_validations if "bounds" in validation.function_name%}
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if "DOUBLE" in parameter_type %}
 {%- if validation.arguments|length == 2 %}
 descriptor.floating_point_range.resize({{loop.index}});
 descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
 descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
-{%- elif "lower" in validation.function_name or "gt_eq" in validation.function_name %}
+{%- elif ("lower" in validation.function_name or "gt" in validation.function_name) and validation.arguments|length == 1 %}
 descriptor.floating_point_range.resize({{loop.index}});
 descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
 descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::max();
-{%- elif "upper" in validation.function_name or "lt_eq" in validation.function_name %}
+{%- elif ("upper" in validation.function_name or "lt" in validation.function_name) and validation.arguments|length == 1 %}
 descriptor.floating_point_range.resize({{loop.index}});
 descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::lowest();
 descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
@@ -24,11 +23,11 @@ descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.argu
 descriptor.integer_range.resize({{loop.index}});
 descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
 descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
-{%- elif "lower" in validation.function_name or "gt_eq" in validation.function_name %}
+{%- elif ("lower" in validation.function_name or "gt" in validation.function_name) and validation.arguments|length == 1 %}
 descriptor.integer_range.resize({{loop.index}});
 descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
 descriptor.integer_range.at({{loop.index0}}).to_value = std::numeric_limits<int>::max();
-{%- elif "upper" in validation.function_name or "lt_eq" in validation.function_name %}
+{%- elif ("upper" in validation.function_name or "lt" in validation.function_name) and validation.arguments|length == 1 %}
 descriptor.integer_range.resize({{loop.index}});
 descriptor.integer_range.at({{loop.index0}}).from_value = std::numeric_limits<int>::lowest();
 descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};

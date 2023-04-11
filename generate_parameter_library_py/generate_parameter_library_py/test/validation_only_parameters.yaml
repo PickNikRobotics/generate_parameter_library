@@ -46,7 +46,7 @@ admittance_controller:
     default_value: 1.0,
     description: "proportional gain term updated",
     validation: {
-      gt_eq: [ 0 ],
+      gt_eq: [ 0.0001 ],
     }
   }
 
@@ -56,6 +56,22 @@ admittance_controller:
     description: "should be a number less than 10",
     validation: {
       upper_bounds<>: [ 10 ],
+    }
+  }
+  lt_eq_fifteen: {
+    type: int,
+    default_value: 1,
+    description: "should be a number less than or equal to 15",
+    validation: {
+      lt_eq<>: [ 15 ],
+    }
+  }
+  gt_fifteen: {
+    type: int,
+    default_value: 16,
+    description: "should be a number greater than 15",
+    validation: {
+      gt<>: [ 15 ],
     }
   }
 
