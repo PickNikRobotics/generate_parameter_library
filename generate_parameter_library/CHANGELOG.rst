@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.2 (2023-04-12)
+------------------
+
 0.3.1 (2023-02-01)
 ------------------
 * Add keyword INTERFACE to fix build error 'ar: no archive members specified' since the generated target is header-only (`#93 <https://github.com/PickNikRobotics/generate_parameter_library/issues/93>`_)

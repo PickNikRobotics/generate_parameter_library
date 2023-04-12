@@ -2,6 +2,9 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.2 (2023-04-12)
+------------------
+
 0.3.1 (2023-02-01)
 ------------------
 * Make it easy for users to override (`#92 <https://github.com/PickNikRobotics/generate_parameter_library/issues/92>`_)

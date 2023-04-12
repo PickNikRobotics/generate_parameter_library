@@ -2,6 +2,14 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.2 (2023-04-12)
+------------------
+* Populate Range Constraints in Parameter Descriptors from Validation Functions (`#103 <https://github.com/PickNikRobotics/generate_parameter_library/issues/103>`_)
+* Mark deprecated rsl method and propose alternative in the docs. (`#102 <https://github.com/PickNikRobotics/generate_parameter_library/issues/102>`_)
+* Allow none type (`#99 <https://github.com/PickNikRobotics/generate_parameter_library/issues/99>`_)
+* Fixed tests never failing although file not found (`#101 <https://github.com/PickNikRobotics/generate_parameter_library/issues/101>`_)
+* Contributors: Chance Cardona, Dr. Denis, GuiHome
+
 0.3.1 (2023-02-01)
 ------------------
 
