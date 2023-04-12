@@ -219,16 +219,16 @@ Some of these validators work only on value types, some on string types, and oth
 The built-in validator functions provided by this package are:
 
 **Value validators**
-| Function               | Arguments           | Description                          |
-|------------------------|---------------------|--------------------------------------|
-| bounds<>               | [lower, upper]      | Bounds checking (inclusive)          |
-| lower_bounds<>         | [lower]             | Lower bounds (inclusive)             |
-| upper_bounds<>         | [upper]             | Upper bounds (inclusive)             |
-| lt<>                   | [value]             | parameter < value                    |
-| gt<>                   | [value]             | parameter > value                    |
-| lt_eq<>                | [value]             | parameter <= value (upper_bounds)    |
-| gt_eq<>                | [value]             | parameter >= value (lower_bounds)    |
-| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values |
+| Function               | Arguments           | Description                           |
+|------------------------|---------------------|---------------------------------------|
+| bounds<>               | [lower, upper]      | Bounds checking (inclusive)           |
+| lower_bounds<>         | [lower]             | Lower bounds [Deprecated, use `gt_eq`]|
+| upper_bounds<>         | [upper]             | Upper bounds [Deprecated, use `lt_eq`]|
+| lt<>                   | [value]             | parameter < value                     |
+| gt<>                   | [value]             | parameter > value                     |
+| lt_eq<>                | [value]             | parameter <= value (upper_bounds)     |
+| gt_eq<>                | [value]             | parameter >= value (lower_bounds)     |
+| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values  |
 
 **String validators**
 | Function               | Arguments           | Description                                     |

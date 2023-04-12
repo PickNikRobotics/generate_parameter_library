@@ -31,7 +31,7 @@ admittance_controller:
         default_value: 1.0,
         description: "proportional gain term",
         validation: {
-          lower_bounds<>: [ 0 ],
+          gt_eq<>: [ 0 ],
         }
       }
       i: {
