@@ -48,7 +48,7 @@ class DescriptorTest : public ::testing::Test {
     std::vector<std::string> names = {"admittance.damping_ratio", "one_number",
                                       "pid.joint4.p", "lt_eq_fifteen",
                                       "gt_fifteen"};
-    descriptors_ = param_listener->get_descriptors(names);
+    descriptors_ = example_test_node_->describe_parameters(names);
   }
 
   void TearDown() { example_test_node_.reset(); }
