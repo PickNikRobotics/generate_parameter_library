@@ -180,10 +180,13 @@ The types of parameters in ros2 map to C++ types.
 | int_array       | `std::vector<int>`          |
 | bool_array      | `std::vector<bool>`         |
 | string_fixed_XX | `FixedSizeString<XX>`       |
+| none            | NO CODE GENERATED           |
 
 Fixed size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
 The corresponding C++ type is a data wrapper class for conveniently accessing the data.
 Note that any fixed size type will automatically use a `size_lt` validator. Validators are explained in the next section.
+
+The purpose of `none` type is purely documentation, and won't generate any C++ code. See [Parameter documentation](#parameter-documentation) for details.
 
 ### Built-In Validators
 Validators are C++ functions that take arguments represented by a key-value pair in yaml.
@@ -216,16 +219,16 @@ Some of these validators work only on value types, some on string types, and oth
 The built-in validator functions provided by this package are:
 
 **Value validators**
-| Function               | Arguments           | Description                          |
-|------------------------|---------------------|--------------------------------------|
-| bounds<>               | [lower, upper]      | Bounds checking (inclusive)          |
-| lower_bounds<>         | [lower]             | Lower bounds (inclusive)             |
-| upper_bounds<>         | [upper]             | Upper bounds (inclusive)             |
-| lt<>                   | [value]             | parameter < value                    |
-| gt<>                   | [value]             | parameter > value                    |
-| lt_eq<>                | [value]             | parameter <= value (upper_bounds)    |
-| gt_eq<>                | [value]             | parameter >= value (lower_bounds)    |
-| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values |
+| Function               | Arguments           | Description                           |
+|------------------------|---------------------|---------------------------------------|
+| bounds<>               | [lower, upper]      | Bounds checking (inclusive)           |
+| lower_bounds<>         | [lower]             | Lower bounds [Deprecated, use `gt_eq`]|
+| upper_bounds<>         | [upper]             | Upper bounds [Deprecated, use `lt_eq`]|
+| lt<>                   | [value]             | parameter < value                     |
+| gt<>                   | [value]             | parameter > value                     |
+| lt_eq<>                | [value]             | parameter <= value (upper_bounds)     |
+| gt_eq<>                | [value]             | parameter >= value (lower_bounds)     |
+| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values  |
 
 **String validators**
 | Function               | Arguments           | Description                                     |
@@ -320,6 +323,52 @@ if (param_listener->is_old(params_)) {
   params_ = param_listener->get_params();
 }
 ```
+
+### Parameter documentation
+
+In some case, parameters might be unknown only at compile-time, and cannot be part of the generated C++ code. However, for documentation purpose of such parameters, the type `none` was introduced.
+
+Parameters with `none` type won't generate any C++ code, but can exist to describe the expected name or namespace, that might be declared by an external piece of code and used in an override.
+
+A typical use case is a controller, loading pluginlib-based filters, that themselves require (and declare) parameters in a known structure.
+
+Example of declarative YAML
+
+```yaml
+force_torque_broadcaster_controller:
+  sensor_name: {
+    type: string,
+    default_value: "",
+    description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined.",
+  }
+  frame_id: {
+    type: string,
+    default_value: "",
+    description: "Sensor's frame_id in which values are published.",
+  }
+  sensor_filter_chain: {
+    type: none,
+    description: "Map of parameters that defines a filter chain, containing filterN as key and underlying map of parameters needed for a specific filter. See <some docs> for more details.",
+  }
+```
+
+Example of parameters for that controller
+
+```yaml
+force_torque_broadcaster_controller:
+  ros__parameters:
+    sensor_name: "fts_sensor"
+    frame_id: "fts_sensor_frame"
+    sensor_filter_chain:
+      filter1:
+        type: "control_filters/LowPassFilterWrench"
+        name: "low_pass_filter"
+        params:
+          sampling_frequency: 200.0
+          damping_frequency: 50.0
+          damping_intensity: 1.0
+```
+
 
 ### Example Project
 See [example project](example/) for a complete example of how to use the generate_parameter_library.
