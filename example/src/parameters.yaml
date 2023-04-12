@@ -37,7 +37,7 @@ admittance_controller:
         default_value: 1.0,
         description: "proportional gain term",
         validation: {
-          gt_eq<>: [ 0 ],
+          gt_eq<>: [ 0.0001 ],
         }
       }
       i: {
@@ -241,6 +241,22 @@ admittance_controller:
     type: bool,
     default_value: false,
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
+  }
+  lt_eq_fifteen: {
+    type: int,
+    default_value: 1,
+    description: "should be a number less than or equal to 15",
+    validation: {
+      lt_eq<>: [ 15 ],
+    }
+  }
+  gt_fifteen: {
+    type: int,
+    default_value: 16,
+    description: "should be a number greater than 15",
+    validation: {
+      gt<>: [ 15 ],
+    }
   }
   one_number: {
     type: int,

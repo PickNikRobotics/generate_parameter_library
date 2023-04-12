@@ -37,10 +37,16 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  # example_test_gtest
   add_rostest_with_parameters_gtest(test_example_gtest test/example_test_gtest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
   target_include_directories(test_example_gtest PRIVATE include)
   target_link_libraries(test_example_gtest admittance_controller_parameters rclcpp::rclcpp)
+  # descriptor_test_gtest
+  add_rostest_with_parameters_gtest(test_descriptor_gtest test/descriptor_test_gtest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
+  target_include_directories(test_descriptor_gtest PRIVATE include)
+  target_link_libraries(test_descriptor_gtest admittance_controller_parameters rclcpp::rclcpp)
 
   find_package(ament_cmake_gmock REQUIRED)
   add_rostest_with_parameters_gmock(test_example_gmock test/example_test_gmock.cpp
