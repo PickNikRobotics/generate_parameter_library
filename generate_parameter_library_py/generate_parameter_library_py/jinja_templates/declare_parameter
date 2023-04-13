@@ -9,11 +9,11 @@ descriptor.read_only = {{parameter_read_only}};
 descriptor.floating_point_range.resize({{loop.index}});
 descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
 descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
-{%- elif ("lower" in validation.function_name or "gt" in validation.function_name) and validation.arguments|length == 1 %}
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_name or "gt_eq" == validation.function_name) and validation.arguments|length == 1 %}
 descriptor.floating_point_range.resize({{loop.index}});
 descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
 descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::max();
-{%- elif ("upper" in validation.function_name or "lt" in validation.function_name) and validation.arguments|length == 1 %}
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_name or "gt_eq" == validation.function_name) and validation.arguments|length == 1 %}
 descriptor.floating_point_range.resize({{loop.index}});
 descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::lowest();
 descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
