@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.3 (2023-04-13)
+------------------
+* Fix Parameter Descriptor Incorrectly Populating Range Constraints for size_lt and size_gt (`#105 <https://github.com/PickNikRobotics/generate_parameter_library/issues/105>`_)
+* Contributors: Chance Cardona
+
 0.3.2 (2023-04-12)
 ------------------
 * Populate Range Constraints in Parameter Descriptors from Validation Functions (`#103 <https://github.com/PickNikRobotics/generate_parameter_library/issues/103>`_)
