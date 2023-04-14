@@ -484,10 +484,11 @@ class ValidationFunction:
     ):
         self.code_gen_variable = code_gen_variable
         self.function_name = function_name
+        self.function_base_name = function_name
         if function_name[-2:] == "<>":
-            self.function_name = function_name[:-2]
+            self.function_base_name = function_name[:-2]
             template_type = code_gen_variable.cpp_base_type
-            self.function_name += f"<{template_type}>"
+            self.function_name = self.function_base_name + f"<{template_type}>"
 
         if arguments is not None:
             self.arguments = arguments
