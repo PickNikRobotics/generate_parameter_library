@@ -102,6 +102,10 @@ struct StackParams {
         prefix_ += ".";
       }
 
+      if (!prefix.empty()) {
+        logger_ = rclcpp::get_logger("{{namespace}}." + prefix);
+      }
+
       parameters_interface_ = parameters_interface;
       declare_params();
       auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
@@ -198,6 +202,7 @@ struct StackParams {
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
+      rclcpp::Logger logger_ = rclcpp::get_logger("{{namespace}}");
       std::mutex mutable mutex_;
   };
 

@@ -7,6 +7,7 @@ if (param.get_name() == param_name) {
 {{parameter_validations-}}
 {% endif -%}
 updated_params.{{parameter_map}}[value].{{parameter_field}} = param.{{parameter_as_function}};
+RCLCPP_DEBUG_STREAM(logger_, param.get_name() << ": " << param.get_type_name() << " = " << param.value_to_string());
 {% endfilter -%}
 }
 {% endfilter -%}
