@@ -930,7 +930,6 @@ class GenerateCode:
             self.declare_parameter_sets.append(declare_parameter_set)
 
     def parse_dict(self, name, root_map, nested_name):
-
         if isinstance(root_map, dict) and isinstance(
             next(iter(root_map.values())), dict
         ):

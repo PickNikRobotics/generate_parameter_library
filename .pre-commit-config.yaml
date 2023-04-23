@@ -15,7 +15,7 @@
 repos:
   # Standard hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.4.0
     hooks:
       - id: check-added-large-files
         args: ['--maxkb=1000']
@@ -50,7 +50,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.3.0
     hooks:
       - id: black
 
@@ -65,7 +65,7 @@ repos:
         args: ['-fallback-style=none', '-i']
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.0.0
+    rev: v2.2.4
     hooks:
       - id: codespell
         args: ['--write-changes']
