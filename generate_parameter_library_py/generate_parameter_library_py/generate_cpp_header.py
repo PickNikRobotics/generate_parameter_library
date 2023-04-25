@@ -29,6 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import argparse
 import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -987,24 +988,13 @@ class GenerateCode:
         code = j2_template.render(data, trim_blocks=True)
         return code
 
-    def run(self):
-        if 3 > len(sys.argv) > 4:
-            raise compile_error(
-                "generate_parameter_library_py expects three input argument: output_file, "
-                "yaml file path, [validate include header]"
-            )
-
-        param_gen_directory = sys.argv[0].split("/")
-        param_gen_directory = "".join(x + "/" for x in param_gen_directory[:-1])
-        if param_gen_directory[-1] != "/":
-            param_gen_directory += "/"
-
-        output_file = sys.argv[1]
+    def run(self, args):
+        output_file = args.output_cpp_header_file
         output_dir = os.path.dirname(output_file)
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
 
-        yaml_file = sys.argv[2]
+        yaml_file = args.input_yaml_file
         with open(yaml_file) as f:
             try:
                 docs = yaml.load_all(f, Loader=yaml.Loader)
@@ -1021,17 +1011,25 @@ class GenerateCode:
             self.namespace = list(doc.keys())[0]
             self.parse_dict(self.namespace, doc[self.namespace], [])
 
-        if len(sys.argv) > 3:
-            self.user_validation_file = sys.argv[3]
+        self.user_validation_file = args.validate_header
 
         code = str(self)
         with open(output_file, "w") as f:
             f.write(code)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output_cpp_header_file")
+    parser.add_argument("input_yaml_file")
+    parser.add_argument("validate_header", nargs="?", default="")
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     gen_param_struct = GenerateCode()
-    gen_param_struct.run()
+    gen_param_struct.run(args)
 
 
 if __name__ == "__main__":
