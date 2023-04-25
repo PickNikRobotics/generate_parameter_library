@@ -769,7 +769,7 @@ class RemoveRuntimeParameter:
 
 
 def get_all_templates():
-    template_path = os.path.join(os.path.dirname(__file__), "jinja_templates")
+    template_path = os.path.join(os.path.dirname(__file__), "jinja_templates", "cpp")
     template_map = {}
     for file_name in [
         f

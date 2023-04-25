@@ -39,17 +39,17 @@ setup(
     install_requires=["setuptools", "typeguard", "jinja2"],
     package_data={
         "": [
-            "jinja_templates/declare_parameter",
-            "jinja_templates/set_parameter",
-            "jinja_templates/declare_struct",
-            "jinja_templates/parameter_library_header",
-            "jinja_templates/parameter_validation",
-            "jinja_templates/update_parameter",
-            "jinja_templates/update_runtime_parameter",
-            "jinja_templates/declare_runtime_parameter",
-            "jinja_templates/remove_runtime_parameter",
-            "jinja_templates/set_runtime_parameter",
-            "jinja_templates/set_stack_params",
+            "jinja_templates/cpp/declare_parameter",
+            "jinja_templates/cpp/set_parameter",
+            "jinja_templates/cpp/declare_struct",
+            "jinja_templates/cpp/parameter_library_header",
+            "jinja_templates/cpp/parameter_validation",
+            "jinja_templates/cpp/update_parameter",
+            "jinja_templates/cpp/update_runtime_parameter",
+            "jinja_templates/cpp/declare_runtime_parameter",
+            "jinja_templates/cpp/remove_runtime_parameter",
+            "jinja_templates/cpp/set_runtime_parameter",
+            "jinja_templates/cpp/set_stack_params",
         ]
     },
     zip_safe=False,
@@ -69,7 +69,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "generate_parameter_library_py = generate_parameter_library_py.main:main",
+            "generate_parameter_library_cpp = generate_parameter_library_py.generate_cpp_header:main",
         ],
     },
 )

@@ -28,9 +28,9 @@
 
 
 function(generate_parameter_library LIB_NAME YAML_FILE)
-  find_program(generate_parameter_library_py_BIN NAMES "generate_parameter_library_py")
-  if(NOT generate_parameter_library_py_BIN)
-    message(FATAL_ERROR "generate_parameter_library_py() variable 'generate_parameter_library_py_BIN' must not be empty")
+  find_program(generate_parameter_library_cpp_BIN NAMES "generate_parameter_library_cpp")
+  if(NOT generate_parameter_library_cpp_BIN)
+    message(FATAL_ERROR "generate_parameter_library_cpp() variable 'generate_parameter_library_cpp_BIN' must not be empty")
   endif()
 
   # Make the include directory
@@ -66,10 +66,10 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   # Generate the header for the library
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
-    COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
+    COMMAND ${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
     DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
     COMMENT
-    "Running `${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
+    "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
     VERBATIM
   )
 
