@@ -39,20 +39,7 @@ from typing import List, Optional
 from typeguard import typechecked
 from jinja2 import Template
 
-
-# YAMLSyntaxError standardizes compiler error messages
-class YAMLSyntaxError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
-
-
-# helper functions
-@typechecked
-def compile_error(msg: str):
-    return YAMLSyntaxError("\nERROR: " + msg)
+from generate_parameter_library_py.parse_yaml import YAMLSyntaxError, compile_error
 
 
 @typechecked
