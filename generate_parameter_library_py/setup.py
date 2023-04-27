@@ -6,25 +6,50 @@ package_name = "generate_parameter_library_py"
 
 setup(
     name=package_name,
-    version="0.1.0",
+    version="0.3.3",
     packages=find_packages(),
     data_files=[
         ("share/" + package_name, ["package.xml"]),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/wrong_default_type.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/missing_type.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/invalid_syntax.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/invalid_parameter_type.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/valid_parameters.yaml"],
+        ),
+        (
+            "share/" + package_name + "/test",
+            ["generate_parameter_library_py/test/valid_parameters_with_none_type.yaml"],
+        ),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
     install_requires=["setuptools", "typeguard", "jinja2"],
     package_data={
         "": [
-            "validators/validators.hpp",
             "jinja_templates/declare_parameter",
-            "jinja_templates/declare_parameter_set",
+            "jinja_templates/set_parameter",
             "jinja_templates/declare_struct",
-            "jinja_templates/parameter_listener",
+            "jinja_templates/parameter_library_header",
             "jinja_templates/parameter_validation",
             "jinja_templates/update_parameter",
-            "jinja_templates/dynamic_update_parameter",
-            "jinja_templates/dynamic_declare_parameter",
-            "jinja_templates/remove_dynamic_parameter",
+            "jinja_templates/update_runtime_parameter",
+            "jinja_templates/declare_runtime_parameter",
+            "jinja_templates/remove_runtime_parameter",
+            "jinja_templates/set_runtime_parameter",
+            "jinja_templates/set_stack_params",
         ]
     },
     zip_safe=False,

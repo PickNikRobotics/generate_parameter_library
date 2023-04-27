@@ -2,14 +2,15 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>generate_parameter_library_example</name>
-  <version>0.1.0</version>
+  <version>0.3.3</version>
   <description>Example usage of generate_parameter_library.</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
-  <depend>rclcpp</depend>
   <depend>generate_parameter_library</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

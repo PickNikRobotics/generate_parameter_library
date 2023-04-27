@@ -1,4 +1,8 @@
-if (!parameters_interface_->has_parameter(prefix_ + "{{parameter_name}}")) {
+for (const auto & value : {{param_struct_instance}}.{{mapped_param}}){
+{%- filter indent(width=4) %}
+auto& entry = {{param_struct_instance}}.{{parameter_map}}[value];
+auto param_name = fmt::format("{}{}.{}.{}", prefix_, "{{struct_name}}", value, "{{parameter_field}}");
+if (!parameters_interface_->has_parameter(param_name)) {
 {%- filter indent(width=4) %}
 rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = "{{parameter_description}}";
@@ -34,12 +38,15 @@ descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[0
 {%- endif %}
 {%- endif %}
 {%- endfor %}
-{%- if not parameter_value|length %}
+{%- if not default_value|length %}
 auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
 {% endif -%}
-{%- if parameter_value|length %}
-auto parameter = to_parameter_value(updated_params.{{parameter_value}});
+{%- if default_value|length %}
+auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
 {% endif -%}
-parameters_interface_->declare_parameter(prefix_ + "{{parameter_name}}", parameter, descriptor);
+parameters_interface_->declare_parameter(param_name, parameter, descriptor);
+{% endfilter -%}
+}
+{{set_runtime_parameter-}}
 {% endfilter -%}
 }

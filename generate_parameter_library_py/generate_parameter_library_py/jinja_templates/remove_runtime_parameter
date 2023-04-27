@@ -1,0 +1,9 @@
+{
+    std::set<std::string> {{mapped_param}}_set(updated_params.{{mapped_param}}.begin(), updated_params.{{mapped_param}}.end());
+    for (const auto &it: updated_params.{{parameter_map}}) {
+        if ({{mapped_param}}_set.find(it.first) == {{mapped_param}}_set.end()) {
+            auto param_name = fmt::format("{}{}.{}.{}", prefix_, "{{struct_name}}", it.first, "{{parameter_field}}");
+            parameters_interface_->undeclare_parameter(param_name);
+        }
+    }
+}

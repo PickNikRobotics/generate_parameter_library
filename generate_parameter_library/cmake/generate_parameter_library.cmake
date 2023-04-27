@@ -74,17 +74,53 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   )
 
   # Create the library target
-  add_library(${LIB_NAME} ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
-  target_include_directories(${LIB_NAME} PUBLIC
+  add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
+  target_include_directories(${LIB_NAME} INTERFACE
     $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include/>
+    $<INSTALL_INTERFACE:include/${LIB_NAME}>
   )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries(${LIB_NAME}
+  target_link_libraries(${LIB_NAME} INTERFACE
     fmt::fmt
     parameter_traits::parameter_traits
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
+    rsl::rsl
+    tcb_span::tcb_span
+    tl_expected::tl_expected
   )
-  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/)
+  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${LIB_NAME})
+endfunction()
+
+# create custom test function to pass yaml file into test main
+function(add_rostest_with_parameters_gtest TARGET SOURCES YAML_FILE)
+  add_executable(${TARGET} ${SOURCES})
+  _ament_cmake_gtest_find_gtest()
+  target_include_directories(${TARGET} PUBLIC "${GTEST_INCLUDE_DIRS}")
+  target_link_libraries(${TARGET} ${GTEST_LIBRARIES})
+  set(executable "$<TARGET_FILE:${TARGET}>")
+  set(result_file "${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.gtest.xml")
+  ament_add_test(
+    ${TARGET}
+    COMMAND ${executable} --ros-args --params-file ${YAML_FILE} --
+    --gtest_output=xml:${result_file}
+    OUTPUT_FILE ${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.txt
+    RESULT_FILE ${result_file}
+  )
+endfunction()
+
+function(add_rostest_with_parameters_gmock TARGET SOURCES YAML_FILE)
+  add_executable(${TARGET} ${SOURCES})
+  _ament_cmake_gmock_find_gmock()
+  target_include_directories(${TARGET} PUBLIC "${GMOCK_INCLUDE_DIRS}")
+  target_link_libraries(${TARGET} ${GMOCK_LIBRARIES})
+  set(executable "$<TARGET_FILE:${TARGET}>")
+  set(result_file "${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.gtest.xml")
+  ament_add_test(
+    ${TARGET}
+    COMMAND ${executable} --ros-args --params-file ${YAML_FILE} --
+    --gtest_output=xml:${result_file}
+    OUTPUT_FILE ${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${TARGET}.txt
+    RESULT_FILE ${result_file}
+  )
 endfunction()

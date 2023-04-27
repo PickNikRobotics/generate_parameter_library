@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.16)
 project(generate_parameter_library NONE)
 
 # find dependencies
@@ -6,7 +6,7 @@ find_package(ament_cmake REQUIRED)
 
 install(
   DIRECTORY cmake
-  DESTINATION share/${PROJECT_NAME}
+  DESTINATION share/generate_parameter_library
 )
 
 if(BUILD_TESTING)

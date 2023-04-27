@@ -1,5 +1,5 @@
 # generate_parameter_library
-Generate C++ for ROS 2 parameter declaration, getting, and validation using delcaritive YAML.
+Generate C++ for ROS 2 parameter declaration, getting, and validation using declarative YAML.
 The generated library contains a C++ struct with specified parameters.
 Additionally, dynamic parameters and custom validation are made easy.
 
@@ -17,6 +17,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 ### Create yaml parameter codegen file
 Write a yaml file to declare your parameters and their attributes.
 
+**src/turtlesim_parameters.yaml**
 ```yaml
 turtlesim:
   background:
@@ -25,7 +26,7 @@ turtlesim:
       default_value: 0,
       description: "Red color value for the background, 8-bit",
       validation: {
-        bounds: [0, 255]
+        bounds<>: [0, 255]
       }
     }
     g: {
@@ -33,7 +34,7 @@ turtlesim:
       default_value: 0,
       description: "Green color value for the background, 8-bit",
       validation: {
-        bounds: [0, 255]
+        bounds<>: [0, 255]
       }
     }
     b: {
@@ -41,7 +42,7 @@ turtlesim:
       default_value: 0,
       description: "Blue color value for the background, 8-bit",
       validation: {
-        bounds: [0, 255]
+        bounds<>: [0, 255]
       }
     }
 ```
@@ -62,7 +63,7 @@ generate_parameter_library(
   src/turtlesim_parameters.yaml # path to input yaml file
 )
 
-add_executable(turtlesim src/turtlesim.cpp)
+add_executable(minimal_node src/turtlesim.cpp)
 target_link_libraries(minimal_node PRIVATE
   rclcpp::rclcpp
   turtlesim_parameters
@@ -70,6 +71,8 @@ target_link_libraries(minimal_node PRIVATE
 ```
 
 ### Use generated struct into project source code
+
+**src/turtlesim.cpp**
 ```c++
 #include <rclcpp/rclcpp.hpp>
 #include "turtlesim_parameters.hpp"
@@ -89,6 +92,33 @@ int main(int argc, char * argv[])
   return 0;
 }
 ```
+
+### Use example yaml files in tests
+When using parameter library generation it can happen that there are issues when executing tests since parameters are not defined and the library defines them as mandatory.
+To overcome this it is recommended to define example yaml files for tests and use them as follows:
+
+```
+find_package(ament_cmake_gtest REQUIRED)
+add_rostest_with_parameters_gtest(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/example_turtlesim_parameters.yaml)
+target_include_directories(test_turtlesim_parameters PRIVATE include)
+target_link_libraries(test_turtlesim_parameters turtlesim_parameters)
+ament_target_dependencies(test_turtlesim_parameters rclcpp)
+```
+
+when using `gtest`, or:
+
+```
+find_package(ament_cmake_gmock REQUIRED)
+add_rostest_with_parameters_gmock(test_turtlesim_parameters test/test_turtlesim_parameters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/example_turtlesim_parameters.yaml)
+target_include_directories(test_turtlesim_parameters PRIVATE include)
+target_link_libraries(test_turtlesim_parameters turtlesim_parameters)
+ament_target_dependencies(test_turtlesim_parameters rclcpp)
+```
+when using `gmock` test library.
+
+🤖 P.S. having this example yaml files will make your users very grateful because they will always have a working example of a configuration for your node.
 
 ## Detailed Documentation
 * [Cpp namespace](#cpp-namespace)
@@ -150,10 +180,13 @@ The types of parameters in ros2 map to C++ types.
 | int_array       | `std::vector<int>`          |
 | bool_array      | `std::vector<bool>`         |
 | string_fixed_XX | `FixedSizeString<XX>`       |
+| none            | NO CODE GENERATED           |
 
 Fixed size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
 The corresponding C++ type is a data wrapper class for conveniently accessing the data.
 Note that any fixed size type will automatically use a `size_lt` validator. Validators are explained in the next section.
+
+The purpose of `none` type is purely documentation, and won't generate any C++ code. See [Parameter documentation](#parameter-documentation) for details.
 
 ### Built-In Validators
 Validators are C++ functions that take arguments represented by a key-value pair in yaml.
@@ -182,54 +215,75 @@ This will require this string_array to have these properties:
 * Values are only in the set `["position", "velocity", "acceleration", "effort",]`
 
 You will note that some validators have a suffix of `<>`, this tells the code generator to pass the C++ type of the parameter as a function template.
+Some of these validators work only on value types, some on string types, and others on array types.
 The built-in validator functions provided by this package are:
 
-| Function               | Arguments           | Description                                                           |
-|------------------------|---------------------|-----------------------------------------------------------------------|
-| unique<>               | []                  | Array type parameter contains no duplicates                           |
-| subset_of<>            | [[val1, val2, ...]] | Every element of array type parameter is contained within argument    |
-| fixed_size<>           | [length]            | Length of array or string is specified length                         |
-| size_gt<>              | [length]            | Length of array or string is greater than specified length            |
-| size_lt<>              | [length]            | Length of array or string is less less specified length               |
-| not_empty<>            | []                  | Array or string parameter is not empty                                |
-| element_bounds<>       | [lower, upper]      | Bounds checking for every element of array type parameter (inclusive) |
-| lower_element_bounds<> | [lower]             | Lower bound for every element of array type parameter (inclusive)     |
-| upper_element_bounds<> | [upper]             | Upper bound for every element of array type parameter (inclusive)     |
-| bounds<>               | [lower, upper]      | Bounds checking for a scalar type parameter (inclusive)               |
-| lower_bounds<>         | [lower]             | Lower bounds for a scalar type parameter (inclusive)                  |
-| upper_bounds<>         | [upper]             | Upper bounds for a scalar type parameter (inclusive)                  |
-| one_of<>               | [[val1, val2, ...]] | Scalar type parameter is one of the specified values                  |
+**Value validators**
+| Function               | Arguments           | Description                           |
+|------------------------|---------------------|---------------------------------------|
+| bounds<>               | [lower, upper]      | Bounds checking (inclusive)           |
+| lower_bounds<>         | [lower]             | Lower bounds [Deprecated, use `gt_eq`]|
+| upper_bounds<>         | [upper]             | Upper bounds [Deprecated, use `lt_eq`]|
+| lt<>                   | [value]             | parameter < value                     |
+| gt<>                   | [value]             | parameter > value                     |
+| lt_eq<>                | [value]             | parameter <= value (upper_bounds)     |
+| gt_eq<>                | [value]             | parameter >= value (lower_bounds)     |
+| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values  |
+
+**String validators**
+| Function               | Arguments           | Description                                     |
+|------------------------|---------------------|-------------------------------------------------|
+| fixed_size<>           | [length]            | Length string is specified length               |
+| size_gt<>              | [length]            | Length string is greater than specified length  |
+| size_lt<>              | [length]            | Length string is less less specified length     |
+| not_empty<>            | []                  | String parameter is not empty                   |
+| one_of<>               | [[val1, val2, ...]] | String is one of the specified values           |
+
+**Array validators**
+| Function               | Arguments           | Description                                          |
+|------------------------|---------------------|------------------------------------------------------|
+| unique<>               | []                  | Contains no duplicates                               |
+| subset_of<>            | [[val1, val2, ...]] | Every element is one of the list                     |
+| fixed_size<>           | [length]            | Number of elements is specified length               |
+| size_gt<>              | [length]            | Number of elements is greater than specified length  |
+| size_lt<>              | [length]            | Number of elements is less less specified length     |
+| not_empty<>            | []                  | Has at-least one element                             |
+| element_bounds<>       | [lower, upper]      | Bounds checking each element (inclusive)             |
+| lower_element_bounds<> | [lower]             | Lower bound for each element (inclusive)             |
+| upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)             |
 
 ### Custom validator functions
-Validators are functions that return a `Result` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
+Validators are functions that return a `tl::expected<void, std::string>` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
 Validators are C++ functions defined in a header file similar to the example shown below.
 
-The `Result` type has a alias `OK` that is shorthand for returning a successful validation.
-It also had a function `ERROR` that uses the expressive [fmt format](https://github.com/fmtlib/fmt) for constructing a human readable error.
-These come from the `parameter_traits` library.
-Note that you need to place your custom validators in the `parameter_traits` namespace.
+Here is an example custom allocator.
 
 ```c++
-#include <parameter_traits/parameter_traits.hpp>
+#include <rclcpp/rclcpp.hpp>
 
-namespace parameter_traits {
+#include <fmt/core.h>
+#include <tl_expected/expected.hpp>
 
-Result integer_equal_value(rclcpp::Parameter const& parameter, int expected_value) {
+namespace my_project {
+
+tl::expected<void, std::string> integer_equal_value(
+    rclcpp::Parameter const& parameter, int expected_value) {
   int param_value = parameter.as_int();
     if (param_value != expected_value) {
-        return ERROR("Invalid value {} for parameter {}. Expected {}",
-               param_value, parameter.get_name(), expected_value);
+        return tl::make_unexpected(fmt::format(
+            "Invalid value {} for parameter {}. Expected {}",
+            param_value, parameter.get_name(), expected_value);
     }
 
-  return OK;
+  return {};
 }
 
-}  // namespace parameter_traits
+}  // namespace my_project
 ```
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
 validation: {
-  integer_equal_value: [3]
+  "my_project::integer_equal_value": [3]
 }
 ```
 
@@ -269,6 +323,52 @@ if (param_listener->is_old(params_)) {
   params_ = param_listener->get_params();
 }
 ```
+
+### Parameter documentation
+
+In some case, parameters might be unknown only at compile-time, and cannot be part of the generated C++ code. However, for documentation purpose of such parameters, the type `none` was introduced.
+
+Parameters with `none` type won't generate any C++ code, but can exist to describe the expected name or namespace, that might be declared by an external piece of code and used in an override.
+
+A typical use case is a controller, loading pluginlib-based filters, that themselves require (and declare) parameters in a known structure.
+
+Example of declarative YAML
+
+```yaml
+force_torque_broadcaster_controller:
+  sensor_name: {
+    type: string,
+    default_value: "",
+    description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined.",
+  }
+  frame_id: {
+    type: string,
+    default_value: "",
+    description: "Sensor's frame_id in which values are published.",
+  }
+  sensor_filter_chain: {
+    type: none,
+    description: "Map of parameters that defines a filter chain, containing filterN as key and underlying map of parameters needed for a specific filter. See <some docs> for more details.",
+  }
+```
+
+Example of parameters for that controller
+
+```yaml
+force_torque_broadcaster_controller:
+  ros__parameters:
+    sensor_name: "fts_sensor"
+    frame_id: "fts_sensor_frame"
+    sensor_filter_chain:
+      filter1:
+        type: "control_filters/LowPassFilterWrench"
+        name: "low_pass_filter"
+        params:
+          sampling_frequency: 200.0
+          damping_frequency: 50.0
+          damping_intensity: 1.0
+```
+
 
 ### Example Project
 See [example project](example/) for a complete example of how to use the generate_parameter_library.
@@ -321,3 +421,20 @@ class ParamListener {
 } // namespace cpp_namespace
 ```
 The structure of the `Params` struct and the logic for declaring and updating parameters is generated from a YAML file specification.
+
+# FAQ
+
+Q. What happens if I declare a parameter twice? Will I get an error at runtime?
+A. The declare routine that is generated checks to see if each parameter has been declared first before declaring it. Because of this you can declare a parameter twice but it will only have the properties of the first time you declared it. Here is some example generated code.
+```cpp
+if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description = "Test scientific notation";
+    descriptor.read_only = false;
+    auto parameter = to_parameter_value(updated_params.scientific_notation_num);
+    parameters_interface_->declare_parameter(prefix_ + "scientific_notation_num", parameter, descriptor);
+}
+```
+
+Q: How do I log when parameters change?
+A. The generated library outputs debug logs whenever a parameter is read from ROS.

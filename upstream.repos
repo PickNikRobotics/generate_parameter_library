@@ -1,0 +1,5 @@
+repositories:
+  rsl:
+    type: git
+    url: https://github.com/picknikrobotics/RSL
+    version: main

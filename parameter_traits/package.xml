@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>parameter_traits</name>
-  <version>0.0.0</version>
+  <version>0.3.3</version>
   <description>Functions and types for rclcpp::Parameter</description>
   <maintainer email="maybe@tylerjw.dev">Tyler Weaver</maintainer>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
@@ -12,6 +12,9 @@
 
   <depend>fmt</depend>
   <depend>rclcpp</depend>
+  <depend>rsl</depend>
+  <depend>tcb_span</depend>
+  <depend>tl_expected</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>

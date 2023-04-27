@@ -1,0 +1,1 @@
+output.{{parameter_name}} = params.{{parameter_name}};

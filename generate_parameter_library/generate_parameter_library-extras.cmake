@@ -29,6 +29,9 @@
 find_package(fmt REQUIRED)
 find_package(parameter_traits REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
+find_package(tcb_span REQUIRED)
+find_package(tl_expected REQUIRED)
 
 include("${generate_parameter_library_DIR}/generate_parameter_library.cmake")

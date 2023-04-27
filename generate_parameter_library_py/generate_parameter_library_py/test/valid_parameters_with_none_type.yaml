@@ -1,0 +1,11 @@
+some_controller:
+  some_parameter: {
+    type: string,
+    default_value: "default",
+    description: "Test parameter that should generate code.",
+  }
+
+  some_external_parameter: {
+    type: none,
+    description: "Parameter that should not generate any code but must be accepted.",
+  }

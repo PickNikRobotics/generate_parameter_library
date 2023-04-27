@@ -27,6 +27,7 @@ jobs:
 
     env:
       BASEDIR: ${{ github.workspace }}/.work
+      UPSTREAM_WORKSPACE: upstream.repos
 
     name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
     runs-on: ubuntu-latest

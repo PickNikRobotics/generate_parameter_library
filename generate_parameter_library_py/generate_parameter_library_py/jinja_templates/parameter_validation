@@ -1,5 +1,5 @@
-if(auto validation_result = parameter_traits::{{validation_function}};
-  !validation_result.success()) {
+if(auto validation_result = {{validation_function}};
+  !validation_result) {
 {%- filter indent(width=4) %}
 {{invalid_effect}}
 {% endfilter -%}

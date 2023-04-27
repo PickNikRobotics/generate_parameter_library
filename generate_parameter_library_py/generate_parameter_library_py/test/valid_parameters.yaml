@@ -10,7 +10,7 @@ admittance_controller:
     description: "specifies which algorithm to use for interpolation.",
     validation: {
       one_of<>: [ [ "spline", "linear" ] ],
-      "custom_validators::no_args_validator": null
+      no_args_validator: null
     }
   }
   joints: {
@@ -18,12 +18,6 @@ admittance_controller:
     default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
   }
-  dof_names: {
-    type: string_array,
-    default_value: ["x", "y", "rz"],
-    description: "specifies which joints will be used by the controller",
-  }
-
   pid:
     rate: {
       type: double,
@@ -37,12 +31,11 @@ admittance_controller:
         default_value: 1.0,
         description: "proportional gain term",
         validation: {
-          gt_eq<>: [ 0.0001 ],
+          gt_eq<>: [ 0 ],
         }
       }
       i: {
         type: double,
-        default_value: 1.0,
         description: "integral gain term"
       }
       d: {
@@ -50,15 +43,6 @@ admittance_controller:
         default_value: 1.0,
         description: "derivative gain term"
       }
-
-  gains:
-    __map_dof_names:
-      k: {
-        type: double,
-        default_value: 2.0,
-        description: "general gain"
-      }
-
   fixed_string: {
     type: string_fixed_25,
     default_value: "string_value",
@@ -218,7 +202,7 @@ admittance_controller:
       The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
       validation: {
         fixed_size<>: 6,
-        "custom_validators::validate_double_array_custom_func": [ 20.3, 5.0 ],
+        validate_double_array_custom_func: [ 20.3, 5.0 ],
         element_bounds<>: [ 0.1, 10.0 ]
       }
     }
@@ -241,38 +225,4 @@ admittance_controller:
     type: bool,
     default_value: false,
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
-  }
-  lt_eq_fifteen: {
-    type: int,
-    default_value: 1,
-    description: "should be a number less than or equal to 15",
-    validation: {
-      lt_eq<>: [ 15 ],
-    }
-  }
-  gt_fifteen: {
-    type: int,
-    default_value: 16,
-    description: "should be a number greater than 15",
-    validation: {
-      gt<>: [ 15 ],
-    }
-  }
-  one_number: {
-    type: int,
-    default_value: 14540,
-    read_only: true,
-    validation: {
-      bounds<>: [ 1024, 65535 ]
-    }
-  }
-  three_numbers: {
-    type: int_array,
-    default_value: [3,4,5],
-    read_only: true,
-  }
-  three_numbers_of_five: {
-    type: int_array_fixed_5,
-    default_value: [3,3,3],
-    read_only: true,
   }
