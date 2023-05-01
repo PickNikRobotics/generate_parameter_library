@@ -1,0 +1,52 @@
+for (const auto & value : {{param_struct_instance}}.{{mapped_param}}){
+{%- filter indent(width=4) %}
+auto& entry = {{param_struct_instance}}.{{parameter_map}}[value];
+auto param_name = fmt::format("{}{}.{}.{}", prefix_, "{{struct_name}}", value, "{{parameter_field}}");
+if (!parameters_interface_->has_parameter(param_name)) {
+{%- filter indent(width=4) %}
+rcl_interfaces::msg::ParameterDescriptor descriptor;
+descriptor.description = "{{parameter_description}}";
+descriptor.read_only = {{parameter_read_only}};
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
+{%- if "DOUBLE" in parameter_type %}
+{%- if validation.arguments|length == 2 %}
+descriptor.floating_point_range.resize({{loop.index}});
+descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
+descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.floating_point_range.resize({{loop.index}});
+descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
+descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::max();
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.floating_point_range.resize({{loop.index}});
+descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::lowest();
+descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
+{%- endif %}
+{%- elif "INTEGER" in parameter_type %}
+{%- if validation.arguments|length == 2 %}
+descriptor.integer_range.resize({{loop.index}});
+descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
+descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.integer_range.resize({{loop.index}});
+descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
+descriptor.integer_range.at({{loop.index0}}).to_value = std::numeric_limits<int>::max();
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.integer_range.resize({{loop.index}});
+descriptor.integer_range.at({{loop.index0}}).from_value = std::numeric_limits<int>::lowest();
+descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+{%- if not default_value|length %}
+auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
+{% endif -%}
+{%- if default_value|length %}
+auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
+{% endif -%}
+parameters_interface_->declare_parameter(param_name, parameter, descriptor);
+{% endfilter -%}
+}
+{{set_runtime_parameter-}}
+{% endfilter -%}
+}

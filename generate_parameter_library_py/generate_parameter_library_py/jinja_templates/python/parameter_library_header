@@ -1,0 +1,213 @@
+{{comments}}
+
+#pragma once
+
+#include <algorithm>
+#include <array>
+#include <functional>
+#include <limits>
+#include <mutex>
+#include <rclcpp/node.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <set>
+#include <sstream>
+#include <string>
+#include <type_traits>
+#include <vector>
+
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+
+#include <parameter_traits/parameter_traits.hpp>
+
+#include <rsl/static_string.hpp>
+#include <rsl/static_vector.hpp>
+#include <rsl/parameter_validators.hpp>
+
+{% if user_validation_file|length -%}
+#include "{{user_validation_file}}"
+{% endif %}
+
+namespace {{namespace}} {
+
+// Use validators from RSL
+using rsl::unique;
+using rsl::subset_of;
+using rsl::fixed_size;
+using rsl::size_gt;
+using rsl::size_lt;
+using rsl::not_empty;
+using rsl::element_bounds;
+using rsl::lower_element_bounds;
+using rsl::upper_element_bounds;
+using rsl::bounds;
+using rsl::upper_bounds;
+using rsl::lower_bounds;
+using rsl::lt;
+using rsl::gt;
+using rsl::lt_eq;
+using rsl::gt_eq;
+using rsl::one_of;
+using rsl::to_parameter_result_msg;
+
+// temporarily needed for backwards compatibility for custom validators
+using namespace parameter_traits;
+
+template <typename T>
+[[nodiscard]] auto to_parameter_value(T value) {
+    return rclcpp::ParameterValue(value);
+}
+
+template <size_t capacity>
+[[nodiscard]] auto to_parameter_value(rsl::StaticString<capacity> const& value) {
+    return rclcpp::ParameterValue(rsl::to_string(value));
+}
+
+template <typename T, size_t capacity>
+[[nodiscard]] auto to_parameter_value(rsl::StaticVector<T, capacity> const& value) {
+    return rclcpp::ParameterValue(rsl::to_vector(value));
+}
+
+{%- filter indent(width=4) %}
+class Params:
+{%- filter indent(width=4) %}
+{{struct_content-}}
+# for detecting if the parameter struct has been updated
+__stamp = rclcpp::Time();
+{% endfilter -%}
+};
+{%- endfilter %}
+
+
+
+
+
+{%- filter indent(width=4) %}
+struct StackParams {
+{%- filter indent(width=4) %}
+{{stack_struct_content-}}
+{% endfilter -%}
+};
+{%- endfilter %}
+
+  class ParamListener{
+  public:
+    // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
+    ParamListener(rclcpp::Node::SharedPtr node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), prefix) {}
+
+    ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), prefix) {}
+
+    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface, std::string const& prefix = ""){
+      prefix_ = prefix;
+      if (!prefix_.empty() && prefix_.back() != '.') {
+        prefix_ += ".";
+      }
+
+      if (!prefix.empty()) {
+        logger_ = rclcpp::get_logger("{{namespace}}." + prefix);
+      }
+
+      parameters_interface_ = parameters_interface;
+      declare_params();
+      auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
+      handle_ = parameters_interface_->add_on_set_parameters_callback(update_param_cb);
+      clock_ = rclcpp::Clock();
+    }
+
+    Params get_params() const{
+      std::lock_guard<std::mutex> lock(mutex_);
+      return params_;
+    }
+
+    bool is_old(Params const& other) const {
+      std::lock_guard<std::mutex> lock(mutex_);
+      return params_.__stamp != other.__stamp;
+    }
+
+    StackParams get_stack_params() {
+      Params params = get_params();
+      StackParams output;
+
+{%- filter indent(width=6) %}
+{{set_stack_params}}
+{%- endfilter %}
+
+      return output;
+    }
+
+    void refresh_dynamic_parameters() {
+      auto updated_params = get_params();
+      // TODO remove any destroyed dynamic parameters
+{%- filter indent(width=6) %}
+{{remove_dynamic_parameters}}
+{%- endfilter %}
+      // declare any new dynamic parameters
+      rclcpp::Parameter param;
+{%- filter indent(width=6) %}
+{{update_declare_dynamic_parameters}}
+{%- endfilter %}
+    }
+
+    rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
+      auto updated_params = get_params();
+
+      for (const auto &param: parameters) {
+{%- filter indent(width=8) %}
+{{update_params_set}}
+{%- endfilter %}
+      }
+{% if update_dynamic_parameters|length %}
+      // update dynamic parameters
+      for (const auto &param: parameters) {
+{%- filter indent(width=8) %}
+{{update_dynamic_parameters}}
+{%- endfilter %}
+      }
+{%- endif %}
+      updated_params.__stamp = clock_.now();
+      update_interal_params(updated_params);
+      return rsl::to_parameter_result_msg({});
+    }
+
+    void declare_params(){
+      auto updated_params = get_params();
+      // declare all parameters and give default values to non-required ones
+{%- filter indent(width=6) %}
+{{declare_params}}
+{%- endfilter %}
+      // get parameters and fill struct fields
+      rclcpp::Parameter param;
+
+{%- filter indent(width=6) %}
+{{declare_params_set}}
+{%- endfilter %}
+{% if declare_set_dynamic_params|length %}
+{% filter indent(width=6) %}
+// declare and set all dynamic parameters
+{{declare_set_dynamic_params}}
+{%- endfilter %}
+{%- endif %}
+
+      updated_params.__stamp = clock_.now();
+      update_interal_params(updated_params);
+    }
+
+    private:
+      void update_interal_params(Params updated_params) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        params_ = updated_params;
+      }
+
+      std::string prefix_;
+      Params params_;
+      rclcpp::Clock clock_;
+      std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
+      std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
+      rclcpp::Logger logger_ = rclcpp::get_logger("{{namespace}}");
+      std::mutex mutable mutex_;
+  };
+
+} // namespace {{namespace}}

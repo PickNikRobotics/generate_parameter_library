@@ -35,6 +35,8 @@ import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
+from generate_parameter_library_py.CPPConvertions import CPPConverstions
+
 
 # YAMLSyntaxError standardizes compiler error messages
 class YAMLSyntaxError(Exception):
@@ -78,27 +80,8 @@ def pascal_case(string: str):
 
 
 @typechecked
-def initialization_fail_validation(param_name: str) -> str:
-    return (
-        f"throw rclcpp::exceptions::InvalidParameterValueException"
-        f'(fmt::format("Invalid value set during initialization for '
-        f"parameter '{param_name}': \" + validation_result.error()));"
-    )
-
-
-@typechecked
-def initialization_pass_validation(param_name: str) -> str:
-    return ""
-
-
-@typechecked
-def update_parameter_fail_validation() -> str:
-    return "return rsl::to_parameter_result_msg(validation_result);"
-
-
-@typechecked
-def update_parameter_pass_validation() -> str:
-    return ""
+def int_to_integer_str(value: str):
+    return value.replace("int", "integer")
 
 
 def get_dynamic_parameter_field(yaml_parameter_name: str):
@@ -153,210 +136,52 @@ def get_fixed_type(yaml_type: str):
     return get_fixed_base_type(yaml_type) + "_fixed"
 
 
-# value to c++ string conversion functions
-@typechecked
-def bool_to_str(cond: Optional[bool]):
-    if cond is None:
-        return ""
-    return "true" if cond else "false"
-
-
-@typechecked
-def float_to_str(num: Optional[float]):
-    if num is None:
-        return ""
-    str_num = str(num)
-    if str_num == "nan":
-        str_num = "std::numeric_limits<double>::quiet_NaN()"
-    elif str_num == "inf":
-        str_num = "std::numeric_limits<double>::infinity()"
-    elif str_num == "-inf":
-        str_num = "-std::numeric_limits<double>::infinity()"
-    else:
-        if len(str_num.split(".")) == 1 and not str_num.__contains__("e"):
-            str_num += ".0"
-
-    return str_num
-
-
-@typechecked
-def int_to_str(num: Optional[int]):
-    if num is None:
-        return ""
-    return str(num)
-
-
-@typechecked
-def str_to_str(s: Optional[str]):
-    if s is None:
-        return ""
-    return f'"{s}"'
-
-
-@typechecked
-def no_code(s: Optional[str]):
-    return ""
-
-
-@typechecked
-def bool_array_to_str(values: Optional[list]):
-    if values is None:
-        return ""
-    return "{" + ", ".join(bool_to_str(x) for x in values) + "}"
-
-
-@typechecked
-def float_array_to_str(values: Optional[list]):
-    if values is None:
-        return ""
-    return "{" + ", ".join(float_to_str(x) for x in values) + "}"
-
-
-@typechecked
-def int_array_to_str(values: Optional[list]):
-    if values is None:
-        return ""
-    return "{" + ", ".join(int_to_str(x) for x in values) + "}"
-
-
-@typechecked
-def str_array_to_str(s: Optional[list]):
-    if s is None:
-        return ""
-    return "{" + ", ".join(str_to_str(x) for x in s) + "}"
-
-
-@typechecked
-def str_array_fixed_to_str(s: Optional[list]):
-    raise compile_error("not implemented")
-
-
-@typechecked
-def str_fixed_to_str(s: Optional[str]):
-    if s is None:
-        return ""
-    return "{%s}" % str_to_str(s)
-
-
-@typechecked
-def float_array_fixed_to_str(values: Optional[list]):
-    if values is None:
-        return ""
-    return "{{" + ", ".join(float_to_str(x) for x in values) + "}}"
-
-
-@typechecked
-def int_array_fixed_to_str(values: Optional[list]):
-    if values is None:
-        return ""
-    return "{{" + ", ".join(int_to_str(x) for x in values) + "}}"
-
-
-@typechecked
-def bool_array_fixed_to_str(values: Optional[list]):
-    if values is None:
-        return ""
-    return "{{" + ", ".join(bool_to_str(x) for x in values) + "}}"
-
-
-@typechecked
-def int_to_integer_str(value: str):
-    return value.replace("int", "integer")
-
-
-# CLASSES!   #
-
-
 class CodeGenVariableBase:
-    defined_type_to_cpp_type = {
-        "none": lambda defined_type, templates: None,
-        "bool": lambda defined_type, templates: "bool",
-        "double": lambda defined_type, templates: "double",
-        "int": lambda defined_type, templates: "int64_t",
-        "string": lambda defined_type, templates: "std::string",
-        "bool_array": lambda defined_type, templates: "std::vector<bool>",
-        "double_array": lambda defined_type, templates: "std::vector<double>",
-        "int_array": lambda defined_type, templates: "std::vector<int64_t>",
-        "string_array": lambda defined_type, templates: "std::vector<std::string>",
-        "double_array_fixed": lambda defined_type, templates: f"rsl::StaticVector<{templates[0]}, {templates[1]}>",
-        "int_array_fixed": lambda defined_type, templates: f"rsl::StaticVector<{templates[0]}, {templates[1]}>",
-        "string_array_fixed": lambda defined_type, templates: f"rsl::StaticVector<{templates[0]}, {templates[1]}>",
-        "string_fixed": lambda defined_type, templates: f"rsl::StaticString<{templates[1]}>",
-    }
-    yaml_type_to_as_function = {
-        "none": None,
-        "string_array": "as_string_array()",
-        "double_array": "as_double_array()",
-        "int_array": "as_integer_array()",
-        "bool_array": "as_bool_array()",
-        "string": "as_string()",
-        "double": "as_double()",
-        "int": "as_int()",
-        "bool": "as_bool()",
-        "bool_array_fixed": "as_bool_array()",
-        "double_array_fixed": "as_double_array()",
-        "int_array_fixed": "as_integer_array()",
-        "string_array_fixed": "as_string_array()",
-        "string_fixed": "as_string()",
-    }
-    cpp_str_value_func = {
-        "none": no_code,
-        "bool": bool_to_str,
-        "double": float_to_str,
-        "int": int_to_str,
-        "string": str_to_str,
-        "bool_array": bool_array_to_str,
-        "double_array": float_array_to_str,
-        "int_array": int_array_to_str,
-        "string_array": str_array_to_str,
-        "bool_array_fixed": bool_array_fixed_to_str,
-        "double_array_fixed": float_array_fixed_to_str,
-        "int_array_fixed": int_array_fixed_to_str,
-        "string_array_fixed": str_array_fixed_to_str,
-        "string_fixed": str_fixed_to_str,
-    }
-    python_val_to_str_func = {
-        "<class 'bool'>": bool_to_str,
-        "<class 'float'>": float_to_str,
-        "<class 'int'>": int_to_str,
-        "<class 'str'>": str_to_str,
-    }
-    python_val_to_yaml_type = {
-        "<class 'bool'>": "bool",
-        "<class 'float'>": "double",
-        "<class 'int'>": "int",
-        "<class 'str'>": "str",
-    }
-    python_list_to_yaml_type = {
-        "<class 'bool'>": "bool_array",
-        "<class 'float'>": "double_array",
-        "<class 'int'>": "integer_array",
-        "<class 'str'>": "string_array",
-    }
 
     @typechecked
     def __init__(
-            self, name: str, param_name: str, defined_type: str, default_value: any
+            self, language: str, name: str, param_name: str, defined_type: str, default_value: any
     ):
+
+        if language == "cpp":
+            self.conversition = CPPConverstions()
+            # self.defined_type_to_cpp_type = CPPConverstions.defined_type_to_cpp_type
+            # self.cpp_str_value_func = CPPConverstions.cpp_str_value_func
+            # self.yaml_type_to_as_function = CPPConverstions.yaml_type_to_as_function
+            # self.python_val_to_str_func = CPPConverstions.python_val_to_str_func
+            # self.python_list_to_yaml_type = CPPConverstions.python_list_to_yaml_type
+            # self.python_val_to_yaml_type = CPPConverstions.python_val_to_yaml_type
+        elif language == "python":
+            self.conversition = PythonConverstions()
+            # self.defined_type_to_cpp_type = PythonConverstions.defined_type_to_cpp_type
+            # self.cpp_str_value_func = PythonConverstions.cpp_str_value_func
+            # self.yaml_type_to_as_function = PythonConverstions.yaml_type_to_as_function
+            # self.python_val_to_str_func = PythonConverstions.python_val_to_str_func
+            # self.python_list_to_yaml_type = PythonConverstions.python_list_to_yaml_type
+            # self.python_val_to_yaml_type = PythonConverstions.python_val_to_yaml_type
+        else:
+            raise compile_error("Invalid language, only c++ and python are currently supported.")
+
         self.name = name
         self.default_value = default_value
         self.name = name
         self.param_name = param_name
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
-        if self.defined_type not in self.defined_type_to_cpp_type:
-            allowed = ", ".join(key for key in self.defined_type_to_cpp_type)
+
+        if self.defined_type not in self.conversition.defined_type_to_cpp_type:
+            allowed = ", ".join(key for key in self.conversition.defined_type_to_cpp_type)
             raise compile_error(
                 f"Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: "
                 + allowed
             )
-        func = self.defined_type_to_cpp_type[self.defined_type]
+        func = self.conversition.defined_type_to_cpp_type[self.defined_type]
         self.cpp_type = func(self.defined_type, template)
         tmp = defined_type.split("_")
         self.defined_base_type = tmp[0]
-        func = self.defined_type_to_cpp_type[self.defined_base_type]
+        func = self.conversition.defined_type_to_cpp_type[self.defined_base_type]
         self.cpp_base_type = func(self.defined_base_type, template)
-        func = self.cpp_str_value_func[self.defined_type]
+        func = self.conversition.cpp_str_value_func[self.defined_type]
         try:
             self.cpp_str_value = func(default_value)
         except TypeError:
@@ -365,18 +190,18 @@ class CodeGenVariableBase:
             )
 
     def parameter_as_function_str(self):
-        if self.defined_type not in self.yaml_type_to_as_function:
+        if self.defined_type not in self.conversition.yaml_type_to_as_function:
             raise compile_error("invalid yaml type: %s" % type(self.defined_type))
-        return self.yaml_type_to_as_function[self.defined_type]
+        return self.conversition.yaml_type_to_as_function[self.defined_type]
 
     def get_python_val_to_str_func(self, arg):
-        return self.python_val_to_str_func[str(type(arg))]
+        return self.conversition.python_val_to_str_func[str(type(arg))]
 
     def get_yaml_type_from_python(self, arg):
         if isinstance(arg, list):
-            return self.python_list_to_yaml_type[str(type(arg[0]))]
+            return self.conversition.python_list_to_yaml_type[str(type(arg[0]))]
         else:
-            return self.python_val_to_yaml_type[str(type(arg[0]))]
+            return self.conversition.python_val_to_yaml_type[str(type(arg[0]))]
 
     def process_type(self, defined_type):
         raise NotImplemented()
@@ -398,7 +223,7 @@ class CodeGenFixedVariable(CodeGenVariableBase):
         size = fixed_type_size(defined_type)
         tmp = defined_type.split("_")
         yaml_base_type = tmp[0]
-        func = self.defined_type_to_cpp_type[yaml_base_type]
+        func = self.conversition.defined_type_to_cpp_type[yaml_base_type]
         cpp_base_type = func(yaml_base_type, None)
         defined_type = get_fixed_type(defined_type)
         return defined_type, (cpp_base_type, size)
@@ -427,7 +252,7 @@ class VariableDeclaration:
             "type": self.code_gen_variable.cpp_type,
             "name": self.code_gen_variable.name,
             "value": value,
-            }
+        }
 
         j2_template = Template(GenerateCode.templates["declare_variable"])
         code = j2_template.render(data, trim_blocks=True)
@@ -673,6 +498,7 @@ class DeclareParameter(DeclareParameterBase):
             self.parameter_value = ""
         else:
             self.parameter_value = self.parameter_name
+        bool_to_str = self.code_gen_variable.conversition.bool_to_str
 
         parameter_validations = self.parameter_validations
         data = {
@@ -720,6 +546,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         else:
             default_value = "non-empty"
 
+        bool_to_str = self.code_gen_variable.conversition.bool_to_str
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
@@ -792,7 +619,7 @@ def get_all_templates(language: str):
     return template_map
 
 
-def preprocess_inputs(name, value, nested_name_list):
+def preprocess_inputs(language, name, value, nested_name_list):
     # define parameter name
     param_name = "".join(x + "." for x in nested_name_list[1:]) + name
 
@@ -814,13 +641,13 @@ def preprocess_inputs(name, value, nested_name_list):
     # optional attributes
     default_value = value.get("default_value", None)
     if not is_fixed_type(defined_type):
-        code_gen_variable = CodeGenVariable(
-            name, param_name, defined_type, default_value
-        )
+        code_gen_variable = CodeGenVariable(language,
+                                            name, param_name, defined_type, default_value
+                                            )
     else:
-        code_gen_variable = CodeGenFixedVariable(
-            name, param_name, defined_type, default_value
-        )
+        code_gen_variable = CodeGenFixedVariable(language,
+                                                 name, param_name, defined_type, default_value
+                                                 )
 
     description = value.get("description", "")
     read_only = bool(value.get("read_only", False))
@@ -849,6 +676,7 @@ class GenerateCode:
 
     def __init__(self, language: str):
         GenerateCode.templates = get_all_templates(language)
+        self.language = language
         self.namespace = ""
         self.struct_tree = DeclareStruct("Params", [])
         self.stack_struct_tree = DeclareStruct("StackParams", [])
@@ -887,16 +715,16 @@ class GenerateCode:
             description,
             read_only,
             validations,
-        ) = preprocess_inputs(name, value, nested_name_list)
+        ) = preprocess_inputs(self.language, name, value, nested_name_list)
         # skip accepted params that do not generate code
         if code_gen_variable.cpp_type is None:
             return
 
         param_name = code_gen_variable.param_name
-        update_parameter_invalid = update_parameter_fail_validation()
-        update_parameter_valid = update_parameter_pass_validation()
-        declare_parameter_invalid = initialization_fail_validation(param_name)
-        declare_parameter_valid = initialization_pass_validation(param_name)
+        update_parameter_invalid = code_gen_variable.conversition.update_parameter_fail_validation()
+        update_parameter_valid = code_gen_variable.conversition.update_parameter_pass_validation()
+        declare_parameter_invalid = code_gen_variable.conversition.initialization_fail_validation(param_name)
+        declare_parameter_valid = code_gen_variable.conversition.initialization_pass_validation(param_name)
 
         # add variable to struct
         var = VariableDeclaration(code_gen_variable)

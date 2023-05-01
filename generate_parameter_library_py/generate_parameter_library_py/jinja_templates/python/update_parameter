@@ -1,0 +1,9 @@
+if (param.get_name() == (prefix_ + "{{parameter_name}}")) {
+{%- filter indent(width=4) %}
+{% if parameter_validations|length -%}
+{{parameter_validations-}}
+{% endif -%}
+updated_params.{{parameter_name}} = param.{{parameter_as_function}};
+RCLCPP_DEBUG_STREAM(logger_, param.get_name() << ": " << param.get_type_name() << " = " << param.value_to_string());
+{% endfilter -%}
+}
