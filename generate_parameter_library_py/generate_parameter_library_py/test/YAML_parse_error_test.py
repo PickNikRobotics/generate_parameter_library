@@ -19,7 +19,11 @@ import pytest
 from unittest.mock import patch
 import sys
 import os
-from generate_parameter_library_py.main import GenerateCode, YAMLSyntaxError
+from generate_parameter_library_py.generate_cpp_header import (
+    GenerateCode,
+    YAMLSyntaxError,
+    parse_args,
+)
 from ament_index_python.packages import get_package_share_path
 
 
@@ -30,8 +34,9 @@ def set_up(yaml_test_file):
     testargs = [sys.argv[0], "/tmp/admittance_controller.h", full_file_path]
 
     with patch.object(sys, "argv", testargs):
+        args = parse_args()
         gen_param_struct = GenerateCode()
-        gen_param_struct.run()
+        gen_param_struct.run(args)
 
 
 # class TestViewValidCodeGen(unittest.TestCase):
