@@ -415,13 +415,23 @@ class VariableDeclaration:
 
     def __str__(self):
         value = self.code_gen_variable.cpp_str_value
-        if len(value) > 0:
-            declare_str = f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name} = {value};\n"
-        else:
-            declare_str = (
-                f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name};\n"
-            )
-        return declare_str
+        # if len(value) > 0:
+        #     declare_str = f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name} = {value};\n"
+        # else:
+        #     declare_str = (
+        #         f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name};\n"
+        #     )
+        # return declare_str
+
+        data = {
+            "type": self.code_gen_variable.cpp_type,
+            "name": self.code_gen_variable.name,
+            "value": value,
+            }
+
+        j2_template = Template(GenerateCode.templates["declare_variable"])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
 
 
 class DeclareStruct:
@@ -768,8 +778,8 @@ class RemoveRuntimeParameter:
         return code
 
 
-def get_all_templates():
-    template_path = os.path.join(os.path.dirname(__file__), "jinja_templates", "cpp")
+def get_all_templates(language: str):
+    template_path = os.path.join(os.path.dirname(__file__), "jinja_templates", language)
     template_map = {}
     for file_name in [
         f
@@ -835,9 +845,10 @@ def preprocess_inputs(name, value, nested_name_list):
 
 # class used to generate c++ code from yaml file
 class GenerateCode:
-    templates = get_all_templates()
+    templates = None
 
-    def __init__(self):
+    def __init__(self, language: str):
+        GenerateCode.templates = get_all_templates(language)
         self.namespace = ""
         self.struct_tree = DeclareStruct("Params", [])
         self.stack_struct_tree = DeclareStruct("StackParams", [])

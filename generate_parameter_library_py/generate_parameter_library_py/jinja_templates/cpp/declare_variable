@@ -1,0 +1,5 @@
+{% if value|length -%}
+{{type}} {{name}} = {{value}};
+{% else -%}
+{{type}} {{name}};
+{% endif -%}

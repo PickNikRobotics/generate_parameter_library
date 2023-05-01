@@ -61,7 +61,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    gen_param_struct = GenerateCode()
+    gen_param_struct = GenerateCode("cpp")
     run(gen_param_struct, args)
 
 
