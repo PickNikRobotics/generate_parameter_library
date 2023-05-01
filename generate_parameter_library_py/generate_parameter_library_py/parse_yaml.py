@@ -35,6 +35,7 @@ import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
+
 # YAMLSyntaxError standardizes compiler error messages
 class YAMLSyntaxError(Exception):
     def __init__(self, msg):
@@ -86,7 +87,7 @@ def initialization_fail_validation(param_name: str) -> str:
 
 
 @typechecked
-def initialization_pass_validation(param_name: str, parameter_conversion: str) -> str:
+def initialization_pass_validation(param_name: str) -> str:
     return ""
 
 
@@ -261,6 +262,9 @@ def bool_array_fixed_to_str(values: Optional[list]):
 @typechecked
 def int_to_integer_str(value: str):
     return value.replace("int", "integer")
+
+
+# CLASSES!   #
 
 
 class CodeGenVariableBase:
@@ -536,9 +540,9 @@ class ParameterValidation:
 
 class UpdateParameterBase:
     @typechecked
-    def __init__(self, parameter_name: str, parameter_as_function: str):
+    def __init__(self, parameter_name: str, code_gen_variable: CodeGenVariableBase):
         self.parameter_name = parameter_name
-        self.parameter_as_function = parameter_as_function
+        self.parameter_as_function = code_gen_variable.parameter_as_function_str()
         self.parameter_validations = []
 
     @typechecked
@@ -597,9 +601,9 @@ class SetStackParams:
 
 class SetParameterBase:
     @typechecked
-    def __init__(self, parameter_name: str, parameter_as_function: str):
+    def __init__(self, parameter_name: str, code_gen_variable: CodeGenVariableBase):
         self.parameter_name = parameter_name
-        self.parameter_as_function = parameter_as_function
+        self.parameter_as_function = code_gen_variable.parameter_as_function_str()
         self.parameter_validations = []
 
     @typechecked
@@ -880,11 +884,8 @@ class GenerateCode:
         param_name = code_gen_variable.param_name
         update_parameter_invalid = update_parameter_fail_validation()
         update_parameter_valid = update_parameter_pass_validation()
-        parameter_conversion = code_gen_variable.parameter_as_function_str()
         declare_parameter_invalid = initialization_fail_validation(param_name)
-        declare_parameter_valid = initialization_pass_validation(
-            param_name, parameter_conversion
-        )
+        declare_parameter_valid = initialization_pass_validation(param_name)
 
         # add variable to struct
         var = VariableDeclaration(code_gen_variable)
@@ -894,19 +895,19 @@ class GenerateCode:
 
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(
-                param_name, parameter_conversion
+                param_name, code_gen_variable
             )
             declare_parameter = DeclareRuntimeParameter(
                 code_gen_variable, description, read_only, validations
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
-            update_parameter = UpdateRuntimeParameter(param_name, parameter_conversion)
+            update_parameter = UpdateRuntimeParameter(param_name, code_gen_variable)
         else:
             declare_parameter = DeclareParameter(
                 code_gen_variable, description, read_only, validations
             )
-            declare_parameter_set = SetParameter(param_name, parameter_conversion)
-            update_parameter = UpdateParameter(param_name, parameter_conversion)
+            declare_parameter_set = SetParameter(param_name, code_gen_variable)
+            update_parameter = UpdateParameter(param_name, code_gen_variable)
 
         # set parameter
         for validation_function in validations:
