@@ -1,7 +1,8 @@
-import admittance_controller_parameters
+from admittance_parameters import admittance_controller
 
 def main():
-    print('Hi from generate_parameter_module_example.')
+    params = admittance_controller.Params()
+    pass
 
 
 if __name__ == '__main__':

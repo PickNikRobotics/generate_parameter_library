@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Copyright 2022 PickNik Inc.
+# Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,42 +27,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import argparse
 import sys
 import os
-
 from generate_parameter_library_py.parse_yaml import GenerateCode
+from generate_parameter_library_py.generate_python_header import run
+
+# TODO there must be a better way to do this
+build_dir = None
+# Look for the `--build-directory` option in the command line arguments
+for i, arg in enumerate(sys.argv):
+    if arg == '--build-directory':
+        build_dir = sys.argv[i + 1]
+        tmp = os.path.split(build_dir)
+        build_dir = os.path.join(*tmp[:-1])
+        break
 
 
-def run(output_file, yaml_file, validate_header=None):
-    gen_param_struct = GenerateCode("python")
-    output_dir = os.path.dirname(output_file)
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
-
-    gen_param_struct.parse(yaml_file, validate_header)
-
-    code = str(gen_param_struct)
-    with open(output_file, "w") as f:
-        f.write(code)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("output_cpp_header_file")
-    parser.add_argument("input_yaml_file")
-    parser.add_argument("validate_header", nargs="?", default="")
-    return parser.parse_args()
-
-
-def main():
-    args = parse_args()
-    output_file = args.output_cpp_header_file
-    yaml_file = args.input_yaml_file
-    validate_header = args.validate_header
-
-    run(output_file, yaml_file, validate_header)
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+def generate_parameter_module(module_name, yaml_file):
+    if build_dir:
+        run(os.path.join(build_dir, module_name + ".py"), yaml_file)
