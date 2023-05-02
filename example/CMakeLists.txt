@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 project(generate_parameter_library_example)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(rclpy REQUIRED)
 
 generate_parameter_library(admittance_controller_parameters
   src/parameters.yaml
