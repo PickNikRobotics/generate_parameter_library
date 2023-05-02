@@ -371,7 +371,7 @@ force_torque_broadcaster_controller:
 
 
 ### Example Project
-See [example project](example/) for a complete example of how to use the generate_parameter_library.
+See [example project](examples/) for a complete example of how to use the generate_parameter_library.
 
 ### Generated code output
 The generated code is primarily consists of two major components:

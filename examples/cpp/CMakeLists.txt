@@ -9,12 +9,12 @@ find_package(rclcpp_components REQUIRED)
 find_package(rclpy REQUIRED)
 
 generate_parameter_library(admittance_controller_parameters
-  src/parameters.yaml
-  include/generate_parameter_library_example/example_validators.hpp
+        src/parameters.yaml
+        include/generate_parameter_library_example/example_validators.hpp
 )
 
 add_library(minimal_publisher SHARED
-  src/minimal_publisher.cpp
+        src/minimal_publisher.cpp
 )
 target_include_directories(minimal_publisher PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -41,24 +41,24 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   # example_test_gtest
   add_rostest_with_parameters_gtest(test_example_gtest test/example_test_gtest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
+          test/example_params.yaml)
   target_include_directories(test_example_gtest PRIVATE include)
   target_link_libraries(test_example_gtest admittance_controller_parameters rclcpp::rclcpp)
   # descriptor_test_gtest
   add_rostest_with_parameters_gtest(test_descriptor_gtest test/descriptor_test_gtest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
+          test/example_params.yaml)
   target_include_directories(test_descriptor_gtest PRIVATE include)
   target_link_libraries(test_descriptor_gtest admittance_controller_parameters rclcpp::rclcpp)
 
   find_package(ament_cmake_gmock REQUIRED)
   add_rostest_with_parameters_gmock(test_example_gmock test/example_test_gmock.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
+          test/example_params.yaml)
   target_include_directories(test_example_gmock PRIVATE include)
   target_link_libraries(test_example_gmock admittance_controller_parameters rclcpp::rclcpp)
 endif()
 
 install(
-  DIRECTORY include/
+  DIRECTORY include
   DESTINATION include/generate_parameter_library_example
 )
 
