@@ -1,95 +1,21 @@
 {{comments}}
 
-#pragma once
+import rclpy
+from rclpy.time import Time
 
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <limits>
-#include <mutex>
-#include <rclcpp/node.hpp>
-#include <rclcpp_lifecycle/lifecycle_node.hpp>
-#include <set>
-#include <sstream>
-#include <string>
-#include <type_traits>
-#include <vector>
-
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <fmt/ranges.h>
-
-#include <parameter_traits/parameter_traits.hpp>
-
-#include <rsl/static_string.hpp>
-#include <rsl/static_vector.hpp>
-#include <rsl/parameter_validators.hpp>
-
-{% if user_validation_file|length -%}
-#include "{{user_validation_file}}"
-{% endif %}
-
-namespace {{namespace}} {
-
-// Use validators from RSL
-using rsl::unique;
-using rsl::subset_of;
-using rsl::fixed_size;
-using rsl::size_gt;
-using rsl::size_lt;
-using rsl::not_empty;
-using rsl::element_bounds;
-using rsl::lower_element_bounds;
-using rsl::upper_element_bounds;
-using rsl::bounds;
-using rsl::upper_bounds;
-using rsl::lower_bounds;
-using rsl::lt;
-using rsl::gt;
-using rsl::lt_eq;
-using rsl::gt_eq;
-using rsl::one_of;
-using rsl::to_parameter_result_msg;
-
-// temporarily needed for backwards compatibility for custom validators
-using namespace parameter_traits;
-
-template <typename T>
-[[nodiscard]] auto to_parameter_value(T value) {
-    return rclcpp::ParameterValue(value);
-}
-
-template <size_t capacity>
-[[nodiscard]] auto to_parameter_value(rsl::StaticString<capacity> const& value) {
-    return rclcpp::ParameterValue(rsl::to_string(value));
-}
-
-template <typename T, size_t capacity>
-[[nodiscard]] auto to_parameter_value(rsl::StaticVector<T, capacity> const& value) {
-    return rclcpp::ParameterValue(rsl::to_vector(value));
-}
-
+class {{namespace}}:
 {%- filter indent(width=4) %}
 class Params:
 {%- filter indent(width=4) %}
 {{struct_content-}}
 # for detecting if the parameter struct has been updated
-__stamp = rclcpp::Time();
+__stamp = Time()
 {% endfilter -%}
-};
 {%- endfilter %}
 
 
 
 
-
-{%- filter indent(width=4) %}
-struct StackParams {
-{%- filter indent(width=4) %}
-{{stack_struct_content-}}
-{% endfilter -%}
-};
-{%- endfilter %}
 
   class ParamListener{
   public:

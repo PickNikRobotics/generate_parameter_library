@@ -8,7 +8,6 @@ class __{{struct_name}} :
 {% endif -%}
 {% endfilter -%}
 {% if struct_instance|length -%}
-}
 {{struct_instance}} = __{{struct_name}}()
 {% endif -%}
 {% if not struct_instance|length -%}

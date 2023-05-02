@@ -36,6 +36,7 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 from generate_parameter_library_py.CPPConvertions import CPPConverstions
+from generate_parameter_library_py.PythonConvertions import PythonConvertions
 
 
 # YAMLSyntaxError standardizes compiler error messages
@@ -144,21 +145,9 @@ class CodeGenVariableBase:
     ):
 
         if language == "cpp":
-            self.conversition = CPPConverstions()
-            # self.defined_type_to_cpp_type = CPPConverstions.defined_type_to_cpp_type
-            # self.cpp_str_value_func = CPPConverstions.cpp_str_value_func
-            # self.yaml_type_to_as_function = CPPConverstions.yaml_type_to_as_function
-            # self.python_val_to_str_func = CPPConverstions.python_val_to_str_func
-            # self.python_list_to_yaml_type = CPPConverstions.python_list_to_yaml_type
-            # self.python_val_to_yaml_type = CPPConverstions.python_val_to_yaml_type
+            self.conversation = CPPConverstions()
         elif language == "python":
-            self.conversition = PythonConverstions()
-            # self.defined_type_to_cpp_type = PythonConverstions.defined_type_to_cpp_type
-            # self.cpp_str_value_func = PythonConverstions.cpp_str_value_func
-            # self.yaml_type_to_as_function = PythonConverstions.yaml_type_to_as_function
-            # self.python_val_to_str_func = PythonConverstions.python_val_to_str_func
-            # self.python_list_to_yaml_type = PythonConverstions.python_list_to_yaml_type
-            # self.python_val_to_yaml_type = PythonConverstions.python_val_to_yaml_type
+            self.conversation = PythonConvertions()
         else:
             raise compile_error("Invalid language, only c++ and python are currently supported.")
 
@@ -169,19 +158,19 @@ class CodeGenVariableBase:
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
 
-        if self.defined_type not in self.conversition.defined_type_to_cpp_type:
-            allowed = ", ".join(key for key in self.conversition.defined_type_to_cpp_type)
+        if self.defined_type not in self.conversation.defined_type_to_cpp_type:
+            allowed = ", ".join(key for key in self.conversation.defined_type_to_cpp_type)
             raise compile_error(
                 f"Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: "
                 + allowed
             )
-        func = self.conversition.defined_type_to_cpp_type[self.defined_type]
+        func = self.conversation.defined_type_to_cpp_type[self.defined_type]
         self.cpp_type = func(self.defined_type, template)
         tmp = defined_type.split("_")
         self.defined_base_type = tmp[0]
-        func = self.conversition.defined_type_to_cpp_type[self.defined_base_type]
+        func = self.conversation.defined_type_to_cpp_type[self.defined_base_type]
         self.cpp_base_type = func(self.defined_base_type, template)
-        func = self.conversition.cpp_str_value_func[self.defined_type]
+        func = self.conversation.cpp_str_value_func[self.defined_type]
         try:
             self.cpp_str_value = func(default_value)
         except TypeError:
@@ -190,18 +179,18 @@ class CodeGenVariableBase:
             )
 
     def parameter_as_function_str(self):
-        if self.defined_type not in self.conversition.yaml_type_to_as_function:
+        if self.defined_type not in self.conversation.yaml_type_to_as_function:
             raise compile_error("invalid yaml type: %s" % type(self.defined_type))
-        return self.conversition.yaml_type_to_as_function[self.defined_type]
+        return self.conversation.yaml_type_to_as_function[self.defined_type]
 
     def get_python_val_to_str_func(self, arg):
-        return self.conversition.python_val_to_str_func[str(type(arg))]
+        return self.conversation.python_val_to_str_func[str(type(arg))]
 
     def get_yaml_type_from_python(self, arg):
         if isinstance(arg, list):
-            return self.conversition.python_list_to_yaml_type[str(type(arg[0]))]
+            return self.conversation.python_list_to_yaml_type[str(type(arg[0]))]
         else:
-            return self.conversition.python_val_to_yaml_type[str(type(arg[0]))]
+            return self.conversation.python_val_to_yaml_type[str(type(arg[0]))]
 
     def process_type(self, defined_type):
         raise NotImplemented()
@@ -223,7 +212,7 @@ class CodeGenFixedVariable(CodeGenVariableBase):
         size = fixed_type_size(defined_type)
         tmp = defined_type.split("_")
         yaml_base_type = tmp[0]
-        func = self.conversition.defined_type_to_cpp_type[yaml_base_type]
+        func = self.conversation.defined_type_to_cpp_type[yaml_base_type]
         cpp_base_type = func(yaml_base_type, None)
         defined_type = get_fixed_type(defined_type)
         return defined_type, (cpp_base_type, size)
@@ -240,14 +229,6 @@ class VariableDeclaration:
 
     def __str__(self):
         value = self.code_gen_variable.cpp_str_value
-        # if len(value) > 0:
-        #     declare_str = f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name} = {value};\n"
-        # else:
-        #     declare_str = (
-        #         f"{self.code_gen_variable.cpp_type} {self.code_gen_variable.name};\n"
-        #     )
-        # return declare_str
-
         data = {
             "type": self.code_gen_variable.cpp_type,
             "name": self.code_gen_variable.name,
@@ -331,6 +312,7 @@ class ValidationFunction:
             self.arguments = []
 
     def __str__(self):
+        # TODO the c++ code here should be moved to a jinja template
         code = self.function_name + "(param"
         for arg in self.arguments:
             if isinstance(arg, list):
@@ -498,7 +480,7 @@ class DeclareParameter(DeclareParameterBase):
             self.parameter_value = ""
         else:
             self.parameter_value = self.parameter_name
-        bool_to_str = self.code_gen_variable.conversition.bool_to_str
+        bool_to_str = self.code_gen_variable.conversation.bool_to_str
 
         parameter_validations = self.parameter_validations
         data = {
@@ -546,7 +528,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         else:
             default_value = "non-empty"
 
-        bool_to_str = self.code_gen_variable.conversition.bool_to_str
+        bool_to_str = self.code_gen_variable.conversation.bool_to_str
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
         mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
@@ -688,7 +670,12 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.set_stack_params = []
-        self.comments = "// auto-generated DO NOT EDIT"
+        if language=="cpp":
+            self.comments = "// auto-generated DO NOT EDIT"
+        elif language=="python":
+            self.comments = "# auto-generated DO NOT EDIT"
+        else:
+            assert(0) # not uspported
         self.user_validation_file = ""
 
     def parse(self, yaml_file, validate_header):
@@ -721,10 +708,10 @@ class GenerateCode:
             return
 
         param_name = code_gen_variable.param_name
-        update_parameter_invalid = code_gen_variable.conversition.update_parameter_fail_validation()
-        update_parameter_valid = code_gen_variable.conversition.update_parameter_pass_validation()
-        declare_parameter_invalid = code_gen_variable.conversition.initialization_fail_validation(param_name)
-        declare_parameter_valid = code_gen_variable.conversition.initialization_pass_validation(param_name)
+        update_parameter_invalid = code_gen_variable.conversation.update_parameter_fail_validation()
+        update_parameter_valid = code_gen_variable.conversation.update_parameter_pass_validation()
+        declare_parameter_invalid = code_gen_variable.conversation.initialization_fail_validation(param_name)
+        declare_parameter_valid = code_gen_variable.conversation.initialization_pass_validation(param_name)
 
         # add variable to struct
         var = VariableDeclaration(code_gen_variable)
