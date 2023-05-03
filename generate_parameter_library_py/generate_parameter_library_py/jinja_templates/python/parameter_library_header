@@ -52,6 +52,7 @@ def __init__(self):
 
         def update(self, parameters):
             updated_params = self.get_params()
+            # TODO: need validation and dynamic parameters
 
             for param in parameters:
 {%- filter indent(width=16) %}
@@ -75,6 +76,9 @@ def __init__(self):
 {%- filter indent(width=12) %}
 {{declare_params}}
 {%- endfilter %}
+            # get parameters and fill struct fields
+            # TODO: need to update params with current values from get_parameter
+            # TODO: need validation
 
 
 
