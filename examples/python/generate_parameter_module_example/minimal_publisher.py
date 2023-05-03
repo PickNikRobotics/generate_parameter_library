@@ -9,27 +9,20 @@ class MinimalParam(rclpy.node.Node):
         super().__init__('minimal_param_node')
         self.timer = self.create_timer(1, self.timer_callback)
 
+        self.param_listener = admittance_controller.ParamListener(self)
+        self.params = self.param_listener.get_params()
+        self.get_logger().info("Initial control frame parameter is: '%s'" % self.params.control.frame.id)
+
+        self.get_logger().info("Original joints parameter is: '%s'" % str(self.params.joints))
+
     def timer_callback(self):
-        my_param = self.get_parameter('my_parameter').get_parameter_value().string_value
-
-        self.get_logger().info('Hello %s!' % my_param)
-
-        my_new_param = rclpy.parameter.Parameter(
-            'my_parameter',
-            rclpy.Parameter.Type.STRING,
-            'world'
-        )
-        all_new_parameters = [my_new_param]
-        self.set_parameters(all_new_parameters)
+        self.params = self.param_listener.get_params()
+        self.get_logger().info("New joints parameter is: '%s'" % str(self.params.joints))
 
 
 def main():
     rclpy.init()
     node = MinimalParam()
-
-    paramListener = admittance_controller.ParamListener(node)
-    params = paramListener.get_params()
-
     rclpy.spin(node)
 
 
