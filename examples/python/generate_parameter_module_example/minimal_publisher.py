@@ -6,7 +6,7 @@ from admittance_parameters import admittance_controller
 
 class MinimalParam(rclpy.node.Node):
     def __init__(self):
-        super().__init__('minimal_param_node')
+        super().__init__('admittance_controller')
         self.timer = self.create_timer(1, self.timer_callback)
 
         self.param_listener = admittance_controller.ParamListener(self)
@@ -20,11 +20,13 @@ class MinimalParam(rclpy.node.Node):
         self.get_logger().info("New joints parameter is: '%s'" % str(self.params.joints))
 
 
-def main():
-    rclpy.init()
+def main(args2=None):
+    rclpy.init(args=args2)
     node = MinimalParam()
     rclpy.spin(node)
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    import sys
+    args = sys.argv
+    main(args)

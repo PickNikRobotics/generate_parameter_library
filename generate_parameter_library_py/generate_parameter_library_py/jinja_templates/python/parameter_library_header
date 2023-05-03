@@ -76,9 +76,14 @@ def __init__(self):
 {%- filter indent(width=12) %}
 {{declare_params}}
 {%- endfilter %}
-            # get parameters and fill struct fields
-            # TODO: need to update params with current values from get_parameter
             # TODO: need validation
+            # get parameters and fill struct fields
+
+{%- filter indent(width=12) %}
+{{declare_params_set}}
+{%- endfilter %}
+
+            self.update_internal_params(updated_params)
 
 
 
