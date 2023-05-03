@@ -20,13 +20,11 @@ class MinimalParam(rclpy.node.Node):
         self.get_logger().info("New joints parameter is: '%s'" % str(self.params.joints))
 
 
-def main(args2=None):
-    rclpy.init(args=args2)
+def main(args=None):
+    rclpy.init(args=args)
     node = MinimalParam()
     rclpy.spin(node)
 
 
 if __name__ == "__main__":
-    import sys
-    args = sys.argv
-    main(args)
+    main()

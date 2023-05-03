@@ -6,8 +6,8 @@ import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
-# from generate_parameter_library_py.parse_yaml import compile_error
 
+# from generate_parameter_library_py.parse_yaml import compile_error
 
 
 class PythonConvertions:
@@ -83,15 +83,19 @@ class PythonConvertions:
 
     @typechecked
     def get_func_signature(self, function_name: str, base_type: str) -> str:
-        # broken! : custom_validators::validate_double_array_custom_fu
-        return function_name[:-2]
+        if function_name.__contains__("::"):
+            # user defined function
+            function_name = function_name.replace("::", ".")
+        else:
+            function_name = "ParameterValidators." + function_name
+        if function_name.__contains__("<>"):
+            function_name = function_name.replace("<>", "")
+        return function_name
 
     @typechecked
     def initialization_fail_validation(self, param_name: str) -> str:
         return (
-            f"throw rclcpp::exceptions::InvalidParameterValueException"
-            f'(fmt::format("Invalid value set during initialization for '
-            f"parameter '{param_name}': \" + validation_result.error()));"
+            f"raise InvalidParameterValueException('Invalid value set during initialization for parameter {param_name}: ' + validation_result)"
         )
 
     @typechecked
@@ -100,7 +104,7 @@ class PythonConvertions:
 
     @typechecked
     def update_parameter_fail_validation(self) -> str:
-        return "return rsl::to_parameter_result_msg(validation_result);"
+        return "return SetParametersResult(successful=False, reason=validation_result)"
 
     @typechecked
     def update_parameter_pass_validation(self) -> str:

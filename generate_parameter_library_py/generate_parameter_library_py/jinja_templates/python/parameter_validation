@@ -1,5 +1,5 @@
 validation_result = {{validation_function}}
-if not validation_result:
+if validation_result:
 {%- filter indent(width=4) %}
 {{invalid_effect}}
 {% endfilter -%}
