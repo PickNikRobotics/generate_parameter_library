@@ -1,10 +1,12 @@
 {{comments}}
 
 from rcl_interfaces.msg import ParameterDescriptor
+from rcl_interfaces.msg import SetParametersResult
 from rclpy.clock import Clock
 from rclpy.time import Time
 import copy
 import rclpy
+
 
 class {{namespace}}:
 {%- filter indent(width=4) %}
@@ -29,13 +31,13 @@ def __init__(self):
             self.prefix_ = prefix
             self.params_ = {{namespace}}.Params()
             self.node_ = node
-            self.logger_ = None
-            if (len(self.prefix_) > 0):
-                self.logger_ = rclpy.logging.get_logger("{{namespace}}." + prefix)
+            #self.logger_ = None
+            #if (len(self.prefix_) > 0):
+            self.logger_ = rclpy.logging.get_logger("{{namespace}}." + prefix)
 
             self.declare_params()
-            # auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
-            # handle_ = parameters_interface_->add_on_set_parameters_callback(update_param_cb);
+
+            self.node_.add_on_set_parameters_callback(self.update)
             self.clock_ = Clock()
 
         def get_params(self):
@@ -49,10 +51,23 @@ def __init__(self):
             return self.params_.stamp_ != other_param.stamp_
 
         def update(self, parameters):
-            pass
+            updated_params = self.get_params()
+
+            for param in parameters:
+{%- filter indent(width=16) %}
+{{update_params_set}}
+{%- endfilter %}
+
+            updated_params.stamp_ = self.clock_.now()
+            self.update_internal_params(updated_params)
+            return SetParametersResult(successful=True)
+
+        def update_internal_params(self, updated_params):
+            self.params_ = updated_params
 
         def to_parameter_value(self, value):
-            return rclpy.ParameterValue(value)
+            assert(0)
+            # I think it can be deleted
 
         def declare_params(self):
             updated_params = self.get_params()
@@ -60,5 +75,7 @@ def __init__(self):
 {%- filter indent(width=12) %}
 {{declare_params}}
 {%- endfilter %}
+
+
 
 

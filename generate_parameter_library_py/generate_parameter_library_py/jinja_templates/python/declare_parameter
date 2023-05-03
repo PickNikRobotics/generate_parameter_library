@@ -1,11 +1,11 @@
-if (not self.node_.has_parameter(self.prefix_ + "{{parameter_name}}")):
+if not self.node_.has_parameter(self.prefix_ + "{{parameter_name}}"):
 {%- filter indent(width=4) %}
 descriptor = ParameterDescriptor(description="{{parameter_description}}", read_only = {{parameter_read_only}})
 {%- if not parameter_value|length %}
 parameter = rclpy.Parameter.Type.{{parameter_type}}
 {% endif -%}
 {%- if parameter_value|length %}
-parameter = updated_params.{{parameter_value}} #self.to_parameter_value(updated_params.{{parameter_value}})
+parameter = updated_params.{{parameter_value}}
 {% endif -%}
 self.node_.declare_parameter(self.prefix_ + "{{parameter_name}}", parameter, descriptor)
 {% endfilter -%}
