@@ -38,7 +38,7 @@ def generate_parameter_module(module_name, yaml_file, validation_module):
     build_dir = None
     for i, arg in enumerate(sys.argv):
         # Look for the `--build-directory` option in the command line arguments
-        if arg == '--build-directory' or arg == '--build-base':
+        if arg == "--build-directory" or arg == "--build-base":
             build_dir = sys.argv[i + 1]
             tmp = os.path.split(build_dir)
             build_dir = os.path.join(*tmp[:-1])

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import List, Optional
 from jinja2 import Template
 from typeguard import typechecked
@@ -94,9 +95,7 @@ class PythonConvertions:
 
     @typechecked
     def initialization_fail_validation(self, param_name: str) -> str:
-        return (
-            f"raise InvalidParameterValueException('Invalid value set during initialization for parameter {param_name}: ' + validation_result)"
-        )
+        return f"raise InvalidParameterValueException('Invalid value set during initialization for parameter {param_name}: ' + validation_result)"
 
     @typechecked
     def initialization_pass_validation(self, param_name: str) -> str:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import List, Optional
 from jinja2 import Template
 from typeguard import typechecked

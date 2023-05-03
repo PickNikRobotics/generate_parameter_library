@@ -9,4 +9,3 @@ parameter = updated_params.{{parameter_value}}
 {% endif -%}
 self.node_.declare_parameter(self.prefix_ + "{{parameter_name}}", parameter, descriptor)
 {% endfilter -%}
-

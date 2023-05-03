@@ -140,7 +140,3 @@ def __init__(self):
 {%- endfilter %}
 
             self.update_internal_params(updated_params)
-
-
-
-

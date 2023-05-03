@@ -138,18 +138,23 @@ def get_fixed_type(yaml_type: str):
 
 
 class CodeGenVariableBase:
-
     @typechecked
     def __init__(
-            self, language: str, name: str, param_name: str, defined_type: str, default_value: any
+        self,
+        language: str,
+        name: str,
+        param_name: str,
+        defined_type: str,
+        default_value: any,
     ):
-
         if language == "cpp":
             self.conversation = CPPConverstions()
         elif language == "python":
             self.conversation = PythonConvertions()
         else:
-            raise compile_error("Invalid language, only c++ and python are currently supported.")
+            raise compile_error(
+                "Invalid language, only c++ and python are currently supported."
+            )
 
         self.name = name
         self.default_value = default_value
@@ -159,7 +164,9 @@ class CodeGenVariableBase:
         self.array_type = array_type(self.defined_type)
 
         if self.defined_type not in self.conversation.defined_type_to_cpp_type:
-            allowed = ", ".join(key for key in self.conversation.defined_type_to_cpp_type)
+            allowed = ", ".join(
+                key for key in self.conversation.defined_type_to_cpp_type
+            )
             raise compile_error(
                 f"Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: "
                 + allowed
@@ -293,10 +300,10 @@ class DeclareStruct:
 class ValidationFunction:
     @typechecked
     def __init__(
-            self,
-            function_name: str,
-            arguments: Optional[List[any]],
-            code_gen_variable: CodeGenVariableBase,
+        self,
+        function_name: str,
+        arguments: Optional[List[any]],
+        code_gen_variable: CodeGenVariableBase,
     ):
         self.code_gen_variable = code_gen_variable
         self.function_name = function_name
@@ -310,8 +317,9 @@ class ValidationFunction:
     def __str__(self):
         # TODO the c++ code here should be moved to a jinja template
         # get func signature
-        function_name = self.code_gen_variable.conversation.get_func_signature(self.function_name,
-                                                                               self.code_gen_variable.cpp_base_type)
+        function_name = self.code_gen_variable.conversation.get_func_signature(
+            self.function_name, self.code_gen_variable.cpp_base_type
+        )
         # bracket type for open/close list type
         open_bracket = self.code_gen_variable.conversation.open_bracket
         close_bracket = self.code_gen_variable.conversation.close_bracket
@@ -337,10 +345,10 @@ class ValidationFunction:
 class ParameterValidation:
     @typechecked
     def __init__(
-            self,
-            invalid_effect: str,
-            valid_effect: str,
-            validation_function: ValidationFunction,
+        self,
+        invalid_effect: str,
+        valid_effect: str,
+        validation_function: ValidationFunction,
     ):
         self.invalid_effect = invalid_effect
         self.valid_effect = valid_effect
@@ -464,11 +472,11 @@ class SetRuntimeParameter(SetParameterBase):
 class DeclareParameterBase:
     @typechecked
     def __init__(
-            self,
-            code_gen_variable: CodeGenVariableBase,
-            parameter_description: str,
-            parameter_read_only: bool,
-            parameter_validations: list,
+        self,
+        code_gen_variable: CodeGenVariableBase,
+        parameter_description: str,
+        parameter_read_only: bool,
+        parameter_validations: list,
     ):
         self.parameter_name = code_gen_variable.param_name
         self.parameter_description = parameter_description
@@ -501,11 +509,11 @@ class DeclareParameter(DeclareParameterBase):
 
 class DeclareRuntimeParameter(DeclareParameterBase):
     def __init__(
-            self,
-            code_gen_variable: CodeGenVariableBase,
-            parameter_description: str,
-            parameter_read_only: bool,
-            parameter_validations: list,
+        self,
+        code_gen_variable: CodeGenVariableBase,
+        parameter_description: str,
+        parameter_read_only: bool,
+        parameter_validations: list,
     ):
         super().__init__(
             code_gen_variable,
@@ -626,13 +634,13 @@ def preprocess_inputs(language, name, value, nested_name_list):
     # optional attributes
     default_value = value.get("default_value", None)
     if not is_fixed_type(defined_type):
-        code_gen_variable = CodeGenVariable(language,
-                                            name, param_name, defined_type, default_value
-                                            )
+        code_gen_variable = CodeGenVariable(
+            language, name, param_name, defined_type, default_value
+        )
     else:
-        code_gen_variable = CodeGenFixedVariable(language,
-                                                 name, param_name, defined_type, default_value
-                                                 )
+        code_gen_variable = CodeGenFixedVariable(
+            language, name, param_name, defined_type, default_value
+        )
 
     description = value.get("description", "")
     read_only = bool(value.get("read_only", False))
@@ -678,7 +686,9 @@ class GenerateCode:
         elif language == "python":
             self.comments = "# auto-generated DO NOT EDIT"
         else:
-            raise compile_error("Invalid language, only c++ and python are currently supported.")
+            raise compile_error(
+                "Invalid language, only c++ and python are currently supported."
+            )
         self.user_validation_file = ""
 
     def parse(self, yaml_file, validate_header):
@@ -711,10 +721,18 @@ class GenerateCode:
             return
 
         param_name = code_gen_variable.param_name
-        update_parameter_invalid = code_gen_variable.conversation.update_parameter_fail_validation()
-        update_parameter_valid = code_gen_variable.conversation.update_parameter_pass_validation()
-        declare_parameter_invalid = code_gen_variable.conversation.initialization_fail_validation(param_name)
-        declare_parameter_valid = code_gen_variable.conversation.initialization_pass_validation(param_name)
+        update_parameter_invalid = (
+            code_gen_variable.conversation.update_parameter_fail_validation()
+        )
+        update_parameter_valid = (
+            code_gen_variable.conversation.update_parameter_pass_validation()
+        )
+        declare_parameter_invalid = (
+            code_gen_variable.conversation.initialization_fail_validation(param_name)
+        )
+        declare_parameter_valid = (
+            code_gen_variable.conversation.initialization_pass_validation(param_name)
+        )
 
         # add variable to struct
         var = VariableDeclaration(code_gen_variable)
@@ -723,9 +741,7 @@ class GenerateCode:
         is_runtime_parameter = is_mapped_parameter(self.struct_tree.struct_name)
 
         if is_runtime_parameter:
-            declare_parameter_set = SetRuntimeParameter(
-                param_name, code_gen_variable
-            )
+            declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
             declare_parameter = DeclareRuntimeParameter(
                 code_gen_variable, description, read_only, validations
             )
@@ -754,11 +770,11 @@ class GenerateCode:
 
         self.struct_tree.add_field(var)
         if not is_runtime_parameter and (
-                isinstance(code_gen_variable, CodeGenFixedVariable)
-                or not (
+            isinstance(code_gen_variable, CodeGenFixedVariable)
+            or not (
                 code_gen_variable.array_type
                 or code_gen_variable.defined_type == "string"
-        )
+            )
         ):
             self.stack_struct_tree.add_field(var)
             self.set_stack_params.append(SetStackParams(code_gen_variable.param_name))
@@ -775,7 +791,7 @@ class GenerateCode:
 
     def parse_dict(self, name, root_map, nested_name):
         if isinstance(root_map, dict) and isinstance(
-                next(iter(root_map.values())), dict
+            next(iter(root_map.values())), dict
         ):
             cur_struct_tree = self.struct_tree
             cur_stack_struct_tree = self.stack_struct_tree
