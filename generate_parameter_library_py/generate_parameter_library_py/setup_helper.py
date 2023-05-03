@@ -29,20 +29,19 @@
 
 import sys
 import os
-from generate_parameter_library_py.parse_yaml import GenerateCode
-from generate_parameter_library_py.generate_python_header import run
-
-# TODO there must be a better way to do this
-build_dir = None
-# Look for the `--build-directory` option in the command line arguments
-for i, arg in enumerate(sys.argv):
-    if arg == '--build-directory':
-        build_dir = sys.argv[i + 1]
-        tmp = os.path.split(build_dir)
-        build_dir = os.path.join(*tmp[:-1])
-        break
+from generate_parameter_library_py.generate_python_module import run
 
 
 def generate_parameter_module(module_name, yaml_file):
+    # TODO there must be a better way to do this. I need to find the build directory so I can place the python
+    # module there
+    build_dir = None
+    for i, arg in enumerate(sys.argv):
+        # Look for the `--build-directory` option in the command line arguments
+        if arg == '--build-directory':
+            build_dir = sys.argv[i + 1]
+            tmp = os.path.split(build_dir)
+            build_dir = os.path.join(*tmp[:-1])
+            break
     if build_dir:
         run(os.path.join(build_dir, module_name + ".py"), yaml_file)

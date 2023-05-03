@@ -70,7 +70,7 @@ setup(
     entry_points={
         "console_scripts": [
             "generate_parameter_library_cpp = generate_parameter_library_py.generate_cpp_header:main",
-            "generate_parameter_library_python = generate_parameter_library_py.generate_python_header:main",
+            "generate_parameter_library_python = generate_parameter_library_py.generate_python_module:main",
             "generate_parameter_library_rst = generate_parameter_library_py.generate_rst:main",
         ],
     },

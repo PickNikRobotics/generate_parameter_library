@@ -35,8 +35,8 @@ import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
-from generate_parameter_library_py.CPPConvertions import CPPConverstions
-from generate_parameter_library_py.PythonConvertions import PythonConvertions
+from generate_parameter_library_py.cpp_convertions import CPPConverstions
+from generate_parameter_library_py.python_convertions import PythonConvertions
 
 
 # YAMLSyntaxError standardizes compiler error messages

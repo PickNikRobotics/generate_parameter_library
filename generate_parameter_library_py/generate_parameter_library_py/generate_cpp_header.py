@@ -36,14 +36,12 @@ import os
 from generate_parameter_library_py.parse_yaml import GenerateCode
 
 
-def run(gen_param_struct, args):
-    output_file = args.output_cpp_header_file
+def run(output_file, yaml_file, validate_header=None):
+    gen_param_struct = GenerateCode("cpp")
     output_dir = os.path.dirname(output_file)
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    yaml_file = args.input_yaml_file
-    validate_header = args.validate_header
     gen_param_struct.parse(yaml_file, validate_header)
 
     code = str(gen_param_struct)
@@ -61,8 +59,11 @@ def parse_args():
 
 def main():
     args = parse_args()
-    gen_param_struct = GenerateCode("cpp")
-    run(gen_param_struct, args)
+    output_file = args.output_cpp_header_file
+    yaml_file = args.input_yaml_file
+    validate_header = args.validate_header
+
+    run(output_file, yaml_file, validate_header)
 
 
 if __name__ == "__main__":
