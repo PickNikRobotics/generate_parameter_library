@@ -2,11 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>generate_parameter_module_example</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>0.1.0</version>
+  <description>Example usage of generate_parameter_library for a python module</description>
   <maintainer email="paulgesel@gmail.com">paul</maintainer>
-  <license>TODO: License declaration</license>
-
+  <license>BSD-3-Clause</license>
 
   <depend>generate_parameter_library</depend>
   <depend>rclpy</depend>

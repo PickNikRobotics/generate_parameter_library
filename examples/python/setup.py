@@ -19,14 +19,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='paul',
+    maintainer='Paul Gesel',
     maintainer_email='paulgesel@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='Example usage of generate_parameter_library for a python module',
+    license='BSD-3-Clause',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'minimal_publisher = generate_parameter_module_example.minimal_publisher:main'
+            'test_node = generate_parameter_module_example.minimal_publisher:main'
         ],
     },
 )
