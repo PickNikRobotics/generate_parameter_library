@@ -1,4 +1,6 @@
-class __{{struct_name}} :
+class _{{struct_name}} :
+{%- filter indent(width=4) %}
+def __init__(self):
 {%- filter indent(width=4) %}
 {% if struct_fields|length -%}
 {{struct_fields-}}
@@ -7,9 +9,10 @@ class __{{struct_name}} :
 {{sub_structs-}}
 {% endif -%}
 {% endfilter -%}
+{% endfilter -%}
 {% if struct_instance|length -%}
-{{struct_instance}} = __{{struct_name}}()
+self.{{struct_instance}} = _{{struct_name}}()
 {% endif -%}
 {% if not struct_instance|length -%}
-{{map_name}} = dict()
+self.{{map_name}} = dict()
 {% endif -%}

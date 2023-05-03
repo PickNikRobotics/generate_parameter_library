@@ -1,25 +1,64 @@
 {{comments}}
 
-import rclpy
+from rcl_interfaces.msg import ParameterDescriptor
+from rclpy.clock import Clock
 from rclpy.time import Time
+import copy
+import rclpy
 
 class {{namespace}}:
 {%- filter indent(width=4) %}
+def __init__(self):
+    pass
+
 class Params:
 {%- filter indent(width=4) %}
+def __init__(self):
+    # for detecting if the parameter struct has been updated
+    self.stamp_ = Time()
+{%- filter indent(width=4) %}
 {{struct_content-}}
-# for detecting if the parameter struct has been updated
-__stamp = Time()
+{% endfilter -%}
 {% endfilter -%}
 {%- endfilter %}
 
 
     class ParamListener:
-        pass
+        def __init__(self, node, prefix=""):
+            node.declare_parameter('my_parameter', 'world')
+            self.prefix_ = prefix
+            self.params_ = {{namespace}}.Params()
+            self.node_ = node
+            self.logger_ = None
+            if (len(self.prefix_) > 0):
+                self.logger_ = rclpy.logging.get_logger("{{namespace}}." + prefix)
 
-    def update(parameters):
-        pass
+            self.declare_params()
+            # auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
+            # handle_ = parameters_interface_->add_on_set_parameters_callback(update_param_cb);
+            self.clock_ = Clock()
+
+        def get_params(self):
+            tmp = self.params_.stamp_
+            self.params_.stamp_ = None
+            paramCopy = copy.deepcopy(self.params_)
+            paramCopy.stamp_ = tmp
+            return paramCopy
+
+        def is_old(self, other_param):
+            return self.params_.stamp_ != other_param.stamp_
+
+        def update(self, parameters):
+            pass
+
+        def to_parameter_value(self, value):
+            return rclpy.ParameterValue(value)
+
+        def declare_params(self):
+            updated_params = self.get_params()
+            # declare all parameters and give default values to non-required ones
+{%- filter indent(width=12) %}
+{{declare_params}}
+{%- endfilter %}
 
 
-    def declare_params():
-        pass
