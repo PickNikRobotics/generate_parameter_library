@@ -3,7 +3,7 @@ from generate_parameter_library_py.setup_helper import generate_parameter_module
 
 package_name = 'generate_parameter_module_example'
 
-# set module_name and
+# set module_name and yaml file
 module_name = "admittance_parameters"
 yaml_file = "generate_parameter_module_example/parameters.yaml"
 generate_parameter_module(module_name, yaml_file)
