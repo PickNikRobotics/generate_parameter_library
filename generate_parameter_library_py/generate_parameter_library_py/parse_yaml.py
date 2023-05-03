@@ -301,10 +301,6 @@ class ValidationFunction:
         self.code_gen_variable = code_gen_variable
         self.function_name = function_name
         self.function_base_name = function_name
-        if function_name[-2:] == "<>":
-            self.function_base_name = function_name[:-2]
-            template_type = code_gen_variable.cpp_base_type
-            self.function_name = self.function_base_name + f"<{template_type}>"
 
         if arguments is not None:
             self.arguments = arguments
@@ -313,16 +309,23 @@ class ValidationFunction:
 
     def __str__(self):
         # TODO the c++ code here should be moved to a jinja template
-        code = self.function_name + "(param"
+        # get func signature
+        function_name = self.code_gen_variable.conversation.get_func_signature(self.function_name,
+                                                                               self.code_gen_variable.cpp_base_type)
+        # bracket type for open/close list type
+        open_bracket = self.code_gen_variable.conversation.open_bracket
+        close_bracket = self.code_gen_variable.conversation.close_bracket
+
+        code = function_name + "(param"
         for arg in self.arguments:
             if isinstance(arg, list):
-                code += ", {"
+                code += ", " + open_bracket
                 for a in arg[:-1]:
                     val_func = self.code_gen_variable.get_python_val_to_str_func(a)
                     code += val_func(a) + ", "
                 val_func = self.code_gen_variable.get_python_val_to_str_func(arg[-1])
                 code += val_func(arg[-1])
-                code += "}"
+                code += close_bracket
             else:
                 val_func = self.code_gen_variable.get_python_val_to_str_func(arg)
                 code += ", " + val_func(arg)

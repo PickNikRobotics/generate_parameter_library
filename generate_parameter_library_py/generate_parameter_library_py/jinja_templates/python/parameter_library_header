@@ -8,7 +8,7 @@ import copy
 import rclpy
 
 {% if user_validation_file|length -%}
-import {{user_validation_file}}
+import {{user_validation_file}} as custom_validators
 {% endif %}
 
 class {{namespace}}:

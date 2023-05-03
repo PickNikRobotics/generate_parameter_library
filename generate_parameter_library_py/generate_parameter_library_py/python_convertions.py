@@ -78,6 +78,14 @@ class PythonConvertions:
             "<class 'str'>": "string_array",
         }
 
+        self.open_bracket = "["
+        self.close_bracket = "]"
+
+    @typechecked
+    def get_func_signature(self, function_name: str, base_type: str) -> str:
+        # broken! : custom_validators::validate_double_array_custom_fu
+        return function_name[:-2]
+
     @typechecked
     def initialization_fail_validation(self, param_name: str) -> str:
         return (

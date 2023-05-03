@@ -6,8 +6,8 @@ import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
-# from generate_parameter_library_py.parse_yaml import compile_error
 
+# from generate_parameter_library_py.parse_yaml import compile_error
 
 
 class CPPConverstions:
@@ -77,6 +77,17 @@ class CPPConverstions:
             "<class 'int'>": "integer_array",
             "<class 'str'>": "string_array",
         }
+
+        self.open_bracket = "{"
+        self.close_bracket = "}"
+
+    @typechecked
+    def get_func_signature(self, function_name: str, base_type: str) -> str:
+        if function_name[-2:] == "<>":
+            function_base_name = function_name[:-2]
+            template_type = base_type
+            function_name = function_base_name + f"<{template_type}>"
+        return function_name
 
     @typechecked
     def initialization_fail_validation(self, param_name: str) -> str:
