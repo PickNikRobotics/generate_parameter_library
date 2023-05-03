@@ -113,14 +113,13 @@ function(generate_parameter_module MODULE_NAME YAML_FILE)
   # Set the output parameter header file name
   set(PARAM_MODULE_FILE ${MODULE_DIR}/${MODULE_NAME}.py)
 
-
-#  message("ERABHERAEARHB " ${VALIDATE_HEADER_FILENAME})# Generate the header for the library
+  #TODO this does not handle validation headers correctly
   add_custom_command(
           OUTPUT ${PARAM_MODULE_FILE}
-          COMMAND ${generate_parameter_library_python_BIN} ${PARAM_MODULE_FILE} ${YAML_FILE}# ${VALIDATE_HEADER_FILENAME}
+          COMMAND ${generate_parameter_library_python_BIN} ${PARAM_MODULE_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
           DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
           COMMENT
-          "Running `${generate_parameter_library_python_BIN} ${PARAM_MODULE_FILE} ${YAML_FILE} `" # ${VALIDATE_HEADER_FILENAME}
+          "Running `${generate_parameter_library_python_BIN} ${PARAM_MODULE_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
           VERBATIM
   )
   install(FILES ${PARAM_MODULE_FILE} DESTINATION ${MODULE_DIR})

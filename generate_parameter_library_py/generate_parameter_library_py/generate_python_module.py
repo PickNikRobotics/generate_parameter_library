@@ -36,13 +36,13 @@ import os
 from generate_parameter_library_py.parse_yaml import GenerateCode
 
 
-def run(output_file, yaml_file, validate_file=None):
+def run(output_file, yaml_file, validation_module=""):
     gen_param_struct = GenerateCode("python")
     output_dir = os.path.dirname(output_file)
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    gen_param_struct.parse(yaml_file, validate_file)
+    gen_param_struct.parse(yaml_file, validation_module)
 
     code = str(gen_param_struct)
     with open(output_file, "w") as f:

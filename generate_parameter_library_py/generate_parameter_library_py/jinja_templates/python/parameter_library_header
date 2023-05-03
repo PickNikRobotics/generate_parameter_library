@@ -7,6 +7,9 @@ from rclpy.time import Time
 import copy
 import rclpy
 
+{% if user_validation_file|length -%}
+import {{user_validation_file}}
+{% endif %}
 
 class {{namespace}}:
 {%- filter indent(width=4) %}

@@ -670,12 +670,12 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.set_stack_params = []
-        if language=="cpp":
+        if language == "cpp":
             self.comments = "// auto-generated DO NOT EDIT"
-        elif language=="python":
+        elif language == "python":
             self.comments = "# auto-generated DO NOT EDIT"
         else:
-            assert(0) # not uspported
+            raise compile_error("Invalid language, only c++ and python are currently supported.")
         self.user_validation_file = ""
 
     def parse(self, yaml_file, validate_header):
