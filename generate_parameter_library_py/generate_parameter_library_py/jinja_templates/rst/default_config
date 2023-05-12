@@ -1,0 +1,8 @@
+Default Config
+```yaml
+{{namespace}}:
+  ros__parameters:
+{%- filter indent(width=4) %}
+{{default_param_values}}
+{% endfilter -%}
+```
