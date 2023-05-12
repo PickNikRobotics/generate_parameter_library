@@ -32,7 +32,7 @@ import os
 from generate_parameter_library_py.generate_python_module import run
 
 
-def generate_parameter_module(module_name, yaml_file, validation_module):
+def generate_parameter_module(module_name, yaml_file, validation_module=""):
     # TODO there must be a better way to do this. I need to find the build directory so I can place the python
     # module there
     build_dir = None
