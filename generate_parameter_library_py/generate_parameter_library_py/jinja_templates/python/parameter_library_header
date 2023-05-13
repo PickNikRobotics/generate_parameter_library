@@ -122,10 +122,6 @@ def __init__(self):
         def update_internal_params(self, updated_params):
             self.params_ = updated_params
 
-        def to_parameter_value(self, value):
-            assert(0)
-            # I think it can be deleted
-
         def declare_params(self):
             updated_params = self.get_params()
             # declare all parameters and give default values to non-required ones
@@ -138,5 +134,11 @@ def __init__(self):
 {%- filter indent(width=12) %}
 {{declare_params_set}}
 {%- endfilter %}
+{% if declare_set_dynamic_params|length %}
+{% filter indent(width=12) %}
+# declare and set all dynamic parameters
+{{declare_set_dynamic_params}}
+{%- endfilter %}
+{%- endif %}
 
             self.update_internal_params(updated_params)
