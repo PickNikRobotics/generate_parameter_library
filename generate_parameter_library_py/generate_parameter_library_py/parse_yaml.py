@@ -262,10 +262,12 @@ class DeclareStruct:
     def add_sub_struct(self, sub_struct):
         self.sub_structs.append(sub_struct)
 
-    def inner_content(self):
+    def field_content(self):
         content = "".join(str(x) for x in self.fields)
-        content += "".join(str(x) for x in self.sub_structs)
+        return str(content)
 
+    def sub_struct_content(self):
+        content = "".join(str(x) for x in self.sub_structs)
         return str(content)
 
     def __str__(self):
@@ -818,10 +820,10 @@ class GenerateCode:
             "user_validation_file": self.user_validation_file,
             "comments": self.comments,
             "namespace": self.namespace,
-            "struct_content": self.struct_tree.sub_structs[0].inner_content(),
-            "stack_struct_content": self.stack_struct_tree.sub_structs[
-                0
-            ].inner_content(),
+            "field_content": self.struct_tree.sub_structs[0].field_content(),
+            "sub_struct_content": self.struct_tree.sub_structs[0].sub_struct_content(),
+            "stack_field_content": self.stack_struct_tree.sub_structs[0].field_content(),
+            "stack_sub_struct_content": self.stack_struct_tree.sub_structs[0].sub_struct_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_dynamic_parameters]

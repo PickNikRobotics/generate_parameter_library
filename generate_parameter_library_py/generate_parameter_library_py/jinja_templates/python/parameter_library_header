@@ -66,17 +66,13 @@ import {{user_validation_file}} as custom_validators
 
 class {{namespace}}:
 {%- filter indent(width=4) %}
-def __init__(self):
-    pass
 
 class Params:
 {%- filter indent(width=4) %}
-def __init__(self):
-    # for detecting if the parameter struct has been updated
-    self.stamp_ = Time()
-{%- filter indent(width=4) %}
-{{struct_content-}}
-{% endfilter -%}
+# for detecting if the parameter struct has been updated
+stamp_ = Time()
+{{field_content-}}
+{{sub_struct_content-}}
 {% endfilter -%}
 {%- endfilter %}
 
@@ -87,8 +83,6 @@ def __init__(self):
             self.prefix_ = prefix
             self.params_ = {{namespace}}.Params()
             self.node_ = node
-            #self.logger_ = None
-            #if (len(self.prefix_) > 0):
             self.logger_ = rclpy.logging.get_logger("{{namespace}}." + prefix)
 
             self.declare_params()
@@ -114,6 +108,15 @@ def __init__(self):
 {%- filter indent(width=16) %}
 {{update_params_set}}
 {%- endfilter %}
+{% if update_dynamic_parameters|length %}
+{%- filter indent(width=12) %}
+# update dynamic parameters
+for param in parameters:
+{%- filter indent(width=4) %}
+{{update_dynamic_parameters}}
+{%- endfilter %}
+{%- endfilter %}
+{%- endif %}
 
             updated_params.stamp_ = self.clock_.now()
             self.update_internal_params(updated_params)

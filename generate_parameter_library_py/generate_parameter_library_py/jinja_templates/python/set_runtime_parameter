@@ -1,4 +1,4 @@
-param = self.node_.get_parameter(self.prefix_ + "{{parameter_name}}")
+param = self.node_.get_parameter(param_name)
 self.logger_.debug(param.name + ": " + param.type_.name + " = " + str(param.value))
 {% if parameter_validations|length -%}
 {{parameter_validations-}}
