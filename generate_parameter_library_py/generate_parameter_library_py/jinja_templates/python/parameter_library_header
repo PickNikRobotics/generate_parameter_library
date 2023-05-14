@@ -7,58 +7,7 @@ from rclpy.exceptions import InvalidParameterValueException
 from rclpy.time import Time
 import copy
 import rclpy
-
-# from rsl import ParameterValidators
-class ParameterValidators:
-    # Value validators
-    def bounds(param, lower, upper):
-        return ""
-    def lower_bounds(param, lower):
-        return ""
-    def upper_bounds(param, upper):
-        return ""
-    def lt(param, value):
-        return ""
-    def gt(param, value):
-        return ""
-    def lt_eq(param, value):
-        return ""
-    def gt_eq(param, value):
-        return ""
-    def one_of(param, values):
-        return ""
-
-    # String validators
-    def fixed_size(param, length):
-        return ""
-    def size_gt(param, length):
-        return ""
-    def size_lt(param, length):
-        return ""
-    def not_empty(param):
-        return ""
-    def one_of(param, values):
-        return ""
-
-    # Array validators
-    def unique(param):
-        return ""
-    def subset_of(param, values):
-        return ""
-    def fixed_size(param, length):
-        return ""
-    def size_gt(param, length):
-        return ""
-    def size_lt(param, length):
-        return ""
-    def not_empty(param):
-        return ""
-    def element_bounds(param, lower, upper):
-        return ""
-    def lower_element_bounds(param, lower):
-        return ""
-    def upper_element_bounds(param, upper):
-        return ""
+from generate_parameter_library_py.python_validators import ParameterValidators
 
 {% if user_validation_file|length -%}
 import {{user_validation_file}} as custom_validators
