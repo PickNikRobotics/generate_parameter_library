@@ -1,0 +1,42 @@
+if not self.node_.has_parameter(self.prefix_ + "{{parameter_name}}"):
+{%- filter indent(width=4) %}
+descriptor = ParameterDescriptor(description="{{parameter_description}}", read_only = {{parameter_read_only}})
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
+{%- if "DOUBLE" in parameter_type %}
+{%- if validation.arguments|length == 2 %}
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.floating_point_range[-1].to_value = {{validation.arguments[1]}}
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.floating_point_range[-1].to_value = float('inf')
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = -float('inf')
+descriptor.floating_point_range[-1].to_value = {{validation.arguments[0]}}
+{%- endif %}
+{%- elif "INTEGER" in parameter_type %}
+{%- if validation.arguments|length == 2 %}
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.integer_range[-1].to_value = {{validation.arguments[1]}}
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.integer_range[-1].to_value = 2**31-1
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = -2**31-1
+descriptor.integer_range[-1].to_value = {{validation.arguments[0]}}
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+{%- if not parameter_value|length %}
+parameter = rclpy.Parameter.Type.{{parameter_type}}
+{% endif -%}
+{%- if parameter_value|length %}
+parameter = updated_params.{{parameter_value}}
+{% endif -%}
+self.node_.declare_parameter(self.prefix_ + "{{parameter_name}}", parameter, descriptor)
+{% endfilter -%}

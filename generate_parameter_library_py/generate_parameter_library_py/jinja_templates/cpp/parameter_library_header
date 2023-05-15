@@ -72,7 +72,8 @@ template <typename T, size_t capacity>
 {%- filter indent(width=4) %}
 struct Params {
 {%- filter indent(width=4) %}
-{{struct_content-}}
+{{field_content-}}
+{{sub_struct_content-}}
 // for detecting if the parameter struct has been updated
 rclcpp::Time __stamp;
 {% endfilter -%}
@@ -82,7 +83,8 @@ rclcpp::Time __stamp;
 {%- filter indent(width=4) %}
 struct StackParams {
 {%- filter indent(width=4) %}
-{{stack_struct_content-}}
+{{stack_field_content-}}
+{{stack_sub_struct_content-}}
 {% endfilter -%}
 };
 {%- endfilter %}

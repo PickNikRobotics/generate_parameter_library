@@ -1,0 +1,8 @@
+if param.name == self.prefix_ + "{{parameter_name}}":
+{%- filter indent(width=4) %}
+{% if parameter_validations|length -%}
+{{parameter_validations-}}
+{% endif -%}
+updated_params.{{parameter_name}} = param.{{parameter_as_function}}
+self.logger_.debug(param.name + ": " + param.type_.name + " = " + str(param.value))
+{% endfilter -%}

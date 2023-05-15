@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>generate_parameter_module_example</name>
+  <version>0.1.0</version>
+  <description>Example usage of generate_parameter_library for a python module</description>
+  <maintainer email="paulgesel@gmail.com">paul</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <depend>generate_parameter_library</depend>
+  <depend>rclpy</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
