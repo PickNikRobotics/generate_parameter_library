@@ -1,7 +1,7 @@
 for value in {{param_struct_instance}}.{{mapped_param}}:
 {%- filter indent(width=4) %}
 {{param_struct_instance}}.{{struct_name}}.add_entry(value)
-entry = {{param_struct_instance}}.{{parameter_map}}[value]
+entry = {{param_struct_instance}}.{{struct_name}}.get_entry(value)
 param_name = f"{self.prefix_}{{struct_name}}.{value}.{{parameter_field}}"
 if not self.node_.has_parameter(self.prefix_ + param_name):
 {%- filter indent(width=4) %}

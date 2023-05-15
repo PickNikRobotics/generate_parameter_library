@@ -1,4 +1,4 @@
-class {{struct_name}} :
+class __{{struct_name}} :
 {%- filter indent(width=4) %}
 {% if struct_fields|length -%}
 {{struct_fields-}}
@@ -8,11 +8,12 @@ class {{struct_name}} :
 {% endif -%}
 {% endfilter -%}
 {% if struct_instance|length -%}
-{{struct_instance}} = {{struct_name}}()
+{{struct_instance}} = __{{struct_name}}()
 {% endif -%}
 {% if not struct_instance|length -%}
-{{map_name}} = dict()
-__map_type = {{struct_name}}
+__map_type = __{{struct_name}}
 def add_entry(self, name):
-    self.{{map_name}}[name] = self.__map_type()
+    setattr(self, name, self.__map_type())
+def get_entry(self, name):
+    return getattr(self, name, self.__map_type())
 {% endif -%}
