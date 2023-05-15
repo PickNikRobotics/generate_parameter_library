@@ -311,7 +311,7 @@ class ValidationFunction:
     ):
         self.code_gen_variable = code_gen_variable
         self.function_name = function_name
-        self.function_base_name = function_name
+        self.function_base_name = function_name.replace("<>", "")
 
         if arguments is not None:
             self.arguments = arguments
