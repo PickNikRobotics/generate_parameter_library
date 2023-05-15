@@ -53,6 +53,7 @@ class MinimalParam(rclpy.node.Node):
 
     def timer_callback(self):
         if self.param_listener.is_old(self.params):
+            self.param_listener.refresh_dynamic_parameters()
             self.params = self.param_listener.get_params()
             self.get_logger().info(
                 "New control frame parameter is: '%s'" % self.params.control.frame.id

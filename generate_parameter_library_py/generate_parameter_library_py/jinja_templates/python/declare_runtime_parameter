@@ -9,31 +9,31 @@ descriptor = ParameterDescriptor(description="{{parameter_description}}", read_o
 {%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if "DOUBLE" in parameter_type %}
 {%- if validation.arguments|length == 2 %}
-descriptor.floating_point_range.resize({{loop.index}})
-descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}}
-descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}}
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.floating_point_range[-1].to_value = {{validation.arguments[1]}}
 {%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.floating_point_range.resize({{loop.index}})
-descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}}
-descriptor.floating_point_range.at({{loop.index0}}).to_value = float('inf')
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.floating_point_range[-1].to_value = float('inf')
 {%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.floating_point_range.resize({{loop.index}})
-descriptor.floating_point_range.at({{loop.index0}}).to_value = -float('inf')
-descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}}
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = -float('inf')
+descriptor.floating_point_range[-1].to_value = {{validation.arguments[0]}}
 {%- endif %}
 {%- elif "INTEGER" in parameter_type %}
 {%- if validation.arguments|length == 2 %}
-descriptor.integer_range.resize({{loop.index}})
-descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}}
-descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}}
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.integer_range[-1].to_value = {{validation.arguments[1]}}
 {%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.integer_range.resize({{loop.index}})
-descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}}
-descriptor.integer_range.at({{loop.index0}}).to_value = float('inf')
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = {{validation.arguments[0]}}
+descriptor.integer_range[-1].to_value = 2**31-1
 {%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.integer_range.resize({{loop.index}})
-descriptor.integer_range.at({{loop.index0}}).from_value = -float('inf')
-descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}}
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = -2**31-1
+descriptor.integer_range[-1].to_value = {{validation.arguments[0]}}
 {%- endif %}
 {%- endif %}
 {%- endfor %}

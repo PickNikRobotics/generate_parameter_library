@@ -2,6 +2,8 @@
 
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
+from rcl_interfaces.msg import FloatingPointRange
+from rcl_interfaces.msg import FloatingPointRange, IntegerRange
 from rclpy.clock import Clock
 from rclpy.exceptions import InvalidParameterValueException
 from rclpy.time import Time
@@ -49,6 +51,17 @@ stamp_ = Time()
 
         def is_old(self, other_param):
             return self.params_.stamp_ != other_param.stamp_
+
+        def refresh_dynamic_parameters(self):
+            updated_params = self.get_params()
+            # TODO remove any destroyed dynamic parameters
+{%- filter indent(width=6) %}
+{{remove_dynamic_parameters}}
+{%- endfilter %}
+            # declare any new dynamic parameters
+{%- filter indent(width=12) %}
+{{update_declare_dynamic_parameters}}
+{%- endfilter %}
 
         def update(self, parameters):
             updated_params = self.get_params()
