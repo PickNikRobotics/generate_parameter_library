@@ -44,6 +44,7 @@ stamp_ = Time()
             self.params_.stamp_ = None
             paramCopy = copy.deepcopy(self.params_)
             paramCopy.stamp_ = tmp
+            self.params_.stamp_ = tmp
             return paramCopy
 
         def is_old(self, other_param):
