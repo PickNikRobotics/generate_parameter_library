@@ -1,10 +1,10 @@
 # generate_parameter_library
-Generate C++ for ROS 2 parameter declaration, getting, and validation using declarative YAML.
+Generate C++ or Python code for ROS 2 parameter declaration, getting, and validation using declarative YAML.
 The generated library contains a C++ struct with specified parameters.
 Additionally, dynamic parameters and custom validation are made easy.
 
 ## Killer Features
-* Declarative YAML syntax for ROS 2 Parameters converted into C++ struct
+* Declarative YAML syntax for ROS 2 Parameters converted into C++ or Python struct
 * Declaring, Getting, Validating, and Updating handled by generated code
 * Dynamic ROS 2 Parameters made easy
 * Custom user specified validator functions

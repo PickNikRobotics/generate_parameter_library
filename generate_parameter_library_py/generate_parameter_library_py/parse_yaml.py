@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 # Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,13 +29,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from typing import List, Optional
 from jinja2 import Template
 from typeguard import typechecked
-import os
-import yaml
+from typing import List, Optional
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
+import os
+import yaml
 
 from generate_parameter_library_py.cpp_convertions import CPPConverstions
 from generate_parameter_library_py.python_convertions import PythonConvertions
@@ -317,12 +319,9 @@ class ValidationFunction:
             self.arguments = []
 
     def __str__(self):
-        # TODO the c++ code here should be moved to a jinja template
-        # get func signature
         function_name = self.code_gen_variable.conversation.get_func_signature(
             self.function_name, self.code_gen_variable.cpp_base_type
         )
-        # bracket type for open/close list type
         open_bracket = self.code_gen_variable.conversation.open_bracket
         close_bracket = self.code_gen_variable.conversation.close_bracket
 

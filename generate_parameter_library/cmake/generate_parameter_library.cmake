@@ -28,9 +28,9 @@
 
 
 function(generate_parameter_library LIB_NAME YAML_FILE)
-  find_program(generate_parameter_library_cpp_BIN NAMES "generate_parameter_library_cpp")
-  if(NOT generate_parameter_library_cpp_BIN)
-    message(FATAL_ERROR "generate_parameter_library_cpp() variable 'generate_parameter_library_cpp_BIN' must not be empty")
+  find_program(generate_parameter_library_py_BIN NAMES "generate_parameter_library_py")
+  if(NOT generate_parameter_library_py_BIN)
+    message(FATAL_ERROR "generate_parameter_library_py() variable 'generate_parameter_library_py_BIN' must not be empty")
   endif()
 
   # Make the include directory
@@ -66,10 +66,10 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   # Generate the header for the library
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
-    COMMAND ${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
+    COMMAND ${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
     DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
     COMMENT
-    "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
+    "Running `${generate_parameter_library_py_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
     VERBATIM
   )
 
@@ -90,41 +90,6 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${LIB_NAME})
-endfunction()
-
-function(generate_parameter_module MODULE_NAME YAML_FILE)
-  find_program(generate_parameter_library_python_BIN NAMES "generate_parameter_library_python")
-  if(NOT generate_parameter_library_python_BIN)
-    message(FATAL_ERROR "generate_parameter_library_python() variable 'generate_parameter_library_python_BIN' must not be empty")
-  endif()
-
-  # Make the module directory
-  set(MODULE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME})
-  file(MAKE_DIRECTORY ${MODULE_DIR})
-
-  # Optional 3rd parameter for the user defined validation header
-  if(${ARGC} EQUAL 3)
-    message(FATAL_ERROR "generate_parameter_library_python() does not currently support validation headers")
-  endif()
-
-  # Set the yaml file parameter to be relative to the current source dir
-  set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
-
-  # Set the output parameter header file name
-  set(PARAM_MODULE_FILE ${MODULE_DIR}/${MODULE_NAME}.py)
-
-  #TODO this does not handle validation headers correctly
-  add_custom_command(
-          OUTPUT ${PARAM_MODULE_FILE}
-          COMMAND ${generate_parameter_library_python_BIN} ${PARAM_MODULE_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
-          DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
-          COMMENT
-          "Running `${generate_parameter_library_python_BIN} ${PARAM_MODULE_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
-          VERBATIM
-  )
-  install(FILES ${PARAM_MODULE_FILE} DESTINATION ${MODULE_DIR})
-
-
 endfunction()
 
 # create custom test function to pass yaml file into test main

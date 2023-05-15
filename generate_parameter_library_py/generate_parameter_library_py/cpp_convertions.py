@@ -8,9 +8,6 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 
-# from generate_parameter_library_py.parse_yaml import compile_error
-
-
 class CPPConverstions:
     def __init__(self):
         self.defined_type_to_cpp_type = {
