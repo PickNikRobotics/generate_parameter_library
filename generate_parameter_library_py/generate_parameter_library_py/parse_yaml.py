@@ -165,23 +165,23 @@ class CodeGenVariableBase:
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
 
-        if self.defined_type not in self.conversation.defined_type_to_cpp_type:
+        if self.defined_type not in self.conversation.defined_type_to_lang_type:
             allowed = ", ".join(
-                key for key in self.conversation.defined_type_to_cpp_type
+                key for key in self.conversation.defined_type_to_lang_type
             )
             raise compile_error(
                 f"Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: "
                 + allowed
             )
-        func = self.conversation.defined_type_to_cpp_type[self.defined_type]
-        self.cpp_type = func(self.defined_type, template)
+        func = self.conversation.defined_type_to_lang_type[self.defined_type]
+        self.lang_type = func(self.defined_type, template)
         tmp = defined_type.split("_")
         self.defined_base_type = tmp[0]
-        func = self.conversation.defined_type_to_cpp_type[self.defined_base_type]
-        self.cpp_base_type = func(self.defined_base_type, template)
-        func = self.conversation.cpp_str_value_func[self.defined_type]
+        func = self.conversation.defined_type_to_lang_type[self.defined_base_type]
+        self.lang_base_type = func(self.defined_base_type, template)
+        func = self.conversation.lang_str_value_func[self.defined_type]
         try:
-            self.cpp_str_value = func(default_value)
+            self.lang_str_value = func(default_value)
         except TypeError:
             raise compile_error(
                 f"Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}"
@@ -221,10 +221,10 @@ class CodeGenFixedVariable(CodeGenVariableBase):
         size = fixed_type_size(defined_type)
         tmp = defined_type.split("_")
         yaml_base_type = tmp[0]
-        func = self.conversation.defined_type_to_cpp_type[yaml_base_type]
-        cpp_base_type = func(yaml_base_type, None)
+        func = self.conversation.defined_type_to_lang_type[yaml_base_type]
+        lang_base_type = func(yaml_base_type, None)
         defined_type = get_fixed_type(defined_type)
-        return defined_type, (cpp_base_type, size)
+        return defined_type, (lang_base_type, size)
 
     def get_parameter_type(self):
         return int_to_integer_str(get_fixed_base_type(self.defined_type)).upper()
@@ -237,9 +237,9 @@ class VariableDeclaration:
         self.code_gen_variable = code_gen_variable
 
     def __str__(self):
-        value = self.code_gen_variable.cpp_str_value
+        value = self.code_gen_variable.lang_str_value
         data = {
-            "type": self.code_gen_variable.cpp_type,
+            "type": self.code_gen_variable.lang_type,
             "name": self.code_gen_variable.name,
             "value": value,
         }
@@ -320,7 +320,7 @@ class ValidationFunction:
 
     def __str__(self):
         function_name = self.code_gen_variable.conversation.get_func_signature(
-            self.function_name, self.code_gen_variable.cpp_base_type
+            self.function_name, self.code_gen_variable.lang_base_type
         )
         open_bracket = self.code_gen_variable.conversation.open_bracket
         close_bracket = self.code_gen_variable.conversation.close_bracket
@@ -488,7 +488,7 @@ class DeclareParameterBase:
 
 class DeclareParameter(DeclareParameterBase):
     def __str__(self):
-        if len(self.code_gen_variable.cpp_str_value) == 0:
+        if len(self.code_gen_variable.lang_str_value) == 0:
             self.parameter_value = ""
         else:
             self.parameter_value = self.parameter_name
@@ -718,7 +718,7 @@ class GenerateCode:
             validations,
         ) = preprocess_inputs(self.language, name, value, nested_name_list)
         # skip accepted params that do not generate code
-        if code_gen_variable.cpp_type is None:
+        if code_gen_variable.lang_type is None:
             return
 
         param_name = code_gen_variable.param_name
