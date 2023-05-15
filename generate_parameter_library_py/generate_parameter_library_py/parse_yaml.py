@@ -821,8 +821,12 @@ class GenerateCode:
             "namespace": self.namespace,
             "field_content": self.struct_tree.sub_structs[0].field_content(),
             "sub_struct_content": self.struct_tree.sub_structs[0].sub_struct_content(),
-            "stack_field_content": self.stack_struct_tree.sub_structs[0].field_content(),
-            "stack_sub_struct_content": self.stack_struct_tree.sub_structs[0].sub_struct_content(),
+            "stack_field_content": self.stack_struct_tree.sub_structs[
+                0
+            ].field_content(),
+            "stack_sub_struct_content": self.stack_struct_tree.sub_structs[
+                0
+            ].sub_struct_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_dynamic_parameters]

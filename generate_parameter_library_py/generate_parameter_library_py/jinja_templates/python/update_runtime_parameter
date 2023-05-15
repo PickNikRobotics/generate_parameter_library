@@ -10,4 +10,3 @@ updated_params.{{parameter_map}}[value].{{parameter_field}} = param.{{parameter_
 self.logger_.debug(param.name + ": " + param.type_.name + " = " + str(param.value))
 {% endfilter -%}
 {% endfilter -%}
-

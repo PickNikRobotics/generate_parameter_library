@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,9 +43,7 @@ class MinimalParam(rclpy.node.Node):
         self.get_logger().info(
             "Initial control frame parameter is: '%s'" % self.params.control.frame.id
         )
-        self.get_logger().info(
-            "fixed string is: '%s'" % self.params.fixed_string
-        )
+        self.get_logger().info("fixed string is: '%s'" % self.params.fixed_string)
 
         self.get_logger().info(
             "Original joints parameter is: '%s'" % str(self.params.joints)
@@ -55,7 +54,9 @@ class MinimalParam(rclpy.node.Node):
     def timer_callback(self):
         if self.param_listener.is_old(self.params):
             self.params = self.param_listener.get_params()
-            self.get_logger().info("New control frame parameter is: '%s'" % self.params.control.frame.id)
+            self.get_logger().info(
+                "New control frame parameter is: '%s'" % self.params.control.frame.id
+            )
             self.get_logger().info("fixed string is: '%s'" % self.params.fixed_string)
             for d in self.params.fixed_array:
                 self.get_logger().info("value: '%s'" % str(d))

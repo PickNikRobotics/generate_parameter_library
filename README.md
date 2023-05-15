@@ -75,7 +75,7 @@ target_link_libraries(minimal_node PRIVATE
 from generate_parameter_library_py.setup_helper import generate_parameter_module
 
 generate_parameter_module(
-  "turtlesim_parameters", # python module name for parameter library 
+  "turtlesim_parameters", # python module name for parameter library
   "turtlesim/turtlesim_parameters.yaml", # path to input yaml file
 )
 ```
@@ -114,7 +114,7 @@ def main(args=None):
   node = Node("turtlesim")
   param_listener = turtlesim_parameters.ParamListener(node)
   params = param_listener.get_params()
-  
+
   color = params.background
   node.get_logger().info(
     "Background color (r,g,b): %d, %d, %d" %
