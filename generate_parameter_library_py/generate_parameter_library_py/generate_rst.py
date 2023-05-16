@@ -35,7 +35,11 @@ import sys
 from jinja2 import Template
 from typeguard import typechecked
 
-from generate_parameter_library_py.parse_yaml import GenerateCode, DeclareParameter, ValidationFunction
+from generate_parameter_library_py.parse_yaml import (
+    GenerateCode,
+    DeclareParameter,
+    ValidationFunction,
+)
 
 
 class ParameterValidationRST:
@@ -81,7 +85,10 @@ class ParameterDetailRST:
     @typechecked
     def __init__(self, declare_parameters: DeclareParameter):
         self.declare_parameters = declare_parameters
-        self.param_validations = [ParameterValidationRST(val) for val in declare_parameters.parameter_validations]
+        self.param_validations = [
+            ParameterValidationRST(val)
+            for val in declare_parameters.parameter_validations
+        ]
 
     def __str__(self):
         constraints = "\n".join(str(val) for val in self.param_validations)
@@ -103,17 +110,23 @@ class DefaultConfigRST:
     @typechecked
     def __init__(self, gen_param_struct: GenerateCode):
         self.gen_param_struct = gen_param_struct
-        self.param_details = [ParameterDetailRST(param) for param in self.gen_param_struct.declare_parameters]
+        self.param_details = [
+            ParameterDetailRST(param)
+            for param in self.gen_param_struct.declare_parameters
+        ]
 
     def __str__(self):
         j2_template = Template(GenerateCode.templates["default_config"])
 
-        tmp = "\n".join(param.parameter_name + ": " + str(param.code_gen_variable.lang_str_value) for param in
-                        self.gen_param_struct.declare_parameters)
+        tmp = "\n".join(
+            param.parameter_name + ": " + str(param.code_gen_variable.lang_str_value)
+            for param in self.gen_param_struct.declare_parameters
+        )
 
         data = {
             "namespace": self.gen_param_struct.namespace,
-            "default_param_values": tmp}
+            "default_param_values": tmp,
+        }
         code = j2_template.render(data, trim_blocks=True)
 
         return code
@@ -124,16 +137,19 @@ class AutoDocumentation:
     def __init__(self, gen_param_struct: GenerateCode):
         self.gen_param_struct = gen_param_struct
         self.default_config = DefaultConfigRST(gen_param_struct)
-        self.param_details = [ParameterDetailRST(param) for param in self.gen_param_struct.declare_parameters]
+        self.param_details = [
+            ParameterDetailRST(param)
+            for param in self.gen_param_struct.declare_parameters
+        ]
 
     def __str__(self):
-        words = self.gen_param_struct.namespace.split('_')
+        words = self.gen_param_struct.namespace.split("_")
         title = " ".join(word.capitalize() for word in words)
 
         data = {
             "title": title,
             "default_config": str(self.default_config),
-            "parameter_details": "\n".join(str(val) for val in self.param_details)
+            "parameter_details": "\n".join(str(val) for val in self.param_details),
         }
 
         j2_template = Template(GenerateCode.templates["documentation"])
