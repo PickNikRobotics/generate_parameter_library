@@ -42,7 +42,7 @@ from generate_parameter_library_py.parse_yaml import (
 )
 
 
-class ParameterValidationRST:
+class ParameterValidationMarkdown:
     @typechecked
     def __init__(self, validation: ValidationFunction):
         self.sentence_conventions = {
@@ -81,12 +81,12 @@ class ParameterValidationRST:
         return " - " + validation
 
 
-class ParameterDetailRST:
+class ParameterDetailMarkdown:
     @typechecked
     def __init__(self, declare_parameters: DeclareParameter):
         self.declare_parameters = declare_parameters
         self.param_validations = [
-            ParameterValidationRST(val)
+            ParameterValidationMarkdown(val)
             for val in declare_parameters.parameter_validations
         ]
 
@@ -106,12 +106,12 @@ class ParameterDetailRST:
         return code
 
 
-class DefaultConfigRST:
+class DefaultConfigMarkdown:
     @typechecked
     def __init__(self, gen_param_struct: GenerateCode):
         self.gen_param_struct = gen_param_struct
         self.param_details = [
-            ParameterDetailRST(param)
+            ParameterDetailMarkdown(param)
             for param in self.gen_param_struct.declare_parameters
         ]
 
@@ -136,9 +136,9 @@ class AutoDocumentation:
     @typechecked
     def __init__(self, gen_param_struct: GenerateCode):
         self.gen_param_struct = gen_param_struct
-        self.default_config = DefaultConfigRST(gen_param_struct)
+        self.default_config = DefaultConfigMarkdown(gen_param_struct)
         self.param_details = [
-            ParameterDetailRST(param)
+            ParameterDetailMarkdown(param)
             for param in self.gen_param_struct.declare_parameters
         ]
 
@@ -159,7 +159,7 @@ class AutoDocumentation:
 
 
 def run(yaml_file, output_file):
-    # cpp is used here because it the desired style of the rst, e.g. false for C++ instead of False for Python
+    # cpp is used here because it the desired style of the markdown, e.g. false for C++ instead of False for Python
     gen_param_struct = GenerateCode("cpp")
     output_dir = os.path.dirname(output_file)
     if not os.path.isdir(output_dir):
@@ -177,10 +177,10 @@ def run(yaml_file, output_file):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_rst_file")
+    parser.add_argument("--output_markdown_file")
     parser.add_argument("--input_yaml_file")
     args = parser.parse_args()
-    run(args.input_yaml_file, args.output_rst_file)
+    run(args.input_yaml_file, args.output_markdown_file)
     print(args)
 
 
