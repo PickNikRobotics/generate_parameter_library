@@ -600,15 +600,22 @@ class RemoveRuntimeParameter:
 
 
 def get_all_templates(language: str):
-    template_path = os.path.join(os.path.dirname(__file__), "jinja_templates", language)
+    template_lang_path = os.path.join(
+        os.path.dirname(__file__), "jinja_templates", language
+    )
+    template_markdown_path = os.path.join(
+        os.path.dirname(__file__), "jinja_templates", "markdown"
+    )
+    template_paths = [template_lang_path, template_markdown_path]
     template_map = {}
-    for file_name in [
-        f
-        for f in os.listdir(template_path)
-        if os.path.isfile(os.path.join(template_path, f))
-    ]:
-        with open(os.path.join(template_path, file_name)) as file:
-            template_map[file_name] = file.read()
+    for template_path in template_paths:
+        for file_name in [
+            f
+            for f in os.listdir(template_path)
+            if os.path.isfile(os.path.join(template_path, f))
+        ]:
+            with open(os.path.join(template_path, file_name)) as file:
+                template_map[file_name] = file.read()
 
     return template_map
 

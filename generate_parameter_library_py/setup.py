@@ -51,6 +51,9 @@ setup(
             "jinja_templates/cpp/set_stack_params",
             "jinja_templates/cpp/update_parameter",
             "jinja_templates/cpp/update_runtime_parameter",
+            "jinja_templates/markdown/default_config",
+            "jinja_templates/markdown/documentation",
+            "jinja_templates/markdown/parameter_detail",
             "jinja_templates/python/declare_parameter",
             "jinja_templates/python/declare_runtime_parameter",
             "jinja_templates/python/declare_struct",
@@ -84,7 +87,7 @@ setup(
         "console_scripts": [
             "generate_parameter_library_cpp = generate_parameter_library_py.generate_cpp_header:main",
             "generate_parameter_library_python = generate_parameter_library_py.generate_python_module:main",
-            "generate_parameter_library_rst = generate_parameter_library_py.generate_rst:main",
+            "generate_parameter_library_markdown = generate_parameter_library_py.generate_markdown:main",
         ],
     },
 )
