@@ -89,7 +89,7 @@ class ParameterDetailRST:
         data = {
             "name": self.declare_parameters.code_gen_variable.name,
             "type": self.declare_parameters.code_gen_variable.defined_type,
-            "default_value": self.declare_parameters.code_gen_variable.cpp_str_value,
+            "default_value": self.declare_parameters.code_gen_variable.lang_str_value,
             "constraints": constraints,
             "description": self.declare_parameters.parameter_description,
         }
@@ -108,7 +108,7 @@ class DefaultConfigRST:
     def __str__(self):
         j2_template = Template(GenerateCode.templates["default_config"])
 
-        tmp = "\n".join(param.parameter_name + ": " + str(param.code_gen_variable.cpp_str_value) for param in
+        tmp = "\n".join(param.parameter_name + ": " + str(param.code_gen_variable.lang_str_value) for param in
                         self.gen_param_struct.declare_parameters)
 
         data = {
@@ -143,6 +143,7 @@ class AutoDocumentation:
 
 
 def run(yaml_file, output_file):
+    # cpp is used here because it the desired style of the rst, e.g. false for C++ instead of False for Python
     gen_param_struct = GenerateCode("cpp")
     output_dir = os.path.dirname(output_file)
     if not os.path.isdir(output_dir):
