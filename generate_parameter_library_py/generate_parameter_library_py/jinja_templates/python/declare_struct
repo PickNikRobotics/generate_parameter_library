@@ -1,6 +1,4 @@
-class _{{struct_name}} :
-{%- filter indent(width=4) %}
-def __init__(self):
+class __{{struct_name}}:
 {%- filter indent(width=4) %}
 {% if struct_fields|length -%}
 {{struct_fields-}}
@@ -9,10 +7,13 @@ def __init__(self):
 {{sub_structs-}}
 {% endif -%}
 {% endfilter -%}
-{% endfilter -%}
 {% if struct_instance|length -%}
-self.{{struct_instance}} = _{{struct_name}}()
+{{struct_instance}} = __{{struct_name}}()
 {% endif -%}
 {% if not struct_instance|length -%}
-self.{{map_name}} = dict()
+__map_type = __{{struct_name}}
+def add_entry(self, name):
+    setattr(self, name, self.__map_type())
+def get_entry(self, name):
+    return getattr(self, name, self.__map_type())
 {% endif -%}

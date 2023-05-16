@@ -77,7 +77,7 @@ setup(
         "Programming Language :: Python",
         "Topic :: Software Development",
     ],
-    description="Generate the ROS parameter struct in C++ with callbacks for updating.",
+    description="Generate the ROS parameter struct in C++ and Python with callbacks for updating.",
     license="BSD-3-Clause",
     tests_require=["pytest"],
     entry_points={

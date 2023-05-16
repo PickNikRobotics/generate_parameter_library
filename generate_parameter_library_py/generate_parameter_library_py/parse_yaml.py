@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 # Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,13 +29,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from typing import List, Optional
 from jinja2 import Template
 from typeguard import typechecked
-import os
-import yaml
+from typing import List, Optional
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
+import os
+import yaml
 
 from generate_parameter_library_py.cpp_convertions import CPPConverstions
 from generate_parameter_library_py.python_convertions import PythonConvertions
@@ -163,23 +165,23 @@ class CodeGenVariableBase:
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
 
-        if self.defined_type not in self.conversation.defined_type_to_cpp_type:
+        if self.defined_type not in self.conversation.defined_type_to_lang_type:
             allowed = ", ".join(
-                key for key in self.conversation.defined_type_to_cpp_type
+                key for key in self.conversation.defined_type_to_lang_type
             )
             raise compile_error(
                 f"Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: "
                 + allowed
             )
-        func = self.conversation.defined_type_to_cpp_type[self.defined_type]
-        self.cpp_type = func(self.defined_type, template)
+        func = self.conversation.defined_type_to_lang_type[self.defined_type]
+        self.lang_type = func(self.defined_type, template)
         tmp = defined_type.split("_")
         self.defined_base_type = tmp[0]
-        func = self.conversation.defined_type_to_cpp_type[self.defined_base_type]
-        self.cpp_base_type = func(self.defined_base_type, template)
-        func = self.conversation.cpp_str_value_func[self.defined_type]
+        func = self.conversation.defined_type_to_lang_type[self.defined_base_type]
+        self.lang_base_type = func(self.defined_base_type, template)
+        func = self.conversation.lang_str_value_func[self.defined_type]
         try:
-            self.cpp_str_value = func(default_value)
+            self.lang_str_value = func(default_value)
         except TypeError:
             raise compile_error(
                 f"Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}"
@@ -219,10 +221,10 @@ class CodeGenFixedVariable(CodeGenVariableBase):
         size = fixed_type_size(defined_type)
         tmp = defined_type.split("_")
         yaml_base_type = tmp[0]
-        func = self.conversation.defined_type_to_cpp_type[yaml_base_type]
-        cpp_base_type = func(yaml_base_type, None)
+        func = self.conversation.defined_type_to_lang_type[yaml_base_type]
+        lang_base_type = func(yaml_base_type, None)
         defined_type = get_fixed_type(defined_type)
-        return defined_type, (cpp_base_type, size)
+        return defined_type, (lang_base_type, size)
 
     def get_parameter_type(self):
         return int_to_integer_str(get_fixed_base_type(self.defined_type)).upper()
@@ -235,9 +237,9 @@ class VariableDeclaration:
         self.code_gen_variable = code_gen_variable
 
     def __str__(self):
-        value = self.code_gen_variable.cpp_str_value
+        value = self.code_gen_variable.lang_str_value
         data = {
-            "type": self.code_gen_variable.cpp_type,
+            "type": self.code_gen_variable.lang_type,
             "name": self.code_gen_variable.name,
             "value": value,
         }
@@ -262,10 +264,12 @@ class DeclareStruct:
     def add_sub_struct(self, sub_struct):
         self.sub_structs.append(sub_struct)
 
-    def inner_content(self):
+    def field_content(self):
         content = "".join(str(x) for x in self.fields)
-        content += "".join(str(x) for x in self.sub_structs)
+        return str(content)
 
+    def sub_struct_content(self):
+        content = "".join(str(x) for x in self.sub_structs)
         return str(content)
 
     def __str__(self):
@@ -307,7 +311,7 @@ class ValidationFunction:
     ):
         self.code_gen_variable = code_gen_variable
         self.function_name = function_name
-        self.function_base_name = function_name
+        self.function_base_name = function_name.replace("<>", "")
 
         if arguments is not None:
             self.arguments = arguments
@@ -315,12 +319,9 @@ class ValidationFunction:
             self.arguments = []
 
     def __str__(self):
-        # TODO the c++ code here should be moved to a jinja template
-        # get func signature
         function_name = self.code_gen_variable.conversation.get_func_signature(
-            self.function_name, self.code_gen_variable.cpp_base_type
+            self.function_name, self.code_gen_variable.lang_base_type
         )
-        # bracket type for open/close list type
         open_bracket = self.code_gen_variable.conversation.open_bracket
         close_bracket = self.code_gen_variable.conversation.close_bracket
 
@@ -487,7 +488,7 @@ class DeclareParameterBase:
 
 class DeclareParameter(DeclareParameterBase):
     def __str__(self):
-        if len(self.code_gen_variable.cpp_str_value) == 0:
+        if len(self.code_gen_variable.lang_str_value) == 0:
             self.parameter_value = ""
         else:
             self.parameter_value = self.parameter_name
@@ -599,18 +600,15 @@ class RemoveRuntimeParameter:
 
 
 def get_all_templates(language: str):
-    template_lang_path = os.path.join(os.path.dirname(__file__), "jinja_templates", language)
-    template_rst_path = os.path.join(os.path.dirname(__file__), "jinja_templates", "rst")
-    template_paths = [template_lang_path, template_rst_path]
+    template_path = os.path.join(os.path.dirname(__file__), "jinja_templates", language)
     template_map = {}
-    for template_path in template_paths:
-        for file_name in [
-            f
-            for f in os.listdir(template_path)
-            if os.path.isfile(os.path.join(template_path, f))
-        ]:
-            with open(os.path.join(template_path, file_name)) as file:
-                template_map[file_name] = file.read()
+    for file_name in [
+        f
+        for f in os.listdir(template_path)
+        if os.path.isfile(os.path.join(template_path, f))
+    ]:
+        with open(os.path.join(template_path, file_name)) as file:
+            template_map[file_name] = file.read()
 
     return template_map
 
@@ -720,7 +718,7 @@ class GenerateCode:
             validations,
         ) = preprocess_inputs(self.language, name, value, nested_name_list)
         # skip accepted params that do not generate code
-        if code_gen_variable.cpp_type is None:
+        if code_gen_variable.lang_type is None:
             return
 
         param_name = code_gen_variable.param_name
@@ -821,10 +819,14 @@ class GenerateCode:
             "user_validation_file": self.user_validation_file,
             "comments": self.comments,
             "namespace": self.namespace,
-            "struct_content": self.struct_tree.sub_structs[0].inner_content(),
-            "stack_struct_content": self.stack_struct_tree.sub_structs[
+            "field_content": self.struct_tree.sub_structs[0].field_content(),
+            "sub_struct_content": self.struct_tree.sub_structs[0].sub_struct_content(),
+            "stack_field_content": self.stack_struct_tree.sub_structs[
                 0
-            ].inner_content(),
+            ].field_content(),
+            "stack_sub_struct_content": self.stack_struct_tree.sub_structs[
+                0
+            ].sub_struct_content(),
             "update_params_set": "\n".join([str(x) for x in self.update_parameters]),
             "update_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_dynamic_parameters]

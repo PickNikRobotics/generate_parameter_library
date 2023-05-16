@@ -2,63 +2,13 @@
 
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
+from rcl_interfaces.msg import FloatingPointRange, IntegerRange
 from rclpy.clock import Clock
 from rclpy.exceptions import InvalidParameterValueException
 from rclpy.time import Time
 import copy
 import rclpy
-
-# from rsl import ParameterValidators
-class ParameterValidators:
-    # Value validators
-    def bounds(param, lower, upper):
-        return ""
-    def lower_bounds(param, lower):
-        return ""
-    def upper_bounds(param, upper):
-        return ""
-    def lt(param, value):
-        return ""
-    def gt(param, value):
-        return ""
-    def lt_eq(param, value):
-        return ""
-    def gt_eq(param, value):
-        return ""
-    def one_of(param, values):
-        return ""
-
-    # String validators
-    def fixed_size(param, length):
-        return ""
-    def size_gt(param, length):
-        return ""
-    def size_lt(param, length):
-        return ""
-    def not_empty(param):
-        return ""
-    def one_of(param, values):
-        return ""
-
-    # Array validators
-    def unique(param):
-        return ""
-    def subset_of(param, values):
-        return ""
-    def fixed_size(param, length):
-        return ""
-    def size_gt(param, length):
-        return ""
-    def size_lt(param, length):
-        return ""
-    def not_empty(param):
-        return ""
-    def element_bounds(param, lower, upper):
-        return ""
-    def lower_element_bounds(param, lower):
-        return ""
-    def upper_element_bounds(param, upper):
-        return ""
+from generate_parameter_library_py.python_validators import ParameterValidators
 
 {% if user_validation_file|length -%}
 import {{user_validation_file}} as custom_validators
@@ -66,17 +16,14 @@ import {{user_validation_file}} as custom_validators
 
 class {{namespace}}:
 {%- filter indent(width=4) %}
-def __init__(self):
-    pass
 
 class Params:
 {%- filter indent(width=4) %}
-def __init__(self):
-    # for detecting if the parameter struct has been updated
-    self.stamp_ = Time()
-{%- filter indent(width=4) %}
-{{struct_content-}}
-{% endfilter -%}
+# for detecting if the parameter struct has been updated
+stamp_ = Time()
+
+{{field_content-}}
+{{sub_struct_content-}}
 {% endfilter -%}
 {%- endfilter %}
 
@@ -87,8 +34,6 @@ def __init__(self):
             self.prefix_ = prefix
             self.params_ = {{namespace}}.Params()
             self.node_ = node
-            #self.logger_ = None
-            #if (len(self.prefix_) > 0):
             self.logger_ = rclpy.logging.get_logger("{{namespace}}." + prefix)
 
             self.declare_params()
@@ -101,19 +46,39 @@ def __init__(self):
             self.params_.stamp_ = None
             paramCopy = copy.deepcopy(self.params_)
             paramCopy.stamp_ = tmp
+            self.params_.stamp_ = tmp
             return paramCopy
 
         def is_old(self, other_param):
             return self.params_.stamp_ != other_param.stamp_
 
+        def refresh_dynamic_parameters(self):
+            updated_params = self.get_params()
+            # TODO remove any destroyed dynamic parameters
+{%- filter indent(width=6) %}
+{{remove_dynamic_parameters}}
+{%- endfilter %}
+            # declare any new dynamic parameters
+{%- filter indent(width=12) %}
+{{update_declare_dynamic_parameters}}
+{%- endfilter %}
+
         def update(self, parameters):
             updated_params = self.get_params()
-            # TODO: need validation and dynamic parameters
 
             for param in parameters:
 {%- filter indent(width=16) %}
 {{update_params_set}}
 {%- endfilter %}
+{% if update_dynamic_parameters|length %}
+{%- filter indent(width=12) %}
+# update dynamic parameters
+for param in parameters:
+{%- filter indent(width=4) %}
+{{update_dynamic_parameters}}
+{%- endfilter %}
+{%- endfilter %}
+{%- endif %}
 
             updated_params.stamp_ = self.clock_.now()
             self.update_internal_params(updated_params)
@@ -121,10 +86,6 @@ def __init__(self):
 
         def update_internal_params(self, updated_params):
             self.params_ = updated_params
-
-        def to_parameter_value(self, value):
-            assert(0)
-            # I think it can be deleted
 
         def declare_params(self):
             updated_params = self.get_params()
@@ -138,5 +99,11 @@ def __init__(self):
 {%- filter indent(width=12) %}
 {{declare_params_set}}
 {%- endfilter %}
+{% if declare_set_dynamic_params|length %}
+{% filter indent(width=12) %}
+# declare and set all dynamic parameters
+{{declare_set_dynamic_params}}
+{%- endfilter %}
+{%- endif %}
 
             self.update_internal_params(updated_params)

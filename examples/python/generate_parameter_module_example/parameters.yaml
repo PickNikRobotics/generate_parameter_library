@@ -13,6 +13,14 @@ admittance_controller:
       "custom_validators::no_args_validator": null
     }
   }
+  subset_selection: {
+    type: string_array,
+    default_value: ["A", "B"],
+    description: "test subset of validator.",
+    validation: {
+      subset_of<>: [ [ "A", "B", "C"] ],
+      }
+  }
   joints: {
     type: string_array,
     default_value: ["joint1", "joint2", "joint3"],

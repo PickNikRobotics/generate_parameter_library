@@ -8,12 +8,9 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 
-# from generate_parameter_library_py.parse_yaml import compile_error
-
-
 class CPPConverstions:
     def __init__(self):
-        self.defined_type_to_cpp_type = {
+        self.defined_type_to_lang_type = {
             "none": lambda defined_type, templates: None,
             "bool": lambda defined_type, templates: "bool",
             "double": lambda defined_type, templates: "double",
@@ -44,7 +41,7 @@ class CPPConverstions:
             "string_array_fixed": "as_string_array()",
             "string_fixed": "as_string()",
         }
-        self.cpp_str_value_func = {
+        self.lang_str_value_func = {
             "none": self.no_code,
             "bool": self.bool_to_str,
             "double": self.float_to_str,

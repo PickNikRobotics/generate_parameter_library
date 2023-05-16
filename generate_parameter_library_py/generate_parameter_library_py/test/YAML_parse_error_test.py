@@ -22,10 +22,8 @@ from ament_index_python.packages import get_package_share_path
 from generate_parameter_library_py.generate_cpp_header import run as run_python
 from generate_parameter_library_py.generate_python_module import run as run_cpp
 from generate_parameter_library_py.parse_yaml import YAMLSyntaxError
-from generate_parameter_library_py.generate_cpp_header import (
-    GenerateCode,
-    parse_args,
-)
+from generate_parameter_library_py.generate_cpp_header import parse_args
+
 
 def set_up(yaml_test_file):
     full_file_path = os.path.join(

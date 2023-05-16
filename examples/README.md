@@ -11,12 +11,18 @@
  colcon build
 ```
 
-## Run the node
+## Run the C++ node
 
 ```
 source install/setup.bash
-ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/example/config/implementation.yaml
+ros2 run generate_parameter_library_example test_node --ros-args --params-file --params-file src/generate_parameter_library/examples/cpp/config/implementation.yaml
 
+```
+## Or run the Python node
+
+```
+source install/setup.bash
+ros2 run generate_parameter_module_example test_node --ros-args --params-file src/generate_parameter_library/examples/python/config/implementation.yaml
 ```
 
 You should see an output like this:
