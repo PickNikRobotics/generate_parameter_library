@@ -69,7 +69,7 @@ class ParameterValidationMarkdown:
         if function_base_name in self.sentence_conventions:
             return self.sentence_conventions[function_base_name]
         else:
-          return "Custom validator: " + str(function_base_name)
+            return "Custom validator: " + str(function_base_name)
 
     def __str__(self):
         arguments = self.validation.arguments
@@ -77,7 +77,7 @@ class ParameterValidationMarkdown:
         if validation.__contains__("VALUES"):
             validation = validation.replace("VALUES", str(arguments[0]))
         elif arguments:
-              validation += ": " + str(arguments[0])
+            validation += ": " + str(arguments[0])
 
         return " - " + validation
 
