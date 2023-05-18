@@ -149,7 +149,11 @@ class CodeGenVariableBase:
         defined_type: str,
         default_value: any,
     ):
-        if language == "cpp" or language == "rst" or language == "markdown":
+        if language == "cpp":
+            self.conversation = CPPConverstions()
+        elif language == "rst" or language == "markdown":
+            # cpp is used here because it the desired style of the markdown,
+            # e.g. "false" for C++ instead of "False" for Python
             self.conversation = CPPConverstions()
         elif language == "python":
             self.conversation = PythonConvertions()
@@ -698,9 +702,11 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.set_stack_params = []
-        if language == "cpp" or language == "rst" or language == "markdown":
+        if language == "cpp":
             self.comments = "// auto-generated DO NOT EDIT"
-        elif language == "python":
+        elif language == "rst":
+            self.comments = ".. auto-generated DO NOT EDIT"
+        elif language == "python" or language == "markdown":
             self.comments = "# auto-generated DO NOT EDIT"
         else:
             raise compile_error(
