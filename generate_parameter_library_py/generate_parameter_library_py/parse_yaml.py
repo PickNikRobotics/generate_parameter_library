@@ -604,15 +604,17 @@ def get_all_templates(language: str):
         os.path.dirname(__file__), "jinja_templates", language
     )
     if language == "markdown":
-      template_markdown_path = os.path.join(
-          os.path.dirname(__file__), "jinja_templates", "markdown"
-      )
-      template_paths = [template_lang_path, template_markdown_path]
-    if language == "rst":
-      template_rst_path = os.path.join(
-          os.path.dirname(__file__), "jinja_templates", "rst"
-      )
-      template_paths = [template_lang_path, template_rst_path]
+        template_markdown_path = os.path.join(
+            os.path.dirname(__file__), "jinja_templates", "markdown"
+        )
+        template_paths = [template_lang_path, template_markdown_path]
+    elif language == "rst":
+        template_rst_path = os.path.join(
+            os.path.dirname(__file__), "jinja_templates", "rst"
+        )
+        template_paths = [template_lang_path, template_rst_path]
+    else:
+        template_paths = [template_lang_path]
 
     template_map = {}
     for template_path in template_paths:
