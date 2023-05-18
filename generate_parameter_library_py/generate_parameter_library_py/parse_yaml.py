@@ -149,7 +149,7 @@ class CodeGenVariableBase:
         defined_type: str,
         default_value: any,
     ):
-        if language == "cpp":
+        if language == "cpp" or language == "rst" or language == "markdown":
             self.conversation = CPPConverstions()
         elif language == "python":
             self.conversation = PythonConvertions()
@@ -603,10 +603,17 @@ def get_all_templates(language: str):
     template_lang_path = os.path.join(
         os.path.dirname(__file__), "jinja_templates", language
     )
-    template_markdown_path = os.path.join(
-        os.path.dirname(__file__), "jinja_templates", "markdown"
-    )
-    template_paths = [template_lang_path, template_markdown_path]
+    if language == "markdown":
+      template_markdown_path = os.path.join(
+          os.path.dirname(__file__), "jinja_templates", "markdown"
+      )
+      template_paths = [template_lang_path, template_markdown_path]
+    if language == "rst":
+      template_rst_path = os.path.join(
+          os.path.dirname(__file__), "jinja_templates", "rst"
+      )
+      template_paths = [template_lang_path, template_rst_path]
+
     template_map = {}
     for template_path in template_paths:
         for file_name in [
@@ -689,7 +696,7 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.set_stack_params = []
-        if language == "cpp":
+        if language == "cpp" or language == "rst" or language == "markdown":
             self.comments = "// auto-generated DO NOT EDIT"
         elif language == "python":
             self.comments = "# auto-generated DO NOT EDIT"
