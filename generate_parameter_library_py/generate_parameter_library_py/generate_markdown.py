@@ -158,9 +158,9 @@ class AutoDocumentation:
         return code
 
 
-def run(yaml_file, output_file):
+def run(yaml_file, output_file, language):
     # cpp is used here because it the desired style of the markdown, e.g. false for C++ instead of False for Python
-    gen_param_struct = GenerateCode("cpp")
+    gen_param_struct = GenerateCode(language)
     output_dir = os.path.dirname(output_file)
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -179,8 +179,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output_markdown_file")
     parser.add_argument("--input_yaml_file")
+    parser.add_argument("--language", default="markdown")
     args = parser.parse_args()
-    run(args.input_yaml_file, args.output_markdown_file)
+    run(args.input_yaml_file, args.output_markdown_file, args.language)
     print(args)
 
 
