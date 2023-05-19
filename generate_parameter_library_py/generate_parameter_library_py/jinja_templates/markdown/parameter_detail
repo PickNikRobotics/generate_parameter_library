@@ -2,11 +2,12 @@
 {% if description|length %}
 {{description}}
 {% endif %}
-| Type | {{type}} |
+* Type: `{{type}}`
 {%- if default_value|length %}
-| Default Value | {{default_value}} |
+* Default Value: {{default_value}}
 {% endif %}
 {%- if constraints|length %}
+
 *Constraints:*
 {{constraints}}
 {% endif %}
