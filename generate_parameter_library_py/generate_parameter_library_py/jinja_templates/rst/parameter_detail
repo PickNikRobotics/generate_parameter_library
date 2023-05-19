@@ -1,0 +1,16 @@
+{{name}} ({{type}}){% if description|length %}
+  {{description}}
+{% endif %}
+{%- if default_value|length %}
+  Default:  {{default_value}}
+{% endif %}
+{%- if constraints|length %}
+
+  Constraints:
+
+{%- filter indent(width=2) %}
+
+{{constraints}}
+{% endfilter -%}
+
+{% endif %}

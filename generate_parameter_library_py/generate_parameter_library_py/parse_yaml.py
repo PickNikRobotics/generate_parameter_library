@@ -151,6 +151,10 @@ class CodeGenVariableBase:
     ):
         if language == "cpp":
             self.conversation = CPPConverstions()
+        elif language == "rst" or language == "markdown":
+            # cpp is used here because it the desired style of the markdown,
+            # e.g. "false" for C++ instead of "False" for Python
+            self.conversation = CPPConverstions()
         elif language == "python":
             self.conversation = PythonConvertions()
         else:
@@ -603,10 +607,19 @@ def get_all_templates(language: str):
     template_lang_path = os.path.join(
         os.path.dirname(__file__), "jinja_templates", language
     )
-    template_markdown_path = os.path.join(
-        os.path.dirname(__file__), "jinja_templates", "markdown"
-    )
-    template_paths = [template_lang_path, template_markdown_path]
+    if language == "markdown":
+        template_markdown_path = os.path.join(
+            os.path.dirname(__file__), "jinja_templates", "markdown"
+        )
+        template_paths = [template_lang_path, template_markdown_path]
+    elif language == "rst":
+        template_rst_path = os.path.join(
+            os.path.dirname(__file__), "jinja_templates", "rst"
+        )
+        template_paths = [template_lang_path, template_rst_path]
+    else:
+        template_paths = [template_lang_path]
+
     template_map = {}
     for template_path in template_paths:
         for file_name in [
@@ -691,7 +704,9 @@ class GenerateCode:
         self.set_stack_params = []
         if language == "cpp":
             self.comments = "// auto-generated DO NOT EDIT"
-        elif language == "python":
+        elif language == "rst":
+            self.comments = ".. auto-generated DO NOT EDIT"
+        elif language == "python" or language == "markdown":
             self.comments = "# auto-generated DO NOT EDIT"
         else:
             raise compile_error(
