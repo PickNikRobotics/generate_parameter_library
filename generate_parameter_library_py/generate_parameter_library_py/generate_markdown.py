@@ -162,7 +162,7 @@ def run(yaml_file, output_file):
     # cpp is used here because it the desired style of the markdown, e.g. false for C++ instead of False for Python
     gen_param_struct = GenerateCode("cpp")
     output_dir = os.path.dirname(output_file)
-    if not os.path.isdir(output_dir):
+    if output_dir and not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
     gen_param_struct.parse(yaml_file, "")
