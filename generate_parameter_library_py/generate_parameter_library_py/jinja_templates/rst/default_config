@@ -1,4 +1,4 @@
-.. code::
+.. code:: yaml
 {%- filter indent(width=2) %}
 
 {{namespace}}:
