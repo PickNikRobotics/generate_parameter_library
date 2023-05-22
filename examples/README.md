@@ -15,7 +15,7 @@
 
 ```
 source install/setup.bash
-ros2 run generate_parameter_library_example test_node --ros-args --params-file --params-file src/generate_parameter_library/examples/cpp/config/implementation.yaml
+ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/examples/cpp/config/implementation.yaml
 
 ```
 ## Or run the Python node
