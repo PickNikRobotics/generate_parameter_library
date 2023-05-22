@@ -30,7 +30,9 @@
 import rclpy
 import rclpy.node
 
-from generate_parameter_module_example.admittance_parameters import admittance_controller
+from generate_parameter_module_example.admittance_parameters import (
+    admittance_controller,
+)
 
 
 class MinimalParam(rclpy.node.Node):

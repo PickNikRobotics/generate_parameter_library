@@ -49,14 +49,24 @@ def generate_parameter_module(module_name, yaml_file, validation_module=""):
             colcon_ws = path_split[0]
 
             tmp = sys.version.split()[0]
-            tmp = tmp.split('.')
-            py_version = f'python{tmp[0]}.{tmp[1]}'
+            tmp = tmp.split(".")
+            py_version = f"python{tmp[0]}.{tmp[1]}"
 
-            install_dir = os.path.join(colcon_ws, 'install', pkg_name, 'lib', py_version, 'site-packages', pkg_name)
-            build_dir = os.path.join(colcon_ws, 'build', pkg_name, pkg_name)
+            install_dir = os.path.join(
+                colcon_ws,
+                "install",
+                pkg_name,
+                "lib",
+                py_version,
+                "site-packages",
+                pkg_name,
+            )
+            build_dir = os.path.join(colcon_ws, "build", pkg_name, pkg_name)
             break
 
     if build_dir:
         run(os.path.join(build_dir, module_name + ".py"), yaml_file, validation_module)
     if install_dir:
-        run(os.path.join(install_dir, module_name + ".py"), yaml_file, validation_module)
+        run(
+            os.path.join(install_dir, module_name + ".py"), yaml_file, validation_module
+        )
