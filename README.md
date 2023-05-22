@@ -107,7 +107,7 @@ int main(int argc, char * argv[])
 ```python
 import rclpy
 from rclpy.node import Node
-from turtlesim_parameters import turtlesim_parameters
+from turtlesim_pkg.turtlesim_parameters import turtlesim_parameters
 
 def main(args=None):
   rclpy.init(args=args)

@@ -36,12 +36,26 @@ def generate_parameter_module(module_name, yaml_file, validation_module=""):
     # TODO there must be a better way to do this. I need to find the build directory so I can place the python
     # module there
     build_dir = None
+    install_dir = None
     for i, arg in enumerate(sys.argv):
         # Look for the `--build-directory` option in the command line arguments
         if arg == "--build-directory" or arg == "--build-base":
-            build_dir = sys.argv[i + 1]
-            tmp = os.path.split(build_dir)
-            build_dir = os.path.join(*tmp[:-1])
+            build = sys.argv[i + 1]
+
+            tmp = os.path.split(build)
+            tmp = os.path.split(tmp[0])
+            pkg_name = tmp[1]
+            tmp = os.path.split(tmp[0])
+            colcon_ws = tmp[0]
+            tmp = sys.version.split()[0]
+            tmp = tmp.split('.')
+
+            py_version = f'python{tmp[0]}.{tmp[1]}'
+            install_dir = os.path.join(colcon_ws, 'install', pkg_name, 'lib', py_version, 'site-packages', pkg_name)
+            build_dir = os.path.join(colcon_ws, 'build', pkg_name, pkg_name)
             break
+
     if build_dir:
         run(os.path.join(build_dir, module_name + ".py"), yaml_file, validation_module)
+    if build_dir:
+        run(os.path.join(install_dir, module_name + ".py"), yaml_file, validation_module)
