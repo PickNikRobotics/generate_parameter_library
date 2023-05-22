@@ -40,22 +40,23 @@ def generate_parameter_module(module_name, yaml_file, validation_module=""):
     for i, arg in enumerate(sys.argv):
         # Look for the `--build-directory` option in the command line arguments
         if arg == "--build-directory" or arg == "--build-base":
-            build = sys.argv[i + 1]
+            build_arg = sys.argv[i + 1]
 
-            tmp = os.path.split(build)
-            tmp = os.path.split(tmp[0])
-            pkg_name = tmp[1]
-            tmp = os.path.split(tmp[0])
-            colcon_ws = tmp[0]
+            path_split = os.path.split(build_arg)
+            path_split = os.path.split(path_split[0])
+            pkg_name = path_split[1]
+            path_split = os.path.split(path_split[0])
+            colcon_ws = path_split[0]
+
             tmp = sys.version.split()[0]
             tmp = tmp.split('.')
-
             py_version = f'python{tmp[0]}.{tmp[1]}'
+
             install_dir = os.path.join(colcon_ws, 'install', pkg_name, 'lib', py_version, 'site-packages', pkg_name)
             build_dir = os.path.join(colcon_ws, 'build', pkg_name, pkg_name)
             break
 
     if build_dir:
         run(os.path.join(build_dir, module_name + ".py"), yaml_file, validation_module)
-    if build_dir:
+    if install_dir:
         run(os.path.join(install_dir, module_name + ".py"), yaml_file, validation_module)
