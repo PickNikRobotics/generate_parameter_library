@@ -36,7 +36,7 @@ setup(
         ),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
-    install_requires=["setuptools", "typeguard", "jinja2"],
+    install_requires=["setuptools", "typeguard", "jinja2", "pyyaml"],
     package_data={
         "": [
             "jinja_templates/cpp/declare_parameter",
