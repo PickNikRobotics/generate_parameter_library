@@ -92,7 +92,7 @@ class CPPConverstions:
         return (
             f"throw rclcpp::exceptions::InvalidParameterValueException"
             f'(fmt::format("Invalid value set during initialization for '
-            f"parameter '{param_name}': \" + validation_result.error()));"
+            f"parameter '{param_name}': {{}}\", validation_result.error()));"
         )
 
     @typechecked
