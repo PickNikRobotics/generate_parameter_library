@@ -9,6 +9,7 @@
 #include <mutex>
 #include <rclcpp/node.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <rclcpp/logger.hpp>
 #include <set>
 #include <sstream>
 #include <string>
@@ -93,19 +94,23 @@ struct StackParams {
   public:
     // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
     ParamListener(rclcpp::Node::SharedPtr node, std::string const& prefix = "")
-    : ParamListener(node->get_node_parameters_interface(), prefix) {}
+    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
 
     ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node, std::string const& prefix = "")
-    : ParamListener(node->get_node_parameters_interface(), prefix) {}
+    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
 
-    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface, std::string const& prefix = ""){
+    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
+                  std::string const& prefix = "")
+    : ParamListener(parameters_interface, rclcpp::get_logger("{{namespace}}"), prefix) {
+      RCLCPP_DEBUG(logger_, "ParameterListener: Not using node logger, recommend using other constructors to use a node logger");
+    }
+
+    ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
+                  rclcpp::Logger logger, std::string const& prefix = "") {
+      logger_ = logger;
       prefix_ = prefix;
       if (!prefix_.empty() && prefix_.back() != '.') {
         prefix_ += ".";
-      }
-
-      if (!prefix.empty()) {
-        logger_ = rclcpp::get_logger("{{namespace}}." + prefix);
       }
 
       parameters_interface_ = parameters_interface;
@@ -204,6 +209,10 @@ struct StackParams {
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
+
+      // rclcpp::Logger cannot be default-constructed
+      // so we must provide a initialization here even though
+      // every one of our constructors initializes logger_
       rclcpp::Logger logger_ = rclcpp::get_logger("{{namespace}}");
       std::mutex mutable mutex_;
   };
