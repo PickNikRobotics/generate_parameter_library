@@ -284,7 +284,7 @@ The built-in validator functions provided by this package are:
 Validators are functions that return a `tl::expected<void, std::string>` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
 Validators are C++ functions defined in a header file similar to the example shown below.
 
-Here is an example custom allocator.
+Here is an example custom validator.
 
 ```c++
 #include <rclcpp/rclcpp.hpp>
