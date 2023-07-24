@@ -2,6 +2,24 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.4 (2023-07-24)
+------------------
+* Use node logger (`#132 <https://github.com/PickNikRobotics/generate_parameter_library/issues/132>`_)
+* Fixed incorrect usage of fmt, causing compile errors (`#127 <https://github.com/PickNikRobotics/generate_parameter_library/issues/127>`_)
+* Add pyyaml as dependency (`#123 <https://github.com/PickNikRobotics/generate_parameter_library/issues/123>`_)
+* Fix Python install (`#122 <https://github.com/PickNikRobotics/generate_parameter_library/issues/122>`_)
+* Use correct syntax highlighting (`#121 <https://github.com/PickNikRobotics/generate_parameter_library/issues/121>`_)
+* ReST template (`#119 <https://github.com/PickNikRobotics/generate_parameter_library/issues/119>`_)
+* Fix empty arguments case and add custom validator prompt (`#117 <https://github.com/PickNikRobotics/generate_parameter_library/issues/117>`_)
+* Update markdown template (`#116 <https://github.com/PickNikRobotics/generate_parameter_library/issues/116>`_)
+* Fix output in current folder (`#115 <https://github.com/PickNikRobotics/generate_parameter_library/issues/115>`_)
+* Generate Markdown Docs for Parameters  (`#111 <https://github.com/PickNikRobotics/generate_parameter_library/issues/111>`_)
+* Add Python support for generate_parameter_library (`#110 <https://github.com/PickNikRobotics/generate_parameter_library/issues/110>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* Update .pre-commit-config.yaml (`#108 <https://github.com/PickNikRobotics/generate_parameter_library/issues/108>`_)
+* Log when a parameter is set (`#106 <https://github.com/PickNikRobotics/generate_parameter_library/issues/106>`_)
+* Contributors: Christoph Fröhlich, Paul Gesel, Tyler Weaver, mosfet80, sprenger120
+
 0.3.3 (2023-04-13)
 ------------------
 * Fix Parameter Descriptor Incorrectly Populating Range Constraints for size_lt and size_gt (`#105 <https://github.com/PickNikRobotics/generate_parameter_library/issues/105>`_)

@@ -401,7 +401,7 @@ force_torque_broadcaster_controller:
 
 
 ### Example Project
-See [example project](examples/) for a complete example of how to use the generate_parameter_library.
+See [cpp example](example/) or [python example](example_python/) for complete examples of how to use the generate_parameter_library.
 
 ### Generated code output
 The generated code is primarily consists of two major components:
@@ -456,7 +456,7 @@ The structure of the `Params` struct and the logic for declaring and updating pa
 
 Using generate_parameter_library you can generate a Markdown-file for your `parameters.yaml` file.
 ```
-generate_parameter_library_markdown --input_yaml examples/cpp/src/parameters.yaml --output_markdown_file parameters.md
+generate_parameter_library_markdown --input_yaml example/src/parameters.yaml --output_markdown_file parameters.md
 ```
 
 This will generate a file `parameters.md` in the current folder that contains a markdown
