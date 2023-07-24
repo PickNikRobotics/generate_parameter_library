@@ -8,6 +8,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 * Declaring, Getting, Validating, and Updating handled by generated code
 * Dynamic ROS 2 Parameters made easy
 * Custom user specified validator functions
+* Automatically create documentation of parameters
 
 ## Basic Usage
 1. [Create YAML parameter codegen file](#create-yaml-parameter-codegen-file)
@@ -158,6 +159,7 @@ when using `gmock` test library.
 * [Dynamic Parameters](#dynamic-parameters)
 * [Example Project](#example-project)
 * [Generated code output](#generated-code-output)
+* [Generate markdown documentation](#generate-markdown-documentation)
 
 ### Cpp namespace
 The root element of the YAML file determines the namespace used in the generated C++ code.
@@ -449,6 +451,16 @@ class ParamListener {
 } // namespace cpp_namespace
 ```
 The structure of the `Params` struct and the logic for declaring and updating parameters is generated from a YAML file specification.
+
+### Generate markdown documentation
+
+Using generate_parameter_library you can generate a Markdown-file for your `parameters.yaml` file.
+```
+generate_parameter_library_markdown --input_yaml examples/cpp/src/parameters.yaml --output_markdown_file parameters.md
+```
+
+This will generate a file `parameters.md` in the current folder that contains a markdown
+representation of the `parameters.yaml` file that you can directly include into your documentation.
 
 # FAQ
 
