@@ -252,12 +252,10 @@ The built-in validator functions provided by this package are:
 | Function               | Arguments           | Description                           |
 |------------------------|---------------------|---------------------------------------|
 | bounds<>               | [lower, upper]      | Bounds checking (inclusive)           |
-| lower_bounds<>         | [lower]             | Lower bounds [Deprecated, use `gt_eq`]|
-| upper_bounds<>         | [upper]             | Upper bounds [Deprecated, use `lt_eq`]|
 | lt<>                   | [value]             | parameter < value                     |
 | gt<>                   | [value]             | parameter > value                     |
-| lt_eq<>                | [value]             | parameter <= value (upper_bounds)     |
-| gt_eq<>                | [value]             | parameter >= value (lower_bounds)     |
+| lt_eq<>                | [value]             | parameter <= value                    |
+| gt_eq<>                | [value]             | parameter >= value                    |
 | one_of<>               | [[val1, val2, ...]] | Value is one of the specified values  |
 
 **String validators**
