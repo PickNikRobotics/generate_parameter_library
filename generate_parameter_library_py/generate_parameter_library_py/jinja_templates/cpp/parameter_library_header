@@ -43,8 +43,6 @@ using rsl::element_bounds;
 using rsl::lower_element_bounds;
 using rsl::upper_element_bounds;
 using rsl::bounds;
-using rsl::upper_bounds;
-using rsl::lower_bounds;
 using rsl::lt;
 using rsl::gt;
 using rsl::lt_eq;

@@ -16,9 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         env:
+          # Werror is not enabled on humble and iron because of gtest
           - ROS_DISTRO: rolling
             ROS_REPO: testing
+            CMAKE_ARGS: -DCMAKE_CXX_FLAGS=-Werror
           - ROS_DISTRO: rolling
+            ROS_REPO: main
+            CMAKE_ARGS: -DCMAKE_CXX_FLAGS=-Werror
+          - ROS_DISTRO: iron
+            ROS_REPO: testing
+          - ROS_DISTRO: iron
             ROS_REPO: main
           - ROS_DISTRO: humble
             ROS_REPO: testing

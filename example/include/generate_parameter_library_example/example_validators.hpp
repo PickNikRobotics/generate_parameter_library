@@ -61,8 +61,7 @@ tl::expected<void, std::string> validate_double_array_custom_func(
   return {};
 }
 
-tl::expected<void, std::string> no_args_validator(
-    const rclcpp::Parameter& parameter) {
+tl::expected<void, std::string> no_args_validator(const rclcpp::Parameter&) {
   return {};
 }
 
