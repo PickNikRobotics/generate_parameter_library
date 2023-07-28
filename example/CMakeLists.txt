@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(generate_parameter_library_example)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+    add_compile_options(-Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast)
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(generate_parameter_library REQUIRED)
