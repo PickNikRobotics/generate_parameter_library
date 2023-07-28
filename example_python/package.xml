@@ -8,6 +8,7 @@
   <license>BSD-3-Clause</license>
 
   <depend>generate_parameter_library</depend>
+  <depend>generate_parameter_library_py</depend>
   <depend>rclpy</depend>
 
   <test_depend>ament_copyright</test_depend>
