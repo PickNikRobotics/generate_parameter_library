@@ -18,8 +18,16 @@ jobs:
         env:
           - ROS_DISTRO: rolling
             ROS_REPO: testing
+            CMAKE_ARGS: -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
           - ROS_DISTRO: rolling
             ROS_REPO: main
+            CMAKE_ARGS: -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+          - ROS_DISTRO: iron
+            ROS_REPO: testing
+            CMAKE_ARGS: -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+          - ROS_DISTRO: iron
+            ROS_REPO: main
+            CMAKE_ARGS: -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
           - ROS_DISTRO: humble
             ROS_REPO: testing
           - ROS_DISTRO: humble

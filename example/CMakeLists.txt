@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(generate_parameter_library_example)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-    add_compile_options(-Werror -Wdeprecated-declarations)
+    add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast)
 endif()
 
 find_package(ament_cmake REQUIRED)
