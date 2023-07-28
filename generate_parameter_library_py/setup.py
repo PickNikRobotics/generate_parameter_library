@@ -6,7 +6,7 @@ package_name = "generate_parameter_library_py"
 
 setup(
     name=package_name,
-    version="0.3.4",
+    version="0.3.5",
     packages=find_packages(),
     data_files=[
         ("share/" + package_name, ["package.xml"]),

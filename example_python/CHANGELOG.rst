@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.5 (2023-07-28)
+------------------
+* add dependency to python example package (`#136 <https://github.com/PickNikRobotics/generate_parameter_library/issues/136>`_)
+* Contributors: Paul Gesel
+
 0.3.4 (2023-07-24)
 ------------------
 * Fix Python install (`#122 <https://github.com/PickNikRobotics/generate_parameter_library/issues/122>`_)

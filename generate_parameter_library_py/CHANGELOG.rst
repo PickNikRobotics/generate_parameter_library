@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.5 (2023-07-28)
+------------------
+* Remove documentation of deprecated validator functions (`#135 <https://github.com/PickNikRobotics/generate_parameter_library/issues/135>`_)
+* Contributors: Tyler Weaver
+
 0.3.4 (2023-07-24)
 ------------------
 * Use node logger (`#132 <https://github.com/PickNikRobotics/generate_parameter_library/issues/132>`_)
