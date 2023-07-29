@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
+import sys
 from setuptools import setup
-from generate_parameter_library_py.setup_helper import generate_parameter_module
 
 package_name = "generate_parameter_module_example"
 
-# set module_name and yaml file
-module_name = "admittance_parameters"
-yaml_file = "generate_parameter_module_example/parameters.yaml"
-validation_module = "generate_parameter_module_example.custom_validation"
-generate_parameter_module(module_name, yaml_file, validation_module=validation_module)
+if len(sys.argv) >= 2 and sys.argv[1] != 'clean':
+    from generate_parameter_library_py.setup_helper import generate_parameter_module
+
+    # set module_name and yaml file
+    module_name = "admittance_parameters"
+    yaml_file = "generate_parameter_module_example/parameters.yaml"
+    validation_module = "generate_parameter_module_example.custom_validation"
+    generate_parameter_module(module_name, yaml_file, validation_module=validation_module)
 
 setup(
     name=package_name,
