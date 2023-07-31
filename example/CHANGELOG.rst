@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.6 (2023-07-31)
+------------------
+
 0.3.5 (2023-07-28)
 ------------------
 * Remove documentation of deprecated validator functions (`#135 <https://github.com/PickNikRobotics/generate_parameter_library/issues/135>`_)
