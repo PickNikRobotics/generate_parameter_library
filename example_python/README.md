@@ -11,15 +11,16 @@
  colcon build
 ```
 
-## Run the C++ node
+## Run the Python node
 
 ```
 source install/setup.bash
-ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/example/config/implementation.yaml
+ros2 run generate_parameter_module_example test_node --ros-args --params-file src/generate_parameter_library/example_python/config/implementation.yaml
 ```
 
 You should see an output like this:
-`[INFO] [1656018676.015816509] [admittance_controller]: Control frame is: 'ee_link'`
+`[INFO] [1656018676.015816509] [admittance_controller]: Initial control frame parameter is: 'ee_link'`
+
 
 ## ROS 2 CLI
 
@@ -109,7 +110,7 @@ If you try to set a parameter that is read only, you will get an error. Running 
 
 will result in the error
 
-`Setting parameter failed: parameter 'command_interfaces' cannot be set because it is read-only`
+`Setting parameter failed: Trying to set a read-only parameter: command_interfaces.`
 
 Running the following
 
@@ -132,7 +133,7 @@ If you try to set a value out of the specified bounds,
 
 you will get the error
 
-`Setting parameter failed: Value -10.0 in parameter 'admittance.damping_ratio' must be within bounds [0.1, 10.0]`
+`Setting parameter failed: Value array('d', [-10.0, -10.0, -10.0, -10.0, -10.0, -10.0]) in parameter 'admittance.damping_ratio' must be within bounds [0.1, 10.0]`
 
 If you try to set a vector parameter with the wrong length,
 
@@ -140,16 +141,17 @@ If you try to set a vector parameter with the wrong length,
 
 you will get the error
 
-`Setting parameter failed: Length of parameter 'admittance.damping_ratio' is 3 but must be equal to 6`
+`Setting parameter failed: Length of parameter 'admittance.damping_ratio' is '3' but must be equal to 6`
 
 If you try to load a yaml file with missing required parameters
 
-`ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/example/config/missing_required.yaml`
+`ros2 run generate_parameter_module_example test_node --ros-args --params-file src/generate_parameter_library/example_python/config/missing_required.yaml`
 
 you will get the error
 
 ```
-terminate called after throwing an instance of 'rclcpp::exceptions::ParameterUninitializedException'
-  what():  parameter 'fixed_string_no_default' is not initialized
-[ros2run]: Aborted
+Traceback (most recent call last):
+[...]
+rclpy.exceptions.ParameterUninitializedException: The parameter 'fixed_string_no_default' is not initialized
+[ros2run]: Process exited with failure 1
 ```
