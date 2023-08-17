@@ -330,6 +330,25 @@ cpp_name_space:
 
 The generated parameter value can then be access with `params.nest1.nest2.param_name`
 
+### Mapped parameters
+You can use parameter maps, where a map with keys from another `string_array` parameter is created. Add the `__map_` prefix followed by the key parameter name as follows:
+
+```yaml
+cpp_name_space:
+  joints: {
+    type: string_array,
+    default_value: ["joint1", "joint2", "joint3"],
+    description: "specifies which joints will be used by the controller",
+  }
+  pid:
+    __map_joints:  # create a map with joints as keys
+      param_name: {
+        type: string_array
+      }
+```
+
+The generated parameter value can then be access with `params.pid.joints_map.at("joint1").param_name`.
+
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
 If you specified it to be `turtlesim_parameters` you can then include the generated code with `#include "turtlesim_parameters.hpp"`.
