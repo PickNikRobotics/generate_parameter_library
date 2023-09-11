@@ -30,7 +30,6 @@ stamp_ = Time()
 
     class ParamListener:
         def __init__(self, node, prefix=""):
-            node.declare_parameter('my_parameter', 'world')
             self.prefix_ = prefix
             self.params_ = {{namespace}}.Params()
             self.node_ = node
