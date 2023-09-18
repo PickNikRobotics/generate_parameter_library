@@ -31,7 +31,7 @@
 
 from jinja2 import Template
 from typeguard import typechecked
-from typing import List, Optional
+from typing import Any, List, Optional
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import os
@@ -147,7 +147,7 @@ class CodeGenVariableBase:
         name: str,
         param_name: str,
         defined_type: str,
-        default_value: any,
+        default_value: Any,
     ):
         if language == "cpp":
             self.conversation = CPPConverstions()
