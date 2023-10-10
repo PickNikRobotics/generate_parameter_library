@@ -92,7 +92,7 @@ class PythonConvertions:
 
     @typechecked
     def initialization_fail_validation(self, param_name: str) -> str:
-        return f"raise InvalidParameterValueException('Invalid value set during initialization for parameter {param_name}: ' + validation_result)"
+        return f"raise InvalidParameterValueException('{param_name}',param.value, 'Invalid value set during initialization for parameter {param_name}: ' + validation_result)"
 
     @typechecked
     def initialization_pass_validation(self, param_name: str) -> str:
