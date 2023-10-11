@@ -54,7 +54,7 @@ class ParameterValidationMarkdown:
             "one_of": "one of the specified values: VALUES",
             "fixed_size": "length must be equal to VALUES",
             "size_gt": "length is greater than VALUES",
-            "size_lt": "length is less less VALUES",
+            "size_lt": "length is less than VALUES",
             "not_empty": "parameter is not empty",
             "unique": "contains no duplicates",
             "subset_of": "every element is one of the list VALUES",
