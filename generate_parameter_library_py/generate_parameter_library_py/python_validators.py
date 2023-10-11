@@ -71,7 +71,7 @@ class ParameterValidators:
 
     # Array validators
     def unique(param):
-        if not len(set(param.value)) != len(param.value):
+        if len(set(param.value)) != len(param.value):
             return f"Parameter '{param.name}' must only contain unique values"
         return ""
 
