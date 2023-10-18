@@ -310,7 +310,7 @@ class ValidationFunction:
     def __init__(
         self,
         function_name: str,
-        arguments: Optional[List[any]],
+        arguments: Optional[List[Any]],
         code_gen_variable: CodeGenVariableBase,
     ):
         self.code_gen_variable = code_gen_variable
