@@ -141,7 +141,7 @@ struct StackParams {
     }
 
     StackParams get_stack_params() {
-      Params params = get_params();
+      Params params = get_internal_params_copy();
       StackParams output;
 
 {%- filter indent(width=6) %}
@@ -152,7 +152,7 @@ struct StackParams {
     }
 
     void refresh_dynamic_parameters() {
-      auto updated_params = get_params();
+      auto updated_params = get_internal_params_copy();
       // TODO remove any destroyed dynamic parameters
 {%- filter indent(width=6) %}
 {{remove_dynamic_parameters}}
@@ -165,7 +165,7 @@ struct StackParams {
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-      auto updated_params = get_params();
+      auto updated_params = get_internal_params_copy();
 
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
@@ -186,7 +186,7 @@ struct StackParams {
     }
 
     void declare_params(){
-      auto updated_params = get_params();
+      auto updated_params = get_internal_params_copy();
       // declare all parameters and give default values to non-required ones
 {%- filter indent(width=6) %}
 {{declare_params}}
@@ -194,7 +194,7 @@ struct StackParams {
     }
 
     void initialize_parameters(){
-      auto updated_params = get_params();
+      auto updated_params = get_internal_params_copy();
       // get parameters and fill struct fields
       rclcpp::Parameter param;
 
@@ -217,6 +217,11 @@ struct StackParams {
       void update_interal_params(Params updated_params) {
         std::lock_guard<std::mutex> lock(mutex_);
         params_ = updated_params;
+      }
+
+      Params get_internal_params_copy() const{
+        std::lock_guard<std::mutex> lock(mutex_);
+        return params_;
       }
 
 
