@@ -179,6 +179,10 @@ struct StackParams {
 {%- filter indent(width=6) %}
 {{declare_params}}
 {%- endfilter %}
+    }
+
+    void retrieve_params(){
+      auto updated_params = get_params();
       // get parameters and fill struct fields
       rclcpp::Parameter param;
 
@@ -194,13 +198,14 @@ struct StackParams {
 
       updated_params.__stamp = clock_.now();
       update_interal_params(updated_params);
-    }
+      }
 
     private:
       void update_interal_params(Params updated_params) {
         std::lock_guard<std::mutex> lock(mutex_);
         params_ = updated_params;
       }
+
 
       std::string prefix_;
       Params params_;
