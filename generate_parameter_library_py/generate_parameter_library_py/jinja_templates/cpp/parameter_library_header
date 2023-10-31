@@ -114,8 +114,9 @@ struct StackParams {
 
       parameters_interface_ = parameters_interface;
       declare_params();
-      if(initialize_params)
+      if(initialize_params) {
         initialize_parameters();
+      }
       auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
       handle_ = parameters_interface_->add_on_set_parameters_callback(update_param_cb);
       clock_ = rclcpp::Clock();
