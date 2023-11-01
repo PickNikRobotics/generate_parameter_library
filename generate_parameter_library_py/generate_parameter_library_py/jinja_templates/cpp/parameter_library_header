@@ -168,11 +168,13 @@ struct StackParams {
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       auto updated_params = get_params();
 
+{% if update_params_set|length %}
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
 {{update_params_set}}
 {%- endfilter %}
       }
+{%- endif %}
 {% if update_dynamic_parameters|length %}
       // update dynamic parameters
       for (const auto &param: parameters) {
@@ -182,7 +184,6 @@ struct StackParams {
       }
 {%- endif %}
       latest_stamp_ = clock_.now();
-      update_interal_params(updated_params);
       return rsl::to_parameter_result_msg({});
     }
 
