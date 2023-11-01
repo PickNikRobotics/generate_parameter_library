@@ -119,8 +119,15 @@ struct StackParams {
     }
 
     Params get_params() const{
+      Params updated_params;
       std::lock_guard<std::mutex> lock(mutex_);
-      return params_;
+      // get parameters and fill struct fields
+      rclcpp::Parameter param;
+
+{%- filter indent(width=6) %}
+{{declare_params_set}}
+{%- endfilter %}
+      return updated_params;
     }
 
     bool is_old(Params const& other) const {
@@ -173,7 +180,7 @@ struct StackParams {
     }
 
     void declare_params(){
-      auto updated_params = get_params();
+      Params updated_params;
       // declare all parameters and give default values to non-required ones
 {%- filter indent(width=6) %}
 {{declare_params}}
@@ -181,9 +188,6 @@ struct StackParams {
       // get parameters and fill struct fields
       rclcpp::Parameter param;
 
-{%- filter indent(width=6) %}
-{{declare_params_set}}
-{%- endfilter %}
 {% if declare_set_dynamic_params|length %}
 {% filter indent(width=6) %}
 // declare and set all dynamic parameters
