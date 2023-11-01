@@ -91,32 +91,28 @@ struct StackParams {
   class ParamListener{
   public:
     // throws rclcpp::exceptions::InvalidParameterValueException on initialization if invalid parameter are loaded
-    ParamListener(rclcpp::Node::SharedPtr node, std::string const& prefix = "", bool initialize_params = true)
-    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix, initialize_params) {}
+    ParamListener(rclcpp::Node::SharedPtr node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
 
-    ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node, std::string const& prefix = "", bool initialize_params = true)
-    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix, initialize_params) {}
+    ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
 
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
-                  std::string const& prefix = "", bool initialize_params = true)
-    : ParamListener(parameters_interface, rclcpp::get_logger("{{namespace}}"), prefix, initialize_params) {
+                  std::string const& prefix = "")
+    : ParamListener(parameters_interface, rclcpp::get_logger("{{namespace}}"), prefix) {
       RCLCPP_DEBUG(logger_, "ParameterListener: Not using node logger, recommend using other constructors to use a node logger");
     }
 
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
-                  rclcpp::Logger logger, std::string const& prefix = "", bool initialize_params = true) {
+                  rclcpp::Logger logger, std::string const& prefix = "") {
       logger_ = logger;
       prefix_ = prefix;
-      are_parameters_initialized_ = false;
       if (!prefix_.empty() && prefix_.back() != '.') {
         prefix_ += ".";
       }
 
       parameters_interface_ = parameters_interface;
       declare_params();
-      if(initialize_params) {
-        initialize_parameters();
-      }
       auto update_param_cb = [this](const std::vector<rclcpp::Parameter> &parameters){return this->update(parameters);};
       handle_ = parameters_interface_->add_on_set_parameters_callback(update_param_cb);
       clock_ = rclcpp::Clock();
@@ -124,16 +120,7 @@ struct StackParams {
 
     Params get_params() const{
       std::lock_guard<std::mutex> lock(mutex_);
-      if(!are_parameters_initialized_)
-      {
-        throw std::runtime_error("Please initialize the parameters using initialize_parameters method, before getting them!");
-      }
       return params_;
-    }
-
-    bool are_params_initialized() const
-    {
-      return are_parameters_initialized_;
     }
 
     bool is_old(Params const& other) const {
@@ -142,7 +129,7 @@ struct StackParams {
     }
 
     StackParams get_stack_params() {
-      Params params = get_internal_params_copy();
+      Params params = get_params();
       StackParams output;
 
 {%- filter indent(width=6) %}
@@ -153,7 +140,7 @@ struct StackParams {
     }
 
     void refresh_dynamic_parameters() {
-      auto updated_params = get_internal_params_copy();
+      auto updated_params = get_params();
       // TODO remove any destroyed dynamic parameters
 {%- filter indent(width=6) %}
 {{remove_dynamic_parameters}}
@@ -166,7 +153,7 @@ struct StackParams {
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-      auto updated_params = get_internal_params_copy();
+      auto updated_params = get_params();
 
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
@@ -187,15 +174,11 @@ struct StackParams {
     }
 
     void declare_params(){
-      auto updated_params = get_internal_params_copy();
+      auto updated_params = get_params();
       // declare all parameters and give default values to non-required ones
 {%- filter indent(width=6) %}
 {{declare_params}}
 {%- endfilter %}
-    }
-
-    void initialize_parameters(){
-      auto updated_params = get_internal_params_copy();
       // get parameters and fill struct fields
       rclcpp::Parameter param;
 
@@ -211,8 +194,7 @@ struct StackParams {
 
       updated_params.__stamp = clock_.now();
       update_interal_params(updated_params);
-      are_parameters_initialized_ = true;
-      }
+    }
 
     private:
       void update_interal_params(Params updated_params) {
@@ -220,16 +202,9 @@ struct StackParams {
         params_ = updated_params;
       }
 
-      Params get_internal_params_copy() const{
-        std::lock_guard<std::mutex> lock(mutex_);
-        return params_;
-      }
-
-
       std::string prefix_;
       Params params_;
       rclcpp::Clock clock_;
-      bool are_parameters_initialized_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
 
