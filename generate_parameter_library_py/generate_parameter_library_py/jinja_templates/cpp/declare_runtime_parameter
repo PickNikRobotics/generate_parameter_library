@@ -47,6 +47,5 @@ auto parameter = rclcpp::ParameterValue(entry.{{parameter_field}});
 parameters_interface_->declare_parameter(param_name, parameter, descriptor);
 {% endfilter -%}
 }
-{{set_runtime_parameter-}}
 {% endfilter -%}
 }

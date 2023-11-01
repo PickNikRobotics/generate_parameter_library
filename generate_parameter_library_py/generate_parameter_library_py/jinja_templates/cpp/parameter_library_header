@@ -127,6 +127,13 @@ struct StackParams {
 {%- filter indent(width=6) %}
 {{declare_params_set}}
 {%- endfilter %}
+{% if declare_set_dynamic_params|length %}
+{% filter indent(width=6) %}
+// set all dynamic parameters
+{{set_dynamic_params-}}
+{%- endfilter %}
+{%- endif %}
+      updated_params.__stamp = latest_stamp_;
       return updated_params;
     }
 
@@ -185,12 +192,10 @@ struct StackParams {
 {%- filter indent(width=6) %}
 {{declare_params}}
 {%- endfilter %}
-      // get parameters and fill struct fields
-      rclcpp::Parameter param;
 
 {% if declare_set_dynamic_params|length %}
 {% filter indent(width=6) %}
-// declare and set all dynamic parameters
+// declare all dynamic parameters
 {{declare_set_dynamic_params}}
 {%- endfilter %}
 {%- endif %}

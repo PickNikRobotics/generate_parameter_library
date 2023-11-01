@@ -463,10 +463,19 @@ class SetRuntimeParameter(SetParameterBase):
     def __str__(self):
         parameter_validations_str = "".join(str(x) for x in self.parameter_validations)
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
+        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        parameter_map = get_dynamic_parameter_map(self.parameter_name)
+        struct_name = get_dynamic_struct_name(self.parameter_name)
+        param_struct_instance = "updated_params"
         data = {
+            "struct_name": struct_name,
             "parameter_field": parameter_field,
             "parameter_validations": str(parameter_validations_str),
             "parameter_as_function": self.parameter_as_function,
+            "param_struct_instance": param_struct_instance,
+            "parameter_field": parameter_field,
+            "parameter_map": parameter_map,
+            "mapped_param": mapped_param,
         }
 
         j2_template = Template(GenerateCode.templates["set_runtime_parameter"])
@@ -701,6 +710,7 @@ class GenerateCode:
         self.update_declare_dynamic_parameter = []
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
+        self.declare_dynamic_parameters_sets = []
         self.set_stack_params = []
         if language == "cpp":
             self.comments = "// auto-generated DO NOT EDIT"
@@ -803,6 +813,7 @@ class GenerateCode:
             self.set_stack_params.append(SetStackParams(code_gen_variable.param_name))
         if is_runtime_parameter:
             self.declare_dynamic_parameters.append(declare_parameter)
+            self.declare_dynamic_parameters_sets.append(declare_parameter_set)
             self.update_dynamic_parameters.append(update_parameter)
             self.update_declare_dynamic_parameter.append(declare_parameter)
             dynamic_update_parameter = RemoveRuntimeParameter(declare_parameter)
@@ -859,6 +870,9 @@ class GenerateCode:
             ),
             "declare_set_dynamic_params": "\n".join(
                 [str(x) for x in self.declare_dynamic_parameters]
+            ),
+            "set_dynamic_params": "\n".join(
+                [str(x) for x in self.declare_dynamic_parameters_sets]
             ),
             "update_declare_dynamic_parameters": "\n".join(
                 [str(x) for x in self.update_declare_dynamic_parameter]
