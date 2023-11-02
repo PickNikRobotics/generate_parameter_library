@@ -119,29 +119,30 @@ struct StackParams {
     }
 
     Params get_params() const{
-      if(latest_stamp_.seconds() == 0){
-        throw rclcpp::exceptions::InvalidParameterValueException("No parameters are loaded yet!");
-      }
-      Params updated_params;
-      std::lock_guard<std::mutex> lock(mutex_);
-      // get parameters and fill struct fields
-      rclcpp::Parameter param;
+      auto params = get_internal_params();
+      if(params.__stamp.seconds() == 0){
+        Params updated_params;
+        // get parameters and fill struct fields
+        rclcpp::Parameter param;
 
-{%- filter indent(width=6) %}
+{%- filter indent(width=8) %}
 {{declare_params_set}}
 {%- endfilter %}
 {% if set_dynamic_params|length %}
-{% filter indent(width=6) %}
+{% filter indent(width=8) %}
 // set all dynamic parameters
 {{set_dynamic_params-}}
 {%- endfilter %}
 {%- endif %}
-      updated_params.__stamp = latest_stamp_;
-      return updated_params;
+        updated_params.__stamp = clock_.now();
+        return updated_params;
+      }
+      return params;
     }
 
     bool is_old(Params const& other) const {
-      return latest_stamp_ != other.__stamp;
+      std::lock_guard<std::mutex> lock(mutex_);
+      return params_.__stamp != other.__stamp;
     }
 
     StackParams get_stack_params() {
@@ -176,7 +177,6 @@ struct StackParams {
 {%- endfilter %}
       }
 {%- endif %}
-      latest_stamp_ = clock_.now();
       updated_params.__stamp = clock_.now();
       update_interal_params(updated_params);
       return rsl::to_parameter_result_msg({});
