@@ -119,6 +119,9 @@ struct StackParams {
     }
 
     Params get_params() const{
+      if(latest_stamp_.seconds() == 0){
+        throw rclcpp::exceptions::InvalidParameterValueException("No parameters are loaded yet!");
+      }
       Params updated_params;
       std::lock_guard<std::mutex> lock(mutex_);
       // get parameters and fill struct fields
@@ -127,7 +130,7 @@ struct StackParams {
 {%- filter indent(width=6) %}
 {{declare_params_set}}
 {%- endfilter %}
-{% if declare_set_dynamic_params|length %}
+{% if set_dynamic_params|length %}
 {% filter indent(width=6) %}
 // set all dynamic parameters
 {{set_dynamic_params-}}
