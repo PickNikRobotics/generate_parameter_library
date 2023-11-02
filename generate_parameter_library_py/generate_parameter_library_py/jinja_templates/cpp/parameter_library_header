@@ -190,8 +190,6 @@ struct StackParams {
 {{declare_set_dynamic_params}}
 {%- endfilter %}
 {%- endif %}
-
-      latest_stamp_ = clock_.now();
     }
 
     private:
