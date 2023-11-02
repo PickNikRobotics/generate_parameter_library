@@ -160,7 +160,7 @@ struct StackParams {
     }
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
-      Params updated_params;
+      auto updated_params = get_internal_params();
 {% if update_params_set|length %}
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
@@ -177,6 +177,8 @@ struct StackParams {
       }
 {%- endif %}
       latest_stamp_ = clock_.now();
+      updated_params.__stamp = clock_.now();
+      update_interal_params(updated_params);
       return rsl::to_parameter_result_msg({});
     }
 
@@ -196,7 +198,18 @@ struct StackParams {
     }
 
     private:
+      void update_interal_params(Params updated_params) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        params_ = updated_params;
+      }
+
+      Params get_internal_params() const{
+        std::lock_guard<std::mutex> lock(mutex_);
+        return params_;
+      }
+
       std::string prefix_;
+      Params params_;
       // for detecting if the parameter struct has been updated by update
       rclcpp::Time latest_stamp_;
       rclcpp::Clock clock_;
