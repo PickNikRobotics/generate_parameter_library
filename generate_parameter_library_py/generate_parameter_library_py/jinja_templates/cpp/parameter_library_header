@@ -167,7 +167,6 @@ struct StackParams {
 
     rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters) {
       auto updated_params = get_params();
-
 {% if update_params_set|length %}
       for (const auto &param: parameters) {
 {%- filter indent(width=8) %}
