@@ -139,6 +139,14 @@ def get_fixed_type(yaml_type: str):
     return get_fixed_base_type(yaml_type) + "_fixed"
 
 
+@typechecked
+def get_all_keys(param_map: dict):
+    for key, value in param_map.items():
+        yield key
+        if isinstance(value, dict):
+            yield from get_all_keys(value)
+
+
 class CodeGenVariableBase:
     @typechecked
     def __init__(
@@ -434,8 +442,14 @@ class SetStackParams:
 
 class SetParameterBase:
     @typechecked
-    def __init__(self, parameter_name: str, code_gen_variable: CodeGenVariableBase):
+    def __init__(
+        self,
+        parameter_name: str,
+        params_map_parents: list,
+        code_gen_variable: CodeGenVariableBase,
+    ):
         self.parameter_name = parameter_name
+        self.params_map_parents = params_map_parents
         self.parameter_as_function = code_gen_variable.parameter_as_function_str()
         self.parameter_validations = []
 
@@ -452,6 +466,7 @@ class SetParameter(SetParameterBase):
             "parameter_name": self.parameter_name,
             "parameter_validations": str(parameter_validations_str),
             "parameter_as_function": self.parameter_as_function,
+            "mapped_params": self.params_map_parents,
         }
 
         j2_template = Template(GenerateCode.templates["set_parameter"])
@@ -738,6 +753,10 @@ class GenerateCode:
                 raise compile_error(
                     "The yaml definition must only have one root element"
                 )
+            self.params_map_parents = list()
+            for key in list(get_all_keys(doc)):
+                if is_mapped_parameter(key):
+                    self.params_map_parents.append((key.replace("__map_", "")))
             self.namespace = list(doc.keys())[0]
             self.user_validation_file = validate_header
             self.parse_dict(self.namespace, doc[self.namespace], [])
@@ -774,7 +793,9 @@ class GenerateCode:
         is_runtime_parameter = is_mapped_parameter(self.struct_tree.struct_name)
 
         if is_runtime_parameter:
-            declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
+            declare_parameter_set = SetRuntimeParameter(
+                param_name, self.params_map_parents, code_gen_variable
+            )
             declare_parameter = DeclareRuntimeParameter(
                 code_gen_variable, description, read_only, validations
             )
@@ -784,7 +805,9 @@ class GenerateCode:
             declare_parameter = DeclareParameter(
                 code_gen_variable, description, read_only, validations
             )
-            declare_parameter_set = SetParameter(param_name, code_gen_variable)
+            declare_parameter_set = SetParameter(
+                param_name, self.params_map_parents, code_gen_variable
+            )
             update_parameter = UpdateParameter(param_name, code_gen_variable)
 
         # set parameter
