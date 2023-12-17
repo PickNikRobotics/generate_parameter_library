@@ -1,0 +1,286 @@
+admittance_controller:
+  scientific_notation_num: {
+    type: double,
+    default_value: 0.00000000001,
+    description: "Test scientific notation",
+  }
+  interpolation_mode: {
+    type: string,
+    default_value: "spline",
+    description: "specifies which algorithm to use for interpolation.",
+    validation: {
+      one_of<>: [ [ "spline", "linear" ] ],
+      "custom_validators::no_args_validator": null
+    }
+  }
+  subset_selection: {
+    type: string_array,
+    default_value: ["A", "B"],
+    description: "test subset of validator.",
+    validation: {
+      subset_of<>: [ [ "A", "B", "C"] ],
+      }
+  }
+  joints: {
+    type: string_array,
+    default_value: ["joint1", "joint2", "joint3"],
+    description: "specifies which joints will be used by the controller",
+  }
+  dof_names: {
+    type: string_array,
+    default_value: ["x", "y", "rz"],
+    description: "specifies which joints will be used by the controller",
+  }
+
+  pid:
+    rate: {
+      type: double,
+      default_value: 0.005,
+      description: "update loop period in seconds"
+
+    }
+    __map_joints:
+      p: {
+        type: double,
+        default_value: 1.0,
+        description: "proportional gain term",
+        validation: {
+          gt_eq<>: [ 0.0001 ],
+        }
+      }
+      i: {
+        type: double,
+        default_value: 1.0,
+        description: "integral gain term"
+      }
+      d: {
+        type: double,
+        default_value: 1.0,
+        description: "derivative gain term"
+      }
+
+  gains:
+    __map_dof_names:
+      k: {
+        type: double,
+        default_value: 2.0,
+        description: "general gain"
+      }
+
+  fixed_string: {
+    type: string_fixed_25,
+    default_value: "string_value",
+    description: "test code generation for fixed sized string",
+  }
+  fixed_array: {
+    type: double_array_fixed_10,
+    default_value: [1.0, 2.3, 4.0 ,5.4, 3.3],
+    description: "test code generation for fixed sized array",
+  }
+  fixed_string_no_default: {
+    type: string_fixed_25,
+    description: "test code generation for fixed sized string with no default",
+  }
+  command_interfaces:
+    {
+      type: string_array,
+      description: "specifies which command interfaces to claim",
+      read_only: true
+    }
+
+  state_interfaces:
+    {
+      type: string_array,
+      description: "specifies which state interfaces to claim",
+      read_only: true
+    }
+
+  chainable_command_interfaces:
+    {
+      type: string_array,
+      description: "specifies which chainable interfaces to claim",
+      read_only: true
+    }
+
+  kinematics:
+    plugin_name: {
+      type: string,
+      description: "specifies which kinematics plugin to load"
+    }
+    plugin_package: {
+      type: string,
+      description: "specifies the package to load the kinematics plugin from"
+    }
+    base: {
+      type: string,
+      description: "specifies the base link of the robot description used by the kinematics plugin"
+    }
+    tip: {
+      type: string,
+      description: "specifies the end effector link of the robot description used by the kinematics plugin"
+    }
+    alpha: {
+      type: double,
+      default_value: 0.0005,
+      description: "specifies the damping coefficient for the Jacobian pseudo inverse"
+    }
+    group_name: {
+      type: string,
+      description: "specifies the group name for planning with Moveit"
+    }
+
+  ft_sensor:
+    name: {
+      type: string,
+      description: "name of the force torque sensor in the robot description"
+    }
+    frame:
+      id: {
+        type: string,
+        description: "frame of the force torque sensor"
+      }
+      external: {
+        type: bool,
+        default_value: false,
+        description: "specifies if the force torque sensor is contained in the kinematics chain from the base to the tip"
+      }
+    filter_coefficient: {
+      type: double,
+      default_value: 0.005,
+      description: "specifies the coefficient for the sensor's exponential filter"
+    }
+
+  control:
+    frame:
+      id: {
+        type: string,
+        description: "control frame used for admittance control"
+      }
+      external: {
+        type: bool,
+        default_value: false,
+        description: "specifies if the control frame is contained in the kinematics chain from the base to the tip"
+      }
+
+  fixed_world_frame: # Gravity points down (neg. Z) in this frame (Usually: world or base_link)
+    frame:
+      id: {
+        type: string,
+        description: "world frame, gravity points down (neg. Z) in this frame"
+      }
+      external: {
+        type: bool,
+        default_value: false,
+        description: "specifies if the world frame is contained in the kinematics chain from the base to the tip"
+      }
+
+  gravity_compensation:
+    frame:
+      id: {
+        type: string,
+        description: "frame which center of gravity (CoG) is defined in"
+      }
+      external: {
+        type: bool,
+        default_value: false,
+        description: "specifies if the center of gravity frame is contained in the kinematics chain from the base to the tip"
+      }
+    CoG: # specifies the center of gravity of the end effector
+      pos: {
+        type: double_array,
+        description: "position of the center of gravity (CoG) in its frame",
+        validation: {
+          fixed_size<>: 3
+        }
+      }
+      force: {
+        type: double,
+        default_value: .NAN,
+        description: "weight of the end effector, e.g mass * 9.81"
+      }
+
+  admittance:
+    selected_axes:
+      {
+        type: bool_array,
+        description: "specifies if the axes x, y, z, rx, ry, and rz are enabled",
+        validation: {
+          fixed_size<>: 6
+        }
+      }
+
+    # Having ".0" at the end is MUST, otherwise there is a loading error
+    # F = M*a + D*v + S*(x - x_d)
+    mass: {
+      type: double_array,
+      description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
+      validation: {
+        fixed_size<>: 6,
+        element_bounds<>: [ 0.0001, 1000000.0 ]
+      }
+    }
+
+    damping_ratio: {
+      type: double_array,
+      description: "specifies damping ratio values for x, y, z, rx, ry, and rz used in the admittance calculation.
+      The values are calculated as damping can be used instead: zeta = D / (2 * sqrt( M * S ))",
+      validation: {
+        fixed_size<>: 6,
+        "custom_validators::validate_double_array_custom_func": [ 20.3, 5.0 ],
+        element_bounds<>: [ 0.1, 10.0 ]
+      }
+    }
+
+    stiffness: {
+      type: double_array,
+      description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
+      validation: {
+        element_bounds: [ 0.0001, 100000.0 ]
+      }
+    }
+
+  # general settings
+  enable_parameter_update_without_reactivation: {
+    type: bool,
+    default_value: true,
+    description: "if enabled, read_only parameters will be dynamically updated in the control loop"
+  }
+  use_feedforward_commanded_input: {
+    type: bool,
+    default_value: false,
+    description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
+  }
+  lt_eq_fifteen: {
+    type: int,
+    default_value: 1,
+    description: "should be a number less than or equal to 15",
+    validation: {
+      lt_eq<>: [ 15 ],
+    }
+  }
+  gt_fifteen: {
+    type: int,
+    default_value: 16,
+    description: "should be a number greater than 15",
+    validation: {
+      gt<>: [ 15 ],
+    }
+  }
+  one_number: {
+    type: int,
+    default_value: 14540,
+    read_only: true,
+    validation: {
+      bounds<>: [ 1024, 65535 ]
+    }
+  }
+  three_numbers: {
+    type: int_array,
+    default_value: [3,4,5],
+    read_only: true,
+  }
+  three_numbers_of_five: {
+    type: int_array_fixed_5,
+    default_value: [3,3,3],
+    read_only: true,
+  }
