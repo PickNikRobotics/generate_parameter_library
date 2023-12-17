@@ -116,7 +116,7 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
           OUTPUT_VARIABLE PYTHON_VERSION
           OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/local/lib/${PYTHON_VERSION}/dist-packages/cmake_python/${LIB_NAME}.py)
+  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/local/lib/${PYTHON_VERSION}/dist-packages/${PROJECT_NAME}/${LIB_NAME}.py)
 
 
   # Generate the module for the python
