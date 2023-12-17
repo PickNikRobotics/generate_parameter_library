@@ -29,8 +29,8 @@
 
 
 def no_args_validator(param):
-    return ""
+    return ''
 
 
 def validate_double_array_custom_func(param, arg1, arg2):
-    return ""
+    return ''
