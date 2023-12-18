@@ -36,88 +36,88 @@ class ParameterValidators:
 
     def lt(param, value):
         if not param.value < value:
-            tmp = "less than"
+            tmp = 'less than'
             return f"Parameter '{param.name}' with the value {param.value} must be {tmp} {value}"
-        return ""
+        return ''
 
     def gt(param, value):
         if not param.value > value:
-            tmp = "greater than"
+            tmp = 'greater than'
             return f"Parameter '{param.name}' with the value {param.value} must be {tmp} {value}"
-        return ""
+        return ''
 
     def lt_eq(param, value):
         if not param.value <= value:
-            tmp = "below upper bound of"
+            tmp = 'below upper bound of'
             return f"Parameter '{param.name}' with the value {param.value} must be {tmp} {value}"
-        return ""
+        return ''
 
     def gt_eq(param, value):
         if not param.value >= value:
-            tmp = "above lower bound of"
+            tmp = 'above lower bound of'
             return f"Parameter '{param.name}' with the value {param.value} must be {tmp} {value}"
-        return ""
+        return ''
 
     def not_empty(param):
         if len(param.value) == 0:
-            tmp = "above lower bound of"
+            tmp = 'above lower bound of'
             return f"Parameter '{param.name}' cannot be empty"
-        return ""
+        return ''
 
     def one_of(param, values):
         if not param.value in values:
             return f"Parameter '{param.name}' with the value '{param.value}' is not in the set {str(values)}"
-        return ""
+        return ''
 
     # Array validators
     def unique(param):
         if len(set(param.value)) != len(param.value):
             return f"Parameter '{param.name}' must only contain unique values"
-        return ""
+        return ''
 
     def subset_of(param, values):
         for val in param.value:
             if not val in values:
                 return f"Entry '{val}' in parameter '{param.name}' is not in the set {str(values)}"
-        return ""
+        return ''
 
     def fixed_size(param, length):
         if not len(param.value) == length:
-            tmp = "equal to"
+            tmp = 'equal to'
             return f"Length of parameter '{param.name}' is '{len(param.value)}' but must be {tmp} {length}"
-        return ""
+        return ''
 
     def size_gt(param, length):
         if not len(param.value) > length:
-            tmp = "greater than"
+            tmp = 'greater than'
             return f"Length of parameter '{param.name}' is '{len(param.value)}' but must be {tmp} {length}"
-        return ""
+        return ''
 
     def size_lt(param, length):
         if not len(param.value) < length:
-            tmp = "less than"
+            tmp = 'less than'
             return f"Length of parameter '{param.name}' is '{len(param.value)}' but must be {tmp} {length}"
-        return ""
+        return ''
 
     def element_bounds(param, lower, upper):
         for val in param.value:
             if val > upper or val < lower:
                 return f"Value {param.value} in parameter '{param.name}' must be within bounds [{lower}, {upper}]"
-        return ""
+        return ''
 
     def lower_element_bounds(param, lower):
         for val in param.value:
             if val < lower:
                 return f"Value {val} in parameter '{param.name}' must be above lower bound of {lower}"
-        return ""
+        return ''
 
     def upper_element_bounds(param, upper):
         for val in param.value:
             if val > upper:
                 return f"Value {val} in parameter '{param.name}' must be above lower bound of {upper}"
-        return ""
+        return ''
 
     def bounds(param, lower, upper):
         if param.value > upper or param.value < lower:
             return f"Value {param.value} in parameter '{param.name}' must be within bounds [{lower}, {upper}]"
-        return ""
+        return ''

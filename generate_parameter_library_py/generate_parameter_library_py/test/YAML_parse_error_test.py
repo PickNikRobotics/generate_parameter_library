@@ -27,11 +27,11 @@ from generate_parameter_library_py.generate_cpp_header import parse_args
 
 def set_up(yaml_test_file):
     full_file_path = os.path.join(
-        get_package_share_path("generate_parameter_library_py"), "test", yaml_test_file
+        get_package_share_path('generate_parameter_library_py'), 'test', yaml_test_file
     )
-    testargs = [sys.argv[0], "/tmp/admittance_controller.h", full_file_path]
+    testargs = [sys.argv[0], '/tmp/admittance_controller.h', full_file_path]
 
-    with patch.object(sys, "argv", testargs):
+    with patch.object(sys, 'argv', testargs):
         args = parse_args()
         output_file = args.output_cpp_header_file
         yaml_file = args.input_yaml_file
@@ -42,14 +42,14 @@ def set_up(yaml_test_file):
 
 # class TestViewValidCodeGen(unittest.TestCase):
 @pytest.mark.parametrize(
-    "test_input,expected",
+    'test_input,expected',
     [
         (file_name, YAMLSyntaxError)
         for file_name in [
-            "wrong_default_type.yaml",
-            "missing_type.yaml",
-            "invalid_syntax.yaml",
-            "invalid_parameter_type.yaml",
+            'wrong_default_type.yaml',
+            'missing_type.yaml',
+            'invalid_syntax.yaml',
+            'invalid_parameter_type.yaml',
         ]
     ],
 )
@@ -62,15 +62,15 @@ def test_expected(test_input, expected):
 
 def test_parse_valid_parameter_file():
     try:
-        yaml_test_file = "valid_parameters.yaml"
+        yaml_test_file = 'valid_parameters.yaml'
         set_up(yaml_test_file)
     except Exception as e:
-        assert False, f"failed to parse valid file, reason:{e}"
+        assert False, f'failed to parse valid file, reason:{e}'
 
 
 def test_parse_valid_parameter_file_including_none_type():
     try:
-        yaml_test_file = "valid_parameters_with_none_type.yaml"
+        yaml_test_file = 'valid_parameters_with_none_type.yaml'
         set_up(yaml_test_file)
     except Exception as e:
-        assert False, f"failed to parse valid file, reason:{e}"
+        assert False, f'failed to parse valid file, reason:{e}'
