@@ -37,7 +37,7 @@ from cmake_generate_parameter_module_example.admittance_parameters import (
 
 class MinimalParam(rclpy.node.Node):
     def __init__(self):
-        super().__init__("admittance_controller")
+        super().__init__('admittance_controller')
         self.timer = self.create_timer(1, self.timer_callback)
 
         self.param_listener = admittance_controller.ParamListener(self)
@@ -71,5 +71,5 @@ def main(args=None):
     rclpy.spin(node)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
