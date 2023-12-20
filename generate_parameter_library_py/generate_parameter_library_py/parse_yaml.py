@@ -870,6 +870,9 @@ class GenerateCode:
             # ),
         }
 
-        j2_template = Template(GenerateCode.templates['parameter_library_header'])
+        j2_template = Template(
+            GenerateCode.templates['parameter_library_header'],
+            keep_trailing_newline=True,
+        )
         code = j2_template.render(data, trim_blocks=True)
         return code
