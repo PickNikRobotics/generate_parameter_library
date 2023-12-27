@@ -1,5 +1,5 @@
 {{name}} ({{type}}){% if description|length %}
-  {{description}}
+{{description}}
 {% endif %}
 {%- if default_value|length %}
   Default:  {{default_value}}

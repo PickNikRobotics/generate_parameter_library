@@ -31,6 +31,7 @@
 
 import argparse
 import os
+import re
 import sys
 from jinja2 import Template
 from typeguard import typechecked
@@ -38,6 +39,7 @@ from typeguard import typechecked
 from generate_parameter_library_py.parse_yaml import (
     GenerateCode,
     DeclareParameter,
+    DeclareRuntimeParameter,
     ValidationFunction,
 )
 
@@ -100,6 +102,72 @@ class ParameterDetailMarkdown:
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
             'description': self.declare_parameters.parameter_description,
+        }
+
+        j2_template = Template(GenerateCode.templates['parameter_detail'])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class ParameterDetailRst:
+    @typechecked
+    def __init__(self, declare_parameters: DeclareParameter):
+        self.declare_parameters = declare_parameters
+        self.param_validations = [
+            ParameterValidationMarkdown(val)
+            for val in declare_parameters.parameter_validations
+        ]
+
+    def __str__(self):
+        constraints = '\n'.join(str(val) for val in self.param_validations)
+
+        data = {
+            'name': self.declare_parameters.parameter_name,
+            'type': self.declare_parameters.code_gen_variable.defined_type,
+            'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
+            'constraints': constraints,
+            # Replace leading whitespaces with two spaces, but preserve newlines
+            'description': re.sub(
+                r'(?m)^(?!$)\s*',
+                '  ',
+                self.declare_parameters.parameter_description,
+                flags=re.MULTILINE,
+            ),
+        }
+
+        j2_template = Template(GenerateCode.templates['parameter_detail'])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class RuntimeParameterDetailRst:
+    @typechecked
+    def __init__(self, declare_parameters: DeclareRuntimeParameter):
+        self.declare_parameters = declare_parameters
+        self.param_validations = [
+            ParameterValidationMarkdown(val)
+            for val in declare_parameters.parameter_validations
+        ]
+
+    def __str__(self):
+        constraints = '\n'.join(str(val) for val in self.param_validations)
+        data = {
+            # replace __map_key with <key>
+            'name': re.sub(
+                r'__map_(\w+)',
+                lambda match: '<' + match.group(1) + '>',
+                self.declare_parameters.parameter_name,
+            ),
+            'type': self.declare_parameters.code_gen_variable.defined_type,
+            'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
+            'constraints': constraints,
+            # Replace leading whitespaces with two spaces, but preserve newlines
+            'description': re.sub(
+                r'(?m)^(?!$)\s*',
+                '  ',
+                self.declare_parameters.parameter_description,
+                flags=re.MULTILINE,
+            ),
         }
 
         j2_template = Template(GenerateCode.templates['parameter_detail'])
