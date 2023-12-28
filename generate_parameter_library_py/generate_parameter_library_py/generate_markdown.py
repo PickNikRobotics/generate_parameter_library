@@ -35,7 +35,7 @@ import re
 import sys
 from jinja2 import Template
 from typeguard import typechecked
-from collections import defaultdict
+import yaml
 
 from generate_parameter_library_py.parse_yaml import (
     GenerateCode,
@@ -181,24 +181,39 @@ class DefaultConfigMarkdown:
         )
 
         # Split the string into lines and group them by the first part
-        groups = defaultdict(list)
-        no_group = []
+        def nest_dict(d, keys, value):
+            # Check if the value is a string
+            if isinstance(value, str):
+                # Remove double quotes from the string
+                value = value.replace('"', '')
+                # Try to convert the value to a boolean, number, or leave it as a string
+                if value.lower() == 'true':
+                    value = True
+                elif value.lower() == 'false':
+                    value = False
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
+
+            if len(keys) == 1:
+                d[keys[0]] = value
+            else:
+                key = keys.pop(0)
+                if key not in d:
+                    d[key] = {}
+                nest_dict(d[key], keys, value)
+
+        # Split the string into lines and create a dictionary
+        d = {}
         for line in tmp.strip().split('\n'):
             name, value = line.split(':', 1)
-            if '.' in name:
-                group, rest = name.split('.', 1)
-                groups[group].append('  ' + rest + ':' + value)
-            else:
-                no_group.append(line)
+            keys = name.split('.')
+            nest_dict(d, keys, value.strip())
 
-        # Combine the groups and no_group lines into the final string
-        result = (
-            '\n'.join(
-                f'{group}:\n' + '\n'.join(lines) for group, lines in groups.items()
-            )
-            + '\n'
-            + '\n'.join(no_group)
-        )
+        # Convert the dictionary to a string
+        result = yaml.dump(d, default_flow_style=False)
 
         data = {
             'namespace': self.gen_param_struct.namespace,
