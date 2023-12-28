@@ -102,11 +102,11 @@ class ParameterDetailMarkdown:
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
-            # Replace leading whitespaces with two spaces, but preserve newlines
+            # remove leading whitespace from description, this is necessary for correct indentation of multi-line descriptions
             'description': re.sub(
                 r'(?m)^(?!$)\s*',
-                '  ',
-                self.declare_parameters.parameter_description,
+                '',
+                str(self.declare_parameters.parameter_description),
                 flags=re.MULTILINE,
             ),
         }
@@ -138,13 +138,7 @@ class RuntimeParameterDetailMarkdown:
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
-            # Replace leading whitespaces with two spaces, but preserve newlines
-            'description': re.sub(
-                r'(?m)^(?!$)\s*',
-                '  ',
-                self.declare_parameters.parameter_description,
-                flags=re.MULTILINE,
-            ),
+            'description': self.declare_parameters.parameter_description,
         }
 
         j2_template = Template(GenerateCode.templates['parameter_detail'])
