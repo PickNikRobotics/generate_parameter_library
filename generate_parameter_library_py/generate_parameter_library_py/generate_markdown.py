@@ -35,6 +35,7 @@ import re
 import sys
 from jinja2 import Template
 from typeguard import typechecked
+from collections import defaultdict
 
 from generate_parameter_library_py.parse_yaml import (
     GenerateCode,
@@ -158,24 +159,50 @@ class DefaultConfigMarkdown:
     def __str__(self):
         j2_template = Template(GenerateCode.templates['default_config'])
 
-        tmp = '\n'.join(
-            param.parameter_name + ': ' + str(param.code_gen_variable.lang_str_value)
-            for param in self.gen_param_struct.declare_parameters
-        ) + '\n'.join(
-            # replace __map_key with <key>
-            re.sub(
-                r'__map_(\w+)',
-                lambda match: '<' + match.group(1) + '>',
-                param.parameter_name,
+        tmp = (
+            '\n'.join(
+                param.parameter_name
+                + ': '
+                + str(param.code_gen_variable.lang_str_value)
+                for param in self.gen_param_struct.declare_parameters
             )
-            + ': '
-            + str(param.code_gen_variable.lang_str_value)
-            for param in self.gen_param_struct.declare_dynamic_parameters
+            + '\n'
+            + '\n'.join(
+                # replace __map_key with <key>
+                re.sub(
+                    r'__map_(\w+)',
+                    lambda match: '<' + match.group(1) + '>',
+                    param.parameter_name,
+                )
+                + ': '
+                + str(param.code_gen_variable.lang_str_value)
+                for param in self.gen_param_struct.declare_dynamic_parameters
+            )
+        )
+
+        # Split the string into lines and group them by the first part
+        groups = defaultdict(list)
+        no_group = []
+        for line in tmp.strip().split('\n'):
+            name, value = line.split(':', 1)
+            if '.' in name:
+                group, rest = name.split('.', 1)
+                groups[group].append('  ' + rest + ':' + value)
+            else:
+                no_group.append(line)
+
+        # Combine the groups and no_group lines into the final string
+        result = (
+            '\n'.join(
+                f'{group}:\n' + '\n'.join(lines) for group, lines in groups.items()
+            )
+            + '\n'
+            + '\n'.join(no_group)
         )
 
         data = {
             'namespace': self.gen_param_struct.namespace,
-            'default_param_values': tmp,
+            'default_param_values': result,
         }
         code = j2_template.render(data, trim_blocks=True)
 
