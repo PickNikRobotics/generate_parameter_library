@@ -689,6 +689,18 @@ class GenerateCode:
     templates = None
 
     def __init__(self, language: str):
+        if language == 'cpp':
+            self.comments = '// auto-generated DO NOT EDIT'
+        elif language == 'rst':
+            self.comments = '.. auto-generated DO NOT EDIT'
+        elif language == 'markdown':
+            self.comments = '<!--- auto-generated DO NOT EDIT -->'
+        elif language == 'python' or language == 'markdown':
+            self.comments = '# auto-generated DO NOT EDIT'
+        else:
+            raise compile_error(
+                'Invalid language, only cpp, markdown, rst, and python are currently supported.'
+            )
         GenerateCode.templates = get_all_templates(language)
         self.language = language
         self.namespace = ''
@@ -702,16 +714,6 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.set_stack_params = []
-        if language == 'cpp':
-            self.comments = '// auto-generated DO NOT EDIT'
-        elif language == 'rst':
-            self.comments = '.. auto-generated DO NOT EDIT'
-        elif language == 'python' or language == 'markdown':
-            self.comments = '# auto-generated DO NOT EDIT'
-        else:
-            raise compile_error(
-                'Invalid language, only c++ and python are currently supported.'
-            )
         self.user_validation_file = ''
 
     def parse(self, yaml_file, validate_header):

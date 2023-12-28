@@ -199,9 +199,9 @@ class AutoDocumentation:
         data = {
             'title': title,
             'default_config': str(self.default_config),
-            'parameter_details': '\n'.join(str(val) for val in self.param_details).join(
-                str(val) for val in self.runtime_param_details
-            ),
+            'parameter_details': '\n'.join(str(val) for val in self.param_details)
+            + '\n'
+            + '\n'.join(str(val) for val in self.runtime_param_details),
         }
 
         j2_template = Template(GenerateCode.templates['documentation'])
