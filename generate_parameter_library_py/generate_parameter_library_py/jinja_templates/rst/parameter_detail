@@ -1,6 +1,9 @@
 {{name}} ({{type}}){% if description|length %}
 {{description}}
 {% endif %}
+{%- if read_only %}
+  Read only: {{read_only}}
+{% endif %}
 {%- if default_value|length %}
   Default:  {{default_value}}
 {% endif %}

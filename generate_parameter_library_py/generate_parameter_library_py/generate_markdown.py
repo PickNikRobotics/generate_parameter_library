@@ -98,6 +98,7 @@ class ParameterDetailMarkdown:
 
         data = {
             'name': self.declare_parameters.code_gen_variable.name,
+            'read_only': self.declare_parameters.parameter_read_only,
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
@@ -123,6 +124,7 @@ class ParameterDetailRst:
 
         data = {
             'name': self.declare_parameters.parameter_name,
+            'read_only': self.declare_parameters.parameter_read_only,
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
@@ -158,6 +160,7 @@ class RuntimeParameterDetailRst:
                 lambda match: '<' + match.group(1) + '>',
                 self.declare_parameters.parameter_name,
             ),
+            'read_only': self.declare_parameters.parameter_read_only,
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
