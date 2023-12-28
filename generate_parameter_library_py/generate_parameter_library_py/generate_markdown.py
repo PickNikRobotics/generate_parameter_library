@@ -161,6 +161,16 @@ class DefaultConfigMarkdown:
         tmp = '\n'.join(
             param.parameter_name + ': ' + str(param.code_gen_variable.lang_str_value)
             for param in self.gen_param_struct.declare_parameters
+        ) + '\n'.join(
+            # replace __map_key with <key>
+            re.sub(
+                r'__map_(\w+)',
+                lambda match: '<' + match.group(1) + '>',
+                param.parameter_name,
+            )
+            + ': '
+            + str(param.code_gen_variable.lang_str_value)
+            for param in self.gen_param_struct.declare_dynamic_parameters
         )
 
         data = {
