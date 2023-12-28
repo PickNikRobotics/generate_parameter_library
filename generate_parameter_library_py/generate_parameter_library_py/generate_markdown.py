@@ -97,32 +97,6 @@ class ParameterDetailMarkdown:
         constraints = '\n'.join(str(val) for val in self.param_validations)
 
         data = {
-            'name': self.declare_parameters.code_gen_variable.name,
-            'read_only': self.declare_parameters.parameter_read_only,
-            'type': self.declare_parameters.code_gen_variable.defined_type,
-            'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
-            'constraints': constraints,
-            'description': self.declare_parameters.parameter_description,
-        }
-
-        j2_template = Template(GenerateCode.templates['parameter_detail'])
-        code = j2_template.render(data, trim_blocks=True)
-        return code
-
-
-class ParameterDetailRst:
-    @typechecked
-    def __init__(self, declare_parameters: DeclareParameter):
-        self.declare_parameters = declare_parameters
-        self.param_validations = [
-            ParameterValidationMarkdown(val)
-            for val in declare_parameters.parameter_validations
-        ]
-
-    def __str__(self):
-        constraints = '\n'.join(str(val) for val in self.param_validations)
-
-        data = {
             'name': self.declare_parameters.parameter_name,
             'read_only': self.declare_parameters.parameter_read_only,
             'type': self.declare_parameters.code_gen_variable.defined_type,
@@ -142,7 +116,7 @@ class ParameterDetailRst:
         return code
 
 
-class RuntimeParameterDetailRst:
+class RuntimeParameterDetailMarkdown:
     @typechecked
     def __init__(self, declare_parameters: DeclareRuntimeParameter):
         self.declare_parameters = declare_parameters
@@ -213,6 +187,10 @@ class AutoDocumentation:
             ParameterDetailMarkdown(param)
             for param in self.gen_param_struct.declare_parameters
         ]
+        self.runtime_param_details = [
+            RuntimeParameterDetailMarkdown(param)
+            for param in self.gen_param_struct.declare_dynamic_parameters
+        ]
 
     def __str__(self):
         words = self.gen_param_struct.namespace.split('_')
@@ -221,7 +199,9 @@ class AutoDocumentation:
         data = {
             'title': title,
             'default_config': str(self.default_config),
-            'parameter_details': '\n'.join(str(val) for val in self.param_details),
+            'parameter_details': '\n'.join(str(val) for val in self.param_details).join(
+                str(val) for val in self.runtime_param_details
+            ),
         }
 
         j2_template = Template(GenerateCode.templates['documentation'])
