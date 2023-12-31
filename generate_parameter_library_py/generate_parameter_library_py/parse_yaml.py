@@ -95,14 +95,16 @@ def get_dynamic_parameter_field(yaml_parameter_name: str):
 
 def get_dynamic_mapped_parameter(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    tmp2 = tmp[-2]
-    mapped_param = tmp2.replace('__map_', '')
-    return mapped_param
+    mapped_params = [
+        val.replace('__map_', '') for val in tmp[:-1] if is_mapped_parameter(val)
+    ]
+    return mapped_params
 
 
 def get_dynamic_struct_name(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    struct_name = tmp[:-2]
+    num_nested = sum([is_mapped_parameter(val) for val in tmp])
+    struct_name = tmp[: -(num_nested + 1)]
     return '.'.join(struct_name)
 
 
@@ -115,10 +117,8 @@ def get_dynamic_parameter_name(yaml_parameter_name: str):
 
 
 def get_dynamic_parameter_map(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split('.')
-    parameter_map = tmp[:-2]
-    mapped_param = get_dynamic_mapped_parameter(yaml_parameter_name)
-    parameter_map.append(mapped_param + '_map')
+    mapped_params = get_dynamic_mapped_parameter(yaml_parameter_name)
+    parameter_map = [val + '_map' for val in mapped_params]
     parameter_map = '.'.join(parameter_map)
     return parameter_map
 
@@ -401,13 +401,13 @@ class UpdateParameter(UpdateParameterBase):
 class UpdateRuntimeParameter(UpdateParameterBase):
     def __str__(self):
         parameter_validations_str = ''.join(str(x) for x in self.parameter_validations)
-        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
 
         data = {
-            'mapped_param': mapped_param,
+            'mapped_params': mapped_params,
             'parameter_map': parameter_map,
             'struct_name': struct_name,
             'parameter_field': parameter_field,
@@ -546,7 +546,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
 
         bool_to_str = self.code_gen_variable.conversation.bool_to_str
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
-        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
 
@@ -556,8 +556,8 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             'parameter_description': self.parameter_description,
             'parameter_read_only': bool_to_str(self.parameter_read_only),
             'parameter_as_function': self.code_gen_variable.parameter_as_function_str(),
-            'mapped_param': mapped_param,
-            'mapped_param_underscore': mapped_param.replace('.', '_'),
+            'mapped_params': mapped_params,
+            'mapped_param_underscore': [val.replace('.', '_') for val in mapped_params],
             'set_runtime_parameter': self.set_runtime_parameter,
             'parameter_map': parameter_map,
             'param_struct_instance': self.param_struct_instance,
@@ -586,13 +586,13 @@ class RemoveRuntimeParameter:
         parameter_field = get_dynamic_parameter_field(
             self.dynamic_declare_parameter.parameter_name
         )
-        mapped_param = get_dynamic_mapped_parameter(
+        mapped_params = get_dynamic_mapped_parameter(
             self.dynamic_declare_parameter.parameter_name
         )
 
         data = {
             'parameter_map': parameter_map,
-            'mapped_param': mapped_param,
+            'mapped_params': mapped_params,
             'dynamic_declare_parameter': str(self.dynamic_declare_parameter),
             'struct_name': struct_name,
             'parameter_field': parameter_field,

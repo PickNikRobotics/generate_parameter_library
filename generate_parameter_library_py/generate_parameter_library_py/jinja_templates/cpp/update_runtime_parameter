@@ -1,5 +1,9 @@
-for (const auto & value : updated_params.{{mapped_param}}){
-{%- filter indent(width=4) %}
+{% for mapped_param in mapped_params -%}
+for (const auto & value_{{loop.index}} : updated_params.{{mapped_param}}) {
+{% endfor -%}
+{%- filter indent(width=4) -%}
+std::string value = fmt::format("{%- for mapped_param in mapped_params -%}{% if loop.index == 1 %}{}{% else %}.{}{% endif -%} {%- endfor -%}",
+{%- for mapped_param in mapped_params -%}{% if loop.index == 1 %} value_{{loop.index}}{% else %}, value_{{loop.index}}{% endif -%} {%- endfor %});
 auto param_name = fmt::format("{}{}.{}.{}", prefix_, "{{struct_name}}", value, "{{parameter_field}}");
 if (param.get_name() == param_name) {
 {%- filter indent(width=4) %}
@@ -11,4 +15,6 @@ RCLCPP_DEBUG_STREAM(logger_, param.get_name() << ": " << param.get_type_name() <
 {% endfilter -%}
 }
 {% endfilter -%}
+{%- for mapped_param in mapped_params -%}
 }
+{% endfor -%}
