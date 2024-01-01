@@ -549,6 +549,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
+        parameter_map = parameter_map.split('.')
 
         data = {
             'struct_name': struct_name,

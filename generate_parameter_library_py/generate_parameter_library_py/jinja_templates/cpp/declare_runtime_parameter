@@ -1,6 +1,10 @@
-for (const auto & value : {{param_struct_instance}}.{{mapped_param}}){
-{%- filter indent(width=4) %}
-auto& entry = {{param_struct_instance}}.{{parameter_map}}[value];
+{% for mapped_param in mapped_params -%}
+for (const auto & value_{{loop.index}} : updated_params.{{mapped_param}}) {
+{% endfor -%}
+{%- filter indent(width=4) -%}
+auto& entry = {{param_struct_instance}}.{{struct_name}}{% for map in parameter_map%}.{{map}}[value_{{loop.index}}]{% endfor %};
+std::string value = fmt::format("{%- for mapped_param in mapped_params -%}{% if loop.index == 1 %}{}{% else %}.{}{% endif -%} {%- endfor -%}",
+{%- for mapped_param in mapped_params -%}{% if loop.index == 1 %} value_{{loop.index}}{% else %}, value_{{loop.index}}{% endif -%} {%- endfor %});
 auto param_name = fmt::format("{}{}.{}.{}", prefix_, "{{struct_name}}", value, "{{parameter_field}}");
 if (!parameters_interface_->has_parameter(param_name)) {
 {%- filter indent(width=4) %}
@@ -49,4 +53,6 @@ parameters_interface_->declare_parameter(param_name, parameter, descriptor);
 }
 {{set_runtime_parameter-}}
 {% endfilter -%}
+{%- for mapped_param in mapped_params -%}
 }
+{% endfor -%}
