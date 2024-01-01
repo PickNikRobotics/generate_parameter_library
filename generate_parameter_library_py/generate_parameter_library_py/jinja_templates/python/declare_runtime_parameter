@@ -1,8 +1,12 @@
-for value in {{param_struct_instance}}.{{mapped_param}}:
-{%- filter indent(width=4) %}
-{{param_struct_instance}}.{{struct_name}}.add_entry(value)
-entry = {{param_struct_instance}}.{{struct_name}}.get_entry(value)
-param_name = f"{self.prefix_}{{struct_name}}.{value}.{{parameter_field}}"
+{% for mapped_param in mapped_params -%}
+{%- filter indent(width=4*loop.index0) %}
+for value_{{loop.index}} in updated_params.{{mapped_param}}:
+{%- endfilter -%}
+{% endfor -%}
+{%- filter indent(width=4*(mapped_params|length)) %}
+{{param_struct_instance}}.{{struct_name}}{% for map in parameter_map%}.add_entry(value_{{loop.index}}){% endfor %}
+entry = {{param_struct_instance}}.{{struct_name}}{% for map in parameter_map%}.get_entry(value_{{loop.index}}){% endfor %}
+param_name = f"{self.prefix_}{{struct_name}}{% for map in parameter_map%}.{value_{{loop.index}}}{% endfor %}.{{parameter_field}}"
 if not self.node_.has_parameter(self.prefix_ + param_name):
 {%- filter indent(width=4) %}
 descriptor = ParameterDescriptor(description="{{parameter_description}}", read_only = {{parameter_read_only}})
