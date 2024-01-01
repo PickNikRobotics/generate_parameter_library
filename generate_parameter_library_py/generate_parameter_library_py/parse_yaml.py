@@ -403,6 +403,7 @@ class UpdateRuntimeParameter(UpdateParameterBase):
         parameter_validations_str = ''.join(str(x) for x in self.parameter_validations)
         mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
+        parameter_map = parameter_map.split('.')
         struct_name = get_dynamic_struct_name(self.parameter_name)
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
 
@@ -581,6 +582,7 @@ class RemoveRuntimeParameter:
         parameter_map = get_dynamic_parameter_map(
             self.dynamic_declare_parameter.parameter_name
         )
+        parameter_map = parameter_map.split('.')
         struct_name = get_dynamic_struct_name(
             self.dynamic_declare_parameter.parameter_name
         )
