@@ -4,10 +4,10 @@
 {% endif %}
 * Type: `{{type}}`
 {%- if default_value|length %}
-* Default Value: {{default_value}}
-{% endif %}
-{%- if constraints|length %}
+* Default Value: {{default_value}}{% endif %}{% if read_only %}
+* Read only: {{read_only}}{% endif %}{%- if constraints|length %}
 
 *Constraints:*
 {{constraints}}
+{% else %}
 {% endif %}

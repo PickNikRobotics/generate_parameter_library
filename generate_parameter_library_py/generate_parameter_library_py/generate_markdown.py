@@ -31,13 +31,16 @@
 
 import argparse
 import os
+import re
 import sys
 from jinja2 import Template
 from typeguard import typechecked
+import yaml
 
 from generate_parameter_library_py.parse_yaml import (
     GenerateCode,
     DeclareParameter,
+    DeclareRuntimeParameter,
     ValidationFunction,
 )
 
@@ -95,7 +98,44 @@ class ParameterDetailMarkdown:
         constraints = '\n'.join(str(val) for val in self.param_validations)
 
         data = {
-            'name': self.declare_parameters.code_gen_variable.name,
+            'name': self.declare_parameters.parameter_name,
+            'read_only': self.declare_parameters.parameter_read_only,
+            'type': self.declare_parameters.code_gen_variable.defined_type,
+            'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
+            'constraints': constraints,
+            # remove leading whitespace from description, this is necessary for correct indentation of multi-line descriptions
+            'description': re.sub(
+                r'(?m)^(?!$)\s*',
+                '',
+                str(self.declare_parameters.parameter_description),
+                flags=re.MULTILINE,
+            ),
+        }
+
+        j2_template = Template(GenerateCode.templates['parameter_detail'])
+        code = j2_template.render(data, trim_blocks=True)
+        return code
+
+
+class RuntimeParameterDetailMarkdown:
+    @typechecked
+    def __init__(self, declare_parameters: DeclareRuntimeParameter):
+        self.declare_parameters = declare_parameters
+        self.param_validations = [
+            ParameterValidationMarkdown(val)
+            for val in declare_parameters.parameter_validations
+        ]
+
+    def __str__(self):
+        constraints = '\n'.join(str(val) for val in self.param_validations)
+        data = {
+            # replace __map_key with <key>
+            'name': re.sub(
+                r'__map_(\w+)',
+                lambda match: '<' + match.group(1) + '>',
+                self.declare_parameters.parameter_name,
+            ),
+            'read_only': self.declare_parameters.parameter_read_only,
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
@@ -119,14 +159,65 @@ class DefaultConfigMarkdown:
     def __str__(self):
         j2_template = Template(GenerateCode.templates['default_config'])
 
-        tmp = '\n'.join(
-            param.parameter_name + ': ' + str(param.code_gen_variable.lang_str_value)
-            for param in self.gen_param_struct.declare_parameters
+        tmp = (
+            '\n'.join(
+                param.parameter_name
+                + ': '
+                + str(param.code_gen_variable.lang_str_value)
+                for param in self.gen_param_struct.declare_parameters
+            )
+            + '\n'
+            + '\n'.join(
+                # replace __map_key with <key>
+                re.sub(
+                    r'__map_(\w+)',
+                    lambda match: '<' + match.group(1) + '>',
+                    param.parameter_name,
+                )
+                + ': '
+                + str(param.code_gen_variable.lang_str_value)
+                for param in self.gen_param_struct.declare_dynamic_parameters
+            )
         )
+
+        # Split the string into lines and group them by the first part
+        def nest_dict(d, keys, value):
+            # Check if the value is a string
+            if isinstance(value, str):
+                # Remove double quotes from the string
+                value = value.replace('"', '')
+                # Try to convert the value to a boolean, number, or leave it as a string
+                if value.lower() == 'true':
+                    value = True
+                elif value.lower() == 'false':
+                    value = False
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
+
+            if len(keys) == 1:
+                d[keys[0]] = value
+            else:
+                key = keys.pop(0)
+                if key not in d:
+                    d[key] = {}
+                nest_dict(d[key], keys, value)
+
+        # Split the string into lines and create a dictionary
+        d = {}
+        for line in tmp.strip().split('\n'):
+            name, value = line.split(':', 1)
+            keys = name.split('.')
+            nest_dict(d, keys, value.strip())
+
+        # Convert the dictionary to a string
+        result = yaml.dump(d, default_flow_style=False)
 
         data = {
             'namespace': self.gen_param_struct.namespace,
-            'default_param_values': tmp,
+            'default_param_values': result,
         }
         code = j2_template.render(data, trim_blocks=True)
 
@@ -142,6 +233,10 @@ class AutoDocumentation:
             ParameterDetailMarkdown(param)
             for param in self.gen_param_struct.declare_parameters
         ]
+        self.runtime_param_details = [
+            RuntimeParameterDetailMarkdown(param)
+            for param in self.gen_param_struct.declare_dynamic_parameters
+        ]
 
     def __str__(self):
         words = self.gen_param_struct.namespace.split('_')
@@ -150,7 +245,9 @@ class AutoDocumentation:
         data = {
             'title': title,
             'default_config': str(self.default_config),
-            'parameter_details': '\n'.join(str(val) for val in self.param_details),
+            'parameter_details': '\n'.join(str(val) for val in self.param_details)
+            + '\n'
+            + '\n'.join(str(val) for val in self.runtime_param_details),
         }
 
         j2_template = Template(GenerateCode.templates['documentation'])
