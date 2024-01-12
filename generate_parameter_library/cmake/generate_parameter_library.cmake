@@ -92,6 +92,52 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${LIB_NAME})
 endfunction()
 
+
+function(generate_parameter_module LIB_NAME YAML_FILE)
+  find_program(generate_parameter_library_python_BIN NAMES "generate_parameter_library_python")
+  if(NOT generate_parameter_library_python_BIN)
+    message(FATAL_ERROR "generate_parameter_library_python() variable 'generate_parameter_library_python_BIN' must not be empty")
+  endif()
+
+  # Optional 3rd parameter for the user defined validation header
+  if(${ARGC} EQUAL 3)
+    set(VALIDATE_HEADER_FILENAME ${ARGV2})
+  endif()
+
+  # Set the yaml file parameter to be relative to the current source dir
+  set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
+
+  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME})
+  file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
+
+  find_package(PythonInterp REQUIRED)
+  execute_process(
+          COMMAND "${PYTHON_EXECUTABLE}" -c "import sys;v = sys.version.split()[0];v = v.split('.');print(f'python{v[0]}.{v[1]}')"
+          OUTPUT_VARIABLE PYTHON_VERSION
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/local/lib/${PYTHON_VERSION}/dist-packages/${PROJECT_NAME}/${LIB_NAME}.py)
+
+
+  # Generate the module for the python
+  add_custom_command(
+          OUTPUT ${PARAM_HEADER_FILE}
+          COMMAND ${generate_parameter_library_python_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
+          DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
+          COMMENT
+          "Running `${generate_parameter_library_python_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
+          VERBATIM
+  )
+
+  # Create the library target
+  add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
+  target_include_directories(${LIB_NAME} INTERFACE
+          $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
+          $<INSTALL_INTERFACE:include/${LIB_NAME}>
+  )
+
+endfunction()
+
 # create custom test function to pass yaml file into test main
 function(add_rostest_with_parameters_gtest TARGET SOURCES YAML_FILE)
   add_executable(${TARGET} ${SOURCES})
