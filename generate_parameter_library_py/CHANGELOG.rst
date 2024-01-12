@@ -2,6 +2,62 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix Python runtime parameters bug (`#165 <https://github.com/PickNikRobotics/generate_parameter_library/issues/165>`_)
+* markdown/rst: Support __map\_ and nested parameters (`#164 <https://github.com/PickNikRobotics/generate_parameter_library/issues/164>`_)
+  * Support nested parameters and maps for RST
+  * Add read_only info to RST template
+  * Use map parameters for AutoDocumentation
+  * Add test for markdown generation
+  * Use jinja indentation instead of regex
+  * Add dynamic_parameters also to DefaultConfig
+  * Proper fromat of default yaml config
+  * Proper format of the default yaml file
+  * Fix imported function names
+  * Add a jinja2 filter to create valid multiline c++ string literals
+  * Handle empty strings for descriptions
+* parse_yaml.py: keep the trailing newline (`#159 <https://github.com/PickNikRobotics/generate_parameter_library/issues/159>`_)
+* Fix rolling CI (`#162 <https://github.com/PickNikRobotics/generate_parameter_library/issues/162>`_)
+* parse_yaml.py: fix issue with typeguard (`#154 <https://github.com/PickNikRobotics/generate_parameter_library/issues/154>`_)
+* Bugfixes on Python code generation (`#152 <https://github.com/PickNikRobotics/generate_parameter_library/issues/152>`_)
+  * Fix raising of validation error
+  * Fix inverse logic of 'unique' validator
+* Fix sentence for size_lt (`#150 <https://github.com/PickNikRobotics/generate_parameter_library/issues/150>`_)
+* Fix typeguard error (`#149 <https://github.com/PickNikRobotics/generate_parameter_library/issues/149>`_)
+  For typeguard==3.0.2, `default_value: any` raised a `TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union` during colcon build of a Python node using this library.
+  Using the `Any` from the `typing` module fixed this issue.
+  Yes, this problem does not occur with the typeguard version provided by apt (2.2.2), but could also occur if Ubuntu bumps that version or for other users with a newer local pip install of typeguard.
+* Remove `my_parameter` from python template (`#146 <https://github.com/PickNikRobotics/generate_parameter_library/issues/146>`_)
+* Contributors: Bruno-Pier, Christoph Fröhlich, Jan Gutsche, Matthias Schoepfer, Paul Gesel, agonzat
+
+* fix Python runtime parameters bug (`#165 <https://github.com/PickNikRobotics/generate_parameter_library/issues/165>`_)
+* markdown/rst: Support __map\_ and nested parameters (`#164 <https://github.com/PickNikRobotics/generate_parameter_library/issues/164>`_)
+  * Support nested parameters and maps for RST
+  * Add read_only info to RST template
+  * Use map parameters for AutoDocumentation
+  * Add test for markdown generation
+  * Use jinja indentation instead of regex
+  * Add dynamic_parameters also to DefaultConfig
+  * Proper fromat of default yaml config
+  * Proper format of the default yaml file
+  * Fix imported function names
+  * Add a jinja2 filter to create valid multiline c++ string literals
+  * Handle empty strings for descriptions
+* parse_yaml.py: keep the trailing newline (`#159 <https://github.com/PickNikRobotics/generate_parameter_library/issues/159>`_)
+* Fix rolling CI (`#162 <https://github.com/PickNikRobotics/generate_parameter_library/issues/162>`_)
+* parse_yaml.py: fix issue with typeguard (`#154 <https://github.com/PickNikRobotics/generate_parameter_library/issues/154>`_)
+* Bugfixes on Python code generation (`#152 <https://github.com/PickNikRobotics/generate_parameter_library/issues/152>`_)
+  * Fix raising of validation error
+  * Fix inverse logic of 'unique' validator
+* Fix sentence for size_lt (`#150 <https://github.com/PickNikRobotics/generate_parameter_library/issues/150>`_)
+* Fix typeguard error (`#149 <https://github.com/PickNikRobotics/generate_parameter_library/issues/149>`_)
+  For typeguard==3.0.2, `default_value: any` raised a `TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union` during colcon build of a Python node using this library.
+  Using the `Any` from the `typing` module fixed this issue.
+  Yes, this problem does not occur with the typeguard version provided by apt (2.2.2), but could also occur if Ubuntu bumps that version or for other users with a newer local pip install of typeguard.
+* Remove `my_parameter` from python template (`#146 <https://github.com/PickNikRobotics/generate_parameter_library/issues/146>`_)
+* Contributors: Bruno-Pier, Christoph Fröhlich, Jan Gutsche, Matthias Schoepfer, Paul Gesel, agonzat
+
 0.3.6 (2023-07-31)
 ------------------
 
