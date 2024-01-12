@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2024-01-12)
+------------------
 * fix Python runtime parameters bug (`#165 <https://github.com/PickNikRobotics/generate_parameter_library/issues/165>`_)
 * markdown/rst: Support __map\_ and nested parameters (`#164 <https://github.com/PickNikRobotics/generate_parameter_library/issues/164>`_)
   * Support nested parameters and maps for RST

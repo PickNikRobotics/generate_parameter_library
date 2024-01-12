@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2024-01-12)
+------------------
 * Split example/README.md into C++ and Python version; updated content (`#138 <https://github.com/PickNikRobotics/generate_parameter_library/issues/138>`_)
 * Contributors: chriseichmann
 
