@@ -45,9 +45,12 @@ class DescriptorTest : public ::testing::Test {
         std::make_shared<admittance_controller::ParamListener>(
             example_test_node_->get_node_parameters_interface());
     params_ = param_listener->get_params();
-    std::vector<std::string> names = {"admittance.damping_ratio", "one_number",
-                                      "pid.joint4.p", "lt_eq_fifteen",
-                                      "gt_fifteen", "default_infinity"};
+    std::vector<std::string> names = {"admittance.damping_ratio",
+                                      "one_number",
+                                      "pid.joint4.p",
+                                      "lt_eq_fifteen",
+                                      "gt_fifteen",
+                                      "default_infinity"};
     descriptors_ = example_test_node_->describe_parameters(names);
   }
 
