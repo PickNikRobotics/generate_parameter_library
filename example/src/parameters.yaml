@@ -258,6 +258,14 @@ admittance_controller:
       gt<>: [ 15 ],
     }
   }
+  default_infinity: {
+    type: double,
+    default_value: .inf,
+    description: "should be a number greater than zero, which should include infinity",
+    validation: {
+      gt_eq<>: [ 0 ],
+    }
+  }
   one_number: {
     type: int,
     default_value: 14540,
