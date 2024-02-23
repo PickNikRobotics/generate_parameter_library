@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.7 (2024-01-12)
+------------------
+* Fix rolling CI (`#162 <https://github.com/PickNikRobotics/generate_parameter_library/issues/162>`_)
+* Split example/README.md into C++ and Python version; updated content (`#138 <https://github.com/PickNikRobotics/generate_parameter_library/issues/138>`_)
+* Contributors: Paul Gesel, chriseichmann
+
 0.3.6 (2023-07-31)
 ------------------
 * Prevent module import  when running `setup.py clean` (`#137 <https://github.com/PickNikRobotics/generate_parameter_library/issues/137>`_)

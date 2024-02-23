@@ -19,8 +19,9 @@ import sys
 import os
 
 from ament_index_python.packages import get_package_share_path
-from generate_parameter_library_py.generate_cpp_header import run as run_python
-from generate_parameter_library_py.generate_python_module import run as run_cpp
+from generate_parameter_library_py.generate_cpp_header import run as run_cpp
+from generate_parameter_library_py.generate_python_module import run as run_python
+from generate_parameter_library_py.generate_markdown import run as run_md
 from generate_parameter_library_py.parse_yaml import YAMLSyntaxError
 from generate_parameter_library_py.generate_cpp_header import parse_args
 
@@ -29,7 +30,7 @@ def set_up(yaml_test_file):
     full_file_path = os.path.join(
         get_package_share_path('generate_parameter_library_py'), 'test', yaml_test_file
     )
-    testargs = [sys.argv[0], '/tmp/admittance_controller.h', full_file_path]
+    testargs = [sys.argv[0], '/tmp/' + yaml_test_file + '.h', full_file_path]
 
     with patch.object(sys, 'argv', testargs):
         args = parse_args()
@@ -37,7 +38,33 @@ def set_up(yaml_test_file):
         yaml_file = args.input_yaml_file
         validate_header = args.validate_header
         run_cpp(output_file, yaml_file, validate_header)
+
+    testargs = [sys.argv[0], '/tmp/' + yaml_test_file + '.py', full_file_path]
+
+    with patch.object(sys, 'argv', testargs):
+        args = parse_args()
+        output_file = args.output_cpp_header_file
+        yaml_file = args.input_yaml_file
+        validate_header = args.validate_header
         run_python(output_file, yaml_file, validate_header)
+
+    testargs = [sys.argv[0], '/tmp/' + yaml_test_file + '.md', full_file_path]
+
+    with patch.object(sys, 'argv', testargs):
+        args = parse_args()
+        output_file = args.output_cpp_header_file
+        yaml_file = args.input_yaml_file
+        validate_header = args.validate_header
+        run_md(yaml_file, output_file, 'markdown')
+
+    testargs = [sys.argv[0], '/tmp/' + yaml_test_file + '.rst', full_file_path]
+
+    with patch.object(sys, 'argv', testargs):
+        args = parse_args()
+        output_file = args.output_cpp_header_file
+        yaml_file = args.input_yaml_file
+        validate_header = args.validate_header
+        run_md(yaml_file, output_file, 'rst')
 
 
 # class TestViewValidCodeGen(unittest.TestCase):

@@ -29,7 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from jinja2 import Template
+from jinja2 import Template, Environment
 from typeguard import typechecked
 from typing import Any, List, Optional
 from yaml.parser import ParserError
@@ -39,6 +39,7 @@ import yaml
 
 from generate_parameter_library_py.cpp_convertions import CPPConverstions
 from generate_parameter_library_py.python_convertions import PythonConvertions
+from generate_parameter_library_py.string_filters_cpp import valid_string_cpp
 
 
 # YAMLSyntaxError standardizes compiler error messages
@@ -500,6 +501,7 @@ class DeclareParameter(DeclareParameterBase):
         bool_to_str = self.code_gen_variable.conversation.bool_to_str
 
         parameter_validations = self.parameter_validations
+
         data = {
             'parameter_name': self.parameter_name,
             'parameter_value': self.parameter_value,
@@ -508,7 +510,11 @@ class DeclareParameter(DeclareParameterBase):
             'parameter_read_only': bool_to_str(self.parameter_read_only),
             'parameter_validations': parameter_validations,
         }
-        j2_template = Template(GenerateCode.templates['declare_parameter'])
+
+        # Create a Jinja2 environment to register the custom filter
+        env = Environment()
+        env.filters['valid_string_cpp'] = valid_string_cpp
+        j2_template = env.from_string(GenerateCode.templates['declare_parameter'])
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -568,7 +574,12 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             'parameter_validations': self.parameter_validations,
         }
 
-        j2_template = Template(GenerateCode.templates['declare_runtime_parameter'])
+        # Create a Jinja2 environment to register the custom filter
+        env = Environment()
+        env.filters['valid_string_cpp'] = valid_string_cpp
+        j2_template = env.from_string(
+            GenerateCode.templates['declare_runtime_parameter']
+        )
         code = j2_template.render(data, trim_blocks=True)
         return code
 
@@ -692,6 +703,18 @@ class GenerateCode:
     templates = None
 
     def __init__(self, language: str):
+        if language == 'cpp':
+            self.comments = '// auto-generated DO NOT EDIT'
+        elif language == 'rst':
+            self.comments = '.. auto-generated DO NOT EDIT'
+        elif language == 'markdown':
+            self.comments = '<!--- auto-generated DO NOT EDIT -->'
+        elif language == 'python' or language == 'markdown':
+            self.comments = '# auto-generated DO NOT EDIT'
+        else:
+            raise compile_error(
+                'Invalid language, only cpp, markdown, rst, and python are currently supported.'
+            )
         GenerateCode.templates = get_all_templates(language)
         self.language = language
         self.namespace = ''
@@ -705,16 +728,6 @@ class GenerateCode:
         self.remove_dynamic_parameter = []
         self.declare_parameter_sets = []
         self.set_stack_params = []
-        if language == 'cpp':
-            self.comments = '// auto-generated DO NOT EDIT'
-        elif language == 'rst':
-            self.comments = '.. auto-generated DO NOT EDIT'
-        elif language == 'python' or language == 'markdown':
-            self.comments = '# auto-generated DO NOT EDIT'
-        else:
-            raise compile_error(
-                'Invalid language, only c++ and python are currently supported.'
-            )
         self.user_validation_file = ''
 
     def parse(self, yaml_file, validate_header):
