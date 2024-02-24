@@ -39,7 +39,10 @@ import yaml
 
 from generate_parameter_library_py.cpp_convertions import CPPConverstions
 from generate_parameter_library_py.python_convertions import PythonConvertions
-from generate_parameter_library_py.string_filters_cpp import valid_string_cpp
+from generate_parameter_library_py.string_filters_cpp import (
+    valid_string_cpp,
+    valid_string_python,
+)
 
 
 # YAMLSyntaxError standardizes compiler error messages
@@ -513,6 +516,7 @@ class DeclareParameter(DeclareParameterBase):
         # Create a Jinja2 environment to register the custom filter
         env = Environment()
         env.filters['valid_string_cpp'] = valid_string_cpp
+        env.filters['valid_string_python'] = valid_string_python
         j2_template = env.from_string(GenerateCode.templates['declare_parameter'])
         code = j2_template.render(data, trim_blocks=True)
         return code
@@ -575,6 +579,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         # Create a Jinja2 environment to register the custom filter
         env = Environment()
         env.filters['valid_string_cpp'] = valid_string_cpp
+        env.filters['valid_string_python'] = valid_string_python
         j2_template = env.from_string(
             GenerateCode.templates['declare_runtime_parameter']
         )
