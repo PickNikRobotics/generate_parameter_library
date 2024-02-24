@@ -10,14 +10,8 @@ def valid_string_cpp(description):
       str: The filtered string that is a valid C++ string.
     """
     if description:
-        filtered_description = (
-            description.replace('\\', '\\\\').replace('"', '\\"').replace('`', '')
-        )
-        # create a quote delimited string for every line
-        filtered_description = '\n'.join(
-            f'"{line}"' for line in filtered_description.splitlines()
-        )
-        return filtered_description
+        filtered_description = description.replace('\n', '\\n    ')
+        return f'"{filtered_description}"'
     else:
         return '""'
 
@@ -33,7 +27,6 @@ def valid_string_python(description):
       str: The filtered string that is a valid Python string.
     """
     if description:
-        return description.replace('\n', '\\n')
-        # return description.replace('\n', '\\\n')
+        return description.replace('\n', '\\n    ')
     else:
         return ''

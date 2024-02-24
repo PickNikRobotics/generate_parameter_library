@@ -276,3 +276,11 @@ admittance_controller:
     default_value: [3,3,3],
     read_only: true,
   }
+  hover_override: {
+    type: int,
+    default_value: 1,
+    description: "Override hover action:\n0: Hover\n1: Push\n2: Pull\n-1: Do not override",
+    validation: {
+      one_of<>: [ [ 0, 1, 2, -1 ] ],
+    },
+  }
