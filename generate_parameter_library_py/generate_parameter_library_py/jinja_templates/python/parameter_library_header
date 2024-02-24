@@ -1,3 +1,5 @@
+# flake8: noqa
+
 {{comments}}
 
 from rcl_interfaces.msg import ParameterDescriptor
