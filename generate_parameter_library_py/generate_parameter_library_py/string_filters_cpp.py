@@ -10,7 +10,10 @@ def valid_string_cpp(description):
       str: The filtered string that is a valid C++ string.
     """
     if description:
-        filtered_description = description.replace('\n', '\\n    ')
+        # remove possible markdown/rst syntax, but add proper indent for cpp-header files.
+        filtered_description = (
+            description.replace('\\', '\\\\').replace('`', '').replace('\n', '\\n    ')
+        )
         return f'"{filtered_description}"'
     else:
         return '""'

@@ -292,3 +292,27 @@ admittance_controller:
       one_of<>: [ [ 0, 1, 2, -1 ] ],
     },
   }
+  angle_wraparound: {
+    type: bool,
+    default_value: false,
+    description: 'For joints that wrap around (without end stop, ie. are continuous),
+          where the shortest rotation to the target position is the desired motion.
+          If true, the position error :math:`e = normalize(s_d - s)` is normalized between :math:`-\pi, \pi`.
+          Otherwise  :math:`e = s_d - s` is used, with the desired position :math:`s_d` and the measured
+          position :math:`s` from the state interface.'
+  }
+  open_loop_control: {
+    type: bool,
+    default_value: false,
+    description: "Use controller in open-loop control mode
+        \n\n
+        * The controller ignores the states provided by hardware interface but using last commands as states for starting the trajectory interpolation.\n
+        * It deactivates the feedback control, see the ``gains`` structure.
+        \n\n
+        This is useful if hardware states are not following commands, i.e., an offset between those (typical for hydraulic manipulators).
+        \n\n
+        If this flag is set, the controller tries to read the values from the command interfaces on activation.
+        If they have real numeric values, those will be used instead of state interfaces.
+        Therefore it is important set command interfaces to NaN (i.e., ``std::numeric_limits<double>::quiet_NaN()``) or state values when the hardware is started.\n",
+    read_only: true,
+  }
