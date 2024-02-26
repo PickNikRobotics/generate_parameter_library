@@ -37,6 +37,7 @@ from generate_parameter_library_py.parse_yaml import GenerateCode
 
 
 def run(output_file, yaml_file, validation_module=''):
+    print(f'Running {__file__} {output_file} {yaml_file} {validation_module}')
     gen_param_struct = GenerateCode('python')
     output_dir = os.path.dirname(output_file)
     if not os.path.isdir(output_dir):
