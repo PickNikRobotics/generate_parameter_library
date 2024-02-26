@@ -110,14 +110,9 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME})
   file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
 
-  find_package(PythonInterp REQUIRED)
-  execute_process(
-          COMMAND "${PYTHON_EXECUTABLE}" -c "import sys;v = sys.version.split()[0];v = v.split('.');print(f'python{v[0]}.{v[1]}')"
-          OUTPUT_VARIABLE PYTHON_VERSION
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/local/lib/${PYTHON_VERSION}/dist-packages/${PROJECT_NAME}/${LIB_NAME}.py)
-
+  find_package(ament_cmake_python)
+  ament_get_python_install_dir(python_install_dir)
+  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/${python_install_dir}/${PROJECT_NAME}/${LIB_NAME}.py)
 
   # Generate the module for the python
   add_custom_command(
