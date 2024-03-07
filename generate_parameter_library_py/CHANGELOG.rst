@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2024-03-06)
+------------------
 * add # flake8: noqa to template (`#177 <https://github.com/PickNikRobotics/generate_parameter_library/issues/177>`_)
 * Fix newline issue (`#176 <https://github.com/PickNikRobotics/generate_parameter_library/issues/176>`_)
   * fix new line rendering for Python

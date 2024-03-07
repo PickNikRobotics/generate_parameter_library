@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2024-03-06)
+------------------
 * Fix newline issue (`#176 <https://github.com/PickNikRobotics/generate_parameter_library/issues/176>`_)
   * fix new line rendering for Python
 * Contributors: Paul Gesel
