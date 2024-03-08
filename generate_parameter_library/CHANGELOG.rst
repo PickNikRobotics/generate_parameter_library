@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.8 (2024-03-06)
+------------------
+* uss python_install_dir (`#178 <https://github.com/PickNikRobotics/generate_parameter_library/issues/178>`_)
+* Update CMakeLists.txt (`#173 <https://github.com/PickNikRobotics/generate_parameter_library/issues/173>`_)
+* Contributors: Christoph Fröhlich, Paul Gesel
+
 0.3.7 (2024-01-12)
 ------------------
 * Enable generate_parameter_module through ament_cmake_python (`#161 <https://github.com/PickNikRobotics/generate_parameter_library/issues/161>`_)

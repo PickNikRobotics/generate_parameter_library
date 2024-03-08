@@ -2,6 +2,14 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.8 (2024-03-06)
+------------------
+* add # flake8: noqa to template (`#177 <https://github.com/PickNikRobotics/generate_parameter_library/issues/177>`_)
+* Fix newline issue (`#176 <https://github.com/PickNikRobotics/generate_parameter_library/issues/176>`_)
+  * fix new line rendering for Python
+* Support nested mapped parameters (`#166 <https://github.com/PickNikRobotics/generate_parameter_library/issues/166>`_)
+* Contributors: Paul Gesel
+
 0.3.7 (2024-01-12)
 ------------------
 * fix Python runtime parameters bug (`#165 <https://github.com/PickNikRobotics/generate_parameter_library/issues/165>`_)
