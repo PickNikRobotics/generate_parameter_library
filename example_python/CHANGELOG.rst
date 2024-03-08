@@ -6,6 +6,7 @@ Changelog for package generate_parameter_module_example
 ------------------
 * Fix newline issue (`#176 <https://github.com/PickNikRobotics/generate_parameter_library/issues/176>`_)
   * fix new line rendering for Python
+* Support nested mapped parameters (`#166 <https://github.com/PickNikRobotics/generate_parameter_library/issues/166>`_)
 * Contributors: Paul Gesel
 
 0.3.7 (2024-01-12)
