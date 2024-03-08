@@ -15,6 +15,7 @@ __map_type = __{{struct_name}}
 def add_entry(self, name):
     if not hasattr(self, name):
         setattr(self, name, self.__map_type())
+    return getattr(self, name)
 def get_entry(self, name):
     return getattr(self, name)
 {% endif -%}

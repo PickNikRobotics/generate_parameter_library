@@ -1,12 +1,16 @@
-for value in updated_params.{{mapped_param}}:
-{%- filter indent(width=4) %}
-param_name = f"{self.prefix_}{{struct_name}}.{value}.{{parameter_field}}"
+{% for mapped_param in mapped_params -%}
+{%- filter indent(width=4*loop.index) %}
+for value_{{loop.index}} in updated_params.{{mapped_param}}:
+{%- endfilter -%}
+{% endfor -%}
+{%- filter indent(width=4*(1+mapped_params|length)) %}
+param_name = f"{self.prefix_}{{struct_name}}{% for map in parameter_map%}.{value_{{loop.index}}}{% endfor %}.{{parameter_field}}"
 if param.name == param_name:
 {%- filter indent(width=4) %}
 {% if parameter_validations|length -%}
 {{parameter_validations-}}
 {% endif -%}
-updated_params.{{parameter_map}}[value].{{parameter_field}} = param.{{parameter_as_function}}
+updated_params.{{struct_name}}{% for map in parameter_map%}.get_entry(value_{{loop.index}}){% endfor %}.{{parameter_field}} = param.{{parameter_as_function}}
 self.logger_.debug(param.name + ": " + param.type_.name + " = " + str(param.value))
 {% endfilter -%}
 {% endfilter -%}

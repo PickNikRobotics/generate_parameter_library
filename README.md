@@ -7,7 +7,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 * Declarative YAML syntax for ROS 2 Parameters converted into C++ or Python struct
 * Declaring, Getting, Validating, and Updating handled by generated code
 * Dynamic ROS 2 Parameters made easy
-* Custom user specified validator functions
+* Custom user-specified validator functions
 * Automatically create documentation of parameters
 
 ## Basic Usage
@@ -81,7 +81,7 @@ generate_parameter_module(
 )
 ```
 
-### Use generated struct into project source code
+### Use generated struct in project source code
 
 **src/turtlesim.cpp**
 ```c++
@@ -181,7 +181,7 @@ cpp_namespace:
     type: int,
     default_value: 3,
     read_only: true,
-    description: "A read only  integer parameter with a default value of 3",
+    description: "A read-only  integer parameter with a default value of 3",
     validation:
       # validation functions ...
   }
@@ -212,11 +212,11 @@ The types of parameters in ros2 map to C++ types.
 | string_fixed_XX | `FixedSizeString<XX>`       |
 | none            | NO CODE GENERATED           |
 
-Fixed size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
+Fixed-size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
 The corresponding C++ type is a data wrapper class for conveniently accessing the data.
 Note that any fixed size type will automatically use a `size_lt` validator. Validators are explained in the next section.
 
-The purpose of `none` type is purely documentation, and won't generate any C++ code. See [Parameter documentation](#parameter-documentation) for details.
+The purpose of the `none` type is purely documentation, and won't generate any C++ code. See [Parameter documentation](#parameter-documentation) for details.
 
 ### Built-In Validators
 Validators are C++ functions that take arguments represented by a key-value pair in yaml.
@@ -316,7 +316,7 @@ validation: {
 ```
 
 ### Nested structures
-After the top level key, every subsequent non-leaf key will generate a nested c++ struct. The struct instance will have
+After the top-level key, every subsequent non-leaf key will generate a nested C++ struct. The struct instance will have
 the same name as the key.
 
 ```yaml
@@ -328,7 +328,7 @@ cpp_name_space:
       }
 ```
 
-The generated parameter value can then be access with `params.nest1.nest2.param_name`
+The generated parameter value can then be accessed with `params.nest1.nest2.param_name`
 
 ### Mapped parameters
 You can use parameter maps, where a map with keys from another `string_array` parameter is created. Add the `__map_` prefix followed by the key parameter name as follows:
@@ -340,14 +340,27 @@ cpp_name_space:
     default_value: ["joint1", "joint2", "joint3"],
     description: "specifies which joints will be used by the controller",
   }
+  interfaces: {
+    type: string_array,
+    default_value: ["position", "velocity", "acceleration"],
+    description: "interfaces to be used by the controller",
+  }
+  # nested mapped example
+  gain:
+    __map_joints: # create a map with joints as keys
+      __map_interfaces:  # create a map with interfaces as keys
+        value: {
+          type: double
+        }
+  # simple mapped example
   pid:
-    __map_joints:  # create a map with joints as keys
-      param_name: {
-        type: string_array
+    __map_joints: # create a map with joints as keys
+      values: {
+        type: double_array
       }
 ```
 
-The generated parameter value can then be access with `params.pid.joints_map.at("joint1").param_name`.
+The generated parameter value for the nested map example can then be accessed with `params.gain.joints_map.at("joint1").interfaces_map.at("position").value`.
 
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
@@ -373,7 +386,7 @@ if (param_listener->is_old(params_)) {
 
 ### Parameter documentation
 
-In some case, parameters might be unknown only at compile-time, and cannot be part of the generated C++ code. However, for documentation purpose of such parameters, the type `none` was introduced.
+In some cases, parameters might be unknown only at compile-time, and cannot be part of the generated C++ code. However, for documentation purpose of such parameters, the type `none` was introduced.
 
 Parameters with `none` type won't generate any C++ code, but can exist to describe the expected name or namespace, that might be declared by an external piece of code and used in an override.
 
@@ -421,7 +434,7 @@ force_torque_broadcaster_controller:
 See [cpp example](example/) or [python example](example_python/) for complete examples of how to use the generate_parameter_library.
 
 ### Generated code output
-The generated code is primarily consists of two major components:
+The generated code primarily consists of two major components:
 1) `struct Params` that contains values of all parameters and
 2) `class ParamListener` that handles parameter declaration, updating, and validation.
    The general structure is shown below.
@@ -458,7 +471,7 @@ class ParamListener {
   // loop over all parameters: perform validation then update
   rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters);
 
-  // declare all parameters and throw exception if non-optional value is missing or validation fails
+  // declare all parameters and throw an exception if a non-optional value is missing or validation fails
   void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface);
 
  private:

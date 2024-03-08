@@ -63,7 +63,6 @@ def main():
     output_file = args.output_python_module_file
     yaml_file = args.input_yaml_file
     validate_file = args.validate_file
-
     run(output_file, yaml_file, validate_file)
 
 
