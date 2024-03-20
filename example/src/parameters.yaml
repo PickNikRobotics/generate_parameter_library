@@ -25,14 +25,15 @@ admittance_controller:
   }
 
   __map_joints:
-    weight: {
-      type: double,
-      default_value: 1.0,
-      description: "map parameter without struct name",
-      validation: {
-        gt<>: [0.0],
+    __map_dof_names:
+      weight: {
+        type: double,
+        default_value: 1.0,
+        description: "map parameter without struct name",
+        validation: {
+          gt<>: [0.0],
+        }
       }
-    }
 
   nested_dynamic:
     __map_joints:

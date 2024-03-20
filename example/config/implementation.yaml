@@ -12,7 +12,8 @@ admittance_controller:
       "happy"
 
     elbow_joint:
-      weight: 2.0
+      x:
+        weight: 2.0
 
     pid:
       shoulder_pan_joint:

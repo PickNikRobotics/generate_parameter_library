@@ -5,7 +5,7 @@ for (const auto & value_{{loop.index}} : updated_params.{{mapped_param}}) {
 {% if struct_name != "" %}
 auto& entry = {{param_struct_instance}}.{{struct_name}}{% for map in parameter_map%}.{{map}}[value_{{loop.index}}]{% endfor %};
 {% else %}
-auto& entry = {{param_struct_instance}}.{% for map in parameter_map%}{{map}}[value_{{loop.index}}]{% endfor %};
+auto& entry = {{param_struct_instance}}{% for map in parameter_map%}.{{map}}[value_{{loop.index}}]{% endfor %};
 {% endif -%}
 std::string value = fmt::format("{%- for mapped_param in mapped_params -%}{% if loop.index == 1 %}{}{% else %}.{}{% endif -%} {%- endfor -%}",
 {%- for mapped_param in mapped_params -%}{% if loop.index == 1 %} value_{{loop.index}}{% else %}, value_{{loop.index}}{% endif -%} {%- endfor %});

@@ -4,7 +4,11 @@ for value_{{loop.index}} in updated_params.{{mapped_param}}:
 {%- endfilter -%}
 {% endfor -%}
 {%- filter indent(width=4*(1+mapped_params|length)) %}
-param_name = f"{self.prefix_}{{struct_name}}{% for map in parameter_map%}.{value_{{loop.index}}}{% endfor %}.{{parameter_field}}"
+{% if struct_name != "" %}
+param_name = f"{self.prefix_}{{struct_name}}{% for map in parameter_map%}{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
+{% else %}
+param_name = f"{self.prefix_}{% for map in parameter_map%}{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
+{% endif -%}
 if param.name == param_name:
 {%- filter indent(width=4) %}
 {% if parameter_validations|length -%}
