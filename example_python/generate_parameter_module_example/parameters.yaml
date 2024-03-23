@@ -32,6 +32,17 @@ admittance_controller:
     description: "specifies which joints will be used by the controller",
   }
 
+  __map_joints:
+    __map_dof_names:
+      weight: {
+        type: double,
+        default_value: 1.0,
+        description: "map parameter without struct name",
+        validation: {
+          gt<>: [0.0],
+        }
+      }
+
   nested_dynamic:
     __map_joints:
       __map_dof_names:
