@@ -2,12 +2,13 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.3.8 (2024-03-06)
+0.3.8 (2024-03-27)
 ------------------
+* Restore functionality for mapped params with no struct name (`#185 <https://github.com/PickNikRobotics/generate_parameter_library/issues/185>_`)
 * Fix newline issue (`#176 <https://github.com/PickNikRobotics/generate_parameter_library/issues/176>`_)
   * fix new line rendering for Python
 * Support nested mapped parameters (`#166 <https://github.com/PickNikRobotics/generate_parameter_library/issues/166>`_)
-* Contributors: Paul Gesel
+* Contributors: Paul Gesel, Sebastian Castro
 
 0.3.7 (2024-01-12)
 ------------------
