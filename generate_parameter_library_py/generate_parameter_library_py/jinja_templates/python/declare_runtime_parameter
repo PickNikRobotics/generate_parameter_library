@@ -1,6 +1,10 @@
 {% for mapped_param in mapped_params -%}
 {%- filter indent(width=4*loop.index0) %}
-for value_{{loop.index}} in updated_params.{{struct_name}}{% for map in parameter_map%}{% endfor %}.{{mapped_param}}:
+{% if struct_name != "" %}
+for value_{{loop.index}} in updated_params.{{struct_name}}.{{mapped_param}}:
+{% else %}
+for value_{{loop.index}} in updated_params.{{mapped_param}}:
+{% endif -%}
 {%- endfilter -%}
 {% endfor -%}
 {%- filter indent(width=4*(mapped_params|length)) %}
