@@ -1,4 +1,13 @@
 admittance_controller:
+  my_node:
+    my_params:
+      params_to_be_mapped: {
+        type: string_array,
+        }
+      __map_my_node.my_params.params_to_be_mapped: # : __map_params_to_be_mapped
+        in_map_param: {
+          type: bool,
+        }
   scientific_notation_num: {
     type: double,
     default_value: 0.00000000001,
