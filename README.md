@@ -302,7 +302,6 @@ To configure a parameter to be validated with the custom validator function `int
 ```yaml
 validation:
   "my_project::integer_equal_value": [3]
-}
 ```
 
 ### Nested structures
