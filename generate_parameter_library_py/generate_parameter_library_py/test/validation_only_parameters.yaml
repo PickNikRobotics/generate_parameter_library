@@ -1,94 +1,73 @@
 admittance_controller:
-  stiffness: {
-    type: double_array,
-    description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
-    validation: {
+  stiffness:
+    type: double_array
+    description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation"
+    validation:
       element_bounds: [ 0.0001, 100000.0 ]
-    }
-  }
-  dankness: {
-    type: int_array,
-    description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation",
-    validation: {
+  dankness:
+    type: int_array
+    description: "specifies stiffness values for x, y, z, rx, ry, and rz used in the admittance calculation"
+    validation:
       element_bounds: [ 1, 100 ]
-    }
-  }
 
-  mass: {
-    type: double_array,
-    description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation",
-    validation: {
-      fixed_size<>: 6,
+  mass:
+    type: double_array
+    description: "specifies mass values for x, y, z, rx, ry, and rz used in the admittance calculation"
+    validation:
+      fixed_size<>: 6
       element_bounds<>: [ 0.0001, 1000000.0 ]
-    }
-  }
 
-  one_number: {
-    type: int,
-    default_value: 14540,
-    read_only: true,
-    validation: {
+  one_number:
+    type: int
+    default_value: 14540
+    read_only: true
+    validation:
       bounds<>: [ 1024, 65535 ]
-    }
-  }
 
-  p: {
-    type: double,
-    default_value: 1.0,
-    description: "proportional gain term",
-    validation: {
-      gt_eq<>: [ 0 ],
-    }
-  }
+  p:
+    type: double
+    default_value: 1.0
+    description: "proportional gain term"
+    validation:
+      gt_eq<>: [ 0 ]
 
-  p2: {
-    type: double,
-    default_value: 1.0,
-    description: "proportional gain term updated",
-    validation: {
-      gt_eq: [ 0.0001 ],
-    }
-  }
+  p2:
+    type: double
+    default_value: 1.0
+    description: "proportional gain term updated"
+    validation:
+      gt_eq: [ 0.0001 ]
 
-  under_ten: {
-    type: double,
-    default_value: 1.0,
-    description: "should be a number less than 10",
-    validation: {
-      lt_eq<>: [ 10 ],
-    }
-  }
-  lt_eq_fifteen: {
-    type: int,
-    default_value: 1,
-    description: "should be a number less than or equal to 15",
-    validation: {
-      lt_eq<>: [ 15 ],
-    }
-  }
-  gt_fifteen: {
-    type: int,
-    default_value: 16,
-    description: "should be a number greater than 15",
-    validation: {
-      gt<>: [ 15 ],
-    }
-  }
+  under_ten:
+    type: double
+    default_value: 1.0
+    description: "should be a number less than 10"
+    validation:
+      lt_eq<>: [ 10 ]
+  lt_eq_fifteen:
+    type: int
+    default_value: 1
+    description: "should be a number less than or equal to 15"
+    validation:
+      lt_eq<>: [ 15 ]
+  gt_fifteen:
+    type: int
+    default_value: 16
+    description: "should be a number greater than 15"
+    validation:
+      gt<>: [ 15 ]
   # This shouldn't populate any description range constraints
-  fixed_array: {
-    type: double_array_fixed_10,
-    default_value: [1.0, 2.3, 4.0 ,5.4, 3.3],
-    description: "test code generation for fixed sized array",
-  }
+  fixed_array:
+    type: double_array_fixed_10
+    default_value: [1.0, 2.3, 4.0 ,5.4, 3.3]
+    description: "test code generation for fixed sized array"
 
     # general settings
-  enable_parameter_update_without_reactivation: {
-    type: bool,
-    default_value: true,
+  enable_parameter_update_without_reactivation:
+    type: bool
+    default_value: true
     description: "if enabled, read_only parameters will be dynamically updated in the control loop"
-  }
-  use_feedforward_commanded_input: {
-    type: bool,
-    default_value: false,
+  use_feedforward_commanded_input:
+    type: bool
+    default_value: false
     description: "if enabled, the velocity commanded to the admittance controller is added to its calculated admittance velocity"
-  }
