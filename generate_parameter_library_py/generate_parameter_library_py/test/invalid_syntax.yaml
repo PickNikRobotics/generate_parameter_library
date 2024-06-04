@@ -1,8 +1,7 @@
 namespace:
-  param_name: {
-    type: double,
-    description: "Test scientific notation",
-  }
+  param_name:
+    type: double
+    description: "Test scientific notation"
   -
     -
       -

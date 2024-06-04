@@ -22,30 +22,24 @@ Write a yaml file to declare your parameters and their attributes.
 ```yaml
 turtlesim:
   background:
-    r: {
-      type: int,
-      default_value: 0,
-      description: "Red color value for the background, 8-bit",
-      validation: {
+    r:
+      type: int
+      default_value: 0
+      description: "Red color value for the background, 8-bit"
+      validation:
         bounds<>: [0, 255]
-      }
-    }
-    g: {
-      type: int,
-      default_value: 0,
-      description: "Green color value for the background, 8-bit",
-      validation: {
+    g:
+      type: int
+      default_value: 0
+      description: "Green color value for the background, 8-bit"
+      validation:
         bounds<>: [0, 255]
-      }
-    }
-    b: {
-      type: int,
-      default_value: 0,
-      description: "Blue color value for the background, 8-bit",
-      validation: {
+    b:
+      type: int
+      default_value: 0
+      description: "Blue color value for the background, 8-bit"
+      validation:
         bounds<>: [0, 255]
-      }
-    }
 ```
 
 ### Add parameter library generation to project
@@ -177,14 +171,13 @@ A leaf represents a single parameter and has the following format.
 
 ```yaml
 cpp_namespace:
-  param_name: {
-    type: int,
-    default_value: 3,
-    read_only: true,
-    description: "A read-only  integer parameter with a default value of 3",
+  param_name:
+    type: int
+    default_value: 3
+    read_only: true
+    description: "A read-only  integer parameter with a default value of 3"
     validation:
       # validation functions ...
-  }
 ```
 
 A parameter is a YAML dictionary with the only required key being `type`.
@@ -226,15 +219,13 @@ If the function does not take any values you write `null` or `[]` to for the val
 
 ```yaml
 joint_trajectory_controller:
-  command_interfaces: {
-    type: string_array,
-    description: "Names of command interfaces to claim",
-    validation: {
-      size_gt<>: [0],
-      unique<>: null,
-      subset_of<>: [["position", "velocity", "acceleration", "effort",]],
-    }
-  }
+  command_interfaces:
+    type: string_array
+    description: "Names of command interfaces to claim"
+    validation:
+      size_gt<>: [0]
+      unique<>: null
+      subset_of<>: [["position", "velocity", "acceleration", "effort",]]
 ```
 
 Above are validations for `command_interfaces` from `ros2_controllers`.
@@ -299,9 +290,8 @@ tl::expected<void, std::string> integer_equal_value(
   int param_value = parameter.as_int();
     if (param_value != expected_value) {
         return tl::make_unexpected(fmt::format(
-            "Invalid value {} for parameter {}. Expected {}",
+            "Invalid value {} for parameter {}. Expected {}"
             param_value, parameter.get_name(), expected_value);
-    }
 
   return {};
 }
@@ -310,9 +300,8 @@ tl::expected<void, std::string> integer_equal_value(
 ```
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
-validation: {
+validation:
   "my_project::integer_equal_value": [3]
-}
 ```
 
 ### Nested structures
@@ -323,9 +312,8 @@ the same name as the key.
 cpp_name_space:
   nest1:
     nest2:
-      param_name: { # this is a leaf
+      param_name: # this is a leaf
         type: string_array
-      }
 ```
 
 The generated parameter value can then be accessed with `params.nest1.nest2.param_name`
@@ -335,29 +323,25 @@ You can use parameter maps, where a map with keys from another `string_array` pa
 
 ```yaml
 cpp_name_space:
-  joints: {
-    type: string_array,
-    default_value: ["joint1", "joint2", "joint3"],
-    description: "specifies which joints will be used by the controller",
-  }
-  interfaces: {
-    type: string_array,
-    default_value: ["position", "velocity", "acceleration"],
-    description: "interfaces to be used by the controller",
-  }
+  joints:
+    type: string_array
+    default_value: ["joint1", "joint2", "joint3"]
+    description: "specifies which joints will be used by the controller"
+  interfaces:
+    type: string_array
+    default_value: ["position", "velocity", "acceleration"]
+    description: "interfaces to be used by the controller"
   # nested mapped example
   gain:
     __map_joints: # create a map with joints as keys
       __map_interfaces:  # create a map with interfaces as keys
-        value: {
+        value:
           type: double
-        }
   # simple mapped example
   pid:
     __map_joints: # create a map with joints as keys
-      values: {
+      values:
         type: double_array
-      }
 ```
 
 The generated parameter value for the nested map example can then be accessed with `params.gain.joints_map.at("joint1").interfaces_map.at("position").value`.
@@ -396,20 +380,17 @@ Example of declarative YAML
 
 ```yaml
 force_torque_broadcaster_controller:
-  sensor_name: {
-    type: string,
-    default_value: "",
-    description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined.",
-  }
-  frame_id: {
-    type: string,
-    default_value: "",
-    description: "Sensor's frame_id in which values are published.",
-  }
-  sensor_filter_chain: {
-    type: none,
-    description: "Map of parameters that defines a filter chain, containing filterN as key and underlying map of parameters needed for a specific filter. See <some docs> for more details.",
-  }
+  sensor_name:
+    type: string
+    default_value: ""
+    description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined."
+  frame_id:
+    type: string
+    default_value: ""
+    description: "Sensor's frame_id in which values are published."
+  sensor_filter_chain:
+    type: none
+    description: "Map of parameters that defines a filter chain, containing filterN as key and underlying map of parameters needed for a specific filter. See <some docs> for more details."
 ```
 
 Example of parameters for that controller
