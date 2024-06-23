@@ -15,11 +15,11 @@ jobs:
     name: pre-commit
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
       - name: Install clang-format
         run: sudo apt-get install clang-format
-      - uses: pre-commit/action@v2.0.3
+      - uses: pre-commit/action@v3.0.1
         id: precommit
       - name: Upload pre-commit changes
         if: failure() && steps.precommit.outcome == 'failure'
