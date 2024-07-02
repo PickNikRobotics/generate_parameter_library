@@ -55,7 +55,6 @@ def generate_parameter_module(module_name, yaml_file, validation_module=''):
             install_dir = os.path.join(
                 colcon_ws,
                 'install',
-                pkg_name,
                 'lib',
                 py_version,
                 'site-packages',
