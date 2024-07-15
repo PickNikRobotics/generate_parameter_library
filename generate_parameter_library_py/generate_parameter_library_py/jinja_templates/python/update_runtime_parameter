@@ -5,9 +5,9 @@ for value_{{loop.index}} in updated_params.{{mapped_param}}:
 {% endfor -%}
 {%- filter indent(width=4*(1+mapped_params|length)) %}
 {% if struct_name != "" %}
-param_name = f"{self.prefix_}{{struct_name}}{% for map in parameter_map%}{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
+param_name = f"{self.prefix_}{{struct_name}}{% for map in parameter_map%}.{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
 {% else %}
-param_name = f"{self.prefix_}{% for map in parameter_map%}{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
+param_name = f"{self.prefix_}{% for map in parameter_map%}.{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
 {% endif -%}
 if param.name == param_name:
 {%- filter indent(width=4) %}
