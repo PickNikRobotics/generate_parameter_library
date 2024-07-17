@@ -31,7 +31,7 @@ def unpack_parameter_dict(namespace: str, parameter_dict: dict):
         # Unroll nested parameters
         if isinstance(param_value, dict):
             nested_params = unpack_parameter_dict(
-                    namespace=full_param_name + '.',
+                    namespace=full_param_name + rclpy.parameter.PARAMETER_SEPARATOR_STRING,
                     parameter_dict=param_value)
             parameters.extend(nested_params)
         else:
