@@ -29,7 +29,7 @@ def unpack_parameter_dict(namespace: str, parameter_dict: dict):
     for param_name, param_value in parameter_dict.items():
         full_param_name = namespace + param_name
         # Unroll nested parameters
-        if type(param_value) == dict:
+        if isinstance(param_value, dict):
             nested_params = unpack_parameter_dict(
                     namespace=full_param_name + '.',
                     parameter_dict=param_value)
@@ -51,6 +51,7 @@ stamp_ = Time()
 {{sub_struct_content-}}
 {% endfilter -%}
 {%- endfilter %}
+
 
     class ParamListener:
         def __init__(self, node, prefix=""):
