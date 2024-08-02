@@ -78,7 +78,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
   target_include_directories(${LIB_NAME} INTERFACE
     $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include/${LIB_NAME}>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}/${LIB_NAME}>
   )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME} INTERFACE
@@ -90,7 +90,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     tcb_span::tcb_span
     tl_expected::tl_expected
   )
-  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${LIB_NAME})
+  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${PROJECT_NAME}/${LIB_NAME})
 endfunction()
 
 
@@ -129,7 +129,7 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
   target_include_directories(${LIB_NAME} INTERFACE
           $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-          $<INSTALL_INTERFACE:include/${LIB_NAME}>
+          $<INSTALL_INTERFACE:include/${PROJECT_NAME}/${LIB_NAME}>
   )
 
 endfunction()
