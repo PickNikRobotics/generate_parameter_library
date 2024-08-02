@@ -37,7 +37,7 @@ try:
 except:
     TypeCheckError = TypeError
 
-from typing import Any, List, Optional
+from typing import Any, List, Union
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import os
@@ -320,7 +320,7 @@ class ValidationFunction:
     def __init__(
         self,
         function_name: str,
-        arguments: Optional[List[Any]],
+        arguments: Union[None, List[Any]],
         code_gen_variable: CodeGenVariableBase,
     ):
         self.code_gen_variable = code_gen_variable
