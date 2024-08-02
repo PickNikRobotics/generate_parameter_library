@@ -32,9 +32,11 @@
 from jinja2 import Template, Environment
 from typeguard import typechecked
 
+# try to import TypeCheckError from typeguard. This was breaking and replaced TypeError in 3.0.0
 try:
     from typeguard import TypeCheckError
-except:
+except ImportError as e:
+    # otherwise, use the old TypeError
     TypeCheckError = TypeError
 
 from typing import Any, List, Union
