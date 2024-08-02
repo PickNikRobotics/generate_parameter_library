@@ -81,12 +81,6 @@ def set_up(yaml_test_file):
     ],
 )
 def test_expected(test_input, expected):
-    if not __debug__ or sys.flags.optimize:
-        if test_input == 'wrong_default_type.yaml':
-            pytest.skip(
-                'Evaluating optimized type validation cannot be completed when python is optimized'
-            )
-
     with pytest.raises(expected) as e:
         yaml_test_file = test_input
         set_up(yaml_test_file)
