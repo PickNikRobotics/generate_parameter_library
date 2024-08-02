@@ -31,6 +31,12 @@
 
 from jinja2 import Template, Environment
 from typeguard import typechecked
+
+try:
+    from typeguard import TypeCheckError
+except:
+    TypeCheckError = TypeError
+
 from typing import Any, List, Optional
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -190,7 +196,7 @@ class CodeGenVariableBase:
         func = self.conversation.lang_str_value_func[self.defined_type]
         try:
             self.lang_str_value = func(default_value)
-        except TypeError:
+        except TypeCheckError:
             raise compile_error(
                 f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
             )
