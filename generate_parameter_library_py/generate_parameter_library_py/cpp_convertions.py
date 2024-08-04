@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import List, Optional
+from typing import List, Union
 from jinja2 import Template
 from typeguard import typechecked
 import os
@@ -108,18 +108,18 @@ class CPPConverstions:
         return ''
 
     @typechecked
-    def no_code(self, s: Optional[str]):
+    def no_code(self, s: Union[None, str]):
         return ''
 
     # value to c++ string conversion functions
     @typechecked
-    def bool_to_str(self, cond: Optional[bool]):
+    def bool_to_str(self, cond: Union[None, bool]):
         if cond is None:
             return ''
         return 'true' if cond else 'false'
 
     @typechecked
-    def float_to_str(self, num: Optional[float]):
+    def float_to_str(self, num: Union[None, float]):
         if num is None:
             return ''
         str_num = str(num)
@@ -136,65 +136,65 @@ class CPPConverstions:
         return str_num
 
     @typechecked
-    def int_to_str(self, num: Optional[int]):
+    def int_to_str(self, num: Union[None, int]):
         if num is None:
             return ''
         return str(num)
 
     @typechecked
-    def str_to_str(self, s: Optional[str]):
+    def str_to_str(self, s: Union[None, str]):
         if s is None:
             return ''
         return f'"{s}"'
 
     @typechecked
-    def bool_array_to_str(self, values: Optional[list]):
+    def bool_array_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
         return '{' + ', '.join(self.bool_to_str(x) for x in values) + '}'
 
     @typechecked
-    def float_array_to_str(self, values: Optional[list]):
+    def float_array_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
         return '{' + ', '.join(self.float_to_str(x) for x in values) + '}'
 
     @typechecked
-    def int_array_to_str(self, values: Optional[list]):
+    def int_array_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
         return '{' + ', '.join(self.int_to_str(x) for x in values) + '}'
 
     @typechecked
-    def str_array_to_str(self, s: Optional[list]):
+    def str_array_to_str(self, s: Union[None, list]):
         if s is None:
             return ''
         return '{' + ', '.join(self.str_to_str(x) for x in s) + '}'
 
     @typechecked
-    def str_array_fixed_to_str(self, s: Optional[list]):
+    def str_array_fixed_to_str(self, s: Union[None, list]):
         raise compile_error('not implemented')
 
     @typechecked
-    def str_fixed_to_str(self, s: Optional[str]):
+    def str_fixed_to_str(self, s: Union[None, str]):
         if s is None:
             return ''
         return '{%s}' % self.str_to_str(s)
 
     @typechecked
-    def float_array_fixed_to_str(self, values: Optional[list]):
+    def float_array_fixed_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
         return '{{' + ', '.join(self.float_to_str(x) for x in values) + '}}'
 
     @typechecked
-    def int_array_fixed_to_str(self, values: Optional[list]):
+    def int_array_fixed_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
         return '{{' + ', '.join(self.int_to_str(x) for x in values) + '}}'
 
     @typechecked
-    def bool_array_fixed_to_str(self, values: Optional[list]):
+    def bool_array_fixed_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
         return '{{' + ', '.join(self.bool_to_str(x) for x in values) + '}}'
