@@ -42,10 +42,10 @@ descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[1
 {%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
 descriptor.integer_range.resize({{loop.index}});
 descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
-descriptor.integer_range.at({{loop.index0}}).to_value = std::numeric_limits<int>::max();
+descriptor.integer_range.at({{loop.index0}}).to_value = std::numeric_limits<int64_t>::max();
 {%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
 descriptor.integer_range.resize({{loop.index}});
-descriptor.integer_range.at({{loop.index0}}).from_value = std::numeric_limits<int>::lowest();
+descriptor.integer_range.at({{loop.index0}}).from_value = std::numeric_limits<int64_t>::lowest();
 descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
 {%- endif %}
 {%- endif %}
