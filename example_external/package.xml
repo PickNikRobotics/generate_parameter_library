@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>generate_parameter_library_example_external</name>
+  <version>0.3.8</version>
+  <description>Example usage of a parameter header generated in another package.</description>
+  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+  <license>BSD-3-Clause</license>
+  <author email="paul.gesel@picknik.ai">Paul Gesel</author>
+
+  <depend>generate_parameter_library_example</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <buildtool_export_depend>ament_cmake_core</buildtool_export_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
