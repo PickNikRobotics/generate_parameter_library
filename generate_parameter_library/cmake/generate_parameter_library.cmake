@@ -35,7 +35,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   endif()
 
   # Make the include directory
-  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/)
+  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME})
   file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
 
   # Optional 3rd parameter for the user defined validation header
@@ -48,14 +48,9 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     cmake_path(APPEND VALIDATE_HEADER ${VALIDATE_HEADER_FILENAME})
 
     # Copy the header file into the include directory
-    add_custom_command(
-      OUTPUT ${VALIDATE_HEADER}
-      COMMAND ${CMAKE_COMMAND} -E copy ${IN_VALIDATE_HEADER} ${VALIDATE_HEADER}
-      DEPENDS ${IN_VALIDATE_HEADER}
-      COMMENT
-      "Running `${CMAKE_COMMAND} -E copy ${IN_VALIDATE_HEADER} ${VALIDATE_HEADER}`"
-      VERBATIM
-    )
+    file(COPY ${IN_VALIDATE_HEADER} DESTINATION ${LIB_INCLUDE_DIR})
+    # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
+    file(COPY ${IN_VALIDATE_HEADER} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
   endif()
 
   # Set the yaml file parameter to be relative to the current source dir
@@ -73,12 +68,25 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
     VERBATIM
   )
+  # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
+  set(LOCAL_PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}.hpp)
+  add_custom_command(
+      OUTPUT ${LOCAL_PARAM_HEADER_FILE}
+      COMMAND ${CMAKE_COMMAND} -E echo "#pragma warning(\"`#include <${LIB_NAME}>` is deprecated. Use `#include <${PROJECT_NAME}/${LIB_NAME}.hpp>` instead.\")" >> ${LOCAL_PARAM_HEADER_FILE}
+      COMMAND ${CMAKE_COMMAND} -E cat ${LOCAL_PARAM_HEADER_FILE} ${PARAM_HEADER_FILE} > ${LOCAL_PARAM_HEADER_FILE}.tmp
+      COMMAND ${CMAKE_COMMAND} -E copy ${LOCAL_PARAM_HEADER_FILE}.tmp ${LOCAL_PARAM_HEADER_FILE}
+      COMMAND ${CMAKE_COMMAND} -E remove ${LOCAL_PARAM_HEADER_FILE}.tmp
+      DEPENDS ${PARAM_HEADER_FILE}
+      COMMENT
+      "Creating deprecated header file ${LOCAL_PARAM_HEADER_FILE}"
+      VERBATIM
+  )
 
   # Create the library target
-  add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
+  add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER} ${LOCAL_PARAM_HEADER_FILE})
   target_include_directories(${LIB_NAME} INTERFACE
-    $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include/${PROJECT_NAME}/${LIB_NAME}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+    $<INSTALL_INTERFACE:include>
   )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME} INTERFACE
@@ -90,7 +98,9 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     tcb_span::tcb_span
     tl_expected::tl_expected
   )
-  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${PROJECT_NAME}/${LIB_NAME})
+  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
+  ament_export_dependencies(fmt parameter_traits rclcpp rclcpp_lifecycle rsl tcb_span tl_expected)
+  set(_AMENT_CMAKE_EXPORT_DEPENDENCIES "${_AMENT_CMAKE_EXPORT_DEPENDENCIES}" PARENT_SCOPE)
 endfunction()
 
 
@@ -108,7 +118,7 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   # Set the yaml file parameter to be relative to the current source dir
   set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
-  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME})
+  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME})
   file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
 
   find_package(ament_cmake_python)
@@ -128,8 +138,8 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   # Create the library target
   add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
   target_include_directories(${LIB_NAME} INTERFACE
-          $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-          $<INSTALL_INTERFACE:include/${PROJECT_NAME}/${LIB_NAME}>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:include>
   )
 
 endfunction()
