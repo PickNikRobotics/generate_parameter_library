@@ -31,7 +31,15 @@
 
 from jinja2 import Template, Environment
 from typeguard import typechecked
-from typing import Any, List, Optional
+
+# try to import TypeCheckError from typeguard. This was breaking and replaced TypeError in 3.0.0
+try:
+    from typeguard import TypeCheckError
+except ImportError as e:
+    # otherwise, use the old TypeError
+    TypeCheckError = TypeError
+
+from typing import Any, List, Union
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import os
@@ -190,7 +198,7 @@ class CodeGenVariableBase:
         func = self.conversation.lang_str_value_func[self.defined_type]
         try:
             self.lang_str_value = func(default_value)
-        except TypeError:
+        except TypeCheckError:
             raise compile_error(
                 f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
             )
@@ -314,7 +322,7 @@ class ValidationFunction:
     def __init__(
         self,
         function_name: str,
-        arguments: Optional[List[Any]],
+        arguments: Union[None, List[Any]],
         code_gen_variable: CodeGenVariableBase,
     ):
         self.code_gen_variable = code_gen_variable

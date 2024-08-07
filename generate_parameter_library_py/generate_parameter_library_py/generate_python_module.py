@@ -40,8 +40,7 @@ def run(output_file, yaml_file, validation_module=''):
     print(f'Running {__file__} {output_file} {yaml_file} {validation_module}')
     gen_param_struct = GenerateCode('python')
     output_dir = os.path.dirname(output_file)
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     gen_param_struct.parse(yaml_file, validation_module)
 
