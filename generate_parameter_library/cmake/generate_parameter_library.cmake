@@ -72,7 +72,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   set(LOCAL_PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}.hpp)
   add_custom_command(
       OUTPUT ${LOCAL_PARAM_HEADER_FILE}
-      COMMAND ${CMAKE_COMMAND} -E echo "#pragma warning(\"`#include <${LIB_NAME}>` is deprecated. Use `#include <${PROJECT_NAME}/${LIB_NAME}.hpp>` instead.\")" >> ${LOCAL_PARAM_HEADER_FILE}
+      COMMAND ${CMAKE_COMMAND} -E echo "#pragma message(\"#include \\\"${LIB_NAME}.hpp\\\" is deprecated. Use #include <${PROJECT_NAME}/${LIB_NAME}.hpp> instead.\")" >> ${LOCAL_PARAM_HEADER_FILE}
       COMMAND ${CMAKE_COMMAND} -E cat ${LOCAL_PARAM_HEADER_FILE} ${PARAM_HEADER_FILE} > ${LOCAL_PARAM_HEADER_FILE}.tmp
       COMMAND ${CMAKE_COMMAND} -E copy ${LOCAL_PARAM_HEADER_FILE}.tmp ${LOCAL_PARAM_HEADER_FILE}
       COMMAND ${CMAKE_COMMAND} -E remove ${LOCAL_PARAM_HEADER_FILE}.tmp

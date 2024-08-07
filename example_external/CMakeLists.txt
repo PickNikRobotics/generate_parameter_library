@@ -30,33 +30,6 @@ rclcpp_components_register_node(minimal_publisher_external
   EXECUTABLE test_node
 )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  set(ament_cmake_cpplint_FOUND TRUE) # Conflicts with clang-foramt
-  set(ament_cmake_flake8_FOUND TRUE) # Conflicts with black
-  set(ament_cmake_uncrustify_FOUND TRUE) # Conflicts with clang-format
-  ament_lint_auto_find_test_dependencies()
-
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(generate_parameter_library REQUIRED)
-  # example_test_gtest
-  add_rostest_with_parameters_gtest(test_example_gtest test/example_test_gtest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
-  target_include_directories(test_example_gtest PRIVATE include)
-  target_link_libraries(test_example_gtest generate_parameter_library_example::admittance_controller_parameters rclcpp::rclcpp)
-  # descriptor_test_gtest
-  add_rostest_with_parameters_gtest(test_descriptor_gtest test/descriptor_test_gtest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
-  target_include_directories(test_descriptor_gtest PRIVATE include)
-  target_link_libraries(test_descriptor_gtest generate_parameter_library_example::admittance_controller_parameters rclcpp::rclcpp)
-
-  find_package(ament_cmake_gmock REQUIRED)
-  add_rostest_with_parameters_gmock(test_example_gmock test/example_test_gmock.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
-  target_include_directories(test_example_gmock PRIVATE include)
-  target_link_libraries(test_example_gmock generate_parameter_library_example::admittance_controller_parameters rclcpp::rclcpp)
-endif()
-
 install(
   DIRECTORY include/
   DESTINATION include/generate_parameter_library_example_external
