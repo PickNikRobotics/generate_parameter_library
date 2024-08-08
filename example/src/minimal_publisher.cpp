@@ -30,7 +30,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <admittance_controller_parameters.hpp>
+#include <generate_parameter_library_example/admittance_controller_parameters.hpp>
 
 using namespace std::chrono_literals;
 
