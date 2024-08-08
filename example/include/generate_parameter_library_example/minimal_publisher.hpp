@@ -31,7 +31,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 
-#include <admittance_controller_parameters.hpp>
+#include <generate_parameter_library_example/admittance_controller_parameters.hpp>
 
 namespace admittance_controller {
 
