@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-function(generate_parameter_library LIB_NAME YAML_FILE)
+macro(generate_parameter_library LIB_NAME YAML_FILE)
   unset(generate_parameter_library_cpp_BIN CACHE)  # Unset the cache variable
   find_program(generate_parameter_library_cpp_BIN NAMES "generate_parameter_library_cpp")
   if(NOT generate_parameter_library_cpp_BIN)
@@ -54,7 +54,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   endif()
 
   # Set the yaml file parameter to be relative to the current source dir
-  set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
+  set(YAML_FILE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
   # Set the output parameter header file name
   set(PARAM_HEADER_FILE ${LIB_INCLUDE_DIR}/${LIB_NAME}.hpp)
@@ -62,10 +62,10 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   # Generate the header for the library
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
-    COMMAND ${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
-    DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
+    COMMAND ${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE_PATH} ${VALIDATE_HEADER_FILENAME}
+    DEPENDS ${YAML_FILE_PATH} ${VALIDATE_HEADER}
     COMMENT
-    "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
+    "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE_PATH} ${VALIDATE_HEADER_FILENAME}`"
     VERBATIM
   )
   # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
@@ -99,9 +99,10 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
+  install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}Targets)
+  ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
   ament_export_dependencies(fmt parameter_traits rclcpp rclcpp_lifecycle rsl tcb_span tl_expected)
-  set(_AMENT_CMAKE_EXPORT_DEPENDENCIES "${_AMENT_CMAKE_EXPORT_DEPENDENCIES}" PARENT_SCOPE)
-endfunction()
+endmacro()
 
 
 function(generate_parameter_module LIB_NAME YAML_FILE)
