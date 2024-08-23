@@ -26,7 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "generate_parameter_library_example/minimal_publisher.hpp"
+#include "generate_parameter_library_example_external/minimal_publisher_external.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 
