@@ -28,6 +28,7 @@
 
 
 function(generate_parameter_library LIB_NAME YAML_FILE)
+  unset(generate_parameter_library_cpp_BIN CACHE)  # Unset the cache variable
   find_program(generate_parameter_library_cpp_BIN NAMES "generate_parameter_library_cpp")
   if(NOT generate_parameter_library_cpp_BIN)
     message(FATAL_ERROR "generate_parameter_library_cpp() variable 'generate_parameter_library_cpp_BIN' must not be empty")
