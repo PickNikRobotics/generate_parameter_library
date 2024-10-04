@@ -66,7 +66,7 @@ install(
   DESTINATION include/generate_parameter_library_example
 )
 
-install(TARGETS minimal_publisher
+install(TARGETS minimal_publisher admittance_controller_parameters
   EXPORT export_generate_parameter_library_example
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

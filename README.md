@@ -63,6 +63,9 @@ target_link_libraries(minimal_node PRIVATE
   rclcpp::rclcpp
   turtlesim_parameters
 )
+
+install(TARGETS minimal_node turtlesim_parameters
+  EXPORT ${PROJECT_NAME}Targets
 ```
 
 **setup.py**
