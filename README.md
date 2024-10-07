@@ -65,7 +65,8 @@ target_link_libraries(minimal_node PRIVATE
 )
 
 install(TARGETS minimal_node turtlesim_parameters
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT ${PROJECT_NAME}Targets)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ```
 
 **setup.py**
