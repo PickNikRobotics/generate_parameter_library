@@ -9,5 +9,9 @@
 
 *Constraints:*
 {{constraints}}
+
+*Additional Constraints:*
+{{additional_constraints}}
+
 {% else %}
 {% endif %}

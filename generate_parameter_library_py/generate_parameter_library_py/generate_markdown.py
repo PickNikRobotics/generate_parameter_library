@@ -103,6 +103,7 @@ class ParameterDetailMarkdown:
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
+            'additional_constraints': self.declare_parameters.parameter_additional_constraints,
             # remove leading whitespace from description, this is necessary for correct indentation of multi-line descriptions
             'description': re.sub(
                 r'(?m)^(?!$)\s*',
@@ -139,6 +140,7 @@ class RuntimeParameterDetailMarkdown:
             'type': self.declare_parameters.code_gen_variable.defined_type,
             'default_value': self.declare_parameters.code_gen_variable.lang_str_value,
             'constraints': constraints,
+            'additional_constraints': self.declare_parameters.parameter_additional_constraints,
             'description': self.declare_parameters.parameter_description,
         }
 

@@ -17,3 +17,8 @@ Constraints:
 
 {% endif %}
 {% endfilter -%}
+
+{%- if additional_constraints|length %}
+Additional Constraints:
+{{additional_constraints}}
+{% endif %}

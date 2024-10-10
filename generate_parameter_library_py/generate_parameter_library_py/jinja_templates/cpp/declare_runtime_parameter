@@ -19,6 +19,9 @@ if (!parameters_interface_->has_parameter(param_name)) {
 rcl_interfaces::msg::ParameterDescriptor descriptor;
 descriptor.description = {{parameter_description | valid_string_cpp}};
 descriptor.read_only = {{parameter_read_only}};
+{%- if parameter_additional_constraints|length %}
+descriptor.additional_constraints = {{parameter_additional_constraints | valid_string_cpp}};
+{% endif -%}
 {%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if "DOUBLE" in parameter_type %}
 {%- if validation.arguments|length == 2 %}

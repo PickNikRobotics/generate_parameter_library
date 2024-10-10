@@ -1,6 +1,9 @@
 if not self.node_.has_parameter(self.prefix_ + "{{parameter_name}}"):
 {%- filter indent(width=4) %}
 descriptor = ParameterDescriptor(description="{{parameter_description|valid_string_python}}", read_only = {{parameter_read_only}})
+{%- if parameter_additional_constraints|length %}
+descriptor.additional_constraints = "{{parameter_additional_constraints|valid_string_python}}"
+{% endif -%}
 {%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if "DOUBLE" in parameter_type %}
 {%- if validation.arguments|length == 2 %}
