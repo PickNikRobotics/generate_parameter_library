@@ -495,12 +495,14 @@ class DeclareParameterBase:
         parameter_description: str,
         parameter_read_only: bool,
         parameter_validations: list,
+        parameter_additional_constraints: str,
     ):
         self.parameter_name = code_gen_variable.param_name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
         self.parameter_validations = parameter_validations
         self.code_gen_variable = code_gen_variable
+        self.parameter_additional_constraints = parameter_additional_constraints
 
 
 class DeclareParameter(DeclareParameterBase):
@@ -519,6 +521,7 @@ class DeclareParameter(DeclareParameterBase):
             'parameter_type': self.code_gen_variable.get_parameter_type(),
             'parameter_description': self.parameter_description,
             'parameter_read_only': bool_to_str(self.parameter_read_only),
+            'parameter_additional_constraints': self.parameter_additional_constraints,
             'parameter_validations': parameter_validations,
         }
 
@@ -538,12 +541,14 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         parameter_description: str,
         parameter_read_only: bool,
         parameter_validations: list,
+        parameter_additional_constraints: str,
     ):
         super().__init__(
             code_gen_variable,
             parameter_description,
             parameter_read_only,
             parameter_validations,
+            parameter_additional_constraints,
         )
         self.set_runtime_parameter = None
         self.param_struct_instance = 'updated_params'
@@ -576,6 +581,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             'parameter_description': self.parameter_description,
             'parameter_read_only': bool_to_str(self.parameter_read_only),
             'parameter_as_function': self.code_gen_variable.parameter_as_function_str(),
+            'parameter_additional_constraints': self.parameter_additional_constraints,
             'mapped_params': mapped_params,
             'mapped_param_underscore': [val.replace('.', '_') for val in mapped_params],
             'set_runtime_parameter': self.set_runtime_parameter,
@@ -671,7 +677,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
         raise compile_error('No type defined for parameter %s' % param_name)
 
     # check for invalid syntax
-    valid_keys = {'default_value', 'description', 'read_only', 'validation', 'type'}
+    valid_keys = {'default_value', 'description', 'read_only', 'additional_constraints', 'validation', 'type'}
     invalid_keys = value.keys() - valid_keys
     if len(invalid_keys) > 0:
         raise compile_error(
@@ -693,6 +699,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
     description = value.get('description', '')
     read_only = bool(value.get('read_only', False))
     validations = []
+    additional_constraints = value.get('additional_constraints', '')
     validations_dict = value.get('validation', {})
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
@@ -708,6 +715,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
         description,
         read_only,
         validations,
+        additional_constraints,
     )
 
 
@@ -767,6 +775,7 @@ class GenerateCode:
             description,
             read_only,
             validations,
+            additional_constraints,
         ) = preprocess_inputs(self.language, name, value, nested_name_list)
         # skip accepted params that do not generate code
         if code_gen_variable.lang_type is None:
@@ -795,13 +804,13 @@ class GenerateCode:
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
             declare_parameter = DeclareRuntimeParameter(
-                code_gen_variable, description, read_only, validations
+                code_gen_variable, description, read_only, validations, additional_constraints
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
             update_parameter = UpdateRuntimeParameter(param_name, code_gen_variable)
         else:
             declare_parameter = DeclareParameter(
-                code_gen_variable, description, read_only, validations
+                code_gen_variable, description, read_only, validations, additional_constraints
             )
             declare_parameter_set = SetParameter(param_name, code_gen_variable)
             update_parameter = UpdateParameter(param_name, code_gen_variable)
