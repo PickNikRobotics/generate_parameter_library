@@ -677,7 +677,14 @@ def preprocess_inputs(language, name, value, nested_name_list):
         raise compile_error('No type defined for parameter %s' % param_name)
 
     # check for invalid syntax
-    valid_keys = {'default_value', 'description', 'read_only', 'additional_constraints', 'validation', 'type'}
+    valid_keys = {
+        'default_value',
+        'description',
+        'read_only',
+        'additional_constraints',
+        'validation',
+        'type',
+    }
     invalid_keys = value.keys() - valid_keys
     if len(invalid_keys) > 0:
         raise compile_error(
@@ -804,13 +811,21 @@ class GenerateCode:
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
             declare_parameter = DeclareRuntimeParameter(
-                code_gen_variable, description, read_only, validations, additional_constraints
+                code_gen_variable,
+                description,
+                read_only,
+                validations,
+                additional_constraints,
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
             update_parameter = UpdateRuntimeParameter(param_name, code_gen_variable)
         else:
             declare_parameter = DeclareParameter(
-                code_gen_variable, description, read_only, validations, additional_constraints
+                code_gen_variable,
+                description,
+                read_only,
+                validations,
+                additional_constraints,
             )
             declare_parameter_set = SetParameter(param_name, code_gen_variable)
             update_parameter = UpdateParameter(param_name, code_gen_variable)
