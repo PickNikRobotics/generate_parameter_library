@@ -48,6 +48,7 @@ admittance_controller:
   command_interfaces:
       type: string_array
       description: "specifies which command interfaces to claim"
+      additional_constraints: "cmd1 | cmd2 | cmd3"
       read_only: true
 
   state_interfaces:

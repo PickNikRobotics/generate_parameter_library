@@ -175,6 +175,7 @@ cpp_namespace:
     type: int
     default_value: 3
     read_only: true
+    additional_constraints: "{ type: 'number', multipleOf: 3 }"
     description: "A read-only  integer parameter with a default value of 3"
     validation:
       # validation functions ...
@@ -182,28 +183,29 @@ cpp_namespace:
 
 A parameter is a YAML dictionary with the only required key being `type`.
 
-| Field         | Description                                                   |
-|---------------|---------------------------------------------------------------|
-| type          | The type (string, double, etc) of the parameter.              |
-| default_value | Value for the parameter if the user does not specify a value. |
-| read_only     | Can only be set at launch and are not dynamic.                |
-| description   | Displayed by `ros2 param describe`.                           |
-| validation    | Dictionary of validation functions and their parameters.      |
+| Field                  | Description                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| type                   | The type (string, double, etc) of the parameter.                                                               |
+| default_value          | Value for the parameter if the user does not specify a value.                                                  |
+| read_only              | Can only be set at launch and are not dynamic.                                                                 |
+| description            | Displayed by `ros2 param describe`.                                                                            |
+| validation             | Dictionary of validation functions and their parameters.                                                       |
+| additional_constraints | Additional constraints that end up on the ParameterDescriptor but are not used for validation by this package. |
 
 The types of parameters in ros2 map to C++ types.
 
-| Parameter Type  | C++ Type                    |
-|-----------------|-----------------------------|
-| string          | `std::string`               |
-| double          | `double`                    |
-| int             | `int`                       |
-| bool            | `bool`                      |
-| string_array    | `std::vector<std::string>`  |
-| double_array    | `std::vector<double>`       |
-| int_array       | `std::vector<int>`          |
-| bool_array      | `std::vector<bool>`         |
-| string_fixed_XX | `FixedSizeString<XX>`       |
-| none            | NO CODE GENERATED           |
+| Parameter Type  | C++ Type                   |
+| --------------- | -------------------------- |
+| string          | `std::string`              |
+| double          | `double`                   |
+| int             | `int`                      |
+| bool            | `bool`                     |
+| string_array    | `std::vector<std::string>` |
+| double_array    | `std::vector<double>`      |
+| int_array       | `std::vector<int>`         |
+| bool_array      | `std::vector<bool>`        |
+| string_fixed_XX | `FixedSizeString<XX>`      |
+| none            | NO CODE GENERATED          |
 
 Fixed-size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
 The corresponding C++ type is a data wrapper class for conveniently accessing the data.
@@ -240,36 +242,36 @@ Some of these validators work only on value types, some on string types, and oth
 The built-in validator functions provided by this package are:
 
 **Value validators**
-| Function               | Arguments           | Description                           |
-|------------------------|---------------------|---------------------------------------|
-| bounds<>               | [lower, upper]      | Bounds checking (inclusive)           |
-| lt<>                   | [value]             | parameter < value                     |
-| gt<>                   | [value]             | parameter > value                     |
-| lt_eq<>                | [value]             | parameter <= value                    |
-| gt_eq<>                | [value]             | parameter >= value                    |
-| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values  |
+| Function | Arguments           | Description                          |
+| -------- | ------------------- | ------------------------------------ |
+| bounds<> | [lower, upper]      | Bounds checking (inclusive)          |
+| lt<>     | [value]             | parameter < value                    |
+| gt<>     | [value]             | parameter > value                    |
+| lt_eq<>  | [value]             | parameter <= value                   |
+| gt_eq<>  | [value]             | parameter >= value                   |
+| one_of<> | [[val1, val2, ...]] | Value is one of the specified values |
 
 **String validators**
-| Function               | Arguments           | Description                                     |
-|------------------------|---------------------|-------------------------------------------------|
-| fixed_size<>           | [length]            | Length string is specified length               |
-| size_gt<>              | [length]            | Length string is greater than specified length  |
-| size_lt<>              | [length]            | Length string is less less specified length     |
-| not_empty<>            | []                  | String parameter is not empty                   |
-| one_of<>               | [[val1, val2, ...]] | String is one of the specified values           |
+| Function     | Arguments           | Description                                    |
+| ------------ | ------------------- | ---------------------------------------------- |
+| fixed_size<> | [length]            | Length string is specified length              |
+| size_gt<>    | [length]            | Length string is greater than specified length |
+| size_lt<>    | [length]            | Length string is less less specified length    |
+| not_empty<>  | []                  | String parameter is not empty                  |
+| one_of<>     | [[val1, val2, ...]] | String is one of the specified values          |
 
 **Array validators**
-| Function               | Arguments           | Description                                          |
-|------------------------|---------------------|------------------------------------------------------|
-| unique<>               | []                  | Contains no duplicates                               |
-| subset_of<>            | [[val1, val2, ...]] | Every element is one of the list                     |
-| fixed_size<>           | [length]            | Number of elements is specified length               |
-| size_gt<>              | [length]            | Number of elements is greater than specified length  |
-| size_lt<>              | [length]            | Number of elements is less less specified length     |
-| not_empty<>            | []                  | Has at-least one element                             |
-| element_bounds<>       | [lower, upper]      | Bounds checking each element (inclusive)             |
-| lower_element_bounds<> | [lower]             | Lower bound for each element (inclusive)             |
-| upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)             |
+| Function               | Arguments           | Description                                         |
+| ---------------------- | ------------------- | --------------------------------------------------- |
+| unique<>               | []                  | Contains no duplicates                              |
+| subset_of<>            | [[val1, val2, ...]] | Every element is one of the list                    |
+| fixed_size<>           | [length]            | Number of elements is specified length              |
+| size_gt<>              | [length]            | Number of elements is greater than specified length |
+| size_lt<>              | [length]            | Number of elements is less less specified length    |
+| not_empty<>            | []                  | Has at-least one element                            |
+| element_bounds<>       | [lower, upper]      | Bounds checking each element (inclusive)            |
+| lower_element_bounds<> | [lower]             | Lower bound for each element (inclusive)            |
+| upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)            |
 
 ### Custom validator functions
 Validators are functions that return a `tl::expected<void, std::string>` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
