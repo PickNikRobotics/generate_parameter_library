@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2024-10-27)
+------------------
+* Disable cache for program (`#218 <https://github.com/PickNikRobotics/generate_parameter_library/issues/218>`_)
+* Contributors: Paul Gesel
+
 0.3.8 (2024-03-27)
 ------------------
 * use python_install_dir (`#178 <https://github.com/PickNikRobotics/generate_parameter_library/issues/178>`_)

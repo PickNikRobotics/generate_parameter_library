@@ -2,6 +2,20 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2024-10-27)
+------------------
+* fix error with not being able to find unpack_parameter_dict when using set_params_from_dict (`#220 <https://github.com/PickNikRobotics/generate_parameter_library/issues/220>`_)
+* Add "additional_constraints" support (`#221 <https://github.com/PickNikRobotics/generate_parameter_library/issues/221>`_)
+* Use int64_t instead of int for parameter integer range, fixes `#199 <https://github.com/PickNikRobotics/generate_parameter_library/issues/199>`_ (`#214 <https://github.com/PickNikRobotics/generate_parameter_library/issues/214>`_)
+* Fix floating point range for upper/lt/lt_eq validations (`#216 <https://github.com/PickNikRobotics/generate_parameter_library/issues/216>`_)
+* Fix nested parameter in Python template (`#210 <https://github.com/PickNikRobotics/generate_parameter_library/issues/210>`_)
+* Fix test on rolling CI (`#187 <https://github.com/PickNikRobotics/generate_parameter_library/issues/187>`_)
+* Add ability for param_listener to load values from yaml dictionary (`#211 <https://github.com/PickNikRobotics/generate_parameter_library/issues/211>`_)
+* Use exist_ok=True in makedirs instead of checking for existence first, in case of multiple concurrent processes (`#212 <https://github.com/PickNikRobotics/generate_parameter_library/issues/212>`_)
+* Add Non-Blocking try_get_params Function for Real-Time Control Systems (`#205 <https://github.com/PickNikRobotics/generate_parameter_library/issues/205>`_)
+* Drop yaml brackets for consistency and readability (`#203 <https://github.com/PickNikRobotics/generate_parameter_library/issues/203>`_)
+* Contributors: Karan Khanna, Auguste Bourgois, David Revay, Emerson Knapp, Jacob Seibert, KentaKato, Marq Rasmussen, Paul Gesel, Tim Clephas
+
 0.3.8 (2024-03-27)
 ------------------
 * Restore functionality for mapped params with no struct name (`#185 <https://github.com/PickNikRobotics/generate_parameter_library/issues/185>_`)
