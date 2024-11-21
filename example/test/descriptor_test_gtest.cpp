@@ -29,7 +29,7 @@
 // Author: Chance Cardona
 //
 
-#include "admittance_controller_parameters.hpp"
+#include "generate_parameter_library_example/admittance_controller_parameters.hpp"
 #include "gtest/gtest.h"
 #include "rclcpp/rclcpp.hpp"
 
