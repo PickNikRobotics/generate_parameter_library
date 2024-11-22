@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Copyright 2022 PickNik Inc.
+# Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,41 +27,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import argparse
-import sys
-import os
 
-from generate_parameter_library_py.parse_yaml import GenerateCode
+def no_args_validator(param):
+    return ''
 
 
-def run(output_file, yaml_file, validation_module=''):
-    print(f'Running {__file__} {output_file} {yaml_file} {validation_module}')
-    gen_param_struct = GenerateCode('python')
-    output_dir = os.path.dirname(output_file)
-    os.makedirs(output_dir, exist_ok=True)
-
-    gen_param_struct.parse(yaml_file, validation_module)
-
-    code = str(gen_param_struct)
-    with open(output_file, 'w') as f:
-        f.write(code)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('output_python_module_file')
-    parser.add_argument('input_yaml_file')
-    parser.add_argument('validate_file', nargs='?', default='')
-    return parser.parse_args()
-
-
-def main():
-    args = parse_args()
-    output_file = args.output_python_module_file
-    yaml_file = args.input_yaml_file
-    validate_file = args.validate_file
-    run(output_file, yaml_file, validate_file)
-
-
-if __name__ == '__main__':
-    sys.exit(main())
+def validate_double_array_custom_func(param, arg1, arg2):
+    return ''

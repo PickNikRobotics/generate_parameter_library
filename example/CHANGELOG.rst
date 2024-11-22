@@ -2,6 +2,27 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2024-10-27)
+------------------
+* Add "additional_constraints" support (`#221 <https://github.com/PickNikRobotics/generate_parameter_library/issues/221>`_)
+* Use int64_t instead of int for parameter integer range, fixes `#199 <https://github.com/PickNikRobotics/generate_parameter_library/issues/199>`_ (`#214 <https://github.com/PickNikRobotics/generate_parameter_library/issues/214>`_)
+* Add Non-Blocking try_get_params Function for Real-Time Control Systems (`#205 <https://github.com/PickNikRobotics/generate_parameter_library/issues/205>`_)
+* Drop yaml brackets for consistency and readability (`#203 <https://github.com/PickNikRobotics/generate_parameter_library/issues/203>`_)
+* Contributors: Auguste Bourgois, David Revay, KentaKato, Tim Clephas
+
+0.3.8 (2024-03-27)
+------------------
+* Restore functionality for mapped params with no struct name (`#185 <https://github.com/PickNikRobotics/generate_parameter_library/issues/185>_`)
+* Fix newline issue (`#176 <https://github.com/PickNikRobotics/generate_parameter_library/issues/176>`_)
+  * fix new line rendering for Python
+* Support nested mapped parameters (`#166 <https://github.com/PickNikRobotics/generate_parameter_library/issues/166>`_)
+* Contributors: Paul Gesel, Sebastian Castro
+
+0.3.7 (2024-01-12)
+------------------
+* Split example/README.md into C++ and Python version; updated content (`#138 <https://github.com/PickNikRobotics/generate_parameter_library/issues/138>`_)
+* Contributors: chriseichmann
+
 0.3.6 (2023-07-31)
 ------------------
 

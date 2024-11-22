@@ -16,13 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          # Werror is not enabled on humble and iron because of gtest
           - ROS_DISTRO: rolling
             ROS_REPO: testing
-            CMAKE_ARGS: -DCMAKE_CXX_FLAGS=-Werror
           - ROS_DISTRO: rolling
             ROS_REPO: main
-            CMAKE_ARGS: -DCMAKE_CXX_FLAGS=-Werror
           - ROS_DISTRO: iron
             ROS_REPO: testing
           - ROS_DISTRO: iron
@@ -39,19 +36,19 @@ jobs:
     name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - id: ici
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
       - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.NAME }}
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
       - name: Upload log artifacts (on failure)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-results-${{ matrix.env.NAME }}

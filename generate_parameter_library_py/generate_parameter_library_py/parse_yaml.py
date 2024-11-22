@@ -31,7 +31,15 @@
 
 from jinja2 import Template, Environment
 from typeguard import typechecked
-from typing import Any, List, Optional
+
+# try to import TypeCheckError from typeguard. This was breaking and replaced TypeError in 3.0.0
+try:
+    from typeguard import TypeCheckError
+except ImportError as e:
+    # otherwise, use the old TypeError
+    TypeCheckError = TypeError
+
+from typing import Any, List, Union
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import os
@@ -39,7 +47,10 @@ import yaml
 
 from generate_parameter_library_py.cpp_convertions import CPPConverstions
 from generate_parameter_library_py.python_convertions import PythonConvertions
-from generate_parameter_library_py.string_filters_cpp import valid_string_cpp
+from generate_parameter_library_py.string_filters_cpp import (
+    valid_string_cpp,
+    valid_string_python,
+)
 
 
 # YAMLSyntaxError standardizes compiler error messages
@@ -96,14 +107,16 @@ def get_dynamic_parameter_field(yaml_parameter_name: str):
 
 def get_dynamic_mapped_parameter(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    tmp2 = tmp[-2]
-    mapped_param = tmp2.replace('__map_', '')
-    return mapped_param
+    mapped_params = [
+        val.replace('__map_', '') for val in tmp[:-1] if is_mapped_parameter(val)
+    ]
+    return mapped_params
 
 
 def get_dynamic_struct_name(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    struct_name = tmp[:-2]
+    num_nested = sum([is_mapped_parameter(val) for val in tmp])
+    struct_name = tmp[: -(num_nested + 1)]
     return '.'.join(struct_name)
 
 
@@ -116,10 +129,8 @@ def get_dynamic_parameter_name(yaml_parameter_name: str):
 
 
 def get_dynamic_parameter_map(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split('.')
-    parameter_map = tmp[:-2]
-    mapped_param = get_dynamic_mapped_parameter(yaml_parameter_name)
-    parameter_map.append(mapped_param + '_map')
+    mapped_params = get_dynamic_mapped_parameter(yaml_parameter_name)
+    parameter_map = [val + '_map' for val in mapped_params]
     parameter_map = '.'.join(parameter_map)
     return parameter_map
 
@@ -187,7 +198,7 @@ class CodeGenVariableBase:
         func = self.conversation.lang_str_value_func[self.defined_type]
         try:
             self.lang_str_value = func(default_value)
-        except TypeError:
+        except TypeCheckError:
             raise compile_error(
                 f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
             )
@@ -311,7 +322,7 @@ class ValidationFunction:
     def __init__(
         self,
         function_name: str,
-        arguments: Optional[List[Any]],
+        arguments: Union[None, List[Any]],
         code_gen_variable: CodeGenVariableBase,
     ):
         self.code_gen_variable = code_gen_variable
@@ -402,13 +413,14 @@ class UpdateParameter(UpdateParameterBase):
 class UpdateRuntimeParameter(UpdateParameterBase):
     def __str__(self):
         parameter_validations_str = ''.join(str(x) for x in self.parameter_validations)
-        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
+        parameter_map = parameter_map.split('.')
         struct_name = get_dynamic_struct_name(self.parameter_name)
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
 
         data = {
-            'mapped_param': mapped_param,
+            'mapped_params': mapped_params,
             'parameter_map': parameter_map,
             'struct_name': struct_name,
             'parameter_field': parameter_field,
@@ -483,12 +495,14 @@ class DeclareParameterBase:
         parameter_description: str,
         parameter_read_only: bool,
         parameter_validations: list,
+        parameter_additional_constraints: str,
     ):
         self.parameter_name = code_gen_variable.param_name
         self.parameter_description = parameter_description
         self.parameter_read_only = parameter_read_only
         self.parameter_validations = parameter_validations
         self.code_gen_variable = code_gen_variable
+        self.parameter_additional_constraints = parameter_additional_constraints
 
 
 class DeclareParameter(DeclareParameterBase):
@@ -507,12 +521,14 @@ class DeclareParameter(DeclareParameterBase):
             'parameter_type': self.code_gen_variable.get_parameter_type(),
             'parameter_description': self.parameter_description,
             'parameter_read_only': bool_to_str(self.parameter_read_only),
+            'parameter_additional_constraints': self.parameter_additional_constraints,
             'parameter_validations': parameter_validations,
         }
 
         # Create a Jinja2 environment to register the custom filter
         env = Environment()
         env.filters['valid_string_cpp'] = valid_string_cpp
+        env.filters['valid_string_python'] = valid_string_python
         j2_template = env.from_string(GenerateCode.templates['declare_parameter'])
         code = j2_template.render(data, trim_blocks=True)
         return code
@@ -525,12 +541,14 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         parameter_description: str,
         parameter_read_only: bool,
         parameter_validations: list,
+        parameter_additional_constraints: str,
     ):
         super().__init__(
             code_gen_variable,
             parameter_description,
             parameter_read_only,
             parameter_validations,
+            parameter_additional_constraints,
         )
         self.set_runtime_parameter = None
         self.param_struct_instance = 'updated_params'
@@ -552,9 +570,10 @@ class DeclareRuntimeParameter(DeclareParameterBase):
 
         bool_to_str = self.code_gen_variable.conversation.bool_to_str
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
-        mapped_param = get_dynamic_mapped_parameter(self.parameter_name)
+        mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
+        parameter_map = parameter_map.split('.')
 
         data = {
             'struct_name': struct_name,
@@ -562,8 +581,9 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             'parameter_description': self.parameter_description,
             'parameter_read_only': bool_to_str(self.parameter_read_only),
             'parameter_as_function': self.code_gen_variable.parameter_as_function_str(),
-            'mapped_param': mapped_param,
-            'mapped_param_underscore': mapped_param.replace('.', '_'),
+            'parameter_additional_constraints': self.parameter_additional_constraints,
+            'mapped_params': mapped_params,
+            'mapped_param_underscore': [val.replace('.', '_') for val in mapped_params],
             'set_runtime_parameter': self.set_runtime_parameter,
             'parameter_map': parameter_map,
             'param_struct_instance': self.param_struct_instance,
@@ -575,6 +595,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         # Create a Jinja2 environment to register the custom filter
         env = Environment()
         env.filters['valid_string_cpp'] = valid_string_cpp
+        env.filters['valid_string_python'] = valid_string_python
         j2_template = env.from_string(
             GenerateCode.templates['declare_runtime_parameter']
         )
@@ -591,19 +612,20 @@ class RemoveRuntimeParameter:
         parameter_map = get_dynamic_parameter_map(
             self.dynamic_declare_parameter.parameter_name
         )
+        parameter_map = parameter_map.split('.')
         struct_name = get_dynamic_struct_name(
             self.dynamic_declare_parameter.parameter_name
         )
         parameter_field = get_dynamic_parameter_field(
             self.dynamic_declare_parameter.parameter_name
         )
-        mapped_param = get_dynamic_mapped_parameter(
+        mapped_params = get_dynamic_mapped_parameter(
             self.dynamic_declare_parameter.parameter_name
         )
 
         data = {
             'parameter_map': parameter_map,
-            'mapped_param': mapped_param,
+            'mapped_params': mapped_params,
             'dynamic_declare_parameter': str(self.dynamic_declare_parameter),
             'struct_name': struct_name,
             'parameter_field': parameter_field,
@@ -655,7 +677,14 @@ def preprocess_inputs(language, name, value, nested_name_list):
         raise compile_error('No type defined for parameter %s' % param_name)
 
     # check for invalid syntax
-    valid_keys = {'default_value', 'description', 'read_only', 'validation', 'type'}
+    valid_keys = {
+        'default_value',
+        'description',
+        'read_only',
+        'additional_constraints',
+        'validation',
+        'type',
+    }
     invalid_keys = value.keys() - valid_keys
     if len(invalid_keys) > 0:
         raise compile_error(
@@ -677,6 +706,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
     description = value.get('description', '')
     read_only = bool(value.get('read_only', False))
     validations = []
+    additional_constraints = value.get('additional_constraints', '')
     validations_dict = value.get('validation', {})
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
@@ -692,6 +722,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
         description,
         read_only,
         validations,
+        additional_constraints,
     )
 
 
@@ -751,6 +782,7 @@ class GenerateCode:
             description,
             read_only,
             validations,
+            additional_constraints,
         ) = preprocess_inputs(self.language, name, value, nested_name_list)
         # skip accepted params that do not generate code
         if code_gen_variable.lang_type is None:
@@ -779,13 +811,21 @@ class GenerateCode:
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
             declare_parameter = DeclareRuntimeParameter(
-                code_gen_variable, description, read_only, validations
+                code_gen_variable,
+                description,
+                read_only,
+                validations,
+                additional_constraints,
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
             update_parameter = UpdateRuntimeParameter(param_name, code_gen_variable)
         else:
             declare_parameter = DeclareParameter(
-                code_gen_variable, description, read_only, validations
+                code_gen_variable,
+                description,
+                read_only,
+                validations,
+                additional_constraints,
             )
             declare_parameter_set = SetParameter(param_name, code_gen_variable)
             update_parameter = UpdateParameter(param_name, code_gen_variable)

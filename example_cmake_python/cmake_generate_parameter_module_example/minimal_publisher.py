@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Copyright 2022 PickNik Inc.
+# Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,41 +27,49 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import argparse
-import sys
-import os
+import rclpy
+import rclpy.node
 
-from generate_parameter_library_py.parse_yaml import GenerateCode
-
-
-def run(output_file, yaml_file, validation_module=''):
-    print(f'Running {__file__} {output_file} {yaml_file} {validation_module}')
-    gen_param_struct = GenerateCode('python')
-    output_dir = os.path.dirname(output_file)
-    os.makedirs(output_dir, exist_ok=True)
-
-    gen_param_struct.parse(yaml_file, validation_module)
-
-    code = str(gen_param_struct)
-    with open(output_file, 'w') as f:
-        f.write(code)
+from cmake_generate_parameter_module_example.admittance_parameters import (
+    admittance_controller,
+)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('output_python_module_file')
-    parser.add_argument('input_yaml_file')
-    parser.add_argument('validate_file', nargs='?', default='')
-    return parser.parse_args()
+class MinimalParam(rclpy.node.Node):
+    def __init__(self):
+        super().__init__('admittance_controller')
+        self.timer = self.create_timer(1, self.timer_callback)
+
+        self.param_listener = admittance_controller.ParamListener(self)
+        self.params = self.param_listener.get_params()
+        self.get_logger().info(
+            "Initial control frame parameter is: '%s'" % self.params.control.frame.id
+        )
+        self.get_logger().info("fixed string is: '%s'" % self.params.fixed_string)
+
+        self.get_logger().info(
+            "Original joints parameter is: '%s'" % str(self.params.joints)
+        )
+        for d in self.params.fixed_array:
+            self.get_logger().info("value: '%s'" % str(d))
+
+    def timer_callback(self):
+        if self.param_listener.is_old(self.params):
+            self.param_listener.refresh_dynamic_parameters()
+            self.params = self.param_listener.get_params()
+            self.get_logger().info(
+                "New control frame parameter is: '%s'" % self.params.control.frame.id
+            )
+            self.get_logger().info("fixed string is: '%s'" % self.params.fixed_string)
+            for d in self.params.fixed_array:
+                self.get_logger().info("value: '%s'" % str(d))
 
 
-def main():
-    args = parse_args()
-    output_file = args.output_python_module_file
-    yaml_file = args.input_yaml_file
-    validate_file = args.validate_file
-    run(output_file, yaml_file, validate_file)
+def main(args=None):
+    rclpy.init(args=args)
+    node = MinimalParam()
+    rclpy.spin(node)
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()

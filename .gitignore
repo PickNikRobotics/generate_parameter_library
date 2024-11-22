@@ -1,1 +1,5 @@
-**__pycache__**
+**/__pycache__
+build
+install
+log
+*.egg-info

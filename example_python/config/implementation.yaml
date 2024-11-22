@@ -11,6 +11,10 @@ admittance_controller:
     fixed_string_no_default:
       "happy"
 
+    elbow_joint:
+      x:
+        weight: 2.0
+
     pid:
       shoulder_pan_joint:
         i: 0.7

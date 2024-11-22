@@ -123,6 +123,17 @@ struct StackParams {
       return params_;
     }
 
+    bool try_get_params(Params & params_in) const {
+      if (mutex_.try_lock()) {
+        if (const bool is_old = params_in.__stamp != params_.__stamp; is_old) {
+          params_in = params_;
+        }
+        mutex_.unlock();
+        return true;
+      }
+      return false;
+    }
+
     bool is_old(Params const& other) const {
       std::lock_guard<std::mutex> lock(mutex_);
       return params_.__stamp != other.__stamp;
@@ -169,7 +180,7 @@ struct StackParams {
       }
 {%- endif %}
       updated_params.__stamp = clock_.now();
-      update_interal_params(updated_params);
+      update_internal_params(updated_params);
       return rsl::to_parameter_result_msg({});
     }
 
@@ -193,11 +204,11 @@ struct StackParams {
 {%- endif %}
 
       updated_params.__stamp = clock_.now();
-      update_interal_params(updated_params);
+      update_internal_params(updated_params);
     }
 
     private:
-      void update_interal_params(Params updated_params) {
+      void update_internal_params(Params updated_params) {
         std::lock_guard<std::mutex> lock(mutex_);
         params_ = updated_params;
       }

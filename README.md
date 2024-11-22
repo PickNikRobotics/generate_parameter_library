@@ -7,7 +7,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 * Declarative YAML syntax for ROS 2 Parameters converted into C++ or Python struct
 * Declaring, Getting, Validating, and Updating handled by generated code
 * Dynamic ROS 2 Parameters made easy
-* Custom user specified validator functions
+* Custom user-specified validator functions
 * Automatically create documentation of parameters
 
 ## Basic Usage
@@ -22,30 +22,24 @@ Write a yaml file to declare your parameters and their attributes.
 ```yaml
 turtlesim:
   background:
-    r: {
-      type: int,
-      default_value: 0,
-      description: "Red color value for the background, 8-bit",
-      validation: {
+    r:
+      type: int
+      default_value: 0
+      description: "Red color value for the background, 8-bit"
+      validation:
         bounds<>: [0, 255]
-      }
-    }
-    g: {
-      type: int,
-      default_value: 0,
-      description: "Green color value for the background, 8-bit",
-      validation: {
+    g:
+      type: int
+      default_value: 0
+      description: "Green color value for the background, 8-bit"
+      validation:
         bounds<>: [0, 255]
-      }
-    }
-    b: {
-      type: int,
-      default_value: 0,
-      description: "Blue color value for the background, 8-bit",
-      validation: {
+    b:
+      type: int
+      default_value: 0
+      description: "Blue color value for the background, 8-bit"
+      validation:
         bounds<>: [0, 255]
-      }
-    }
 ```
 
 ### Add parameter library generation to project
@@ -81,7 +75,7 @@ generate_parameter_module(
 )
 ```
 
-### Use generated struct into project source code
+### Use generated struct in project source code
 
 **src/turtlesim.cpp**
 ```c++
@@ -177,46 +171,47 @@ A leaf represents a single parameter and has the following format.
 
 ```yaml
 cpp_namespace:
-  param_name: {
-    type: int,
-    default_value: 3,
-    read_only: true,
-    description: "A read only  integer parameter with a default value of 3",
+  param_name:
+    type: int
+    default_value: 3
+    read_only: true
+    additional_constraints: "{ type: 'number', multipleOf: 3 }"
+    description: "A read-only  integer parameter with a default value of 3"
     validation:
       # validation functions ...
-  }
 ```
 
 A parameter is a YAML dictionary with the only required key being `type`.
 
-| Field         | Description                                                   |
-|---------------|---------------------------------------------------------------|
-| type          | The type (string, double, etc) of the parameter.              |
-| default_value | Value for the parameter if the user does not specify a value. |
-| read_only     | Can only be set at launch and are not dynamic.                |
-| description   | Displayed by `ros2 param describe`.                           |
-| validation    | Dictionary of validation functions and their parameters.      |
+| Field                  | Description                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| type                   | The type (string, double, etc) of the parameter.                                                               |
+| default_value          | Value for the parameter if the user does not specify a value.                                                  |
+| read_only              | Can only be set at launch and are not dynamic.                                                                 |
+| description            | Displayed by `ros2 param describe`.                                                                            |
+| validation             | Dictionary of validation functions and their parameters.                                                       |
+| additional_constraints | Additional constraints that end up on the ParameterDescriptor but are not used for validation by this package. |
 
 The types of parameters in ros2 map to C++ types.
 
-| Parameter Type  | C++ Type                    |
-|-----------------|-----------------------------|
-| string          | `std::string`               |
-| double          | `double`                    |
-| int             | `int`                       |
-| bool            | `bool`                      |
-| string_array    | `std::vector<std::string>`  |
-| double_array    | `std::vector<double>`       |
-| int_array       | `std::vector<int>`          |
-| bool_array      | `std::vector<bool>`         |
-| string_fixed_XX | `FixedSizeString<XX>`       |
-| none            | NO CODE GENERATED           |
+| Parameter Type  | C++ Type                   |
+| --------------- | -------------------------- |
+| string          | `std::string`              |
+| double          | `double`                   |
+| int             | `int`                      |
+| bool            | `bool`                     |
+| string_array    | `std::vector<std::string>` |
+| double_array    | `std::vector<double>`      |
+| int_array       | `std::vector<int>`         |
+| bool_array      | `std::vector<bool>`        |
+| string_fixed_XX | `FixedSizeString<XX>`      |
+| none            | NO CODE GENERATED          |
 
-Fixed size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
+Fixed-size types are denoted with a suffix `_fixed_XX`, where `XX` is the desired size.
 The corresponding C++ type is a data wrapper class for conveniently accessing the data.
 Note that any fixed size type will automatically use a `size_lt` validator. Validators are explained in the next section.
 
-The purpose of `none` type is purely documentation, and won't generate any C++ code. See [Parameter documentation](#parameter-documentation) for details.
+The purpose of the `none` type is purely documentation, and won't generate any C++ code. See [Parameter documentation](#parameter-documentation) for details.
 
 ### Built-In Validators
 Validators are C++ functions that take arguments represented by a key-value pair in yaml.
@@ -226,15 +221,13 @@ If the function does not take any values you write `null` or `[]` to for the val
 
 ```yaml
 joint_trajectory_controller:
-  command_interfaces: {
-    type: string_array,
-    description: "Names of command interfaces to claim",
-    validation: {
-      size_gt<>: [0],
-      unique<>: null,
-      subset_of<>: [["position", "velocity", "acceleration", "effort",]],
-    }
-  }
+  command_interfaces:
+    type: string_array
+    description: "Names of command interfaces to claim"
+    validation:
+      size_gt<>: [0]
+      unique<>: null
+      subset_of<>: [["position", "velocity", "acceleration", "effort",]]
 ```
 
 Above are validations for `command_interfaces` from `ros2_controllers`.
@@ -249,36 +242,36 @@ Some of these validators work only on value types, some on string types, and oth
 The built-in validator functions provided by this package are:
 
 **Value validators**
-| Function               | Arguments           | Description                           |
-|------------------------|---------------------|---------------------------------------|
-| bounds<>               | [lower, upper]      | Bounds checking (inclusive)           |
-| lt<>                   | [value]             | parameter < value                     |
-| gt<>                   | [value]             | parameter > value                     |
-| lt_eq<>                | [value]             | parameter <= value                    |
-| gt_eq<>                | [value]             | parameter >= value                    |
-| one_of<>               | [[val1, val2, ...]] | Value is one of the specified values  |
+| Function | Arguments           | Description                          |
+| -------- | ------------------- | ------------------------------------ |
+| bounds<> | [lower, upper]      | Bounds checking (inclusive)          |
+| lt<>     | [value]             | parameter < value                    |
+| gt<>     | [value]             | parameter > value                    |
+| lt_eq<>  | [value]             | parameter <= value                   |
+| gt_eq<>  | [value]             | parameter >= value                   |
+| one_of<> | [[val1, val2, ...]] | Value is one of the specified values |
 
 **String validators**
-| Function               | Arguments           | Description                                     |
-|------------------------|---------------------|-------------------------------------------------|
-| fixed_size<>           | [length]            | Length string is specified length               |
-| size_gt<>              | [length]            | Length string is greater than specified length  |
-| size_lt<>              | [length]            | Length string is less less specified length     |
-| not_empty<>            | []                  | String parameter is not empty                   |
-| one_of<>               | [[val1, val2, ...]] | String is one of the specified values           |
+| Function     | Arguments           | Description                                    |
+| ------------ | ------------------- | ---------------------------------------------- |
+| fixed_size<> | [length]            | Length string is specified length              |
+| size_gt<>    | [length]            | Length string is greater than specified length |
+| size_lt<>    | [length]            | Length string is less less specified length    |
+| not_empty<>  | []                  | String parameter is not empty                  |
+| one_of<>     | [[val1, val2, ...]] | String is one of the specified values          |
 
 **Array validators**
-| Function               | Arguments           | Description                                          |
-|------------------------|---------------------|------------------------------------------------------|
-| unique<>               | []                  | Contains no duplicates                               |
-| subset_of<>            | [[val1, val2, ...]] | Every element is one of the list                     |
-| fixed_size<>           | [length]            | Number of elements is specified length               |
-| size_gt<>              | [length]            | Number of elements is greater than specified length  |
-| size_lt<>              | [length]            | Number of elements is less less specified length     |
-| not_empty<>            | []                  | Has at-least one element                             |
-| element_bounds<>       | [lower, upper]      | Bounds checking each element (inclusive)             |
-| lower_element_bounds<> | [lower]             | Lower bound for each element (inclusive)             |
-| upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)             |
+| Function               | Arguments           | Description                                         |
+| ---------------------- | ------------------- | --------------------------------------------------- |
+| unique<>               | []                  | Contains no duplicates                              |
+| subset_of<>            | [[val1, val2, ...]] | Every element is one of the list                    |
+| fixed_size<>           | [length]            | Number of elements is specified length              |
+| size_gt<>              | [length]            | Number of elements is greater than specified length |
+| size_lt<>              | [length]            | Number of elements is less less specified length    |
+| not_empty<>            | []                  | Has at-least one element                            |
+| element_bounds<>       | [lower, upper]      | Bounds checking each element (inclusive)            |
+| lower_element_bounds<> | [lower]             | Lower bound for each element (inclusive)            |
+| upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)            |
 
 ### Custom validator functions
 Validators are functions that return a `tl::expected<void, std::string>` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
@@ -299,9 +292,8 @@ tl::expected<void, std::string> integer_equal_value(
   int param_value = parameter.as_int();
     if (param_value != expected_value) {
         return tl::make_unexpected(fmt::format(
-            "Invalid value {} for parameter {}. Expected {}",
+            "Invalid value {} for parameter {}. Expected {}"
             param_value, parameter.get_name(), expected_value);
-    }
 
   return {};
 }
@@ -310,44 +302,51 @@ tl::expected<void, std::string> integer_equal_value(
 ```
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
-validation: {
+validation:
   "my_project::integer_equal_value": [3]
-}
 ```
 
 ### Nested structures
-After the top level key, every subsequent non-leaf key will generate a nested c++ struct. The struct instance will have
+After the top-level key, every subsequent non-leaf key will generate a nested C++ struct. The struct instance will have
 the same name as the key.
 
 ```yaml
 cpp_name_space:
   nest1:
     nest2:
-      param_name: { # this is a leaf
+      param_name: # this is a leaf
         type: string_array
-      }
 ```
 
-The generated parameter value can then be access with `params.nest1.nest2.param_name`
+The generated parameter value can then be accessed with `params.nest1.nest2.param_name`
 
 ### Mapped parameters
 You can use parameter maps, where a map with keys from another `string_array` parameter is created. Add the `__map_` prefix followed by the key parameter name as follows:
 
 ```yaml
 cpp_name_space:
-  joints: {
-    type: string_array,
-    default_value: ["joint1", "joint2", "joint3"],
-    description: "specifies which joints will be used by the controller",
-  }
+  joints:
+    type: string_array
+    default_value: ["joint1", "joint2", "joint3"]
+    description: "specifies which joints will be used by the controller"
+  interfaces:
+    type: string_array
+    default_value: ["position", "velocity", "acceleration"]
+    description: "interfaces to be used by the controller"
+  # nested mapped example
+  gain:
+    __map_joints: # create a map with joints as keys
+      __map_interfaces:  # create a map with interfaces as keys
+        value:
+          type: double
+  # simple mapped example
   pid:
-    __map_joints:  # create a map with joints as keys
-      param_name: {
-        type: string_array
-      }
+    __map_joints: # create a map with joints as keys
+      values:
+        type: double_array
 ```
 
-The generated parameter value can then be access with `params.pid.joints_map.at("joint1").param_name`.
+The generated parameter value for the nested map example can then be accessed with `params.gain.joints_map.at("joint1").interfaces_map.at("position").value`.
 
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
@@ -373,7 +372,7 @@ if (param_listener->is_old(params_)) {
 
 ### Parameter documentation
 
-In some case, parameters might be unknown only at compile-time, and cannot be part of the generated C++ code. However, for documentation purpose of such parameters, the type `none` was introduced.
+In some cases, parameters might be unknown only at compile-time, and cannot be part of the generated C++ code. However, for documentation purpose of such parameters, the type `none` was introduced.
 
 Parameters with `none` type won't generate any C++ code, but can exist to describe the expected name or namespace, that might be declared by an external piece of code and used in an override.
 
@@ -383,20 +382,17 @@ Example of declarative YAML
 
 ```yaml
 force_torque_broadcaster_controller:
-  sensor_name: {
-    type: string,
-    default_value: "",
-    description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined.",
-  }
-  frame_id: {
-    type: string,
-    default_value: "",
-    description: "Sensor's frame_id in which values are published.",
-  }
-  sensor_filter_chain: {
-    type: none,
-    description: "Map of parameters that defines a filter chain, containing filterN as key and underlying map of parameters needed for a specific filter. See <some docs> for more details.",
-  }
+  sensor_name:
+    type: string
+    default_value: ""
+    description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined."
+  frame_id:
+    type: string
+    default_value: ""
+    description: "Sensor's frame_id in which values are published."
+  sensor_filter_chain:
+    type: none
+    description: "Map of parameters that defines a filter chain, containing filterN as key and underlying map of parameters needed for a specific filter. See <some docs> for more details."
 ```
 
 Example of parameters for that controller
@@ -421,7 +417,7 @@ force_torque_broadcaster_controller:
 See [cpp example](example/) or [python example](example_python/) for complete examples of how to use the generate_parameter_library.
 
 ### Generated code output
-The generated code is primarily consists of two major components:
+The generated code primarily consists of two major components:
 1) `struct Params` that contains values of all parameters and
 2) `class ParamListener` that handles parameter declaration, updating, and validation.
    The general structure is shown below.
@@ -458,7 +454,7 @@ class ParamListener {
   // loop over all parameters: perform validation then update
   rcl_interfaces::msg::SetParametersResult update(const std::vector<rclcpp::Parameter> &parameters);
 
-  // declare all parameters and throw exception if non-optional value is missing or validation fails
+  // declare all parameters and throw an exception if a non-optional value is missing or validation fails
   void declare_params(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface);
 
  private:
