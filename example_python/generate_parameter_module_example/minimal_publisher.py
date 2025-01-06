@@ -36,6 +36,7 @@ import rclpy.node
 
 
 class MinimalParam(rclpy.node.Node):
+
     def __init__(self):
         super().__init__('admittance_controller')
         self.timer = self.create_timer(1, self.timer_callback)
