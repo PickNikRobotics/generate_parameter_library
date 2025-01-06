@@ -14,6 +14,7 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <fmt/core.h>
@@ -105,7 +106,7 @@ struct StackParams {
 
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
                   rclcpp::Logger logger, std::string const& prefix = "") {
-      logger_ = logger;
+      logger_ = std::move(logger);
       prefix_ = prefix;
       if (!prefix_.empty() && prefix_.back() != '.') {
         prefix_ += ".";
@@ -210,7 +211,7 @@ struct StackParams {
     private:
       void update_internal_params(Params updated_params) {
         std::lock_guard<std::mutex> lock(mutex_);
-        params_ = updated_params;
+        params_ = std::move(updated_params);
       }
 
       std::string prefix_;
