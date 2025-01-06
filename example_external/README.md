@@ -1,4 +1,9 @@
-# Example:
+# Using parameters defined in another package
+
+This package is a minimal example demonstrating how the parameters defined in `generate_parameter_library/example`
+can be used in a different package (i.e. the current one :  `generate_parameter_library/example_external`).
+
+In particular, check the `CMakeLists.txt` file and the `#include` instructions in the source files.
 
 ## Build the node
 
@@ -93,7 +98,8 @@ You should see:
   use_sim_time
   ```
 
-All parameter are automatically declared and callbacks are setup by default. You can set a parameter by typing:
+All parameters are automatically declared and callbacks are setup by default.
+You can set a parameter by typing:
 
 `ros2 param set /admittance_controller control.frame.id new_frame`
 
@@ -103,7 +109,8 @@ You should see:
 
 Congratulations, you updated the parameter!
 
-If you try to set a parameter that is read only, you will get an error. Running the following
+If you try to set a parameter that is read only, you will get an error.
+Running the following
 
 `ros2 param set /admittance_controller command_interfaces ["velocity"]`
 
