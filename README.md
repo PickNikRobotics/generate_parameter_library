@@ -63,6 +63,10 @@ target_link_libraries(minimal_node PRIVATE
   rclcpp::rclcpp
   turtlesim_parameters
 )
+
+install(TARGETS minimal_node turtlesim_parameters
+  EXPORT ${PROJECT_NAME}Targets)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ```
 
 **setup.py**
@@ -80,7 +84,7 @@ generate_parameter_module(
 **src/turtlesim.cpp**
 ```c++
 #include <rclcpp/rclcpp.hpp>
-#include "turtlesim_parameters.hpp"
+#include <turtlesim/turtlesim_parameters.hpp>  // you can also use the deprecated #include "turtlesim_parameters.hpp"
 
 int main(int argc, char * argv[])
 {
@@ -350,10 +354,46 @@ The generated parameter value for the nested map example can then be accessed wi
 
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
-If you specified it to be `turtlesim_parameters` you can then include the generated code with `#include "turtlesim_parameters.hpp"`.
+If you specified it to be `turtlesim_parameters` you can then include the generated code with `#include <turtlesim/turtlesim_parameters.hpp>`.
 ```c++
-#include "turtlesim_parameters.hpp"
+#include <turtlesim/turtlesim_parameters.hpp>
 ```
+
+Note that this header can also be used from another package:
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_other_package)
+
+
+include(GNUInstallDirs)
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(turtelsim REQUIRED)
+
+add_library(my_lib src/my_lib.cpp)
+target_include_directories(my_lib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+target_link_libraries(my_lib PUBLIC turtlesim::turtlesim_parameters)
+
+#############
+## Install ##
+#############
+
+install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+
+install(TARGETS my_lib
+  EXPORT ${PROJECT_NAME}Targets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
+
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_dependencies(turtlesim)
+ament_package()
+```
+
 In your initialization code, create a `ParamListener` which will declare and get the parameters.
 An exception will be thrown if any validation fails or any required parameters were not set.
 Then call `get_params` on the listener to get a copy of the `Params` struct.

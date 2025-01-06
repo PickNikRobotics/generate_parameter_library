@@ -1,4 +1,4 @@
-// Copyright 2022 PickNik Inc.
+// Copyright 2025 Forssea Robotics
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the PickNik Inc. nor the names of its
+//    * Neither the name of Forssea Robotics nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,49 +26,27 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "generate_parameter_library_example/minimal_publisher.hpp"
+#pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 
 #include <generate_parameter_library_example/admittance_controller_parameters.hpp>
 
-using namespace std::chrono_literals;
-
 namespace admittance_controller {
 
-MinimalPublisher::MinimalPublisher(const rclcpp::NodeOptions& options)
-    : Node("admittance_controller", options) {
-  timer_ = create_wall_timer(
-      500ms, std::bind(&MinimalPublisher::timer_callback, this));
-  param_listener_ =
-      std::make_shared<ParamListener>(get_node_parameters_interface());
-  params_ = param_listener_->get_params();
+class MinimalPublisher : public rclcpp::Node {
+ public:
+  MinimalPublisher(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
-  [[maybe_unused]] StackParams s_params = param_listener_->get_stack_params();
+ private:
+  void timer_callback();
 
-  RCLCPP_INFO(get_logger(), "Initial control frame parameter is: '%s'",
-              params_.control.frame.id.c_str());
-  RCLCPP_INFO(get_logger(), "fixed string is: '%s'",
-              std::string{params_.fixed_string}.c_str());
-  const tcb::span<double> fixed_array = params_.fixed_array;
-  for (auto d : fixed_array) {
-    RCLCPP_INFO(get_logger(), "value: '%s'", std::to_string(d).c_str());
-  }
-}
-
-void MinimalPublisher::timer_callback() {
-  if (param_listener_->is_old(params_)) {
-    param_listener_->refresh_dynamic_parameters();
-    params_ = param_listener_->get_params();
-    RCLCPP_INFO(get_logger(), "New control frame parameter is: '%s'",
-                params_.control.frame.id.c_str());
-    RCLCPP_INFO(get_logger(), "fixed string is: '%s'",
-                std::string{params_.fixed_string}.c_str());
-    const tcb::span<double> fixed_array = params_.fixed_array;
-    for (auto d : fixed_array) {
-      RCLCPP_INFO(get_logger(), "value: '%s'", std::to_string(d).c_str());
-    }
-  }
-}
+  rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<admittance_controller::ParamListener> param_listener_;
+  admittance_controller::Params params_;
+};
 
 }  // namespace admittance_controller
+
+RCLCPP_COMPONENTS_REGISTER_NODE(admittance_controller::MinimalPublisher)
