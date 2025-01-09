@@ -350,7 +350,7 @@ cpp_name_space:
         type: double_array
 ```
 
-The generated parameter value for the nested map example can then be accessed with `params.gain.joints_map.at("joint1").interfaces_map.at("position").value`.
+The generated parameter value for the nested map example can then be accessed with `params.gain.get_entry("joint1").get_entry("position").value`.
 
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
