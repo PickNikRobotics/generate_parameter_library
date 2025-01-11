@@ -11,7 +11,7 @@ if len(sys.argv) >= 2 and sys.argv[1] != 'clean':
     # set module_name and yaml file
     module_name = 'admittance_parameters'
     yaml_file = 'generate_parameter_module_example/parameters.yaml'
-    validation_module = 'generate_parameter_module_example.custom_validation'
+    validation_module = 'validators.custom_validation'
     generate_parameter_module(
         module_name, yaml_file, validation_module=validation_module
     )
@@ -33,7 +33,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'test_node = generate_parameter_module_example.minimal_publisher:main'
+            'test_node = examples.minimal_publisher:main'
         ],
     },
 )
