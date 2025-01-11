@@ -32,8 +32,8 @@ setup(
     license='BSD-3-Clause',
     tests_require=['pytest'],
     entry_points={
-        'generate_parameter_module_example': [
-            'test_node = examples.minimal_publisher:main'
+        'console_scripts': [
+            'test_node = generate_parameter_module_example.minimal_publisher:main'
         ],
     },
 )
