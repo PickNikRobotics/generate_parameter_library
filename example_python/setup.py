@@ -11,7 +11,7 @@ if len(sys.argv) >= 2 and sys.argv[1] != 'clean':
     # set module_name and yaml file
     module_name = 'admittance_parameters'
     yaml_file = 'generate_parameter_module_example/parameters.yaml'
-    validation_module = 'validators.custom_validation'
+    validation_module = 'generate_parameter_module_example.custom_validation'
     generate_parameter_module(
         module_name, yaml_file, validation_module=validation_module
     )
