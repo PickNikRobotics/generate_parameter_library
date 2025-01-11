@@ -8,38 +8,38 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 
-class CPPConverstions:
+class PythonConversions:
     def __init__(self):
         self.defined_type_to_lang_type = {
             'none': lambda defined_type, templates: None,
             'bool': lambda defined_type, templates: 'bool',
-            'double': lambda defined_type, templates: 'double',
-            'int': lambda defined_type, templates: 'int64_t',
-            'string': lambda defined_type, templates: 'std::string',
-            'bool_array': lambda defined_type, templates: 'std::vector<bool>',
-            'double_array': lambda defined_type, templates: 'std::vector<double>',
-            'int_array': lambda defined_type, templates: 'std::vector<int64_t>',
-            'string_array': lambda defined_type, templates: 'std::vector<std::string>',
-            'double_array_fixed': lambda defined_type, templates: f'rsl::StaticVector<{templates[0]}, {templates[1]}>',
-            'int_array_fixed': lambda defined_type, templates: f'rsl::StaticVector<{templates[0]}, {templates[1]}>',
-            'string_array_fixed': lambda defined_type, templates: f'rsl::StaticVector<{templates[0]}, {templates[1]}>',
-            'string_fixed': lambda defined_type, templates: f'rsl::StaticString<{templates[1]}>',
+            'double': lambda defined_type, templates: 'float',
+            'int': lambda defined_type, templates: 'int',
+            'string': lambda defined_type, templates: 'str',
+            'bool_array': lambda defined_type, templates: '[bool]',
+            'double_array': lambda defined_type, templates: '[float]',
+            'int_array': lambda defined_type, templates: '[int]',
+            'string_array': lambda defined_type, templates: '[str]',
+            'double_array_fixed': lambda defined_type, templates: '[float]',
+            'int_array_fixed': lambda defined_type, templates: '[int]',
+            'string_array_fixed': lambda defined_type, templates: '[str]',
+            'string_fixed': lambda defined_type, templates: 'str',
         }
         self.yaml_type_to_as_function = {
             'none': None,
-            'string_array': 'as_string_array()',
-            'double_array': 'as_double_array()',
-            'int_array': 'as_integer_array()',
-            'bool_array': 'as_bool_array()',
-            'string': 'as_string()',
-            'double': 'as_double()',
-            'int': 'as_int()',
-            'bool': 'as_bool()',
-            'bool_array_fixed': 'as_bool_array()',
-            'double_array_fixed': 'as_double_array()',
-            'int_array_fixed': 'as_integer_array()',
-            'string_array_fixed': 'as_string_array()',
-            'string_fixed': 'as_string()',
+            'string_array': 'value',
+            'double_array': 'value',
+            'int_array': 'value',
+            'bool_array': 'value',
+            'string': 'value',
+            'double': 'value',
+            'int': 'value',
+            'bool': 'value',
+            'bool_array_fixed': 'value',
+            'double_array_fixed': 'value',
+            'int_array_fixed': 'value',
+            'string_array_fixed': 'value',
+            'string_fixed': 'value',
         }
         self.lang_str_value_func = {
             'none': self.no_code,
@@ -76,24 +76,23 @@ class CPPConverstions:
             "<class 'str'>": 'string_array',
         }
 
-        self.open_bracket = '{'
-        self.close_bracket = '}'
+        self.open_bracket = '['
+        self.close_bracket = ']'
 
     @typechecked
     def get_func_signature(self, function_name: str, base_type: str) -> str:
-        if function_name[-2:] == '<>':
-            function_base_name = function_name[:-2]
-            template_type = base_type
-            function_name = function_base_name + f'<{template_type}>'
+        if function_name.__contains__('::'):
+            # user defined function
+            function_name = function_name.replace('::', '.')
+        else:
+            function_name = 'ParameterValidators.' + function_name
+        if function_name.__contains__('<>'):
+            function_name = function_name.replace('<>', '')
         return function_name
 
     @typechecked
     def initialization_fail_validation(self, param_name: str) -> str:
-        return (
-            f'throw rclcpp::exceptions::InvalidParameterValueException'
-            f'(fmt::format("Invalid value set during initialization for '
-            f"parameter '{param_name}': {{}}\", validation_result.error()));"
-        )
+        return f"raise InvalidParameterValueException('{param_name}',param.value, 'Invalid value set during initialization for parameter {param_name}: ' + validation_result)"
 
     @typechecked
     def initialization_pass_validation(self, param_name: str) -> str:
@@ -101,7 +100,7 @@ class CPPConverstions:
 
     @typechecked
     def update_parameter_fail_validation(self) -> str:
-        return 'return rsl::to_parameter_result_msg(validation_result);'
+        return 'return SetParametersResult(successful=False, reason=validation_result)'
 
     @typechecked
     def update_parameter_pass_validation(self) -> str:
@@ -116,7 +115,7 @@ class CPPConverstions:
     def bool_to_str(self, cond: Union[None, bool]):
         if cond is None:
             return ''
-        return 'true' if cond else 'false'
+        return 'True' if cond else 'False'
 
     @typechecked
     def float_to_str(self, num: Union[None, float]):
@@ -124,11 +123,11 @@ class CPPConverstions:
             return ''
         str_num = str(num)
         if str_num == 'nan':
-            str_num = 'std::numeric_limits<double>::quiet_NaN()'
+            str_num = "float('nan')"
         elif str_num == 'inf':
-            str_num = 'std::numeric_limits<double>::infinity()'
+            str_num = "float('inf')"
         elif str_num == '-inf':
-            str_num = '-std::numeric_limits<double>::infinity()'
+            str_num = "-float('inf')"
         else:
             if len(str_num.split('.')) == 1 and not str_num.__contains__('e'):
                 str_num += '.0'
@@ -151,25 +150,25 @@ class CPPConverstions:
     def bool_array_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
-        return '{' + ', '.join(self.bool_to_str(x) for x in values) + '}'
+        return '[' + ', '.join(self.bool_to_str(x) for x in values) + ']'
 
     @typechecked
     def float_array_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
-        return '{' + ', '.join(self.float_to_str(x) for x in values) + '}'
+        return '[' + ', '.join(self.float_to_str(x) for x in values) + ']'
 
     @typechecked
     def int_array_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
-        return '{' + ', '.join(self.int_to_str(x) for x in values) + '}'
+        return '[' + ', '.join(self.int_to_str(x) for x in values) + ']'
 
     @typechecked
     def str_array_to_str(self, s: Union[None, list]):
         if s is None:
             return ''
-        return '{' + ', '.join(self.str_to_str(x) for x in s) + '}'
+        return '[' + ', '.join(self.str_to_str(x) for x in s) + ']'
 
     @typechecked
     def str_array_fixed_to_str(self, s: Union[None, list]):
@@ -179,22 +178,22 @@ class CPPConverstions:
     def str_fixed_to_str(self, s: Union[None, str]):
         if s is None:
             return ''
-        return '{%s}' % self.str_to_str(s)
+        return '%s' % self.str_to_str(s)
 
     @typechecked
     def float_array_fixed_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
-        return '{{' + ', '.join(self.float_to_str(x) for x in values) + '}}'
+        return '[' + ', '.join(self.float_to_str(x) for x in values) + ']'
 
     @typechecked
     def int_array_fixed_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
-        return '{{' + ', '.join(self.int_to_str(x) for x in values) + '}}'
+        return '[' + ', '.join(self.int_to_str(x) for x in values) + ']'
 
     @typechecked
     def bool_array_fixed_to_str(self, values: Union[None, list]):
         if values is None:
             return ''
-        return '{{' + ', '.join(self.bool_to_str(x) for x in values) + '}}'
+        return '[' + ', '.join(self.bool_to_str(x) for x in values) + ']'
