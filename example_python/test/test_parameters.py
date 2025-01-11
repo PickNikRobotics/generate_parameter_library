@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import generate_parameter_module_example
+
 print(f'Imported file from: {generate_parameter_module_example.__file__}')
 print('OK 1')
 

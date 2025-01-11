@@ -52,6 +52,7 @@ def run(output_file, yaml_file, validation_module=''):
     init_file = os.path.join(os.path.dirname(output_file), '__init__.py')
     open(init_file, 'a').close()
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('output_python_module_file')
