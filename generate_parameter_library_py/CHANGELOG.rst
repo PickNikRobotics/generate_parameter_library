@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.0 (2025-01-13)
+------------------
 * Unit test friendly folder structure for Python examples (`#237 <https://github.com/PickNikRobotics/generate_parameter_library/issues/237>`_)
 * Revert "Fix python lib install path (`#207 <https://github.com/PickNikRobotics/generate_parameter_library/issues/207>`_)" (`#236 <https://github.com/PickNikRobotics/generate_parameter_library/issues/236>`_)
   This reverts commit 4e92cc4e9da5e7a853ac0b1762db85e1f859d91b.

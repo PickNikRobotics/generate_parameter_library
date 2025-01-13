@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.0 (2025-01-13)
+------------------
 * Unit test friendly folder structure for Python examples (`#237 <https://github.com/PickNikRobotics/generate_parameter_library/issues/237>`_)
 * Fix flake8 error in publisher example (`#229 <https://github.com/PickNikRobotics/generate_parameter_library/issues/229>`_)
 * Contributors: Sebastian Castro
