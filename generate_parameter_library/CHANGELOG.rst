@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Change header install path (`#213 <https://github.com/PickNikRobotics/generate_parameter_library/issues/213>`_)
+* Contributors: Auguste Bourgois
+
 0.3.9 (2024-10-27)
 ------------------
 * Disable cache for program (`#218 <https://github.com/PickNikRobotics/generate_parameter_library/issues/218>`_)
