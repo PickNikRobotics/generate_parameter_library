@@ -2,6 +2,13 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.4.0 (2025-01-13)
+------------------
+* Unit test friendly folder structure for Python examples (`#237 <https://github.com/PickNikRobotics/generate_parameter_library/issues/237>`_)
+* Fix conversion typos (`#238 <https://github.com/PickNikRobotics/generate_parameter_library/issues/238>`_)
+* Apply clang-tidy suggestions to `std::move` certain variables (`#228 <https://github.com/PickNikRobotics/generate_parameter_library/issues/228>`_)
+* Contributors: Sebastian Castro
+
 0.3.9 (2024-10-27)
 ------------------
 * fix error with not being able to find unpack_parameter_dict when using set_params_from_dict (`#220 <https://github.com/PickNikRobotics/generate_parameter_library/issues/220>`_)
