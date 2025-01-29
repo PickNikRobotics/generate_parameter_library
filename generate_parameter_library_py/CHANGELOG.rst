@@ -2,6 +2,10 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+10.0.1 (2025-01-29)
+------------------
+* Greenroom Release
+
 0.4.0 (2025-01-13)
 ------------------
 * Unit test friendly folder structure for Python examples (`#237 <https://github.com/PickNikRobotics/generate_parameter_library/issues/237>`_)
