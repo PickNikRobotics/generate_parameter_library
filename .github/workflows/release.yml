@@ -1,0 +1,75 @@
+name: Tag & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: 'If not specified, all packages will be released.'
+        options:
+          - ""
+          - generate_parameter_library
+          - generate_parameter_library_py
+          - parameter_traits
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        job:
+          - runner: buildjet-2vcpu-ubuntu-2204
+            arch: amd64
+            ros_distro: jazzy
+          - runner: buildjet-2vcpu-ubuntu-2204-arm
+            arch: arm64
+            ros_distro: jazzy
+          - runner: buildjet-2vcpu-ubuntu-2204
+            arch: amd64
+            ros_distro: iron
+          - runner: buildjet-2vcpu-ubuntu-2204-arm
+            arch: arm64
+            ros_distro: iron
+
+    name: Build - ${{ matrix.job.arch }} - ${{ matrix.job.ros_distro }}
+    runs-on: ${{ matrix.job.runner }}
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Semantic release - Build
+        uses: Greenroom-Robotics/ros_semantic_release_action@main
+        with:
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+          package_dir: ./
+          package: ${{ github.event.inputs.package }}
+          arch: ${{ matrix.job.arch }}
+          ros_distro: ${{ matrix.job.ros_distro }}
+          github_release: false
+          public: false
+          changelog: false
+          skip_build: false
+          skip_tag: true
+
+  release:
+    name: Create Release
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    needs:
+      - build
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Release
+        uses: Greenroom-Robotics/ros_semantic_release_action@main
+        with:
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+          package_dir: ./
+          package: ${{ github.event.inputs.package }}
+          github_release: true
+          public: false
+          changelog: false
+          skip_build: true
+          skip_tag: false
