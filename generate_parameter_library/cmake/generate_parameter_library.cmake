@@ -70,13 +70,12 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
   )
   # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
   set(LOCAL_PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}.hpp)
+  set(LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}_pragma_warning)
+  file(WRITE ${LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE}
+    "#pragma message(\"#include \\\"${LIB_NAME}.hpp\\\" is deprecated. Use #include <${PROJECT_NAME}/${LIB_NAME}.hpp> instead.\")\n")
   add_custom_command(
     OUTPUT ${LOCAL_PARAM_HEADER_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "#pragma message(\"#include \\\"${LIB_NAME}.hpp\\\" is deprecated. \
-Use #include <${PROJECT_NAME}/${LIB_NAME}.hpp> instead.\")" >> ${LOCAL_PARAM_HEADER_FILE}
-    COMMAND ${CMAKE_COMMAND} -E cat ${LOCAL_PARAM_HEADER_FILE} ${PARAM_HEADER_FILE} > ${LOCAL_PARAM_HEADER_FILE}.tmp
-    COMMAND ${CMAKE_COMMAND} -E copy ${LOCAL_PARAM_HEADER_FILE}.tmp ${LOCAL_PARAM_HEADER_FILE}
-    COMMAND ${CMAKE_COMMAND} -E remove ${LOCAL_PARAM_HEADER_FILE}.tmp
+    COMMAND ${CMAKE_COMMAND} -E cat ${LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE} ${PARAM_HEADER_FILE} > ${LOCAL_PARAM_HEADER_FILE}
     DEPENDS ${PARAM_HEADER_FILE}
     COMMENT
     "Creating deprecated header file ${LOCAL_PARAM_HEADER_FILE}"
