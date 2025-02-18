@@ -1,5 +1,9 @@
 {% if value|length -%}
-{{name}} = {{value}}
+{% if type.startswith('[') and type.endswith(']') -%}
+{{name}} : list{{type}} = field(default_factory=lambda: {{value}})
+{%else -%}
+{{name}} : {{type}} = {{value}}
+{% endif -%}
 {% else -%}
 {{name}} = None
 {% endif -%}
