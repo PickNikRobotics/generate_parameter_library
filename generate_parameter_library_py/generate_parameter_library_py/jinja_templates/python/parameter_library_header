@@ -12,6 +12,7 @@ import copy
 import rclpy
 import rclpy.parameter
 from generate_parameter_library_py.python_validators import ParameterValidators
+from dataclasses import dataclass, field
 
 {% if user_validation_file|length -%}
 import {{user_validation_file}} as custom_validators
@@ -20,6 +21,7 @@ import {{user_validation_file}} as custom_validators
 class {{namespace}}:
 {%- filter indent(width=4) %}
 
+@dataclass
 class Params:
 {%- filter indent(width=4) %}
 # for detecting if the parameter struct has been updated

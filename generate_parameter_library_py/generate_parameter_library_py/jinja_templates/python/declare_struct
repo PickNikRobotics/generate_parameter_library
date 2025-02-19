@@ -1,3 +1,4 @@
+@dataclass
 class __{{struct_name}}:
 {%- filter indent(width=4) %}
 {% if struct_fields|length -%}
@@ -8,7 +9,7 @@ class __{{struct_name}}:
 {% endif -%}
 {% endfilter -%}
 {% if struct_instance|length -%}
-{{struct_instance}} = __{{struct_name}}()
+{{struct_instance}}: __{{struct_name}} = field(default_factory=__{{struct_name}})
 {% endif -%}
 {% if not struct_instance|length -%}
 __map_type = __{{struct_name}}
