@@ -41,6 +41,7 @@ class MinimalPublisher : public rclcpp::Node {
 
  private:
   void timer_callback();
+  void reconfigure_callback(const admittance_controller::Params& params);
 
   rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<admittance_controller::ParamListener> param_listener_;
