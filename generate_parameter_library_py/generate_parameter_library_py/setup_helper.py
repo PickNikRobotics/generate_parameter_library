@@ -30,49 +30,52 @@
 import sys
 import os
 from generate_parameter_library_py.generate_python_module import run
+from pathlib import Path
 
 
 def generate_parameter_module(
     module_name, yaml_file, validation_module='', install_base=None, merge_install=False
 ):
-    # TODO there must be a better way to do this. I need to find the build directory so I can place the python
-    # module there
-    build_dir = None
-    install_dir = None
+    # There's no nice way of auto-detecting if colcon was run with --merge-install or not
+    # Have to manually specify for this function
+
+    # Get python version
+    tmp = sys.version.split()[0]
+    tmp = tmp.split('.')
+    py_version = f'python{tmp[0]}.{tmp[1]}'
+
+    # Get pkg name and colcon_ws
+    cwd = Path(os.getcwd())
+    colcon_ws = str(cwd.parent.parent)
+    pkg_name = cwd.stem
+
+    # Get paths
+    if not install_base:
+        install_base = os.path.join(colcon_ws, 'install')
+
+    install_base = (
+        install_base if merge_install else os.path.join(install_base, pkg_name)
+    )
+    install_lib = None
     for i, arg in enumerate(sys.argv):
-        # Look for the `--build-directory` option in the command line arguments
-        if arg == '--build-directory' or arg == '--build-base':
-            build_arg = sys.argv[i + 1]
+        if arg == '--install-lib':
+            install_lib = sys.argv[i + 1]
+            install_lib_split = install_lib.split('/')
+            for i, val in enumerate(install_lib_split):
+                if '$' in val:
+                    env_val = os.getenv(val)
+                    install_lib_split[i] = env_val if env_val else ''
 
-            path_split = os.path.split(build_arg)
-            path_split = os.path.split(path_split[0])
-            pkg_name = path_split[1]
-            path_split = os.path.split(path_split[0])
-            colcon_ws = path_split[0]
+    # Get final install and build directories
+    install_dir = os.path.join(
+        install_base,
+        'lib',
+        py_version,
+        'site-packages',
+        pkg_name,
+    )
+    build_dir = os.path.join(colcon_ws, 'build', pkg_name, pkg_name)
 
-            tmp = sys.version.split()[0]
-            tmp = tmp.split('.')
-            py_version = f'python{tmp[0]}.{tmp[1]}'
-
-            if not install_base:
-                install_base = os.path.join(colcon_ws, 'install')
-
-            install_base = (
-                install_base if merge_install else os.path.join(install_base, pkg_name)
-            )
-            install_dir = os.path.join(
-                install_base,
-                'lib',
-                py_version,
-                'site-packages',
-                pkg_name,
-            )
-            build_dir = os.path.join(colcon_ws, 'build', pkg_name, pkg_name)
-            break
-
-    if build_dir:
-        run(os.path.join(build_dir, module_name + '.py'), yaml_file, validation_module)
-    if install_dir:
-        run(
-            os.path.join(install_dir, module_name + '.py'), yaml_file, validation_module
-        )
+    # Auto-generate python script
+    run(os.path.join(build_dir, module_name + '.py'), yaml_file, validation_module)
+    run(os.path.join(install_dir, module_name + '.py'), yaml_file, validation_module)
