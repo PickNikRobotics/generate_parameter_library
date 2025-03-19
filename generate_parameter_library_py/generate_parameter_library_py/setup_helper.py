@@ -37,7 +37,10 @@ def generate_parameter_module(
     module_name, yaml_file, validation_module='', install_base=None, merge_install=False
 ):
     # There's no nice way of auto-detecting if colcon was run with --merge-install or not
-    # Have to manually specify for this function
+    # Have to manually specify if using merge install
+
+    if len(sys.argv) <= 2:
+        return
 
     # Get python version
     tmp = sys.version.split()[0]
@@ -45,9 +48,16 @@ def generate_parameter_module(
     py_version = f'python{tmp[0]}.{tmp[1]}'
 
     # Get pkg name and colcon_ws
+    colcon_ws, pkg_name = None, None
+    for i, arg in enumerate(sys.argv):
+        if arg == '--build-directory' or arg == '--build-base':
+            build_arg = Path(sys.argv[i + 1])
+            colcon_ws = build_arg.parent.parent.parent
+            pkg_name = build_arg.parent.stem
+
     cwd = Path(os.getcwd())
-    colcon_ws = str(cwd.parent.parent)
-    pkg_name = cwd.stem
+    colcon_ws = colcon_ws if colcon_ws else str(cwd.parent.parent)
+    pkg_name = pkg_name if pkg_name else cwd.stem
 
     # Get paths
     if not install_base:
