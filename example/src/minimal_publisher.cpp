@@ -42,8 +42,8 @@ MinimalPublisher::MinimalPublisher(const rclcpp::NodeOptions& options)
       500ms, std::bind(&MinimalPublisher::timer_callback, this));
   param_listener_ =
       std::make_shared<ParamListener>(get_node_parameters_interface());
-  param_listener_->setUserCallback(std::bind(
-      &MinimalPublisher::reconfigure_callback, this, std::placeholders::_1));
+  param_listener_->setUserCallback(
+      [this](const auto& params) { reconfigure_callback(params); });
   params_ = param_listener_->get_params();
 
   [[maybe_unused]] StackParams s_params = param_listener_->get_stack_params();
