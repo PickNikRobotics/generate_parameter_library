@@ -424,7 +424,7 @@ if (param_listener->is_old(params_)) {
 
 Alternatively, you can bind a callback function that triggers whenever a parameter is updated. When activated, the callback receives the updated parameters as an argument.
 ```c++
-parameter_listener.setUserCallback(std::bind(&reconfigureCallback, this, std::placeholders::_1));
+parameter_listener.setUserCallback([this](const auto& params) { reconfigure_callback(params); });
 ```
 
 ### Parameter documentation
