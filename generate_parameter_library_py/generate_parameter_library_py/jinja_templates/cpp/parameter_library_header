@@ -125,12 +125,12 @@ struct StackParams {
     }
 
     bool try_get_params(Params & params_in) const {
-      if (mutex_.try_lock()) {
+      std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
+      if (lock.owns_lock()) {
         if (const bool is_old = params_in.__stamp != params_.__stamp; is_old) {
           params_in = params_;
+          return true;
         }
-        mutex_.unlock();
-        return true;
       }
       return false;
     }
