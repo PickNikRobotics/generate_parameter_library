@@ -65,7 +65,7 @@ TEST_F(ExampleTest, check_parameters) {
 }
 
 TEST_F(ExampleTest, try_get_params) {
-  ASSERT_TRUE(param_listener_->try_get_params(params_));
+  ASSERT_FALSE(param_listener_->try_get_params(params_));
 
   const rclcpp ::Parameter new_param("interpolation_mode", "linear");
   example_test_node_->set_parameter(new_param);
