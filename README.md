@@ -364,6 +364,29 @@ params.gain.joints_map.at("joint1").interfaces_map.at("position").value
 params.gain.get_entry("joint1").get_entry("position").value
 ```
 
+### Additional Constraints
+The `additional_constraints` field is not mandatory but allows for user defined data to be packaged into the ParameterDescriptor.
+This is useful when you need to convey additional data, constraints, or instructions along with the parameter for your specific application,
+where it may not have access to the validators included in your `parameter.yaml`.
+For example, this could include a JSON schema which your UI uses to generate a form to update the parameter, or valid bounds for a value.
+
+```yaml
+cpp_namespace:
+  operating_mode:
+    type: string
+    default_value: "standby"
+    description: "Operating mode of the robot."
+    additional_constraints: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"enum\":[\"standby\",\"navigation\",\"take_over_the_world\"]}"
+  speed:
+    type: double
+    default_value: 5.0
+    description: "Speed of the robot in m/s."
+    additional_constraints: "{\"type\":\"number\",\"minimum\":0,\"maximum\":10}"
+    validation:
+        gt_eq<>: [0.0]
+        lt_eq<>: [10.0]
+```
+
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
 If you specified it to be `turtlesim_parameters` you can then include the generated code with `#include <turtlesim/turtlesim_parameters.hpp>`.
