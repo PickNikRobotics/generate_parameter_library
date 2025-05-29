@@ -376,7 +376,7 @@ cpp_namespace:
     type: string
     default_value: "standby"
     description: "Operating mode of the robot."
-    additional_constraints: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"enum\":[\"standby\",\"navigation\",\"take_over_the_world\"]}"
+    additional_constraints: "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema#\",\"enum\":[\"standby\",\"navigation\",\"take_over_the_world\"]}"
   speed:
     type: double
     default_value: 5.0

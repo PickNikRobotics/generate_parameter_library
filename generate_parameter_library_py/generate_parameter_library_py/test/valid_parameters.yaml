@@ -7,7 +7,7 @@ admittance_controller:
     type: string
     default_value: "spline"
     description: "specifies which algorithm to use for interpolation."
-    additional_constraints: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"enum\": [\"spline\", \"linear\"]}"
+    additional_constraints: "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema#\",\"enum\": [\"spline\", \"linear\"]}"
     validation:
       one_of<>: [ [ "spline", "linear" ] ]
       no_args_validator: null
