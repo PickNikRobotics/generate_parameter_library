@@ -211,8 +211,8 @@ struct StackParams {
       update_internal_params(updated_params);
     }
 
-    using UserCallbackType = std::function<void(const Params&)>;
-    void setUserCallback(const UserCallbackType& callback){
+    using userParameterUpdateCB = std::function<void(const Params&)>;
+    void setUserCallback(const userParameterUpdateCB& callback){
       user_callback_ = callback;
     }
 
@@ -231,7 +231,7 @@ struct StackParams {
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
-      UserCallbackType user_callback_;
+      userParameterUpdateCB user_callback_;
 
       // rclcpp::Logger cannot be default-constructed
       // so we must provide a initialization here even though
