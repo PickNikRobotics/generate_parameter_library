@@ -67,6 +67,12 @@ class MinimalParam(rclpy.node.Node):
 
     def reconfigure_callback(self, parameters):
         self.get_logger().info("Reconfigure callback fired!")
+        self.get_logger().info(
+            "New control frame parameter is: '%s'" % parameters.control.frame.id
+        )
+        self.get_logger().info("fixed string is: '%s'" % parameters.fixed_string)
+        for d in parameters.fixed_array:
+            self.get_logger().info("value: '%s'" % str(d))
 
 def main(args=None):
     rclpy.init(args=args)
