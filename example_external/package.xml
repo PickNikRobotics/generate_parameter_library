@@ -5,6 +5,8 @@
   <version>0.4.0</version>
   <description>Example usage of a parameter header generated in another package.</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+  <maintainer email="nathanbrooks@picknik.ai">Nathan Brooks</maintainer>
+  <maintainer email="shaurya.kumar@picknik.ai">Shaurya Kumar</maintainer>
   <license>BSD-3-Clause</license>
   <author email="auguste@forssea-robotics.fr">Auguste Bourgois</author>
 
