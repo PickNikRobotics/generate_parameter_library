@@ -42,6 +42,7 @@ class MinimalParam(rclpy.node.Node):
 
         self.param_listener = admittance_controller.ParamListener(self)
         self.params = self.param_listener.get_params()
+        self.param_listener.set_user_callback(self.reconfigure_callback)
         self.get_logger().info(
             "Initial control frame parameter is: '%s'" % self.params.control.frame.id
         )
@@ -63,6 +64,15 @@ class MinimalParam(rclpy.node.Node):
             self.get_logger().info("fixed string is: '%s'" % self.params.fixed_string)
             for d in self.params.fixed_array:
                 self.get_logger().info("value: '%s'" % str(d))
+
+    def reconfigure_callback(self, parameters):
+        self.get_logger().info('Reconfigure callback fired!')
+        self.get_logger().info(
+            "New control frame parameter is: '%s'" % parameters.control.frame.id
+        )
+        self.get_logger().info("fixed string is: '%s'" % parameters.fixed_string)
+        for d in parameters.fixed_array:
+            self.get_logger().info("value: '%s'" % str(d))
 
 
 def main(args=None):
