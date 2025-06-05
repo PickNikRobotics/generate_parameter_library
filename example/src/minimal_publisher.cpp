@@ -42,6 +42,8 @@ MinimalPublisher::MinimalPublisher(const rclcpp::NodeOptions& options)
       500ms, std::bind(&MinimalPublisher::timer_callback, this));
   param_listener_ =
       std::make_shared<ParamListener>(get_node_parameters_interface());
+  param_listener_->setUserCallback(
+      [this](const auto& params) { reconfigure_callback(params); });
   params_ = param_listener_->get_params();
 
   [[maybe_unused]] StackParams s_params = param_listener_->get_stack_params();
@@ -68,6 +70,19 @@ void MinimalPublisher::timer_callback() {
     for (auto d : fixed_array) {
       RCLCPP_INFO(get_logger(), "value: '%s'", std::to_string(d).c_str());
     }
+  }
+}
+
+void MinimalPublisher::reconfigure_callback(
+    const admittance_controller::Params& params) {
+  RCLCPP_INFO(get_logger(), "Reconfigure callback fired!");
+  RCLCPP_INFO(get_logger(), "New control frame parameter is: '%s'",
+              params.control.frame.id.c_str());
+  RCLCPP_INFO(get_logger(), "fixed string is: '%s'",
+              std::string{params.fixed_string}.c_str());
+  const auto fixed_array = params.fixed_array;
+  for (auto d : fixed_array) {
+    RCLCPP_INFO(get_logger(), "value: '%s'", std::to_string(d).c_str());
   }
 }
 

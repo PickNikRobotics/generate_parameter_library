@@ -182,6 +182,9 @@ struct StackParams {
 {%- endif %}
       updated_params.__stamp = clock_.now();
       update_internal_params(updated_params);
+      if (user_callback_) {
+         user_callback_(updated_params);
+      }
       return rsl::to_parameter_result_msg({});
     }
 
@@ -208,6 +211,15 @@ struct StackParams {
       update_internal_params(updated_params);
     }
 
+    using userParameterUpdateCB = std::function<void(const Params&)>;
+    void setUserCallback(const userParameterUpdateCB& callback){
+      user_callback_ = callback;
+    }
+
+    void clearUserCallback(){
+      user_callback_ = {};
+    }
+
     private:
       void update_internal_params(Params updated_params) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -219,6 +231,7 @@ struct StackParams {
       rclcpp::Clock clock_;
       std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> handle_;
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
+      userParameterUpdateCB user_callback_;
 
       // rclcpp::Logger cannot be default-constructed
       // so we must provide a initialization here even though
