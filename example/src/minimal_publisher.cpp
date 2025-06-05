@@ -77,7 +77,7 @@ void MinimalPublisher::reconfigure_callback(
     const admittance_controller::Params& params) {
   RCLCPP_INFO(get_logger(), "Reconfigure callback fired!");
   RCLCPP_INFO(get_logger(), "New control frame parameter is: '%s'",
-            params.control.frame.id.c_str());
+              params.control.frame.id.c_str());
   RCLCPP_INFO(get_logger(), "fixed string is: '%s'",
               std::string{params.fixed_string}.c_str());
   const auto fixed_array = params.fixed_array;
