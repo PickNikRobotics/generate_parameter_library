@@ -105,9 +105,9 @@ struct StackParams {
     }
 
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
-                  rclcpp::Logger logger, std::string const& prefix = "") {
-      logger_ = std::move(logger);
-      prefix_ = prefix;
+                  rclcpp::Logger logger, std::string const& prefix = "")
+    : logger_{std::move(logger)},
+      prefix_{prefix} {
       if (!prefix_.empty() && prefix_.back() != '.') {
         prefix_ += ".";
       }
@@ -233,10 +233,7 @@ struct StackParams {
       std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;
       userParameterUpdateCB user_callback_;
 
-      // rclcpp::Logger cannot be default-constructed
-      // so we must provide a initialization here even though
-      // every one of our constructors initializes logger_
-      rclcpp::Logger logger_ = rclcpp::get_logger("{{namespace}}");
+      rclcpp::Logger logger_;
       std::mutex mutable mutex_;
   };
 
