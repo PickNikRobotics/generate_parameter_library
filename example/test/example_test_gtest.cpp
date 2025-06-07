@@ -64,8 +64,17 @@ TEST_F(ExampleTest, check_parameters) {
   ASSERT_EQ(params_.ft_sensor.filter_coefficient, 0.1);
 }
 
+TEST_F(ExampleTest, try_update_params) {
+  ASSERT_FALSE(param_listener_->try_update_params(params_));
+
+  const rclcpp ::Parameter new_param("interpolation_mode", "linear");
+  example_test_node_->set_parameter(new_param);
+  ASSERT_TRUE(param_listener_->try_update_params(params_));
+  ASSERT_EQ(params_.interpolation_mode, "linear");
+}
+
 TEST_F(ExampleTest, try_get_params) {
-  ASSERT_FALSE(param_listener_->try_get_params(params_));
+  ASSERT_TRUE(param_listener_->try_get_params(params_));
 
   const rclcpp ::Parameter new_param("interpolation_mode", "linear");
   example_test_node_->set_parameter(new_param);

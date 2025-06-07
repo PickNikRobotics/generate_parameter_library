@@ -124,13 +124,37 @@ struct StackParams {
       return params_;
     }
 
-    bool try_get_params(Params & params_in) const {
+    /**
+     * @brief Tries to update the parsed Params object
+     * @param params_in The Params object to update
+     * @return true if the Params object was updated, false if it was already up to date or the mutex could not be locked
+     * @note This function tries to lock the mutex without blocking, so it can be used in a RT loop
+     */
+    bool try_update_params(Params & params_in) const {
       std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
       if (lock.owns_lock()) {
         if (const bool is_old = params_in.__stamp != params_.__stamp; is_old) {
           params_in = params_;
           return true;
         }
+      }
+      return false;
+    }
+
+    /**
+     * @brief Tries to get the current Params object
+     * @param params_in The Params object to fill with the current parameters
+     * @return true if mutex can be locked, false if mutex could not be locked
+     * @note The parameters are only filled, when the mutex can be locked and the params timestamp is different
+     * @note This function tries to lock the mutex without blocking, so it can be used in a RT loop
+     */
+    bool try_get_params(Params & params_in) const {
+      if (mutex_.try_lock()) {
+        if (const bool is_old = params_in.__stamp != params_.__stamp; is_old) {
+          params_in = params_;
+        }
+        mutex_.unlock();
+        return true;
       }
       return false;
     }
