@@ -106,8 +106,8 @@ struct StackParams {
 
     ParamListener(const std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>& parameters_interface,
                   rclcpp::Logger logger, std::string const& prefix = "")
-    : logger_{std::move(logger)},
-      prefix_{prefix} {
+    : prefix_{prefix},
+      logger_{std::move(logger)} {
       if (!prefix_.empty() && prefix_.back() != '.') {
         prefix_ += ".";
       }
