@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.5.0 (2025-06-12)
+------------------
 * Add `try_update_params` method (`#260 <https://github.com/PickNikRobotics/generate_parameter_library/issues/260>`_)
 * Add user callback (`#250 <https://github.com/PickNikRobotics/generate_parameter_library/issues/250>`_)
 * Contributors: Nathan Brooks, Sai Kishor Kothakota, Yannick de Hoop

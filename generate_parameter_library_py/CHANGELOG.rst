@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.5.0 (2025-06-12)
+------------------
 * Add `try_update_params` method (`#260 <https://github.com/PickNikRobotics/generate_parameter_library/issues/260>`_)
 * Fix ros2_controllers issue`#1740 <https://github.com/PickNikRobotics/generate_parameter_library/issues/1740>`_ -Wreorder fix (`#264 <https://github.com/PickNikRobotics/generate_parameter_library/issues/264>`_)
 * No need to default-construct logger in the declaration (`#252 <https://github.com/PickNikRobotics/generate_parameter_library/issues/252>`_)

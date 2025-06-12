@@ -2,8 +2,8 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.5.0 (2025-06-12)
+------------------
 * Add some new maintainers for ROS releases (`#263 <https://github.com/PickNikRobotics/generate_parameter_library/issues/263>`_)
 * Contributors: Nathan Brooks
 
