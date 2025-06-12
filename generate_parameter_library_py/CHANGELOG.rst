@@ -2,6 +2,16 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add `try_update_params` method (`#260 <https://github.com/PickNikRobotics/generate_parameter_library/issues/260>`_)
+* Fix ros2_controllers issue`#1740 <https://github.com/PickNikRobotics/generate_parameter_library/issues/1740>`_ -Wreorder fix (`#264 <https://github.com/PickNikRobotics/generate_parameter_library/issues/264>`_)
+* No need to default-construct logger in the declaration (`#252 <https://github.com/PickNikRobotics/generate_parameter_library/issues/252>`_)
+* Add user callback python (`#254 <https://github.com/PickNikRobotics/generate_parameter_library/issues/254>`_)
+* Add user callback (`#250 <https://github.com/PickNikRobotics/generate_parameter_library/issues/250>`_)
+* Fix merge install for python packages (`#241 <https://github.com/PickNikRobotics/generate_parameter_library/issues/241>`_)
+* Contributors: Darren Tsai, Dimitri Decious, Nathan Brooks, Sai Kishor Kothakota, Tim Clephas, Yannick de Hoop
+
 0.4.0 (2025-01-13)
 ------------------
 * Unit test friendly folder structure for Python examples (`#237 <https://github.com/PickNikRobotics/generate_parameter_library/issues/237>`_)

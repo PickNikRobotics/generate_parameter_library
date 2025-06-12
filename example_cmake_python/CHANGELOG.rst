@@ -2,6 +2,11 @@
 Changelog for package cmake_generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add user callback python (`#254 <https://github.com/PickNikRobotics/generate_parameter_library/issues/254>`_)
+* Contributors: Nathan Brooks, Yannick de Hoop
+
 0.4.0 (2025-01-13)
 ------------------
 

@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix generate_parameter_library macro on Windows (`#242 <https://github.com/PickNikRobotics/generate_parameter_library/issues/242>`_)
+* Contributors: Nathan Brooks, Silvio Traversaro
+
 0.4.0 (2025-01-13)
 ------------------
 * Change header install path (`#213 <https://github.com/PickNikRobotics/generate_parameter_library/issues/213>`_)
