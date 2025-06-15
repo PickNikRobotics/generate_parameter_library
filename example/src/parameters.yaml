@@ -40,12 +40,13 @@ admittance_controller:
             gt_eq<>: [ 0.0001 ]
         __map_joints:
           __map_dof_names:
-            nested_deep:
-              type: double
-              default_value: 1.0
-              description: "test deep nested map params"
-              validation:
-                gt_eq<>: [ 0.0001 ]
+              nested:
+                nested_deep:
+                  type: double
+                  default_value: 1.0
+                  description: "test deep nested map params"
+                  validation:
+                    gt_eq<>: [ 0.0001 ]
 
   pid:
     rate:
