@@ -79,7 +79,7 @@ generate_parameter_module(
 )
 ```
 
-### Use generated struct in project source code
+### Use generated struct into project source code
 
 **src/turtlesim.cpp**
 ```c++
