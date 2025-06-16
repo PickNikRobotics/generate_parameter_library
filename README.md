@@ -13,7 +13,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 ## Basic Usage
 1. [Create YAML parameter codegen file](#create-yaml-parameter-codegen-file)
 2. [Add parameter library generation to project](#add-parameter-library-generation-to-project)
-3. [Use generated struct into project source code](#use-generated-struct-into-project-source-code)
+3. [Use generated struct in project source code](#use-generated-struct-in-project-source-code)
 
 ### Create yaml parameter codegen file
 Write a yaml file to declare your parameters and their attributes.
@@ -79,7 +79,7 @@ generate_parameter_module(
 )
 ```
 
-### Use generated struct into project source code
+### Use generated struct in project source code
 
 **src/turtlesim.cpp**
 ```c++
