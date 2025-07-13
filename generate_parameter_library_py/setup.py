@@ -79,13 +79,16 @@ setup(
     keywords=['ROS'],
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD-3-Clause',
         'Programming Language :: Python',
         'Topic :: Software Development',
     ],
     description='Generate the ROS parameter struct in C++ and Python with callbacks for updating.',
     license='BSD-3-Clause',
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         'console_scripts': [
             'generate_parameter_library_cpp = generate_parameter_library_py.generate_cpp_header:main',
