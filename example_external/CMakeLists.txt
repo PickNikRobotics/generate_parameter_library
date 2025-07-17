@@ -49,4 +49,10 @@ install(
 
 ament_export_targets(export_generate_parameter_library_example_external HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp rclcpp_components generate_parameter_library_example)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package()
