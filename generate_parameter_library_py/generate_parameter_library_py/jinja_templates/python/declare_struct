@@ -1,5 +1,5 @@
 @dataclass
-class __{{struct_name}}:
+class {{struct_name}}:
 {%- filter indent(width=4) %}
 {% if struct_fields|length -%}
 {{struct_fields-}}
@@ -9,13 +9,13 @@ class __{{struct_name}}:
 {% endif -%}
 {% endfilter -%}
 {% if struct_instance|length -%}
-{{struct_instance}}: __{{struct_name}} = field(default_factory=__{{struct_name}})
+{{struct_instance}}: {{struct_name}} = field(default_factory={{struct_name}})
 {% endif -%}
 {% if not struct_instance|length -%}
-__map_type = __{{struct_name}}
+_map_type = {{struct_name}}
 def add_entry(self, name):
     if not hasattr(self, name):
-        setattr(self, name, self.__map_type())
+        setattr(self, name, self._map_type())
     return getattr(self, name)
 def get_entry(self, name):
     return getattr(self, name)
