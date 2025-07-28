@@ -1,4 +1,6 @@
 # flake8: noqa
+# type: ignore
+# fmt: off
 
 {{comments}}
 
