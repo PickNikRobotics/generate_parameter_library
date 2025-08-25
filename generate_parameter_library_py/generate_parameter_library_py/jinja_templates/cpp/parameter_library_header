@@ -95,6 +95,9 @@ struct StackParams {
     ParamListener(rclcpp::Node::SharedPtr node, std::string const& prefix = "")
     : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
 
+    ParamListener(rclcpp::Node* node, std::string const& prefix = "")
+    : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
+
     ParamListener(rclcpp_lifecycle::LifecycleNode::SharedPtr node, std::string const& prefix = "")
     : ParamListener(node->get_node_parameters_interface(), node->get_logger(), prefix) {}
 
