@@ -1,6 +1,7 @@
 # flake8: noqa
 # type: ignore
 # fmt: off
+# isort: skip_file
 
 {{comments}}
 
