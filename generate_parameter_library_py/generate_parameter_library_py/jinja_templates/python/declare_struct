@@ -13,10 +13,10 @@ class {{struct_name}}:
 {% endif -%}
 {% if not struct_instance|length -%}
 _map_type = {{struct_name}}
-def add_entry(self, name):
+def add_entry(self, name) -> {{struct_name}}:
     if not hasattr(self, name):
         setattr(self, name, self._map_type())
     return getattr(self, name)
-def get_entry(self, name):
+def get_entry(self, name) -> {{struct_name}}:
     return getattr(self, name)
 {% endif -%}
