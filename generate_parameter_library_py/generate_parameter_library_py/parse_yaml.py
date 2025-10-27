@@ -101,8 +101,9 @@ def int_to_integer_str(value: str):
 
 def get_dynamic_parameter_field(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    parameter_field = tmp[-1]
-    return parameter_field
+    num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
+    field = tmp[(max(num_nested)+1):] if len(num_nested) else tmp[-1]
+    return '.'.join(field)
 
 
 def get_dynamic_mapped_parameter(yaml_parameter_name: str):
@@ -115,8 +116,8 @@ def get_dynamic_mapped_parameter(yaml_parameter_name: str):
 
 def get_dynamic_struct_name(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    num_nested = sum([is_mapped_parameter(val) for val in tmp])
-    struct_name = tmp[: -(num_nested + 1)]
+    num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
+    struct_name = tmp[:(min(num_nested))] if len(num_nested) else ""
     return '.'.join(struct_name)
 
 
@@ -806,7 +807,7 @@ class GenerateCode:
         var = VariableDeclaration(code_gen_variable)
 
         # check if runtime parameter
-        is_runtime_parameter = is_mapped_parameter(self.struct_tree.struct_name)
+        is_runtime_parameter = is_mapped_parameter(param_name)
 
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
