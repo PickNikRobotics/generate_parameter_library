@@ -102,7 +102,7 @@ def int_to_integer_str(value: str):
 def get_dynamic_parameter_field(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
     num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
-    field = tmp[(max(num_nested)+1):] if len(num_nested) else tmp[-1]
+    field = tmp[(max(num_nested) + 1) :] if len(num_nested) else tmp[-1]
     return '.'.join(field)
 
 
@@ -117,7 +117,7 @@ def get_dynamic_mapped_parameter(yaml_parameter_name: str):
 def get_dynamic_struct_name(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
     num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
-    struct_name = tmp[:(min(num_nested))] if len(num_nested) else ""
+    struct_name = tmp[: (min(num_nested))] if len(num_nested) else ''
     return '.'.join(struct_name)
 
 
