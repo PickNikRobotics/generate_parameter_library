@@ -77,6 +77,77 @@ def validate_yaml_against_schema(
         sys.exit(1)
 
 
+def validate_additional_constraints(
+    node: dict, path: str, yaml_path: Path, ui_schema: Optional[dict]
+) -> bool:
+    """
+    Recursively validate additional_constraints JSON content against UI schema.
+    Returns True if valid or if ui_schema is None.
+    """
+    if ui_schema is None:
+        return True
+
+    all_valid = True
+
+    # Check if this node has additional_constraints
+    if 'additional_constraints' in node:
+        constraints_str = node['additional_constraints']
+        try:
+            # Parse the JSON string
+            constraints_data = json.loads(constraints_str)
+
+            # Validate against UI schema
+            from jsonschema import Draft7Validator
+
+            validator = Draft7Validator(ui_schema)
+            errors = list(validator.iter_errors(constraints_data))
+
+            if errors:
+                print(
+                    f"\n❌ additional_constraints validation failed at {path} in {yaml_path}:",
+                    file=sys.stderr,
+                )
+                for error in errors:
+                    error_path = (
+                        ' -> '.join(str(p) for p in error.path)
+                        if error.path
+                        else 'root'
+                    )
+                    print(f"  Path: {error_path}", file=sys.stderr)
+                    print(f"  Error: {error.message}", file=sys.stderr)
+                print(f"  Constraints value: {constraints_str}", file=sys.stderr)
+                print('', file=sys.stderr)
+                all_valid = False
+
+        except json.JSONDecodeError as e:
+            print(
+                f"\n❌ additional_constraints is not valid JSON at {path} in {yaml_path}:",
+                file=sys.stderr,
+            )
+            print(f"  Error: {e}", file=sys.stderr)
+            print(f"  Value: {constraints_str}", file=sys.stderr)
+            print('', file=sys.stderr)
+            all_valid = False
+
+    # Recursively check nested parameters
+    for key, value in node.items():
+        if isinstance(value, dict) and key not in [
+            'type',
+            'default_value',
+            'description',
+            'read_only',
+            'validation',
+            'additional_constraints',
+        ]:
+            nested_path = f"{path} -> {key}" if path else key
+            if not validate_additional_constraints(
+                value, nested_path, yaml_path, ui_schema
+            ):
+                all_valid = False
+
+    return all_valid
+
+
 def validate_parameter_structure(yaml_data: dict, yaml_path: Path) -> bool:
     """
     Additional validation beyond JSON schema:
@@ -108,14 +179,25 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         '--schema',
         type=Path,
-        default=Path(__file__).parent.parent / 'parameter_schema.json',
+        default=Path(__file__).parent / 'parameter_schema.json',
         help='Path to JSON schema file (default: parameter_schema.json)',
+    )
+    parser.add_argument(
+        '--ui-schema',
+        action='store_true',
+        help='Validate additional_constraints JSON content against alpha_ui_schema.json',
     )
 
     args = parser.parse_args(argv)
 
     # Load schema once
     schema = load_schema(args.schema)
+
+    # Load UI schema if flag is set
+    ui_schema = None
+    if args.ui_schema:
+        ui_schema_path = Path(__file__).parent / 'alpha_ui_schema.json'
+        ui_schema = load_schema(ui_schema_path)
 
     all_valid = True
 
@@ -135,6 +217,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         if not validate_yaml_against_schema(yaml_data, schema, yaml_file):
             all_valid = False
             continue
+
+        # Validate additional_constraints if UI schema provided
+        if ui_schema:
+            # Get the root namespace
+            root_namespace = list(yaml_data.keys())[0]
+            if not validate_additional_constraints(
+                yaml_data[root_namespace], root_namespace, yaml_file, ui_schema
+            ):
+                all_valid = False
+                continue
 
         print(f"✓ {yaml_file} is valid")
 
