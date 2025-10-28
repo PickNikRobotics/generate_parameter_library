@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "node": {
+      "patternProperties": {
+        "^(?!type$|default_value$|description$|read_only$|validation$|additional_constraints$)[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "$ref": "#/$defs/node",
+          "description": "Nested parameter or parameter group"
+        },
+        "^__map_[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "$ref": "#/$defs/node",
+          "description": "Mapped parameter group using array parameter as keys"
+        }
+      },
+      "properties": {
+        "additional_constraints": {
+          "description": "Additional constraints for ParameterDescriptor (not used for validation)",
+          "type": "string"
+        },
+        "default_value": {
+          "description": "Default value for the parameter. Type must match the declared type."
+        },
+        "description": {
+          "description": "Human-readable description shown by 'ros2 param describe'",
+          "type": "string"
+        },
+        "read_only": {
+          "default": false,
+          "description": "If true, parameter can only be set at launch time, not dynamically updated",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "Parameter data type. Use _fixed_XX suffix for fixed-size types (e.g., string_fixed_25, double_array_fixed_10)",
+          "pattern": "^(bool|int|double|string|bool_array|int_array|double_array|string_array|none|string_fixed_[0-9]+|int_array_fixed_[0-9]+|double_array_fixed_[0-9]+|string_array_fixed_[0-9]+)$",
+          "type": "string"
+        },
+        "validation": {
+          "description": "Validation functions and their arguments. Use <> suffix for templated validators (e.g., bounds<>, gt<>, one_of<>).",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://raw.githubusercontent.com/Greenroom-Robotics/generate_parameter_library/main/parameter_schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "Schema for YAML parameter definition files used by generate_parameter_library. This schema validates the structure of parameter definitions but does not perform deep type checking - use generate_parameter_library for complete validation.",
+  "maxProperties": 1,
+  "minProperties": 1,
+  "patternProperties": {
+    "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+      "$ref": "#/$defs/node"
+    }
+  },
+  "title": "ROS2 Generate Parameter Library Schema",
+  "type": "object"
+}

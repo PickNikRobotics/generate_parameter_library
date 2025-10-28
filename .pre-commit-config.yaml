@@ -28,6 +28,7 @@ repos:
       - id: check-json
       - id: check-executables-have-shebangs
       - id: pretty-format-json
+        args: ['--autofix']
       - id: check-merge-conflict
       - id: check-symlinks
       - id: check-toml

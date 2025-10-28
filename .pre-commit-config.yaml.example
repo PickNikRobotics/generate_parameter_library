@@ -1,0 +1,10 @@
+# Example pre-commit configuration for generate_parameter_library projects
+# Copy this to .pre-commit-config.yaml in your project root
+
+repos:
+  # Validate parameter YAML files against JSON schema
+  - repo: https://github.com/Greenroom-Robotics/generate_parameter_library
+    rev: main
+    hooks:
+      - id: validate-parameter-schema
+        files: .*parameters\.yaml$
