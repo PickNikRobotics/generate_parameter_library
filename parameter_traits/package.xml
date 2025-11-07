@@ -4,10 +4,11 @@
   <name>parameter_traits</name>
   <version>0.5.0</version>
   <description>Functions and types for rclcpp::Parameter</description>
-  <maintainer email="maybe@tylerjw.dev">Tyler Weaver</maintainer>
-  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+  <maintainer email="bence.magyar.robotics@gmail.com">bmagyar</maintainer>
+  <maintainer email="christoph.froehlich@ait.ac.at">christophfroehlich</maintainer>
   <maintainer email="nathanbrooks@picknik.ai">Nathan Brooks</maintainer>
   <maintainer email="shaurya.kumar@picknik.ai">Shaurya Kumar</maintainer>
+  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

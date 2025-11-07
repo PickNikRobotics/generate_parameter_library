@@ -4,9 +4,11 @@
   <name>generate_parameter_library_py</name>
   <version>0.5.0</version>
   <description>Python to generate ROS parameter library.</description>
-  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+  <maintainer email="bence.magyar.robotics@gmail.com">bmagyar</maintainer>
+  <maintainer email="christoph.froehlich@ait.ac.at">christophfroehlich</maintainer>
   <maintainer email="nathanbrooks@picknik.ai">Nathan Brooks</maintainer>
   <maintainer email="shaurya.kumar@picknik.ai">Shaurya Kumar</maintainer>
+  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
