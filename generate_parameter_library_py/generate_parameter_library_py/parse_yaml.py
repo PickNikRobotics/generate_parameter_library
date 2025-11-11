@@ -805,8 +805,8 @@ class GenerateCode:
         # add variable to struct
         var = VariableDeclaration(code_gen_variable)
 
-        # check if runtime parameter
-        is_runtime_parameter = is_mapped_parameter(self.struct_tree.struct_name)
+        # check if runtime parameter - check any ancestor in the path is a mapped parameter
+        is_runtime_parameter = any(is_mapped_parameter(x) for x in nested_name_list)
 
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)

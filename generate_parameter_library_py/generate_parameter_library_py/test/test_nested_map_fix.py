@@ -156,3 +156,129 @@ def test_single_map_parameter_names():
                 # Clean up temporary files
                 os.unlink(yaml_file.name)
                 os.unlink(output_file.name)
+
+
+def test_control_modes_nested_structures():
+    """Test nested structures within mapped parameters.
+
+    This tests the specific issue where parameters nested within mapped structures
+    (like control_modes.__map_control_mode_ids.fixed_heading.enabled) were not
+    generating loop iteration code correctly.
+    """
+
+    control_modes_yaml_content = """autopilot_params:
+  active_control_mode:
+    type: string
+    default_value: "dynamic_heading"
+    description: "The current active control mode"
+
+  control_mode_ids:
+    type: string_array
+    default_value: ["dynamic_heading", "fixed_heading"]
+    description: "List of available control modes"
+
+  control_modes:
+    __map_control_mode_ids:
+      use_trajectory:
+        type: bool
+        default_value: true
+        description: "Use generated trajectory as control reference"
+
+      fixed_heading:
+        enabled:
+          type: bool
+          default_value: false
+          description: "Enable fixed heading control"
+        angle:
+          type: double
+          default_value: 0.0
+          description: "Fixed heading angle in degrees"
+          validation:
+            bounds<>: [0.0, 360.0]
+"""
+
+    with tempfile.NamedTemporaryFile(
+        mode='w', suffix='.yaml', delete=False
+    ) as yaml_file:
+        yaml_file.write(control_modes_yaml_content)
+        yaml_file.flush()
+
+        with tempfile.NamedTemporaryFile(
+            mode='w', suffix='.py', delete=False
+        ) as output_file:
+            try:
+                run_python(output_file.name, yaml_file.name, 'test_validate.hpp')
+
+                with open(output_file.name, 'r') as f:
+                    generated_code = f.read()
+
+                # Check for proper loop generation
+                assert (
+                    'for value_1 in updated_params.control_mode_ids:' in generated_code
+                ), 'Should generate loop over control_mode_ids'
+
+                # Check that we're using get_entry correctly
+                assert (
+                    'updated_params.control_modes.get_entry(value_1)' in generated_code
+                    or 'entry = updated_params.control_modes.get_entry(value_1)' in generated_code
+                ), 'Should use get_entry to access mapped parameters'
+
+                # Get all parameter name lines
+                lines = generated_code.split('\n')
+                param_name_lines = [
+                    line
+                    for line in lines
+                    if 'param_name' in line and 'control_modes' in line
+                ]
+
+                # Assert there are parameter name lines
+                assert (
+                    len(param_name_lines) > 0
+                ), 'Should have found parameter name lines for control_modes'
+
+                # Check for expected parameter patterns (using {value_1} for dynamic substitution)
+                expected_patterns = [
+                    'control_modes.{value_1}.use_trajectory',
+                    'control_modes.{value_1}.fixed_heading.enabled',
+                    'control_modes.{value_1}.fixed_heading.angle',
+                ]
+
+                for pattern in expected_patterns:
+                    pattern_found = any(pattern in line for line in param_name_lines)
+                    assert (
+                        pattern_found
+                    ), f"Expected pattern '{pattern}' not found in generated code.\nParam lines:\n" + '\n'.join(param_name_lines[:5])
+
+                # Ensure no double dots in parameter names
+                for line in param_name_lines:
+                    assert (
+                        '..' not in line
+                    ), f'Found double dots in parameter name: {line.strip()}'
+
+                # Check that we're accessing nested parameters via entry, not via __map_
+                entry_access_lines = [
+                    line for line in lines
+                    if 'entry.' in line and ('fixed_heading' in line)
+                ]
+                assert (
+                    len(entry_access_lines) > 0
+                ), 'Should access nested parameters via entry variable'
+
+                # Verify no direct access to __map_control_mode_ids
+                wrong_access_lines = [
+                    line for line in lines
+                    if 'control_modes.__map_control_mode_ids' in line
+                ]
+                # Filter out comments
+                wrong_access_lines = [
+                    line for line in wrong_access_lines
+                    if not line.strip().startswith('#')
+                ]
+                assert (
+                    len(wrong_access_lines) == 0
+                ), f'Should not directly access __map_control_mode_ids. Found:\n' + '\n'.join(wrong_access_lines)
+
+            finally:
+                # Clean up temporary files
+                os.unlink(yaml_file.name)
+                os.unlink(output_file.name)
