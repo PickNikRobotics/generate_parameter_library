@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
       - name: Install clang-format
         run: sudo apt-get install clang-format
       - uses: pre-commit/action@v3.0.1
