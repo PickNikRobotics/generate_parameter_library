@@ -29,7 +29,11 @@ setup(
     maintainer_email='paulgesel@gmail.com',
     description='Example usage of generate_parameter_library for a python module',
     license='BSD-3-Clause',
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         'console_scripts': [
             'test_node = generate_parameter_module_example.minimal_publisher:main'
