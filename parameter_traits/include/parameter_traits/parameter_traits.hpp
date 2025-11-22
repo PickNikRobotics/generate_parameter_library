@@ -43,8 +43,8 @@ template <typename... Args>
 [[deprecated(
     "When returning tl::expected<void, std::string> you can call fmt::format "
     "directly.")]] auto
-ERROR(const std::string& format, Args... args)
-    -> tl::expected<void, std::string> {
+ERROR(const std::string& format,
+      Args... args) -> tl::expected<void, std::string> {
   return tl::make_unexpected(fmt::format(format, args...));
 }
 

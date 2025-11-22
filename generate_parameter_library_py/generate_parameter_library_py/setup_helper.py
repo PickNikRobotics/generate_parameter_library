@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without

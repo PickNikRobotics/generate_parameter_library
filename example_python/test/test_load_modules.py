@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import generate_parameter_module_example
 
 print(f'Imported module from: {generate_parameter_module_example.__file__}')

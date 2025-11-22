@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 def valid_string_cpp(description):
     """
     Filter a string to make it a valid C++ string literal.
