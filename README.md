@@ -471,7 +471,7 @@ force_torque_broadcaster_controller:
 
 
 ### Example Project
-See [cpp example](example/) or [python example](example_python/) for complete examples of how to use the generate_parameter_library.
+See [cpp example](https://github.com/PickNikRobotics/generate_parameter_library/tree/main/example) or [python example](https://github.com/PickNikRobotics/generate_parameter_library/tree/main/example_python) for complete examples of how to use the generate_parameter_library.
 
 ### Generated code output
 The generated code primarily consists of two major components:

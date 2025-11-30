@@ -1,0 +1,10 @@
+type: "rosdoc2 config"
+version: 1
+
+---
+settings: {
+    # Prevent rosdoc2 from infering this is a python package because it depends on ament_cmake_python
+    never_run_sphinx_apidoc: true,
+  }
+builders:
+  - sphinx: {}
