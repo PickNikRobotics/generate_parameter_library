@@ -2,6 +2,12 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)
+* Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
+* Contributors: Christoph Fröhlich, Nathan Brooks
+
 0.5.0 (2025-06-12)
 ------------------
 * Add some new maintainers for ROS releases (`#263 <https://github.com/PickNikRobotics/generate_parameter_library/issues/263>`_)

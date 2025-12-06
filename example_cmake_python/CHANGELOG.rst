@@ -2,6 +2,12 @@
 Changelog for package cmake_generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)
+* Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
+* Contributors: Christoph Fröhlich, Nathan Brooks
+
 0.5.0 (2025-06-12)
 ------------------
 * Add user callback python (`#254 <https://github.com/PickNikRobotics/generate_parameter_library/issues/254>`_)
