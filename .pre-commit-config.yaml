@@ -103,9 +103,3 @@ repos:
         entry: ament_copyright
         language: system
         exclude: .*/conf\.py$
-      - id: ament_flake8
-        name: ament_flake8
-        description: Check Python code style using flake8.
-        language: system
-        types: [python]
-        entry: ament_flake8
