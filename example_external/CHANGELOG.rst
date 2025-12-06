@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_example_external
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.6.0 (2025-12-06)
+------------------
 * Update linters for generate_parameter_library_external (`#270 <https://github.com/PickNikRobotics/generate_parameter_library/issues/270>`_)
 * Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
 * Contributors: Nathan Brooks, Plumezz

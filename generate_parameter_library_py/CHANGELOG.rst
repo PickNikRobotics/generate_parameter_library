@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.6.0 (2025-12-06)
+------------------
 * Use templated NodeT in c++ constructor  (`#274 <https://github.com/PickNikRobotics/generate_parameter_library/issues/274>`_)
 * Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)
 * Improve logging message when a parameter is not set (`#279 <https://github.com/PickNikRobotics/generate_parameter_library/issues/279>`_)
