@@ -30,9 +30,9 @@
 
 #include <string>
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <fmt/core.h>
+
+#include <rclcpp/rclcpp.hpp>
 #include <tl_expected/expected.hpp>
 
 namespace custom_validators {
