@@ -28,11 +28,11 @@
 
 #pragma once
 
+#include <fmt/core.h>
+
 #include <string>
 
 #include <rclcpp/rclcpp.hpp>
-
-#include <fmt/core.h>
 #include <tl_expected/expected.hpp>
 
 namespace custom_validators {

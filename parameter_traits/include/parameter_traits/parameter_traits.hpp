@@ -29,6 +29,10 @@
 #pragma once
 
 #include <fmt/core.h>
+
+#include <string>
+#include <vector>
+
 #include <rsl/algorithm.hpp>
 #include <tl_expected/expected.hpp>
 

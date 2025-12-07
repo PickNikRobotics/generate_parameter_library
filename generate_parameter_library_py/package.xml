@@ -17,7 +17,6 @@
   <depend>python3-typeguard</depend>
   <depend>python3-yaml</depend>
 
-  <test_depend>ament_copyright</test_depend>
   <test_depend>python3-pytest</test_depend>
 
   <export>
