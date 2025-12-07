@@ -34,6 +34,7 @@ repos:
       - id: check-vcs-permalinks
       - id: check-yaml
         exclude: generate_parameter_library_py/generate_parameter_library_py/test
+        args: ["--allow-multiple-documents"]
       - id: debug-statements
       - id: destroyed-symlinks
       - id: detect-private-key
