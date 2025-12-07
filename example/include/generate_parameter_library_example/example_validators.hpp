@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <fmt/core.h>
+
+#include <string>
 
 #include <rclcpp/rclcpp.hpp>
 #include <tl_expected/expected.hpp>
