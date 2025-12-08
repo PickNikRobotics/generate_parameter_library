@@ -7,11 +7,11 @@ for value_{{loop.index}} in updated_params.{{mapped_param}}:
 {% if struct_name != "" %}
 {{param_struct_instance}}.{{struct_name}}{% for map in parameter_map%}.add_entry(value_{{loop.index}}){% endfor %}
 entry = {{param_struct_instance}}.{{struct_name}}{% for map in parameter_map%}.get_entry(value_{{loop.index}}){% endfor %}
-param_name = f"{self.prefix_}{{struct_name}}.{% for map in parameter_map%}{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
+param_name = f"{self.prefix_}{{struct_name}}.{% for map in parameter_map%}{value_{{loop.index}}}{% if not loop.last %}.{% endif %}{% endfor %}.{{parameter_field}}"
 {% else %}
 {{param_struct_instance}}{% for map in parameter_map%}.add_entry(value_{{loop.index}}){% endfor %}
 entry = {{param_struct_instance}}{% for map in parameter_map%}.get_entry(value_{{loop.index}}){% endfor %}
-param_name = f"{self.prefix_}{% for map in parameter_map%}{value_{{loop.index}}}.{% endfor %}{{parameter_field}}"
+param_name = f"{self.prefix_}{% for map in parameter_map%}{value_{{loop.index}}}{% if not loop.last %}.{% endif %}{% endfor %}.{{parameter_field}}"
 {% endif -%}
 if not self.node_.has_parameter(self.prefix_ + param_name):
 {%- filter indent(width=4) %}
