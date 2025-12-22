@@ -29,11 +29,11 @@
 // Author: Denis Štogl
 //
 
+#include <memory>
+
 #include "generate_parameter_library_example/admittance_controller_parameters.hpp"
 #include "gtest/gtest.h"
 #include "rclcpp/rclcpp.hpp"
-
-#include <memory>
 
 class ExampleTest : public ::testing::Test {
  public:
