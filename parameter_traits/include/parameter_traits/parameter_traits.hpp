@@ -36,6 +36,19 @@
 #include <rsl/algorithm.hpp>
 #include <tl_expected/expected.hpp>
 
+#ifndef SILENCE_DEPRECATION_WARNINGS
+#ifdef _MSC_VER
+#pragma message( \
+    "This header is obsolete, \
+  please include \"rsl/algorithm.hpp\" for rsl::contains and rsl::is_unique, \
+  and \"tl_expected/expected.hpp\" for tl::expected.")
+#else
+#warning This header is obsolete, \
+  please include "rsl/algorithm.hpp" for rsl::contains and rsl::is_unique, \
+  and "tl_expected/expected.hpp" for tl::expected.
+#endif
+#endif
+
 namespace parameter_traits {
 
 using Result

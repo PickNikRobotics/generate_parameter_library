@@ -23,5 +23,11 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <export>
+    <deprecated>
+      This package will be removed in Lyrical Luth. Instead, use the
+      rsl or tl_expected packages directly for similar functionality.
+    </deprecated>
+</export>
   </export>
 </package>
