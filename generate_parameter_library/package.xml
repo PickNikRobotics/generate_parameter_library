@@ -26,6 +26,8 @@
   <depend>tcb_span</depend>
   <depend>tl_expected</depend>
 
+  <exec_depend>ament_cmake_gmock</exec_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>
