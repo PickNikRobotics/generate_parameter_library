@@ -21,7 +21,7 @@ from ament_index_python.packages import get_package_share_path
 from generate_parameter_library_py.generate_cpp_header import run as run_cpp
 from generate_parameter_library_py.generate_python_module import run as run_python
 from generate_parameter_library_py.generate_markdown import run as run_md
-from generate_parameter_library_py.parse_yaml import YAMLSyntaxError
+from generate_parameter_library_py.parse_yaml import YAMLSyntaxError, get_dynamic_mapped_parameter
 from generate_parameter_library_py.generate_cpp_header import parse_args
 
 
@@ -86,17 +86,31 @@ def test_expected(test_input, expected):
     print(e.value)
 
 
-def test_parse_valid_parameter_file():
+@pytest.mark.parametrize(
+    "yaml_test_file",
+    [
+        ("valid_parameters.yaml"),
+        ("valid_parameters_with_none_type.yaml"),
+        ("nested_map_test.yaml"),
+        ("nested_map_keys.yaml"),
+    ],
+)
+def test_parse_valid_parameter_files(yaml_test_file):
     try:
-        yaml_test_file = 'valid_parameters.yaml'
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f'failed to parse valid file, reason:{e}'
 
-
-def test_parse_valid_parameter_file_including_none_type():
-    try:
-        yaml_test_file = 'valid_parameters_with_none_type.yaml'
-        set_up(yaml_test_file)
-    except Exception as e:
-        assert False, f'failed to parse valid file, reason:{e}'
+@pytest.mark.parametrize(
+    "param_name,expected",
+    [
+        ("nested.__map_entries.value", ["nested.entries"]),
+        ("level1.level2.__map_items.param", ["level1.level2.items"]),
+        ("__map_keys.value", ["keys"]),
+        ("__map_level1.__map_level2.__map_level3.value", ["level1", "level1_map[value_1].level2", "level1_map[value_1].level2_map[value_2].level3"]),
+    ],
+)
+def test_get_dynamic_mapped_parameter_nested(param_name, expected):
+    """Test that get_dynamic_mapped_parameter returns correct paths for nested maps."""
+    result = get_dynamic_mapped_parameter(param_name)
+    assert result == expected
