@@ -35,3 +35,7 @@ find_package(tcb_span REQUIRED)
 find_package(tl_expected REQUIRED)
 
 include("${generate_parameter_library_DIR}/generate_parameter_library.cmake")
+
+# Expose the Python codegen helper function to downstream packages that call:
+#   find_package(generate_parameter_library REQUIRED)
+include("${generate_parameter_library_DIR}/generate_parameter_library_py_codegen.cmake")
