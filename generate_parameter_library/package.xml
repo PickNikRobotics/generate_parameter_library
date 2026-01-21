@@ -26,6 +26,8 @@
   <depend>tcb_span</depend>
   <depend>tl_expected</depend>
 
+  <buildtool_depend>hydra_cpack</buildtool_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

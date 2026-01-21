@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+from generate_parameter_library_py.generate_cpp_header import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())
