@@ -38,13 +38,8 @@ install(
   DESTINATION share/${PROJECT_NAME}/test
 )
 
-# Add hydra_cpack for deb packaging
 find_package(hydra_cpack REQUIRED)
 
-if(NOT DEFINED HYDRA_CPACK_VERSION)
-  message(FATAL_ERROR "HYDRA_CPACK_VERSION must be set for deb packaging.")
-endif()
+ament_package()
 
 hydra_cpack_ros(VERSION ${HYDRA_CPACK_VERSION})
-
-ament_package()
