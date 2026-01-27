@@ -117,14 +117,17 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   # Set the yaml file parameter to be relative to the current source dir
   set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
-  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME})
-  file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
+  # Create a build-local output directory for the generated Python module
+  set(PY_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/generate_parameter_module_temp)
+  file(MAKE_DIRECTORY ${PY_BUILD_DIR})
 
   find_package(ament_cmake_python)
   ament_get_python_install_dir(python_install_dir)
-  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/${python_install_dir}/${PROJECT_NAME}/${LIB_NAME}.py)
 
-  # Generate the module for the python
+  # Generate into the build tree, not into CMAKE_INSTALL_PREFIX
+  set(PARAM_HEADER_FILE ${PY_BUILD_DIR}/${LIB_NAME}.py)
+
+  # Generate the module for Python
   add_custom_command(
           OUTPUT ${PARAM_HEADER_FILE}
           COMMAND ${generate_parameter_library_python_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
@@ -141,6 +144,8 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
       $<INSTALL_INTERFACE:include>
   )
 
+  # Install the generated module into the Python site-packages dir
+  install(FILES ${PARAM_HEADER_FILE} DESTINATION ${CMAKE_INSTALL_PREFIX}/${python_install_dir}/${PROJECT_NAME})
 endfunction()
 
 # create custom test function to pass yaml file into test main
