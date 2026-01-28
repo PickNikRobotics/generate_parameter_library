@@ -21,7 +21,7 @@ install(PROGRAMS
   scripts/generate_parameter_library_cpp
   scripts/generate_parameter_library_python
   scripts/generate_parameter_library_markdown
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION bin
 )
 
 # Standard ROS package installs
