@@ -59,10 +59,7 @@ repos:
     rev: v21.1.8
     hooks:
       - id: clang-format
-        name: clang-format
         description: Format files with ClangFormat.
-        entry: clang-format
-        language: system
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
         args: ['-fallback-style=none', '-i']
 
