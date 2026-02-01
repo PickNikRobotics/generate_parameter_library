@@ -55,13 +55,11 @@ repos:
       - id: black
         args: ["--skip-string-normalization"]
 
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v21.1.8
     hooks:
       - id: clang-format
-        name: clang-format
         description: Format files with ClangFormat.
-        entry: clang-format
-        language: system
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
         args: ['-fallback-style=none', '-i']
 
@@ -85,12 +83,14 @@ repos:
         entry: env AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS=1 ament_cppcheck
         language: system
         files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+        exclude: parameter_traits/include/parameter_traits/parameter_traits.hpp
       - id: ament_cpplint
         name: ament_cpplint
         description: Static code analysis of C/C++ files.
         entry: ament_cpplint
         language: system
         files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+        exclude: parameter_traits/include/parameter_traits/parameter_traits.hpp
         args: ["--linelength=100", "--filter=-whitespace/newline"]
       - id: ament_lint_cmake
         name: ament_lint_cmake
