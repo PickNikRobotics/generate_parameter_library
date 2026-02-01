@@ -86,12 +86,14 @@ repos:
         entry: env AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS=1 ament_cppcheck
         language: system
         files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+        exclude: parameter_traits/include/parameter_traits/parameter_traits.hpp
       - id: ament_cpplint
         name: ament_cpplint
         description: Static code analysis of C/C++ files.
         entry: ament_cpplint
         language: system
         files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+        exclude: parameter_traits/include/parameter_traits/parameter_traits.hpp
         args: ["--linelength=100", "--filter=-whitespace/newline"]
       - id: ament_lint_cmake
         name: ament_lint_cmake
