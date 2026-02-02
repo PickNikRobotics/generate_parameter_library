@@ -107,6 +107,28 @@ def get_dynamic_parameter_field(yaml_parameter_name: str):
 
 def get_dynamic_mapped_parameter(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
+    mapped_params = []
+    current_prefix = []
+    map_index = 1
+    for val in tmp[:-1]:
+        if is_mapped_parameter(val):
+            # construct the current level of map parmeter
+            key_name = val.replace('__map_', '')
+            keys_path = '.'.join(current_prefix + [key_name])
+            mapped_params.append(keys_path)
+
+            # construct the next level of prefix
+            map_name = key_name + '_map'
+            current_prefix.append(f"{map_name}[value_{map_index}]")
+            map_index += 1
+        else:
+            current_prefix.append(val)
+
+    return mapped_params
+
+
+def get_dynamic_mapped_parameter_names(yaml_parameter_name: str):
+    tmp = yaml_parameter_name.split('.')
     mapped_params = [
         val.replace('__map_', '') for val in tmp[:-1] if is_mapped_parameter(val)
     ]
@@ -129,7 +151,7 @@ def get_dynamic_parameter_name(yaml_parameter_name: str):
 
 
 def get_dynamic_parameter_map(yaml_parameter_name: str):
-    mapped_params = get_dynamic_mapped_parameter(yaml_parameter_name)
+    mapped_params = get_dynamic_mapped_parameter_names(yaml_parameter_name)
     parameter_map = [val + '_map' for val in mapped_params]
     parameter_map = '.'.join(parameter_map)
     return parameter_map
