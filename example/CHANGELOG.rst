@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.7.0 (2026-02-22)
+------------------
 * Added missing gmock/gtest dependency (`#304 <https://github.com/PickNikRobotics/generate_parameter_library/issues/304>`_)
 * Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
 * Contributors: Alejandro Hernández Cordero, Christoph Fröhlich
