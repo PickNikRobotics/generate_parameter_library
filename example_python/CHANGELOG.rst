@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Christoph Fröhlich
+
 0.6.0 (2025-12-06)
 ------------------
 * Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)

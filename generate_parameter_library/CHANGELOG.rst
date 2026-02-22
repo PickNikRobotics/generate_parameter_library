@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use a temporary build directory for Python module output (`#303 <https://github.com/PickNikRobotics/generate_parameter_library/issues/303>`_)
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Błażej Sowa, Christoph Fröhlich
+
 0.6.0 (2025-12-06)
 ------------------
 * Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
