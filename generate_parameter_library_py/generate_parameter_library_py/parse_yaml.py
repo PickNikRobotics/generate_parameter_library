@@ -105,7 +105,9 @@ def get_dynamic_parameter_field(yaml_parameter_name: str):
     return '.'.join(field)
 
 
-def get_dynamic_mapped_parameter(yaml_parameter_name: str, declared_names: set = None) -> list:
+def get_dynamic_mapped_parameter(
+    yaml_parameter_name: str, declared_names: set = None
+) -> list:
     """Get the resolved paths to the key arrays for each __map_ segment."""
     keys = get_dynamic_mapped_parameter_keys(yaml_parameter_name)
     if not declared_names:
@@ -119,7 +121,7 @@ def _resolve_key_path(key_name: str, struct_name: str, declared_names: set) -> s
     """Resolve the full path to a mapped parameter key array by searching scopes."""
     prefix = struct_name
     while prefix:
-        candidate = f"{prefix}.{key_name}"
+        candidate = f'{prefix}.{key_name}'
         if candidate in declared_names:
             return candidate
         # Move up one level (e.g., "a.b.c" -> "a.b")
@@ -131,7 +133,9 @@ def _resolve_key_path(key_name: str, struct_name: str, declared_names: set) -> s
 def get_dynamic_mapped_parameter_keys(yaml_parameter_name: str) -> list:
     """Get the base key names (without __map_ prefix) for all mapped segments."""
     segments = yaml_parameter_name.split('.')
-    return [seg.replace('__map_', '') for seg in segments[:-1] if is_mapped_parameter(seg)]
+    return [
+        seg.replace('__map_', '') for seg in segments[:-1] if is_mapped_parameter(seg)
+    ]
 
 
 def get_dynamic_struct_name(yaml_parameter_name: str):
@@ -139,6 +143,7 @@ def get_dynamic_struct_name(yaml_parameter_name: str):
     num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
     struct_name = tmp[: (min(num_nested))] if len(num_nested) else ''
     return '.'.join(struct_name)
+
 
 def get_dynamic_parameter_name(yaml_parameter_name: str):
     struct_name = get_dynamic_struct_name(yaml_parameter_name)
@@ -841,7 +846,9 @@ class GenerateCode:
         # Resolve mapped paths for dynamic params; track paths for standard params
         mapped_params = []
         if is_runtime_parameter:
-            mapped_params = get_dynamic_mapped_parameter(param_name, self.declared_param_names)
+            mapped_params = get_dynamic_mapped_parameter(
+                param_name, self.declared_param_names
+            )
         else:
             self.declared_param_names.add(param_name)
 
@@ -856,7 +863,9 @@ class GenerateCode:
                 mapped_params,
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
-            update_parameter = UpdateRuntimeParameter(param_name, code_gen_variable, mapped_params)
+            update_parameter = UpdateRuntimeParameter(
+                param_name, code_gen_variable, mapped_params
+            )
         else:
             declare_parameter = DeclareParameter(
                 code_gen_variable,
