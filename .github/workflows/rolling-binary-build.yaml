@@ -20,22 +20,8 @@ jobs:
             ROS_REPO: testing
           - ROS_DISTRO: rolling
             ROS_REPO: main
-          - ROS_DISTRO: kilted
-            ROS_REPO: testing
-          - ROS_DISTRO: kilted
-            ROS_REPO: main
-          - ROS_DISTRO: jazzy
-            ROS_REPO: testing
-          - ROS_DISTRO: jazzy
-            ROS_REPO: main
-          - ROS_DISTRO: humble
-            ROS_REPO: testing
-          - ROS_DISTRO: humble
-            ROS_REPO: main
-
     env:
       BASEDIR: ${{ github.workspace }}/.work
-      UPSTREAM_WORKSPACE: upstream.repos
 
     name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
     runs-on: ubuntu-latest
