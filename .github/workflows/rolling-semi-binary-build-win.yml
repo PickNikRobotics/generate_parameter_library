@@ -1,4 +1,4 @@
-name: Rolling Windows Binary Build
+name: Rolling Windows Semi-Binary Build
 # author: Christoph Fröhlich <christoph.froehlich@ait.ac.at>
 # description: 'Build & test all dependencies from released (binary) windows packages.'
 
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  binary-windows:
+  semi-binary-windows:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
     with:
       ros_distro: rolling
