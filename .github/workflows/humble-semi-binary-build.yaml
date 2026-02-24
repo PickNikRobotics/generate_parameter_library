@@ -6,9 +6,11 @@ name: CI
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - humble
   push:
     branches:
-      - main
+      - humble
 
 jobs:
   ci:
