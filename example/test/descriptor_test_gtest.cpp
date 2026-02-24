@@ -45,9 +45,12 @@ class DescriptorTest : public ::testing::Test {
         std::make_shared<admittance_controller::ParamListener>(
             example_test_node_->get_node_parameters_interface());
     params_ = param_listener->get_params();
-    std::vector<std::string> names = {"admittance.damping_ratio", "one_number",
-                                      "pid.joint4.p", "lt_eq_fifteen",
-                                      "gt_fifteen"};
+    std::vector<std::string> names = {"admittance.damping_ratio",
+                                      "one_number",
+                                      "pid.joint4.p",
+                                      "lt_eq_fifteen",
+                                      "gt_fifteen",
+                                      "default_infinity"};
     descriptors_ = example_test_node_->describe_parameters(names);
   }
 
@@ -74,7 +77,7 @@ TEST_F(DescriptorTest, check_integer_descriptors) {
 TEST_F(DescriptorTest, check_lower_upper_bounds) {
   EXPECT_EQ(descriptors_[2].floating_point_range.at(0).from_value, 0.0001);
   EXPECT_EQ(descriptors_[2].floating_point_range.at(0).to_value,
-            std::numeric_limits<double>::max());
+            std::numeric_limits<double>::infinity());
 }
 
 TEST_F(DescriptorTest, check_lt_eq) {
@@ -87,6 +90,12 @@ TEST_F(DescriptorTest, check_gt) {
   EXPECT_EQ(descriptors_[4].integer_range.at(0).from_value, 15);
   EXPECT_EQ(descriptors_[4].integer_range.at(0).to_value,
             std::numeric_limits<int64_t>::max());
+}
+
+TEST_F(DescriptorTest, default_infinity) {
+  EXPECT_EQ(descriptors_[5].floating_point_range.at(0).from_value, 0.0);
+  EXPECT_EQ(descriptors_[5].floating_point_range.at(0).to_value,
+            std::numeric_limits<double>::infinity());
 }
 
 int main(int argc, char** argv) {
