@@ -11,7 +11,7 @@ on:
         type: number
   pull_request:
     branches:
-      - master
+      - main
     types:
       - opened # default
       - reopened # default
