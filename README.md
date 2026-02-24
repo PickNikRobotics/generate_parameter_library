@@ -3,6 +3,13 @@ Generate C++ or Python code for ROS 2 parameter declaration, getting, and valida
 The generated library contains a C++ struct with specified parameters.
 Additionally, dynamic parameters and custom validation are made easy.
 
+## TOC
+- [Killer Features](#killer-features)
+- [Basic Usage](#basic-usage)
+- [Detailed Documentation](#detailed-documentation)
+- [FAQ](#faq)
+- [Build status](#build-status)
+
 ## Killer Features
 * Declarative YAML syntax for ROS 2 Parameters converted into C++ or Python struct
 * Declaring, Getting, Validating, and Updating handled by generated code
@@ -153,8 +160,10 @@ when using `gmock` test library.
 * [Built-In Validators](#built-in-validators)
 * [Custom validator functions](#custom-validator-functions)
 * [Nested structures](#nested-structures)
+* [Mapped parameters](#mapped-parameters)
 * [Use generated struct in Cpp](#use-generated-struct-in-cpp)
 * [Dynamic Parameters](#dynamic-parameters)
+* [Parameter documentation](#parameter-documentation)
 * [Example Project](#example-project)
 * [Generated code output](#generated-code-output)
 * [Generate markdown documentation](#generate-markdown-documentation)
@@ -535,6 +544,7 @@ representation of the `parameters.yaml` file that you can directly include into 
 # FAQ
 
 Q. What happens if I declare a parameter twice? Will I get an error at runtime?
+
 A. The declare routine that is generated checks to see if each parameter has been declared first before declaring it. Because of this you can declare a parameter twice but it will only have the properties of the first time you declared it. Here is some example generated code.
 ```cpp
 if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) {
@@ -547,6 +557,7 @@ if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) 
 ```
 
 Q: How do I log when parameters change?
+
 A. The generated library outputs debug logs whenever a parameter is read from ROS.
 
 
