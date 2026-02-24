@@ -35,6 +35,11 @@ install(
   DESTINATION include/generate_parameter_library_example_external
 )
 
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 install(TARGETS minimal_publisher_external
   EXPORT export_generate_parameter_library_example_external
   ARCHIVE DESTINATION lib
@@ -46,6 +51,13 @@ install(
   TARGETS test_node
   DESTINATION lib/generate_parameter_library_example_external
 )
+
+if(BUILD_TESTING)
+  find_package(launch_testing_ament_cmake REQUIRED)
+  add_launch_test(test/launch.test.py
+    TIMEOUT 50
+  )
+endif()
 
 ament_export_targets(export_generate_parameter_library_example_external HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp rclcpp_components generate_parameter_library_example)
