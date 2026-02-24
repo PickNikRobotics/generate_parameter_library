@@ -24,7 +24,7 @@ jobs:
       BASEDIR: ${{ github.workspace }}/.work
       UPSTREAM_WORKSPACE: upstream.repos
 
-    name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+    name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-semi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
