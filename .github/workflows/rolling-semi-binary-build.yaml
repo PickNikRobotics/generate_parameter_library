@@ -29,7 +29,7 @@ jobs:
             ROS_REPO: main
     env:
       BASEDIR: ${{ github.workspace }}/.work
-      UPSTREAM_WORKSPACE: upstream.repos
+      UPSTREAM_WORKSPACE: generate_parameter_library.${{ matrix.env.ROS_DISTRO }}.repos
 
     name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-semi
     runs-on: ubuntu-latest
