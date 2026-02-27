@@ -48,14 +48,14 @@ jobs:
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
       - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.NAME }}
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
           overwrite: true
       - name: Upload log artifacts (on failure)
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: logs-${{ matrix.env.NAME }}
