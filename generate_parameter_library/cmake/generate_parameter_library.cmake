@@ -91,7 +91,6 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME} INTERFACE
     fmt::fmt
-    parameter_traits::parameter_traits
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
     rsl::rsl
@@ -99,7 +98,7 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
     tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
-  ament_export_dependencies(fmt parameter_traits rclcpp rclcpp_lifecycle rsl tcb_span tl_expected)
+  ament_export_dependencies(fmt rclcpp rclcpp_lifecycle rsl tcb_span tl_expected)
 endmacro()
 
 
