@@ -1,14 +1,21 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: CI
+name: Humble Binary Build
 
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - humble
   push:
     branches:
-      - main
+      - humble
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on given branches
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
   ci:
@@ -16,10 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - ROS_DISTRO: rolling
-            ROS_REPO: testing
-          - ROS_DISTRO: rolling
-            ROS_REPO: main
           - ROS_DISTRO: kilted
             ROS_REPO: testing
           - ROS_DISTRO: kilted
@@ -35,7 +38,6 @@ jobs:
 
     env:
       BASEDIR: ${{ github.workspace }}/.work
-      UPSTREAM_WORKSPACE: upstream.repos
 
     name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
     runs-on: ubuntu-latest
