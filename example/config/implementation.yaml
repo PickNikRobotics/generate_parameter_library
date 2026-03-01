@@ -115,3 +115,9 @@ admittance_controller:
     # general settings
     enable_parameter_update_without_reactivation: true
     use_feedforward_commanded_input: true
+
+    nested_map:
+      entry1:
+        value: 3.14
+      entry2:
+        value: 2.71

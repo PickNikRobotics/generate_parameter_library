@@ -1,0 +1,8 @@
+# Test nested mapped parameters for get_dynamic_mapped_parameter
+nested_map_test:
+  __map_outer:
+    __map_inner:
+      value:
+        type: double
+        default_value: 1.23
+        description: "A deeply nested mapped parameter."

@@ -63,6 +63,14 @@ setup(
             'share/' + package_name + '/test',
             ['generate_parameter_library_py/test/valid_parameters_with_none_type.yaml'],
         ),
+        (
+            'share/' + package_name + '/test',
+            ['generate_parameter_library_py/test/nested_map_test.yaml'],
+        ),
+        (
+            'share/' + package_name + '/test',
+            ['generate_parameter_library_py/test/nested_map_keys.yaml'],
+        ),
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
     ],
     install_requires=['setuptools', 'typeguard', 'jinja2', 'pyyaml'],
