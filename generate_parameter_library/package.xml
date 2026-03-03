@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>generate_parameter_library</name>
-  <version>0.5.0</version>
+  <version>0.7.0</version>
   <description>CMake to generate ROS parameter library.</description>
   <maintainer email="bence.magyar.robotics@gmail.com">bmagyar</maintainer>
   <maintainer email="christoph.froehlich@ait.ac.at">christophfroehlich</maintainer>
@@ -25,9 +25,6 @@
   <depend>rsl</depend>
   <depend>tcb_span</depend>
   <depend>tl_expected</depend>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

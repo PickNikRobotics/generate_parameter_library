@@ -3,6 +3,13 @@ Generate C++ or Python code for ROS 2 parameter declaration, getting, and valida
 The generated library contains a C++ struct with specified parameters.
 Additionally, dynamic parameters and custom validation are made easy.
 
+## TOC
+- [Killer Features](#killer-features)
+- [Basic Usage](#basic-usage)
+- [Detailed Documentation](#detailed-documentation)
+- [FAQ](#faq)
+- [Build status](#build-status)
+
 ## Killer Features
 * Declarative YAML syntax for ROS 2 Parameters converted into C++ or Python struct
 * Declaring, Getting, Validating, and Updating handled by generated code
@@ -153,8 +160,10 @@ when using `gmock` test library.
 * [Built-In Validators](#built-in-validators)
 * [Custom validator functions](#custom-validator-functions)
 * [Nested structures](#nested-structures)
+* [Mapped parameters](#mapped-parameters)
 * [Use generated struct in Cpp](#use-generated-struct-in-cpp)
 * [Dynamic Parameters](#dynamic-parameters)
+* [Parameter documentation](#parameter-documentation)
 * [Example Project](#example-project)
 * [Generated code output](#generated-code-output)
 * [Generate markdown documentation](#generate-markdown-documentation)
@@ -535,6 +544,7 @@ representation of the `parameters.yaml` file that you can directly include into 
 # FAQ
 
 Q. What happens if I declare a parameter twice? Will I get an error at runtime?
+
 A. The declare routine that is generated checks to see if each parameter has been declared first before declaring it. Because of this you can declare a parameter twice but it will only have the properties of the first time you declared it. Here is some example generated code.
 ```cpp
 if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) {
@@ -547,4 +557,15 @@ if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) 
 ```
 
 Q: How do I log when parameters change?
+
 A. The generated library outputs debug logs whenever a parameter is read from ROS.
+
+
+## Build status
+
+ROS2 Distro | Branch | Build status | Documentation | Package Build
+:---------: | :----: | :----------: | :-----------: | :---------------:
+**Rolling** | [`main`](https://github.com/PickNikRobotics/generate_parameter_library/tree/main) | [![Rolling Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-binary-build.yaml/badge.svg?branch=main)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-binary-build.yaml?branch=main) <br> [![Rolling Semi-Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-semi-binary-build.yaml/badge.svg?branch=main)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-semi-binary-build.yaml?branch=main) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Rdev__generate_parameter_library__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Rdev__generate_parameter_library__ubuntu_noble_amd64/) | [Documentation](https://docs.ros.org/en/rolling/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary/)
+**Kilted** | [`humble`](https://github.com/PickNikRobotics/generate_parameter_library/tree/humble) | see below <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Kdev__generate_parameter_library__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Kdev__generate_parameter_library__ubuntu_noble_amd64/) | [Documentation](https://docs.ros.org/en/kilted/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Kbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Kbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Kbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Kbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary/)
+**Jazzy** | [`humble`](https://github.com/PickNikRobotics/generate_parameter_library/tree/humble) | see below <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Jdev__generate_parameter_library__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Jdev__generate_parameter_library__ubuntu_noble_amd64/) | [Documentation](https://docs.ros.org/en/jazzy/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Jbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Jbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary/)
+**Humble** | [`humble`](https://github.com/PickNikRobotics/generate_parameter_library/tree/humble) | [![Humble Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-binary-build.yaml/badge.svg?branch=humble)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-binary-build.yaml?branch=humble) <br> [![Humble Semi-Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-semi-binary-build.yaml/badge.svg?branch=humble)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-semi-binary-build.yaml?branch=humble) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Hdev__generate_parameter_library__ubuntu_jammy_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Hdev__generate_parameter_library__ubuntu_jammy_amd64/) | [Documentation](https://docs.ros.org/en/humble/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__generate_parameter_library__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__generate_parameter_library__ubuntu_jammy_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__generate_parameter_library_py__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__generate_parameter_library_py__ubuntu_jammy_amd64__binary/)

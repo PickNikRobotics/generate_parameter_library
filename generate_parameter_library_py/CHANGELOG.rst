@@ -2,6 +2,22 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2026-02-22)
+------------------
+* Deprecate parameter_traits package and header file (`#297 <https://github.com/PickNikRobotics/generate_parameter_library/issues/297>`_)
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Christoph Fröhlich
+
+0.6.0 (2025-12-06)
+------------------
+* Use templated NodeT in c++ constructor  (`#274 <https://github.com/PickNikRobotics/generate_parameter_library/issues/274>`_)
+* Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)
+* Improve logging message when a parameter is not set (`#279 <https://github.com/PickNikRobotics/generate_parameter_library/issues/279>`_)
+* Account for nested map params (`#277 <https://github.com/PickNikRobotics/generate_parameter_library/issues/277>`_) (`#280 <https://github.com/PickNikRobotics/generate_parameter_library/issues/280>`_)
+* Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
+* fix setuptools deprecations (`#268 <https://github.com/PickNikRobotics/generate_parameter_library/issues/268>`_)
+* Contributors: Ander González Tomé, Christoph Fröhlich, Gaël Écorchard, Nathan Brooks, Russ, mosfet80
+
 0.5.0 (2025-06-12)
 ------------------
 * Add `try_update_params` method (`#260 <https://github.com/PickNikRobotics/generate_parameter_library/issues/260>`_)

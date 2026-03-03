@@ -29,8 +29,25 @@
 #pragma once
 
 #include <fmt/core.h>
+
+#include <string>
+#include <vector>
+
 #include <rsl/algorithm.hpp>
 #include <tl_expected/expected.hpp>
+
+#ifndef SILENCE_DEPRECATION_WARNINGS
+#ifdef _MSC_VER
+#pragma message( \
+    "This header is obsolete, \
+  please include \"rsl/algorithm.hpp\" for rsl::contains and rsl::is_unique, \
+  and \"tl_expected/expected.hpp\" for tl::expected.")
+#else
+#warning This header is obsolete, \
+  please include "rsl/algorithm.hpp" for rsl::contains and rsl::is_unique, \
+  and "tl_expected/expected.hpp" for tl::expected.
+#endif
+#endif
 
 namespace parameter_traits {
 
@@ -43,8 +60,8 @@ template <typename... Args>
 [[deprecated(
     "When returning tl::expected<void, std::string> you can call fmt::format "
     "directly.")]] auto
-ERROR(const std::string& format,
-      Args... args) -> tl::expected<void, std::string> {
+ERROR(const std::string& format, Args... args)
+    -> tl::expected<void, std::string> {
   return tl::make_unexpected(fmt::format(format, args...));
 }
 

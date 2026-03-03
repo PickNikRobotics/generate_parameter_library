@@ -2,6 +2,18 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2026-02-22)
+------------------
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Christoph Fröhlich
+
+0.6.0 (2025-12-06)
+------------------
+* Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)
+* fix setuptools deprecation (`#272 <https://github.com/PickNikRobotics/generate_parameter_library/issues/272>`_)
+* Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
+* Contributors: Christoph Fröhlich, Nathan Brooks, mosfet80
+
 0.5.0 (2025-06-12)
 ------------------
 * Add some new maintainers for ROS releases (`#263 <https://github.com/PickNikRobotics/generate_parameter_library/issues/263>`_)

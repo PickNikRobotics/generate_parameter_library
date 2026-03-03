@@ -151,7 +151,7 @@ you will get the error
 
 If you try to load a yaml file with missing required parameters
 
-`ros2 run generate_parameter_library_example test_node --ros-args --params-file src/generate_parameter_library/example_external/config/missing_required.yaml`
+`ros2 run generate_parameter_library_example_external test_node --ros-args --params-file src/generate_parameter_library/example_external/config/missing_required.yaml`
 
 you will get the error
 
