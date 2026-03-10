@@ -22,3 +22,4 @@ jobs:
       pixi_dependencies: typeguard jinja2 compilers
       ninja_packages: rsl
       target_cmake_args: -DBUILD_TESTING=OFF
+      windows_dependencies: generate_parameter_library.rolling.repos
