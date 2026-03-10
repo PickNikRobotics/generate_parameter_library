@@ -5,6 +5,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
     add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast)
 endif()
 
+find_package(ros2_control_cmake REQUIRED)
+export_windows_symbols()
+
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -35,6 +38,11 @@ install(
   DESTINATION include/generate_parameter_library_example_external
 )
 
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 install(TARGETS minimal_publisher_external
   EXPORT export_generate_parameter_library_example_external
   ARCHIVE DESTINATION lib
@@ -46,6 +54,13 @@ install(
   TARGETS test_node
   DESTINATION lib/generate_parameter_library_example_external
 )
+
+if(BUILD_TESTING)
+  find_package(launch_testing_ament_cmake REQUIRED)
+  add_launch_test(test/launch.test.py
+    TIMEOUT 50
+  )
+endif()
 
 ament_export_targets(export_generate_parameter_library_example_external HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp rclcpp_components generate_parameter_library_example)

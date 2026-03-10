@@ -47,7 +47,7 @@ if len(sys.argv) >= 2 and sys.argv[1] != 'clean':
 
 setup(
     name=package_name,
-    version='0.6.0',
+    version='0.7.0',
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),

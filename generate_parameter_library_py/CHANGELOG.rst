@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2026-02-22)
+------------------
+* Deprecate parameter_traits package and header file (`#297 <https://github.com/PickNikRobotics/generate_parameter_library/issues/297>`_)
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Christoph Fröhlich
+
 0.6.0 (2025-12-06)
 ------------------
 * Use templated NodeT in c++ constructor  (`#274 <https://github.com/PickNikRobotics/generate_parameter_library/issues/274>`_)
