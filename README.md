@@ -91,7 +91,7 @@ generate_parameter_module(
 **src/turtlesim.cpp**
 ```c++
 #include <rclcpp/rclcpp.hpp>
-#include <turtlesim/turtlesim_parameters.hpp>  // you can also use the deprecated #include "turtlesim_parameters.hpp"
+#include <turtlesim/turtlesim_parameters.hpp>
 
 int main(int argc, char * argv[])
 {
@@ -155,18 +155,29 @@ when using `gmock` test library.
 🤖 P.S. having this example yaml files will make your users very grateful because they will always have a working example of a configuration for your node.
 
 ## Detailed Documentation
-* [Cpp namespace](#cpp-namespace)
-* [Parameter definition](#parameter-definition)
-* [Built-In Validators](#built-in-validators)
-* [Custom validator functions](#custom-validator-functions)
-* [Nested structures](#nested-structures)
-* [Mapped parameters](#mapped-parameters)
-* [Use generated struct in Cpp](#use-generated-struct-in-cpp)
-* [Dynamic Parameters](#dynamic-parameters)
-* [Parameter documentation](#parameter-documentation)
-* [Example Project](#example-project)
-* [Generated code output](#generated-code-output)
-* [Generate markdown documentation](#generate-markdown-documentation)
+- [generate\_parameter\_library](#generate_parameter_library)
+  - [TOC](#toc)
+  - [Killer Features](#killer-features)
+  - [Basic Usage](#basic-usage)
+    - [Create yaml parameter codegen file](#create-yaml-parameter-codegen-file)
+    - [Add parameter library generation to project](#add-parameter-library-generation-to-project)
+    - [Use generated struct in project source code](#use-generated-struct-in-project-source-code)
+    - [Use example yaml files in tests](#use-example-yaml-files-in-tests)
+  - [Detailed Documentation](#detailed-documentation)
+    - [Cpp namespace](#cpp-namespace)
+    - [Parameter definition](#parameter-definition)
+    - [Built-In Validators](#built-in-validators)
+    - [Custom validator functions](#custom-validator-functions)
+    - [Nested structures](#nested-structures)
+    - [Mapped parameters](#mapped-parameters)
+    - [Use generated struct in Cpp](#use-generated-struct-in-cpp)
+    - [Dynamic Parameters](#dynamic-parameters)
+    - [Parameter documentation](#parameter-documentation)
+    - [Example Project](#example-project)
+    - [Generated code output](#generated-code-output)
+    - [Generate markdown documentation](#generate-markdown-documentation)
+- [FAQ](#faq)
+  - [Build status](#build-status)
 
 ### Cpp namespace
 The root element of the YAML file determines the namespace used in the generated C++ code.
