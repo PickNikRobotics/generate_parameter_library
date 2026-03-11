@@ -313,6 +313,17 @@ tl::expected<void, std::string> integer_equal_value(
 
 }  // namespace my_project
 ```
+
+Add it to `CMakeLists.txt`
+
+```cmake
+generate_parameter_library(
+  turtlesim_parameters # cmake target name for the parameter library
+  src/turtlesim_parameters.yaml # path to input yaml file
+  src/example_validators.hpp # path to the custom validator
+)
+```
+
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
 validation:
