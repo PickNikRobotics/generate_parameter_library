@@ -24,6 +24,11 @@
   <depend>rclcpp_lifecycle</depend>
   <depend>rsl</depend>
   <depend>tcb_span</depend>
+  <depend>libexpected-dev</depend>
+
+  <!-- for backward compatibility -->
+  <!-- remove once this redirection is removed -->
+  <!-- https://github.com/PickNikRobotics/cpp_polyfills/pull/12 -->
   <depend>tl_expected</depend>
 
   <export>
