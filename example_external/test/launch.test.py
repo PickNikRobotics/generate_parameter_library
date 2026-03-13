@@ -80,7 +80,7 @@ class TestFixture(unittest.TestCase):
         while time.time() - start < 5.0 and not found:
             found = node_name in self.node.get_node_names()
             time.sleep(0.1)
-        assert found, f"{node_name} not found!"
+        assert found, f'{node_name} not found!'
 
 
 @launch_testing.post_shutdown_test()
