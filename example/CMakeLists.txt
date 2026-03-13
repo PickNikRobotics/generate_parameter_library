@@ -5,6 +5,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
     add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast)
 endif()
 
+find_package(ros2_control_cmake REQUIRED)
+export_windows_symbols()
+
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(generate_parameter_library REQUIRED)
@@ -53,11 +56,21 @@ if(BUILD_TESTING)
     ${CMAKE_CURRENT_SOURCE_DIR}/test/example_params.yaml)
   target_include_directories(test_example_gmock PRIVATE include)
   target_link_libraries(test_example_gmock admittance_controller_parameters rclcpp::rclcpp)
+
+  find_package(launch_testing_ament_cmake REQUIRED)
+  add_launch_test(test/launch.test.py
+    TIMEOUT 50
+  )
 endif()
 
 install(
   DIRECTORY include/
   DESTINATION include/generate_parameter_library_example
+)
+
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 install(TARGETS minimal_publisher admittance_controller_parameters

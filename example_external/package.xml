@@ -15,10 +15,15 @@
   <depend>generate_parameter_library_example</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>ros2_control_cmake</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <buildtool_export_depend>ament_cmake_core</buildtool_export_depend>
+
+  <test_depend>launch_ros</test_depend>
+  <test_depend>launch_testing</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

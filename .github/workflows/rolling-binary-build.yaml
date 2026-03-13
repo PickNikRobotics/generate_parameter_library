@@ -1,0 +1,54 @@
+# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
+# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
+
+name: Rolling Binary Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on given branches
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - ROS_DISTRO: rolling
+            ROS_REPO: testing
+          - ROS_DISTRO: rolling
+            ROS_REPO: main
+    env:
+      BASEDIR: ${{ github.workspace }}/.work
+
+    name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - id: ici
+        name: Run industrial_ci
+        uses: ros-industrial/industrial_ci@master
+        env: ${{ matrix.env }}
+      - name: Upload test artifacts (on failure)
+        uses: actions/upload-artifact@v6
+        if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
+        with:
+          name: test-results-${{ matrix.env.NAME }}
+          path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
+          overwrite: true
+      - name: Upload log artifacts (on failure)
+        uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: logs-${{ matrix.env.NAME }}
+          path: ${{ env.BASEDIR }}/target_ws/log/*
+          overwrite: true
