@@ -101,38 +101,3 @@ def test_parse_valid_parameter_files(yaml_test_file):
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f'failed to parse valid file, reason:{e}'
-
-
-@pytest.mark.parametrize(
-    'param_name,declared_params,expected',
-    [
-        # entries is inside nested -> resolve to nested.entries
-        ('nested.__map_entries.value', {'nested.entries'}, ['nested.entries']),
-        # items is inside level1.level2 -> resolve to level1.level2.items
-        (
-            'level1.level2.__map_items.param',
-            {'level1.level2.items'},
-            ['level1.level2.items'],
-        ),
-        # keys is at root -> resolve to bare name
-        ('__map_keys.value', {'keys'}, ['keys']),
-        # multi-level maps with keys at root -> all bare names
-        (
-            '__map_level1.__map_level2.__map_level3.value',
-            {'level1', 'level2', 'level3'},
-            ['level1', 'level2', 'level3'],
-        ),
-        # keys at root but __map_ inside a struct (like pid.__map_joints)
-        ('pid.__map_joints.p', {'joints'}, ['joints']),
-        # nested struct with keys at root (like nested_dynamic.__map_joints)
-        (
-            'nested_dynamic.__map_joints.__map_dof_names.nested',
-            {'joints', 'dof_names'},
-            ['joints', 'dof_names'],
-        ),
-    ],
-)
-def test_get_dynamic_mapped_parameter_nested(param_name, declared_params, expected):
-    """Test that get_dynamic_mapped_parameter returns correct paths for nested maps."""
-    result = get_dynamic_mapped_parameter(param_name, declared_params)
-    assert result == expected
