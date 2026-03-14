@@ -1,0 +1,12 @@
+nested_map_test:
+  nested:
+    entries:
+      type: string_array
+      default_value: ["entry1", "entry2"]
+      description: "Keys for the nested mapped parameters"
+
+    __map_entries:
+      value:
+        type: double
+        default_value: 1.0
+        description: "A value in the nested map"
