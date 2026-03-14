@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-function(generate_parameter_library LIB_NAME YAML_FILE)
+macro(generate_parameter_library LIB_NAME YAML_FILE)
   unset(generate_parameter_library_cpp_BIN CACHE)  # Unset the cache variable
   find_program(generate_parameter_library_cpp_BIN NAMES "generate_parameter_library_cpp")
   if(NOT generate_parameter_library_cpp_BIN)
@@ -35,7 +35,7 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   endif()
 
   # Make the include directory
-  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}/include/)
+  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME})
   file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
 
   # Optional 3rd parameter for the user defined validation header
@@ -48,18 +48,13 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
     cmake_path(APPEND VALIDATE_HEADER ${VALIDATE_HEADER_FILENAME})
 
     # Copy the header file into the include directory
-    add_custom_command(
-      OUTPUT ${VALIDATE_HEADER}
-      COMMAND ${CMAKE_COMMAND} -E copy ${IN_VALIDATE_HEADER} ${VALIDATE_HEADER}
-      DEPENDS ${IN_VALIDATE_HEADER}
-      COMMENT
-      "Running `${CMAKE_COMMAND} -E copy ${IN_VALIDATE_HEADER} ${VALIDATE_HEADER}`"
-      VERBATIM
-    )
+    file(COPY ${IN_VALIDATE_HEADER} DESTINATION ${LIB_INCLUDE_DIR})
+    # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
+    file(COPY ${IN_VALIDATE_HEADER} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
   endif()
 
   # Set the yaml file parameter to be relative to the current source dir
-  set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
+  set(YAML_FILE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
   # Set the output parameter header file name
   set(PARAM_HEADER_FILE ${LIB_INCLUDE_DIR}/${LIB_NAME}.hpp)
@@ -67,31 +62,55 @@ function(generate_parameter_library LIB_NAME YAML_FILE)
   # Generate the header for the library
   add_custom_command(
     OUTPUT ${PARAM_HEADER_FILE}
-    COMMAND ${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
-    DEPENDS ${YAML_FILE} ${VALIDATE_HEADER}
+    COMMAND ${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE_PATH} ${VALIDATE_HEADER_FILENAME}
+    DEPENDS ${YAML_FILE_PATH} ${VALIDATE_HEADER}
     COMMENT
-    "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}`"
+    "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE_PATH} ${VALIDATE_HEADER_FILENAME}`"
+    VERBATIM
+  )
+  # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
+  set(LOCAL_PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}.hpp)
+  set(LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}_pragma_warning)
+  file(WRITE ${LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE}
+    "#pragma message(\"#include \\\"${LIB_NAME}.hpp\\\" is deprecated. Use #include <${PROJECT_NAME}/${LIB_NAME}.hpp> instead.\")\n")
+  add_custom_command(
+    OUTPUT ${LOCAL_PARAM_HEADER_FILE}
+    COMMAND ${CMAKE_COMMAND} -E cat ${LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE} ${PARAM_HEADER_FILE} > ${LOCAL_PARAM_HEADER_FILE}
+    DEPENDS ${PARAM_HEADER_FILE}
+    COMMENT
+    "Creating deprecated header file ${LOCAL_PARAM_HEADER_FILE}"
     VERBATIM
   )
 
   # Create the library target
-  add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
+  add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER} ${LOCAL_PARAM_HEADER_FILE})
   target_include_directories(${LIB_NAME} INTERFACE
-    $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include/${LIB_NAME}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+    $<INSTALL_INTERFACE:include>
   )
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME} INTERFACE
     fmt::fmt
-    parameter_traits::parameter_traits
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
     rsl::rsl
     tcb_span::tcb_span
+    tl::expected
+    # for backward compatibility
+    # remove once this redirection is removed
+    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
     tl_expected::tl_expected
   )
-  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include/${LIB_NAME})
-endfunction()
+  install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
+  ament_export_dependencies(
+    fmt rclcpp rclcpp_lifecycle rsl tcb_span
+    tl-expected
+    # for backward compatibility
+    # remove once this redirection is removed
+    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
+    tl_expected
+  )
+endmacro()
 
 
 function(generate_parameter_module LIB_NAME YAML_FILE)
@@ -108,14 +127,17 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   # Set the yaml file parameter to be relative to the current source dir
   set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${YAML_FILE})
 
-  set(LIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME})
-  file(MAKE_DIRECTORY ${LIB_INCLUDE_DIR})
+  # Create a build-local output directory for the generated Python module
+  set(PY_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/generate_parameter_module_temp)
+  file(MAKE_DIRECTORY ${PY_BUILD_DIR})
 
   find_package(ament_cmake_python)
   ament_get_python_install_dir(python_install_dir)
-  set(PARAM_HEADER_FILE ${CMAKE_INSTALL_PREFIX}/${python_install_dir}/${PROJECT_NAME}/${LIB_NAME}.py)
 
-  # Generate the module for the python
+  # Generate into the build tree, not into CMAKE_INSTALL_PREFIX
+  set(PARAM_HEADER_FILE ${PY_BUILD_DIR}/${LIB_NAME}.py)
+
+  # Generate the module for Python
   add_custom_command(
           OUTPUT ${PARAM_HEADER_FILE}
           COMMAND ${generate_parameter_library_python_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE} ${VALIDATE_HEADER_FILENAME}
@@ -128,10 +150,12 @@ function(generate_parameter_module LIB_NAME YAML_FILE)
   # Create the library target
   add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER})
   target_include_directories(${LIB_NAME} INTERFACE
-          $<BUILD_INTERFACE:${LIB_INCLUDE_DIR}>
-          $<INSTALL_INTERFACE:include/${LIB_NAME}>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:include>
   )
 
+  # Install the generated module into the Python site-packages dir
+  install(FILES ${PARAM_HEADER_FILE} DESTINATION ${CMAKE_INSTALL_PREFIX}/${python_install_dir}/${PROJECT_NAME})
 endfunction()
 
 # create custom test function to pass yaml file into test main

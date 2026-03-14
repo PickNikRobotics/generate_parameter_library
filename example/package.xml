@@ -2,8 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>generate_parameter_library_example</name>
-  <version>0.3.9</version>
+  <version>0.7.0</version>
   <description>Example usage of generate_parameter_library.</description>
+  <maintainer email="bence.magyar.robotics@gmail.com">bmagyar</maintainer>
+  <maintainer email="christoph.froehlich@ait.ac.at">christophfroehlich</maintainer>
+  <maintainer email="nathanbrooks@picknik.ai">Nathan Brooks</maintainer>
+  <maintainer email="shaurya.kumar@picknik.ai">Shaurya Kumar</maintainer>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
@@ -11,13 +15,17 @@
   <depend>generate_parameter_library</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>ros2_control_cmake</depend>
+
+  <test_depend>ament_cmake_gmock</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>launch_ros</test_depend>
+  <test_depend>launch_testing</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <buildtool_export_depend>ament_cmake_core</buildtool_export_depend>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

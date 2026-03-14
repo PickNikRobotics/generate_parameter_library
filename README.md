@@ -3,6 +3,13 @@ Generate C++ or Python code for ROS 2 parameter declaration, getting, and valida
 The generated library contains a C++ struct with specified parameters.
 Additionally, dynamic parameters and custom validation are made easy.
 
+## TOC
+- [Killer Features](#killer-features)
+- [Basic Usage](#basic-usage)
+- [Detailed Documentation](#detailed-documentation)
+- [FAQ](#faq)
+- [Build status](#build-status)
+
 ## Killer Features
 * Declarative YAML syntax for ROS 2 Parameters converted into C++ or Python struct
 * Declaring, Getting, Validating, and Updating handled by generated code
@@ -13,7 +20,7 @@ Additionally, dynamic parameters and custom validation are made easy.
 ## Basic Usage
 1. [Create YAML parameter codegen file](#create-yaml-parameter-codegen-file)
 2. [Add parameter library generation to project](#add-parameter-library-generation-to-project)
-3. [Use generated struct into project source code](#use-generated-struct-into-project-source-code)
+3. [Use generated struct in project source code](#use-generated-struct-in-project-source-code)
 
 ### Create yaml parameter codegen file
 Write a yaml file to declare your parameters and their attributes.
@@ -63,6 +70,10 @@ target_link_libraries(minimal_node PRIVATE
   rclcpp::rclcpp
   turtlesim_parameters
 )
+
+install(TARGETS minimal_node turtlesim_parameters
+  EXPORT ${PROJECT_NAME}Targets)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ```
 
 **setup.py**
@@ -80,7 +91,7 @@ generate_parameter_module(
 **src/turtlesim.cpp**
 ```c++
 #include <rclcpp/rclcpp.hpp>
-#include "turtlesim_parameters.hpp"
+#include <turtlesim/turtlesim_parameters.hpp>  // you can also use the deprecated #include "turtlesim_parameters.hpp"
 
 int main(int argc, char * argv[])
 {
@@ -149,8 +160,10 @@ when using `gmock` test library.
 * [Built-In Validators](#built-in-validators)
 * [Custom validator functions](#custom-validator-functions)
 * [Nested structures](#nested-structures)
+* [Mapped parameters](#mapped-parameters)
 * [Use generated struct in Cpp](#use-generated-struct-in-cpp)
 * [Dynamic Parameters](#dynamic-parameters)
+* [Parameter documentation](#parameter-documentation)
 * [Example Project](#example-project)
 * [Generated code output](#generated-code-output)
 * [Generate markdown documentation](#generate-markdown-documentation)
@@ -283,7 +296,7 @@ Here is an example custom validator.
 #include <rclcpp/rclcpp.hpp>
 
 #include <fmt/core.h>
-#include <tl_expected/expected.hpp>
+#include <tl/expected.hpp>
 
 namespace my_project {
 
@@ -300,6 +313,17 @@ tl::expected<void, std::string> integer_equal_value(
 
 }  // namespace my_project
 ```
+
+Add it to `CMakeLists.txt`
+
+```cmake
+generate_parameter_library(
+  turtlesim_parameters # cmake target name for the parameter library
+  src/turtlesim_parameters.yaml # path to input yaml file
+  src/example_validators.hpp # path to the custom validator
+)
+```
+
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
 validation:
@@ -346,14 +370,84 @@ cpp_name_space:
         type: double_array
 ```
 
-The generated parameter value for the nested map example can then be accessed with `params.gain.joints_map.at("joint1").interfaces_map.at("position").value`.
+The generated parameter value for the nested map example can then be accessed with:
+
+**C++**
+
+```c++
+params.gain.joints_map.at("joint1").interfaces_map.at("position").value
+```
+
+**Python**
+
+```python
+params.gain.get_entry("joint1").get_entry("position").value
+```
+
+#### Key array scope resolution
+
+The `key` used by a `__map_<key>` segment does not need to be defined at the root namespace level. It can also be a **sibling** within the same struct, or defined anywhere in a parent scope.
+This allows you to co-locate the key array alongside the map it controls:
+
+```yaml
+cpp_name_space:
+  # key array defined as a sibling of the map that uses it
+  nested_map:
+    entries:
+      type: string_array
+      default_value: ["entry1", "entry2"]
+      description: "Keys for the nested map"
+    __map_entries: # resolved to nested_map.entries (sibling scope)
+      value:
+        type: double
+        default_value: 1.0
+        description: "A value keyed by entries"
+```
+
+> **Note:** Scope resolution searches the current struct first, then walks up to parent scopes. If the key array is not found in any scope, the bare name is used as a fallback.
 
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.
-If you specified it to be `turtlesim_parameters` you can then include the generated code with `#include "turtlesim_parameters.hpp"`.
+If you specified it to be `turtlesim_parameters` you can then include the generated code with `#include <turtlesim/turtlesim_parameters.hpp>`.
 ```c++
-#include "turtlesim_parameters.hpp"
+#include <turtlesim/turtlesim_parameters.hpp>
 ```
+
+Note that this header can also be used from another package:
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_other_package)
+
+
+include(GNUInstallDirs)
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(turtelsim REQUIRED)
+
+add_library(my_lib src/my_lib.cpp)
+target_include_directories(my_lib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+target_link_libraries(my_lib PUBLIC turtlesim::turtlesim_parameters)
+
+#############
+## Install ##
+#############
+
+install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+
+install(TARGETS my_lib
+  EXPORT ${PROJECT_NAME}Targets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
+
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_dependencies(turtlesim)
+ament_package()
+```
+
 In your initialization code, create a `ParamListener` which will declare and get the parameters.
 An exception will be thrown if any validation fails or any required parameters were not set.
 Then call `get_params` on the listener to get a copy of the `Params` struct.
@@ -368,6 +462,11 @@ If you are using dynamic parameters, you can use the following code to check if 
 if (param_listener->is_old(params_)) {
   params_ = param_listener->get_params();
 }
+```
+
+Alternatively, you can bind a callback function that triggers whenever a parameter is updated. When activated, the callback receives the updated parameters as an argument.
+```c++
+parameter_listener.setUserCallback([this](const auto& params) { reconfigure_callback(params); });
 ```
 
 ### Parameter documentation
@@ -478,6 +577,7 @@ representation of the `parameters.yaml` file that you can directly include into 
 # FAQ
 
 Q. What happens if I declare a parameter twice? Will I get an error at runtime?
+
 A. The declare routine that is generated checks to see if each parameter has been declared first before declaring it. Because of this you can declare a parameter twice but it will only have the properties of the first time you declared it. Here is some example generated code.
 ```cpp
 if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) {
@@ -490,4 +590,15 @@ if (!parameters_interface_->has_parameter(prefix_ + "scientific_notation_num")) 
 ```
 
 Q: How do I log when parameters change?
+
 A. The generated library outputs debug logs whenever a parameter is read from ROS.
+
+
+## Build status
+
+ROS2 Distro | Branch | Build status | Documentation | Package Build
+:---------: | :----: | :----------: | :-----------: | :---------------:
+**Rolling** | [`main`](https://github.com/PickNikRobotics/generate_parameter_library/tree/main) | [![Rolling Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-binary-build.yaml/badge.svg?branch=main)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-binary-build.yaml?branch=main) <br> [![Rolling Semi-Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-semi-binary-build.yaml/badge.svg?branch=main)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/rolling-semi-binary-build.yaml?branch=main) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Rdev__generate_parameter_library__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Rdev__generate_parameter_library__ubuntu_noble_amd64/) | [Documentation](https://docs.ros.org/en/rolling/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary/)
+**Kilted** | [`humble`](https://github.com/PickNikRobotics/generate_parameter_library/tree/humble) | see below <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Kdev__generate_parameter_library__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Kdev__generate_parameter_library__ubuntu_noble_amd64/) | [Documentation](https://docs.ros.org/en/kilted/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Kbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Kbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Kbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Kbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary/)
+**Jazzy** | [`humble`](https://github.com/PickNikRobotics/generate_parameter_library/tree/humble) | see below <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Jdev__generate_parameter_library__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Jdev__generate_parameter_library__ubuntu_noble_amd64/) | [Documentation](https://docs.ros.org/en/jazzy/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Jbin_uN64__generate_parameter_library__ubuntu_noble_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Jbin_uN64__generate_parameter_library_py__ubuntu_noble_amd64__binary/)
+**Humble** | [`humble`](https://github.com/PickNikRobotics/generate_parameter_library/tree/humble) | [![Humble Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-binary-build.yaml/badge.svg?branch=humble)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-binary-build.yaml?branch=humble) <br> [![Humble Semi-Binary Build](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-semi-binary-build.yaml/badge.svg?branch=humble)](https://github.com/PickNikRobotics/generate_parameter_library/actions/workflows/humble-semi-binary-build.yaml?branch=humble) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Hdev__generate_parameter_library__ubuntu_jammy_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Hdev__generate_parameter_library__ubuntu_jammy_amd64/) | [Documentation](https://docs.ros.org/en/humble/p/generate_parameter_library/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__generate_parameter_library__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__generate_parameter_library__ubuntu_jammy_amd64__binary/) <br> [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__generate_parameter_library_py__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__generate_parameter_library_py__ubuntu_jammy_amd64__binary/)

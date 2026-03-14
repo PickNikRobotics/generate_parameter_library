@@ -29,11 +29,11 @@
 // Author: Denis Štogl
 //
 
-#include "admittance_controller_parameters.hpp"
+#include <memory>
+
+#include "generate_parameter_library_example/admittance_controller_parameters.hpp"
 #include "gtest/gtest.h"
 #include "rclcpp/rclcpp.hpp"
-
-#include <memory>
 
 class ExampleTest : public ::testing::Test {
  public:
@@ -62,6 +62,15 @@ TEST_F(ExampleTest, check_parameters) {
   EXPECT_EQ(params_.joints[2], "joint6");
 
   ASSERT_EQ(params_.ft_sensor.filter_coefficient, 0.1);
+}
+
+TEST_F(ExampleTest, try_update_params) {
+  ASSERT_FALSE(param_listener_->try_update_params(params_));
+
+  const rclcpp ::Parameter new_param("interpolation_mode", "linear");
+  example_test_node_->set_parameter(new_param);
+  ASSERT_TRUE(param_listener_->try_update_params(params_));
+  ASSERT_EQ(params_.interpolation_mode, "linear");
 }
 
 TEST_F(ExampleTest, try_get_params) {

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2022 PickNik Inc.
 #
@@ -47,6 +46,10 @@ def run(output_file, yaml_file, validation_module=''):
     code = str(gen_param_struct)
     with open(output_file, 'w') as f:
         f.write(code)
+
+    # Put an __init__.py file if one does not yet exist.
+    init_file = os.path.join(os.path.dirname(output_file), '__init__.py')
+    open(init_file, 'a').close()
 
 
 def parse_args():

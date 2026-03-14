@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2023 PickNik Inc.
 #
@@ -45,8 +44,8 @@ from yaml.scanner import ScannerError
 import os
 import yaml
 
-from generate_parameter_library_py.cpp_convertions import CPPConverstions
-from generate_parameter_library_py.python_convertions import PythonConvertions
+from generate_parameter_library_py.cpp_conversions import CPPConversions
+from generate_parameter_library_py.python_conversions import PythonConversions
 from generate_parameter_library_py.string_filters_cpp import (
     valid_string_cpp,
     valid_string_python,
@@ -101,22 +100,48 @@ def int_to_integer_str(value: str):
 
 def get_dynamic_parameter_field(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    parameter_field = tmp[-1]
-    return parameter_field
+    num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
+    field = tmp[(max(num_nested) + 1) :] if len(num_nested) else tmp[-1]
+    return '.'.join(field)
 
 
-def get_dynamic_mapped_parameter(yaml_parameter_name: str):
-    tmp = yaml_parameter_name.split('.')
-    mapped_params = [
-        val.replace('__map_', '') for val in tmp[:-1] if is_mapped_parameter(val)
+def get_dynamic_mapped_parameter(
+    yaml_parameter_name: str, declared_names: set = None
+) -> list:
+    """Get the resolved paths to the key arrays for each __map_ segment."""
+    keys = get_dynamic_mapped_parameter_keys(yaml_parameter_name)
+    if not declared_names:
+        return keys
+
+    struct_name = get_dynamic_struct_name(yaml_parameter_name)
+    return [_resolve_key_path(k, struct_name, declared_names) for k in keys]
+
+
+def _resolve_key_path(key_name: str, struct_name: str, declared_names: set) -> str:
+    """Resolve the full path to a mapped parameter key array by searching scopes."""
+    prefix = struct_name
+    while prefix:
+        candidate = f'{prefix}.{key_name}'
+        if candidate in declared_names:
+            return candidate
+        # Move up one level (e.g., "a.b.c" -> "a.b")
+        prefix, _, _ = prefix.rpartition('.')
+    # Fallback to the bare key name if not found in any scope
+    return key_name
+
+
+def get_dynamic_mapped_parameter_keys(yaml_parameter_name: str) -> list:
+    """Get the base key names (without __map_ prefix) for all mapped segments."""
+    segments = yaml_parameter_name.split('.')
+    return [
+        seg.replace('__map_', '') for seg in segments[:-1] if is_mapped_parameter(seg)
     ]
-    return mapped_params
 
 
 def get_dynamic_struct_name(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
-    num_nested = sum([is_mapped_parameter(val) for val in tmp])
-    struct_name = tmp[: -(num_nested + 1)]
+    num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
+    struct_name = tmp[: (min(num_nested))] if len(num_nested) else ''
     return '.'.join(struct_name)
 
 
@@ -129,7 +154,7 @@ def get_dynamic_parameter_name(yaml_parameter_name: str):
 
 
 def get_dynamic_parameter_map(yaml_parameter_name: str):
-    mapped_params = get_dynamic_mapped_parameter(yaml_parameter_name)
+    mapped_params = get_dynamic_mapped_parameter_keys(yaml_parameter_name)
     parameter_map = [val + '_map' for val in mapped_params]
     parameter_map = '.'.join(parameter_map)
     return parameter_map
@@ -162,13 +187,13 @@ class CodeGenVariableBase:
         default_value: Any,
     ):
         if language == 'cpp':
-            self.conversation = CPPConverstions()
+            self.conversion = CPPConversions()
         elif language == 'rst' or language == 'markdown':
             # cpp is used here because it the desired style of the markdown,
             # e.g. "false" for C++ instead of "False" for Python
-            self.conversation = CPPConverstions()
+            self.conversion = CPPConversions()
         elif language == 'python':
-            self.conversation = PythonConvertions()
+            self.conversion = PythonConversions()
         else:
             raise compile_error(
                 'Invalid language, only c++ and python are currently supported.'
@@ -181,21 +206,21 @@ class CodeGenVariableBase:
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
 
-        if self.defined_type not in self.conversation.defined_type_to_lang_type:
+        if self.defined_type not in self.conversion.defined_type_to_lang_type:
             allowed = ', '.join(
-                key for key in self.conversation.defined_type_to_lang_type
+                key for key in self.conversion.defined_type_to_lang_type
             )
             raise compile_error(
                 f'Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: '
                 + allowed
             )
-        func = self.conversation.defined_type_to_lang_type[self.defined_type]
+        func = self.conversion.defined_type_to_lang_type[self.defined_type]
         self.lang_type = func(self.defined_type, template)
         tmp = defined_type.split('_')
         self.defined_base_type = tmp[0]
-        func = self.conversation.defined_type_to_lang_type[self.defined_base_type]
+        func = self.conversion.defined_type_to_lang_type[self.defined_base_type]
         self.lang_base_type = func(self.defined_base_type, template)
-        func = self.conversation.lang_str_value_func[self.defined_type]
+        func = self.conversion.lang_str_value_func[self.defined_type]
         try:
             self.lang_str_value = func(default_value)
         except TypeCheckError:
@@ -204,18 +229,18 @@ class CodeGenVariableBase:
             )
 
     def parameter_as_function_str(self):
-        if self.defined_type not in self.conversation.yaml_type_to_as_function:
+        if self.defined_type not in self.conversion.yaml_type_to_as_function:
             raise compile_error('invalid yaml type: %s' % type(self.defined_type))
-        return self.conversation.yaml_type_to_as_function[self.defined_type]
+        return self.conversion.yaml_type_to_as_function[self.defined_type]
 
     def get_python_val_to_str_func(self, arg):
-        return self.conversation.python_val_to_str_func[str(type(arg))]
+        return self.conversion.python_val_to_str_func[str(type(arg))]
 
     def get_yaml_type_from_python(self, arg):
         if isinstance(arg, list):
-            return self.conversation.python_list_to_yaml_type[str(type(arg[0]))]
+            return self.conversion.python_list_to_yaml_type[str(type(arg[0]))]
         else:
-            return self.conversation.python_val_to_yaml_type[str(type(arg[0]))]
+            return self.conversion.python_val_to_yaml_type[str(type(arg[0]))]
 
     def process_type(self, defined_type):
         raise NotImplemented()
@@ -237,7 +262,7 @@ class CodeGenFixedVariable(CodeGenVariableBase):
         size = fixed_type_size(defined_type)
         tmp = defined_type.split('_')
         yaml_base_type = tmp[0]
-        func = self.conversation.defined_type_to_lang_type[yaml_base_type]
+        func = self.conversion.defined_type_to_lang_type[yaml_base_type]
         lang_base_type = func(yaml_base_type, None)
         defined_type = get_fixed_type(defined_type)
         return defined_type, (lang_base_type, size)
@@ -335,11 +360,11 @@ class ValidationFunction:
             self.arguments = []
 
     def __str__(self):
-        function_name = self.code_gen_variable.conversation.get_func_signature(
+        function_name = self.code_gen_variable.conversion.get_func_signature(
             self.function_name, self.code_gen_variable.lang_base_type
         )
-        open_bracket = self.code_gen_variable.conversation.open_bracket
-        close_bracket = self.code_gen_variable.conversation.close_bracket
+        open_bracket = self.code_gen_variable.conversion.open_bracket
+        close_bracket = self.code_gen_variable.conversion.close_bracket
 
         code = function_name + '(param'
         for arg in self.arguments:
@@ -411,9 +436,18 @@ class UpdateParameter(UpdateParameterBase):
 
 
 class UpdateRuntimeParameter(UpdateParameterBase):
+    def __init__(
+        self,
+        parameter_name: str,
+        code_gen_variable: CodeGenVariableBase,
+        mapped_params: list = None,
+    ):
+        super().__init__(parameter_name, code_gen_variable)
+        self.mapped_params = mapped_params or []
+
     def __str__(self):
         parameter_validations_str = ''.join(str(x) for x in self.parameter_validations)
-        mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
+        mapped_params = self.mapped_params
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         parameter_map = parameter_map.split('.')
         struct_name = get_dynamic_struct_name(self.parameter_name)
@@ -511,7 +545,7 @@ class DeclareParameter(DeclareParameterBase):
             self.parameter_value = ''
         else:
             self.parameter_value = self.parameter_name
-        bool_to_str = self.code_gen_variable.conversation.bool_to_str
+        bool_to_str = self.code_gen_variable.conversion.bool_to_str
 
         parameter_validations = self.parameter_validations
 
@@ -542,6 +576,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         parameter_read_only: bool,
         parameter_validations: list,
         parameter_additional_constraints: str,
+        mapped_params: list = None,
     ):
         super().__init__(
             code_gen_variable,
@@ -550,6 +585,7 @@ class DeclareRuntimeParameter(DeclareParameterBase):
             parameter_validations,
             parameter_additional_constraints,
         )
+        self.mapped_params = mapped_params or []
         self.set_runtime_parameter = None
         self.param_struct_instance = 'updated_params'
 
@@ -568,9 +604,9 @@ class DeclareRuntimeParameter(DeclareParameterBase):
         else:
             default_value = 'non-empty'
 
-        bool_to_str = self.code_gen_variable.conversation.bool_to_str
+        bool_to_str = self.code_gen_variable.conversion.bool_to_str
         parameter_field = get_dynamic_parameter_field(self.parameter_name)
-        mapped_params = get_dynamic_mapped_parameter(self.parameter_name)
+        mapped_params = self.mapped_params
         parameter_map = get_dynamic_parameter_map(self.parameter_name)
         struct_name = get_dynamic_struct_name(self.parameter_name)
         parameter_map = parameter_map.split('.')
@@ -619,9 +655,7 @@ class RemoveRuntimeParameter:
         parameter_field = get_dynamic_parameter_field(
             self.dynamic_declare_parameter.parameter_name
         )
-        mapped_params = get_dynamic_mapped_parameter(
-            self.dynamic_declare_parameter.parameter_name
-        )
+        mapped_params = self.dynamic_declare_parameter.mapped_params
 
         data = {
             'parameter_map': parameter_map,
@@ -744,6 +778,7 @@ class GenerateCode:
                 'Invalid language, only cpp, markdown, rst, and python are currently supported.'
             )
         GenerateCode.templates = get_all_templates(language)
+        self.declared_param_names = set()
         self.language = language
         self.namespace = ''
         self.struct_tree = DeclareStruct('Params', [])
@@ -790,23 +825,32 @@ class GenerateCode:
 
         param_name = code_gen_variable.param_name
         update_parameter_invalid = (
-            code_gen_variable.conversation.update_parameter_fail_validation()
+            code_gen_variable.conversion.update_parameter_fail_validation()
         )
         update_parameter_valid = (
-            code_gen_variable.conversation.update_parameter_pass_validation()
+            code_gen_variable.conversion.update_parameter_pass_validation()
         )
         declare_parameter_invalid = (
-            code_gen_variable.conversation.initialization_fail_validation(param_name)
+            code_gen_variable.conversion.initialization_fail_validation(param_name)
         )
         declare_parameter_valid = (
-            code_gen_variable.conversation.initialization_pass_validation(param_name)
+            code_gen_variable.conversion.initialization_pass_validation(param_name)
         )
 
         # add variable to struct
         var = VariableDeclaration(code_gen_variable)
 
         # check if runtime parameter
-        is_runtime_parameter = is_mapped_parameter(self.struct_tree.struct_name)
+        is_runtime_parameter = is_mapped_parameter(param_name)
+
+        # Resolve mapped paths for dynamic params; track paths for standard params
+        mapped_params = []
+        if is_runtime_parameter:
+            mapped_params = get_dynamic_mapped_parameter(
+                param_name, self.declared_param_names
+            )
+        else:
+            self.declared_param_names.add(param_name)
 
         if is_runtime_parameter:
             declare_parameter_set = SetRuntimeParameter(param_name, code_gen_variable)
@@ -816,9 +860,12 @@ class GenerateCode:
                 read_only,
                 validations,
                 additional_constraints,
+                mapped_params,
             )
             declare_parameter.add_set_runtime_parameter(declare_parameter_set)
-            update_parameter = UpdateRuntimeParameter(param_name, code_gen_variable)
+            update_parameter = UpdateRuntimeParameter(
+                param_name, code_gen_variable, mapped_params
+            )
         else:
             declare_parameter = DeclareParameter(
                 code_gen_variable,

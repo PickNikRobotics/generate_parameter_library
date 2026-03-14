@@ -2,8 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>generate_parameter_library</name>
-  <version>0.3.9</version>
+  <version>0.7.0</version>
   <description>CMake to generate ROS parameter library.</description>
+  <maintainer email="bence.magyar.robotics@gmail.com">bmagyar</maintainer>
+  <maintainer email="christoph.froehlich@ait.ac.at">christophfroehlich</maintainer>
+  <maintainer email="nathanbrooks@picknik.ai">Nathan Brooks</maintainer>
+  <maintainer email="shaurya.kumar@picknik.ai">Shaurya Kumar</maintainer>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
@@ -14,16 +18,17 @@
   <buildtool_export_depend>generate_parameter_library_py</buildtool_export_depend>
 
   <depend>fmt</depend>
-  <depend>parameter_traits</depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>rsl</depend>
   <depend>tcb_span</depend>
-  <depend>tl_expected</depend>
+  <depend>libexpected-dev</depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <!-- for backward compatibility -->
+  <!-- remove once this redirection is removed -->
+  <!-- https://github.com/PickNikRobotics/cpp_polyfills/pull/12 -->
+  <depend>tl_expected</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

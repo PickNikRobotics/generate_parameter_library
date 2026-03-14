@@ -2,6 +2,28 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2026-02-22)
+------------------
+* Added missing gmock/gtest dependency (`#304 <https://github.com/PickNikRobotics/generate_parameter_library/issues/304>`_)
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Alejandro Hernández Cordero, Christoph Fröhlich
+
+0.6.0 (2025-12-06)
+------------------
+* Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
+* Contributors: Nathan Brooks
+
+0.5.0 (2025-06-12)
+------------------
+* Add `try_update_params` method (`#260 <https://github.com/PickNikRobotics/generate_parameter_library/issues/260>`_)
+* Add user callback (`#250 <https://github.com/PickNikRobotics/generate_parameter_library/issues/250>`_)
+* Contributors: Nathan Brooks, Sai Kishor Kothakota, Yannick de Hoop
+
+0.4.0 (2025-01-13)
+------------------
+* Change header install path (`#213 <https://github.com/PickNikRobotics/generate_parameter_library/issues/213>`_)
+* Contributors: Auguste Bourgois
+
 0.3.9 (2024-10-27)
 ------------------
 * Add "additional_constraints" support (`#221 <https://github.com/PickNikRobotics/generate_parameter_library/issues/221>`_)

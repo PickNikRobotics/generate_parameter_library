@@ -1,4 +1,5 @@
-// Copyright (c) 2022, PickNik Inc.
+// Copyright 2025 Forssea Robotics
+// All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +11,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the copyright holder nor the names of its
+//    * Neither the name of the Forssea Robotics nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -28,42 +29,28 @@
 
 #pragma once
 
-#include <fmt/core.h>
-#include <rsl/algorithm.hpp>
-#include <tl_expected/expected.hpp>
+#include <memory>
 
-namespace parameter_traits {
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 
-using Result
-    [[deprecated("Use tl::expected<void, std::string> for return instead. "
-                 "`#include <tl_expected/expected.hpp>`.")]] =
-        tl::expected<void, std::string>;
+#include <generate_parameter_library_example/admittance_controller_parameters.hpp>
 
-template <typename... Args>
-[[deprecated(
-    "When returning tl::expected<void, std::string> you can call fmt::format "
-    "directly.")]] auto
-ERROR(const std::string& format, Args... args)
-    -> tl::expected<void, std::string> {
-  return tl::make_unexpected(fmt::format(format, args...));
-}
+namespace admittance_controller {
 
-auto static OK
-    [[deprecated("When returning tl::expected<void, std::string> default "
-                 "construct for OK with `{}`.")]] =
-        tl::expected<void, std::string>{};
+class MinimalPublisher : public rclcpp::Node {
+ public:
+  explicit MinimalPublisher(
+      const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
-template <typename T>
-[[deprecated("Use rsl::contains instead. `#include <rsl/algorithm.hpp>`")]] bool
-contains(std::vector<T> const& vec, T const& val) {
-  return rsl::contains(vec, val);
-}
+ private:
+  void timer_callback();
 
-template <class T>
-[[deprecated(
-    "Use rsl::is_unique instead. `#include <rsl/algorithm.hpp>`")]] bool
-is_unique(std::vector<T> const& x) {
-  return rsl::is_unique(x);
-}
+  rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<admittance_controller::ParamListener> param_listener_;
+  admittance_controller::Params params_;
+};
 
-}  // namespace parameter_traits
+}  // namespace admittance_controller
+
+RCLCPP_COMPONENTS_REGISTER_NODE(admittance_controller::MinimalPublisher)

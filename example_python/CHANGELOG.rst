@@ -2,6 +2,29 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2026-02-22)
+------------------
+* Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
+* Contributors: Christoph Fröhlich
+
+0.6.0 (2025-12-06)
+------------------
+* Update pre-commit hooks (`#288 <https://github.com/PickNikRobotics/generate_parameter_library/issues/288>`_)
+* fix setuptools deprecation (`#272 <https://github.com/PickNikRobotics/generate_parameter_library/issues/272>`_)
+* Update maintainers for GBP release team (`#282 <https://github.com/PickNikRobotics/generate_parameter_library/issues/282>`_)
+* Contributors: Christoph Fröhlich, Nathan Brooks, mosfet80
+
+0.5.0 (2025-06-12)
+------------------
+* Add some new maintainers for ROS releases (`#263 <https://github.com/PickNikRobotics/generate_parameter_library/issues/263>`_)
+* Contributors: Nathan Brooks
+
+0.4.0 (2025-01-13)
+------------------
+* Unit test friendly folder structure for Python examples (`#237 <https://github.com/PickNikRobotics/generate_parameter_library/issues/237>`_)
+* Fix flake8 error in publisher example (`#229 <https://github.com/PickNikRobotics/generate_parameter_library/issues/229>`_)
+* Contributors: Sebastian Castro
+
 0.3.9 (2024-10-27)
 ------------------
 * Add "additional_constraints" support (`#221 <https://github.com/PickNikRobotics/generate_parameter_library/issues/221>`_)

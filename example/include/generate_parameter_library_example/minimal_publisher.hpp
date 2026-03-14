@@ -28,19 +28,23 @@
 
 #pragma once
 
+#include <memory>
+
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 
-#include <admittance_controller_parameters.hpp>
+#include <generate_parameter_library_example/admittance_controller_parameters.hpp>
 
 namespace admittance_controller {
 
 class MinimalPublisher : public rclcpp::Node {
  public:
-  MinimalPublisher(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+  explicit MinimalPublisher(
+      const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
  private:
   void timer_callback();
+  void reconfigure_callback(const admittance_controller::Params& params);
 
   rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<admittance_controller::ParamListener> param_listener_;

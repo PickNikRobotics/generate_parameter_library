@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2023 PickNik Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +35,7 @@ import rclpy.node
 
 
 class MinimalParam(rclpy.node.Node):
+
     def __init__(self):
         super().__init__('admittance_controller')
         self.timer = self.create_timer(1, self.timer_callback)
@@ -52,6 +52,15 @@ class MinimalParam(rclpy.node.Node):
         )
         for d in self.params.fixed_array:
             self.get_logger().info("value: '%s'" % str(d))
+
+        self.get_logger().info(
+            "self.params.nested_map.entry1.value = '%s'"
+            % self.params.nested_map.get_entry('entry1').value
+        )
+        self.get_logger().info(
+            "self.params.nested_map.entry2.value = '%s'"
+            % self.params.nested_map.get_entry('entry2').value
+        )
 
     def timer_callback(self):
         if self.param_listener.is_old(self.params):
