@@ -55,11 +55,11 @@ class MinimalParam(rclpy.node.Node):
 
         self.get_logger().info(
             "self.params.nested_map.entry1.value = '%s'"
-            % self.params.nested_map.entry1.value
+            % self.params.nested_map.get_entry('entry1').value
         )
         self.get_logger().info(
             "self.params.nested_map.entry2.value = '%s'"
-            % self.params.nested_map.entry2.value
+            % self.params.nested_map.get_entry('entry2').value
         )
 
     def timer_callback(self):
