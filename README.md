@@ -91,7 +91,7 @@ generate_parameter_module(
 **src/turtlesim.cpp**
 ```c++
 #include <rclcpp/rclcpp.hpp>
-#include <turtlesim/turtlesim_parameters.hpp>  // you can also use the deprecated #include "turtlesim_parameters.hpp"
+#include <turtlesim/turtlesim_parameters.hpp>
 
 int main(int argc, char * argv[])
 {
