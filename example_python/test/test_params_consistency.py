@@ -349,6 +349,152 @@ class TestParamsConsistency(unittest.TestCase):
         self.assertAlmostEqual(lib_value, new_value)
         self.assertAlmostEqual(lib_value, ros_value)
 
+    def test_update_bool_enable_parameter_update(self):
+        new_value = False
+        self.node.set_parameters([
+            Parameter('enable_parameter_update_without_reactivation', value=new_value)
+        ])
+        updated_params = self.listener.get_params()
+        self.assertEqual(updated_params.enable_parameter_update_without_reactivation, new_value)
+        self.assertEqual(
+            updated_params.enable_parameter_update_without_reactivation,
+            self.node.get_parameter('enable_parameter_update_without_reactivation').value,
+        )
+
+    def test_update_bool_angle_wraparound(self):
+        new_value = True
+        self.node.set_parameters([Parameter('angle_wraparound', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(updated_params.angle_wraparound, new_value)
+        self.assertEqual(
+            updated_params.angle_wraparound,
+            self.node.get_parameter('angle_wraparound').value,
+        )
+
+    def test_update_bool_nested_ft_sensor_frame_external(self):
+        new_value = True
+        self.node.set_parameters([Parameter('ft_sensor.frame.external', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(updated_params.ft_sensor.frame.external, new_value)
+        self.assertEqual(
+            updated_params.ft_sensor.frame.external,
+            self.node.get_parameter('ft_sensor.frame.external').value,
+        )
+
+    def test_update_double_scientific_notation_num(self):
+        new_value = 1.5e-4
+        self.node.set_parameters([Parameter('scientific_notation_num', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertAlmostEqual(updated_params.scientific_notation_num, new_value)
+        self.assertAlmostEqual(
+            updated_params.scientific_notation_num,
+            self.node.get_parameter('scientific_notation_num').value,
+        )
+
+    def test_update_double_pid_rate(self):
+        new_value = 0.01
+        self.node.set_parameters([Parameter('pid.rate', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertAlmostEqual(updated_params.pid.rate, new_value)
+        self.assertAlmostEqual(
+            updated_params.pid.rate,
+            self.node.get_parameter('pid.rate').value,
+        )
+
+    def test_update_double_array_fixed_array(self):
+        new_value = [9.9, 8.8, 7.7, 6.6, 5.5]
+        self.node.set_parameters([Parameter('fixed_array', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(list(updated_params.fixed_array), new_value)
+        self.assertEqual(
+            list(updated_params.fixed_array),
+            list(self.node.get_parameter('fixed_array').value),
+        )
+
+    def test_update_double_array_admittance_mass(self):
+        new_value = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        self.node.set_parameters([Parameter('admittance.mass', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(list(updated_params.admittance.mass), new_value)
+        self.assertEqual(
+            list(updated_params.admittance.mass),
+            list(self.node.get_parameter('admittance.mass').value),
+        )
+
+    def test_update_bool_array_admittance_selected_axes(self):
+        new_value = [True, False, True, False, True, False]
+        self.node.set_parameters([Parameter('admittance.selected_axes', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(list(updated_params.admittance.selected_axes), new_value)
+        self.assertEqual(
+            list(updated_params.admittance.selected_axes),
+            list(self.node.get_parameter('admittance.selected_axes').value),
+        )
+
+    def test_update_string_array_subset_selection(self):
+        new_value = ['A']
+        self.node.set_parameters([Parameter('subset_selection', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(list(updated_params.subset_selection), new_value)
+        self.assertEqual(
+            list(updated_params.subset_selection),
+            list(self.node.get_parameter('subset_selection').value),
+        )
+
+    def test_update_int_gt_fifteen(self):
+        new_value = 42
+        self.node.set_parameters([Parameter('gt_fifteen', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(updated_params.gt_fifteen, new_value)
+        self.assertEqual(
+            updated_params.gt_fifteen,
+            self.node.get_parameter('gt_fifteen').value,
+        )
+
+    def test_update_int_hover_override(self):
+        new_value = 0
+        self.node.set_parameters([Parameter('hover_override', value=new_value)])
+        updated_params = self.listener.get_params()
+        self.assertEqual(updated_params.hover_override, new_value)
+        self.assertEqual(
+            updated_params.hover_override,
+            self.node.get_parameter('hover_override').value,
+        )
+
+    def test_update_map_pid_joint_p(self):
+        joint = self.params.joints[0]
+        param_name = f'pid.{joint}.p'
+        new_value = 5.0
+        self.node.set_parameters([Parameter(param_name, value=new_value)])
+        updated_params = self.listener.get_params()
+        lib_value = updated_params.pid.get_entry(joint).p
+        ros_value = self.node.get_parameter(param_name).value
+        self.assertAlmostEqual(lib_value, new_value)
+        self.assertAlmostEqual(lib_value, ros_value)
+
+    def test_update_map_gains_dof_k(self):
+        dof = self.params.dof_names[0]
+        param_name = f'gains.{dof}.k'
+        new_value = 10.0
+        self.node.set_parameters([Parameter(param_name, value=new_value)])
+        updated_params = self.listener.get_params()
+        lib_value = updated_params.gains.get_entry(dof).k
+        ros_value = self.node.get_parameter(param_name).value
+        self.assertAlmostEqual(lib_value, new_value)
+        self.assertAlmostEqual(lib_value, ros_value)
+
+    def test_update_nested_dynamic_map(self):
+        joint = self.params.joints[0]
+        dof = self.params.dof_names[0]
+        param_name = f'nested_dynamic.{joint}.{dof}.nested'
+        new_value = 3.14
+        self.node.set_parameters([Parameter(param_name, value=new_value)])
+        updated_params = self.listener.get_params()
+        lib_value = updated_params.nested_dynamic.get_entry(joint).get_entry(dof).nested
+        ros_value = self.node.get_parameter(param_name).value
+        self.assertAlmostEqual(lib_value, new_value)
+        self.assertAlmostEqual(lib_value, ros_value)
+
 
 def main():
     unittest.main()
