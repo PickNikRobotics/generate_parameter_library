@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.8.0 (2026-03-22)
+------------------
 * Testing consistency of parameters update (Python) (`#327 <https://github.com/PickNikRobotics/generate_parameter_library/issues/327>`_)
 * Fix nested mapped parameters map (`#306 <https://github.com/PickNikRobotics/generate_parameter_library/issues/306>`_)
 * Contributors: Mat198, Nick Laurenson
