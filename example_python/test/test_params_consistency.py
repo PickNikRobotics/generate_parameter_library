@@ -51,7 +51,10 @@ class TestParamsConsistency(unittest.TestCase):
         # Reload the module to reset class-level attribute state between tests.
         # See: https://github.com/PickNikRobotics/generate_parameter_library/issues/313
         importlib.reload(generate_parameter_module_example.admittance_parameters)
-        from generate_parameter_module_example.admittance_parameters import admittance_controller as ac
+        from generate_parameter_module_example.admittance_parameters import (
+            admittance_controller as ac,
+        )
+
         self.ac = ac
 
         # Provide values for required parameters (declared with type-only, no default).
@@ -138,7 +141,9 @@ class TestParamsConsistency(unittest.TestCase):
     def test_enable_parameter_update_without_reactivation(self):
         self.assertEqual(
             self.params.enable_parameter_update_without_reactivation,
-            self.node.get_parameter('enable_parameter_update_without_reactivation').value,
+            self.node.get_parameter(
+                'enable_parameter_update_without_reactivation'
+            ).value,
         )
 
     def test_use_feedforward_commanded_input(self):
@@ -258,7 +263,8 @@ class TestParamsConsistency(unittest.TestCase):
                 lib_value = self.params.get_entry(joint).get_entry(dof).weight
                 ros_value = self.node.get_parameter(param_name).value
                 self.assertAlmostEqual(
-                    lib_value, ros_value,
+                    lib_value,
+                    ros_value,
                     msg=f'Mismatch for {param_name}: get_params()={lib_value}, get_parameter()={ros_value}',
                 )
 
@@ -266,10 +272,13 @@ class TestParamsConsistency(unittest.TestCase):
         for joint in self.params.joints:
             for dof in self.params.dof_names:
                 param_name = f'nested_dynamic.{joint}.{dof}.nested'
-                lib_value = self.params.nested_dynamic.get_entry(joint).get_entry(dof).nested
+                lib_value = (
+                    self.params.nested_dynamic.get_entry(joint).get_entry(dof).nested
+                )
                 ros_value = self.node.get_parameter(param_name).value
                 self.assertAlmostEqual(
-                    lib_value, ros_value,
+                    lib_value,
+                    ros_value,
                     msg=f'Mismatch for {param_name}: get_params()={lib_value}, get_parameter()={ros_value}',
                 )
 
@@ -279,7 +288,8 @@ class TestParamsConsistency(unittest.TestCase):
             lib_value = self.params.pid.get_entry(joint).p
             ros_value = self.node.get_parameter(param_name).value
             self.assertAlmostEqual(
-                lib_value, ros_value,
+                lib_value,
+                ros_value,
                 msg=f'Mismatch for {param_name}: get_params()={lib_value}, get_parameter()={ros_value}',
             )
 
@@ -289,7 +299,8 @@ class TestParamsConsistency(unittest.TestCase):
             lib_value = self.params.pid.get_entry(joint).i
             ros_value = self.node.get_parameter(param_name).value
             self.assertAlmostEqual(
-                lib_value, ros_value,
+                lib_value,
+                ros_value,
                 msg=f'Mismatch for {param_name}: get_params()={lib_value}, get_parameter()={ros_value}',
             )
 
@@ -299,7 +310,8 @@ class TestParamsConsistency(unittest.TestCase):
             lib_value = self.params.pid.get_entry(joint).d
             ros_value = self.node.get_parameter(param_name).value
             self.assertAlmostEqual(
-                lib_value, ros_value,
+                lib_value,
+                ros_value,
                 msg=f'Mismatch for {param_name}: get_params()={lib_value}, get_parameter()={ros_value}',
             )
 
@@ -309,7 +321,8 @@ class TestParamsConsistency(unittest.TestCase):
             lib_value = self.params.gains.get_entry(dof).k
             ros_value = self.node.get_parameter(param_name).value
             self.assertAlmostEqual(
-                lib_value, ros_value,
+                lib_value,
+                ros_value,
                 msg=f'Mismatch for {param_name}: get_params()={lib_value}, get_parameter()={ros_value}',
             )
 
@@ -351,14 +364,18 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_bool_enable_parameter_update(self):
         new_value = False
-        self.node.set_parameters([
-            Parameter('enable_parameter_update_without_reactivation', value=new_value)
-        ])
+        self.node.set_parameters(
+            [Parameter('enable_parameter_update_without_reactivation', value=new_value)]
+        )
         updated_params = self.listener.get_params()
-        self.assertEqual(updated_params.enable_parameter_update_without_reactivation, new_value)
+        self.assertEqual(
+            updated_params.enable_parameter_update_without_reactivation, new_value
+        )
         self.assertEqual(
             updated_params.enable_parameter_update_without_reactivation,
-            self.node.get_parameter('enable_parameter_update_without_reactivation').value,
+            self.node.get_parameter(
+                'enable_parameter_update_without_reactivation'
+            ).value,
         )
 
     def test_update_bool_angle_wraparound(self):
@@ -373,7 +390,9 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_bool_nested_ft_sensor_frame_external(self):
         new_value = True
-        self.node.set_parameters([Parameter('ft_sensor.frame.external', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('ft_sensor.frame.external', value=new_value)]
+        )
         updated_params = self.listener.get_params()
         self.assertEqual(updated_params.ft_sensor.frame.external, new_value)
         self.assertEqual(
@@ -383,7 +402,9 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_double_scientific_notation_num(self):
         new_value = 1.5e-4
-        self.node.set_parameters([Parameter('scientific_notation_num', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('scientific_notation_num', value=new_value)]
+        )
         updated_params = self.listener.get_params()
         self.assertAlmostEqual(updated_params.scientific_notation_num, new_value)
         self.assertAlmostEqual(
@@ -423,7 +444,9 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_bool_array_admittance_selected_axes(self):
         new_value = [True, False, True, False, True, False]
-        self.node.set_parameters([Parameter('admittance.selected_axes', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('admittance.selected_axes', value=new_value)]
+        )
         updated_params = self.listener.get_params()
         self.assertEqual(list(updated_params.admittance.selected_axes), new_value)
         self.assertEqual(
