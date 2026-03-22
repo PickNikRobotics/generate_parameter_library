@@ -2,6 +2,14 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.8.0 (2026-03-22)
+------------------
+* Fix nested mappings double dot bug (`#329 <https://github.com/PickNikRobotics/generate_parameter_library/issues/329>`_)
+  Co-authored-by: Nathan <50861188+natrad100@users.noreply.github.com>
+* Fix nested mapped parameters map (`#306 <https://github.com/PickNikRobotics/generate_parameter_library/issues/306>`_)
+* Remove unused variables in pytest (`#317 <https://github.com/PickNikRobotics/generate_parameter_library/issues/317>`_)
+* Contributors: Christoph Fröhlich, Nick Laurenson
+
 0.7.0 (2026-02-22)
 ------------------
 * Deprecate parameter_traits package and header file (`#297 <https://github.com/PickNikRobotics/generate_parameter_library/issues/297>`_)

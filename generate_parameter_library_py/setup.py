@@ -35,7 +35,7 @@ package_name = 'generate_parameter_library_py'
 
 setup(
     name=package_name,
-    version='0.7.0',
+    version='0.8.0',
     packages=find_packages(),
     data_files=[
         ('share/' + package_name, ['package.xml']),
@@ -62,6 +62,14 @@ setup(
         (
             'share/' + package_name + '/test',
             ['generate_parameter_library_py/test/valid_parameters_with_none_type.yaml'],
+        ),
+        (
+            'share/' + package_name + '/test',
+            ['generate_parameter_library_py/test/nested_map_test.yaml'],
+        ),
+        (
+            'share/' + package_name + '/test',
+            ['generate_parameter_library_py/test/nested_map_keys.yaml'],
         ),
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
     ],

@@ -76,14 +76,28 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME} INTERFACE
     fmt::fmt
+    parameter_traits::parameter_traits
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
     rsl::rsl
     tcb_span::tcb_span
+    tl::expected
+    # for backward compatibility
+    # remove once this redirection is removed
+    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
     tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
-  ament_export_dependencies(fmt rclcpp rclcpp_lifecycle rsl tcb_span tl_expected)
+  ament_export_dependencies(
+    fmt rclcpp rclcpp_lifecycle rsl tcb_span
+    # TODO(christophfroehlich): remove parameter_traits dependency after removal
+    parameter_traits
+    tl-expected
+    # for backward compatibility
+    # remove once this redirection is removed
+    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
+    tl_expected
+  )
 endmacro()
 
 

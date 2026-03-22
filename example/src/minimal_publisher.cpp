@@ -56,6 +56,11 @@ MinimalPublisher::MinimalPublisher(const rclcpp::NodeOptions& options)
   for (auto d : fixed_array) {
     RCLCPP_INFO(get_logger(), "value: '%s'", std::to_string(d).c_str());
   }
+
+  RCLCPP_INFO(get_logger(), "self.params.nested_map.entry1.value = '%f'",
+              params_.nested_map.entries_map["entry1"].value);
+  RCLCPP_INFO(get_logger(), "self.params.nested_map.entry2.value = '%f'",
+              params_.nested_map.entries_map["entry2"].value);
 }
 
 void MinimalPublisher::timer_callback() {

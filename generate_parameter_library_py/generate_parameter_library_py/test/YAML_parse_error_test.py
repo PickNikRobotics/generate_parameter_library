@@ -53,7 +53,6 @@ def set_up(yaml_test_file):
         args = parse_args()
         output_file = args.output_cpp_header_file
         yaml_file = args.input_yaml_file
-        validate_header = args.validate_header
         run_md(yaml_file, output_file, 'markdown')
 
     testargs = [sys.argv[0], '/tmp/' + yaml_test_file + '.rst', full_file_path]
@@ -62,7 +61,6 @@ def set_up(yaml_test_file):
         args = parse_args()
         output_file = args.output_cpp_header_file
         yaml_file = args.input_yaml_file
-        validate_header = args.validate_header
         run_md(yaml_file, output_file, 'rst')
 
 
@@ -86,17 +84,17 @@ def test_expected(test_input, expected):
     print(e.value)
 
 
-def test_parse_valid_parameter_file():
+@pytest.mark.parametrize(
+    'yaml_test_file',
+    [
+        ('valid_parameters.yaml'),
+        ('valid_parameters_with_none_type.yaml'),
+        ('nested_map_test.yaml'),
+        ('nested_map_keys.yaml'),
+    ],
+)
+def test_parse_valid_parameter_files(yaml_test_file):
     try:
-        yaml_test_file = 'valid_parameters.yaml'
-        set_up(yaml_test_file)
-    except Exception as e:
-        assert False, f'failed to parse valid file, reason:{e}'
-
-
-def test_parse_valid_parameter_file_including_none_type():
-    try:
-        yaml_test_file = 'valid_parameters_with_none_type.yaml'
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f'failed to parse valid file, reason:{e}'

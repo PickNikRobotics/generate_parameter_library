@@ -296,7 +296,7 @@ Here is an example custom validator.
 #include <rclcpp/rclcpp.hpp>
 
 #include <fmt/core.h>
-#include <tl_expected/expected.hpp>
+#include <tl/expected.hpp>
 
 namespace my_project {
 
@@ -313,6 +313,17 @@ tl::expected<void, std::string> integer_equal_value(
 
 }  // namespace my_project
 ```
+
+Add it to `CMakeLists.txt`
+
+```cmake
+generate_parameter_library(
+  turtlesim_parameters # cmake target name for the parameter library
+  src/turtlesim_parameters.yaml # path to input yaml file
+  src/example_validators.hpp # path to the custom validator
+)
+```
+
 To configure a parameter to be validated with the custom validator function `integer_equal_value` with an `expected_value` of `3` you could would this to the YAML.
 ```yaml
 validation:
@@ -372,6 +383,28 @@ params.gain.joints_map.at("joint1").interfaces_map.at("position").value
 ```python
 params.gain.get_entry("joint1").get_entry("position").value
 ```
+
+#### Key array scope resolution
+
+The `key` used by a `__map_<key>` segment does not need to be defined at the root namespace level. It can also be a **sibling** within the same struct, or defined anywhere in a parent scope.
+This allows you to co-locate the key array alongside the map it controls:
+
+```yaml
+cpp_name_space:
+  # key array defined as a sibling of the map that uses it
+  nested_map:
+    entries:
+      type: string_array
+      default_value: ["entry1", "entry2"]
+      description: "Keys for the nested map"
+    __map_entries: # resolved to nested_map.entries (sibling scope)
+      value:
+        type: double
+        default_value: 1.0
+        description: "A value keyed by entries"
+```
+
+> **Note:** Scope resolution searches the current struct first, then walks up to parent scopes. If the key array is not found in any scope, the bare name is used as a fallback.
 
 ### Use generated struct in Cpp
 The generated header file is named based on the target library name you passed as the first argument to the cmake function.

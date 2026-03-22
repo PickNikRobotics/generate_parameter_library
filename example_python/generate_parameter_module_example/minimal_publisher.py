@@ -53,6 +53,15 @@ class MinimalParam(rclpy.node.Node):
         for d in self.params.fixed_array:
             self.get_logger().info("value: '%s'" % str(d))
 
+        self.get_logger().info(
+            "self.params.nested_map.entry1.value = '%s'"
+            % self.params.nested_map.get_entry('entry1').value
+        )
+        self.get_logger().info(
+            "self.params.nested_map.entry2.value = '%s'"
+            % self.params.nested_map.get_entry('entry2').value
+        )
+
     def timer_callback(self):
         if self.param_listener.is_old(self.params):
             self.param_listener.refresh_dynamic_parameters()

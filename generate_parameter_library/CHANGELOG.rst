@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.8.0 (2026-03-22)
+------------------
+* Use libexpected-dev instead of tl_expected (`#322 <https://github.com/PickNikRobotics/generate_parameter_library/issues/322>`_)
+* Contributors: Christoph Fröhlich
+
 0.7.0 (2026-02-22)
 ------------------
 * Use a temporary build directory for Python module output (`#303 <https://github.com/PickNikRobotics/generate_parameter_library/issues/303>`_)
