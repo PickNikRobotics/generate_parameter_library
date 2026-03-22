@@ -2,6 +2,9 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.7.0 (2026-02-22)
 ------------------
 * Fix pre-commit workflow (`#310 <https://github.com/PickNikRobotics/generate_parameter_library/issues/310>`_)
