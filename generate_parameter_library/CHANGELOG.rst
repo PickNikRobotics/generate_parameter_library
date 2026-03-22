@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.7.0 (2026-02-22)
 ------------------
 * Use a temporary build directory for Python module output (`#303 <https://github.com/PickNikRobotics/generate_parameter_library/issues/303>`_)

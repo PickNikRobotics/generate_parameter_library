@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library_example_external
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix pre-commit on humble (`#324 <https://github.com/PickNikRobotics/generate_parameter_library/issues/324>`_)
+* Branch for rolling, add additional CI jobs and tests (backport `#314 <https://github.com/PickNikRobotics/generate_parameter_library/issues/314>`_)
+* Contributors: Christoph Froehlich, Christoph Fröhlich
+
 0.7.0 (2026-02-22)
 ------------------
 * Move linters to pre-commit (`#298 <https://github.com/PickNikRobotics/generate_parameter_library/issues/298>`_)
