@@ -1,4 +1,17 @@
-# -*- coding: utf-8 -*-
+# Copyright 2025 Greenroom Robotics
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import pytest
 import tempfile
 import os
@@ -48,7 +61,7 @@ def test_nested_map_parameter_names():
             try:
                 run_python(output_file.name, yaml_file.name, 'test_validate.hpp')
 
-                with open(output_file.name, 'r') as f:
+                with open(output_file.name) as f:
                     generated_code = f.read()
 
                 # Check that no parameter names have double dots
@@ -91,7 +104,7 @@ def test_nested_map_parameter_names():
 
 
 def test_single_map_parameter_names():
-    """Test that single map parameters still work correctly after the fix."""
+    """Test that single map parameters work."""
 
     single_map_yaml_content = """test_namespace:
   params:
@@ -120,7 +133,7 @@ def test_single_map_parameter_names():
             try:
                 run_python(output_file.name, yaml_file.name, 'test_validate.hpp')
 
-                with open(output_file.name, 'r') as f:
+                with open(output_file.name) as f:
                     generated_code = f.read()
 
                 # Check that no parameter names have double dots
