@@ -21,11 +21,6 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-// silence deprecation warnings for parameter_traits, needed for backwards compatibility
-#define SILENCE_DEPRECATION_WARNINGS
-#include <parameter_traits/parameter_traits.hpp>
-#undef SILENCE_DEPRECATION_WARNINGS
-
 #include <rsl/static_string.hpp>
 #include <rsl/static_vector.hpp>
 #include <rsl/parameter_validators.hpp>
@@ -53,9 +48,6 @@ using rsl::lt_eq;
 using rsl::gt_eq;
 using rsl::one_of;
 using rsl::to_parameter_result_msg;
-
-// temporarily needed for backwards compatibility for custom validators
-using namespace parameter_traits;
 
 template <typename T>
 [[nodiscard]] auto to_parameter_value(T value) {
