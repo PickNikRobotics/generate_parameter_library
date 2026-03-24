@@ -20,6 +20,5 @@ jobs:
     with:
       ros_distro: rolling
       pixi_dependencies: typeguard jinja2 compilers cpp-expected
-      ninja_packages: rsl
       target_cmake_args: -DBUILD_TESTING=OFF
       windows_dependencies: generate_parameter_library.rolling.repos
