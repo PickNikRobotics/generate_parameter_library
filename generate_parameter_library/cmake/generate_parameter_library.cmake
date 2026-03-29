@@ -49,8 +49,6 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
 
     # Copy the header file into the include directory
     file(COPY ${IN_VALIDATE_HEADER} DESTINATION ${LIB_INCLUDE_DIR})
-    # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
-    file(COPY ${IN_VALIDATE_HEADER} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
   endif()
 
   # Set the yaml file parameter to be relative to the current source dir
@@ -68,19 +66,6 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
     "Running `${generate_parameter_library_cpp_BIN} ${PARAM_HEADER_FILE} ${YAML_FILE_PATH} ${VALIDATE_HEADER_FILENAME}`"
     VERBATIM
   )
-  # necessary so that #include <param_file.hpp> can be used in the local package (deprecated)
-  set(LOCAL_PARAM_HEADER_FILE ${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}.hpp)
-  set(LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}_pragma_warning)
-  file(WRITE ${LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE}
-    "#pragma message(\"#include \\\"${LIB_NAME}.hpp\\\" is deprecated. Use #include <${PROJECT_NAME}/${LIB_NAME}.hpp> instead.\")\n")
-  add_custom_command(
-    OUTPUT ${LOCAL_PARAM_HEADER_FILE}
-    COMMAND ${CMAKE_COMMAND} -E cat ${LOCAL_PARAM_HEADER_PRAGMA_WARNING_FILE} ${PARAM_HEADER_FILE} > ${LOCAL_PARAM_HEADER_FILE}
-    DEPENDS ${PARAM_HEADER_FILE}
-    COMMENT
-    "Creating deprecated header file ${LOCAL_PARAM_HEADER_FILE}"
-    VERBATIM
-  )
 
   # Create the library target
   add_library(${LIB_NAME} INTERFACE ${PARAM_HEADER_FILE} ${VALIDATE_HEADER} ${LOCAL_PARAM_HEADER_FILE})
@@ -91,15 +76,25 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
   set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${LIB_NAME} INTERFACE
     fmt::fmt
-    parameter_traits::parameter_traits
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
     rsl::rsl
     tcb_span::tcb_span
+    tl::expected
+    # for backward compatibility
+    # remove once this redirection is removed
+    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
     tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
-  ament_export_dependencies(fmt parameter_traits rclcpp rclcpp_lifecycle rsl tcb_span tl_expected)
+  ament_export_dependencies(
+    fmt rclcpp rclcpp_lifecycle rsl tcb_span
+    tl-expected
+    # for backward compatibility
+    # remove once this redirection is removed
+    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
+    tl_expected
+  )
 endmacro()
 
 
