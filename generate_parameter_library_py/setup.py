@@ -57,6 +57,14 @@ setup(
         ),
         (
             'share/' + package_name + '/test',
+            ['generate_parameter_library_py/test/conflicting_element_bounds.yaml'],
+        ),
+        (
+            'share/' + package_name + '/test',
+            ['generate_parameter_library_py/test/conflicting_scalar_bounds.yaml'],
+        ),
+        (
+            'share/' + package_name + '/test',
             ['generate_parameter_library_py/test/valid_parameters.yaml'],
         ),
         (
