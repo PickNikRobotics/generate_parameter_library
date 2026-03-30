@@ -117,6 +117,18 @@ def validate_validator_combinations(param_name: str, validations_dict: dict):
             'generator emits a single ROS descriptor range.'.format(param_name)
         )
 
+    scalar_lower_bounds = {'gt', 'gt_eq'}
+    scalar_upper_bounds = {'lt', 'lt_eq'}
+    if validation_names.intersection(
+        scalar_lower_bounds
+    ) and validation_names.intersection(scalar_upper_bounds):
+        raise compile_error(
+            'Parameter {} cannot combine lower and upper scalar bound validators '
+            '(gt/gt_eq with lt/lt_eq). '
+            "Use 'bounds<>' for inclusive ranges or a custom validator for "
+            'exclusive/mixed bounds.'.format(param_name)
+        )
+
 
 def get_dynamic_parameter_field(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
