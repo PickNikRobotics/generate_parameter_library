@@ -170,6 +170,14 @@ admittance_controller:
       validation:
         element_bounds: [ 0.0001, 100000.0 ]
 
+    acceleration_limits:
+      type: double_array
+      description: "specifies maximum acceleration limits for x, y and z axis"
+      validation:
+        fixed_size<>: 3
+        lower_element_bounds<>: -10.0
+        upper_element_bounds<>: 10.0
+
   # general settings
   enable_parameter_update_without_reactivation:
     type: bool

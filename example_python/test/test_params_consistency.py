@@ -50,7 +50,8 @@ class TestParamsConsistency(unittest.TestCase):
     def setUp(self):
         # Reload the module to reset class-level attribute state between tests.
         # See: https://github.com/PickNikRobotics/generate_parameter_library/issues/313
-        importlib.reload(generate_parameter_module_example.admittance_parameters)
+        importlib.reload(
+            generate_parameter_module_example.admittance_parameters)
         from generate_parameter_module_example.admittance_parameters import (
             admittance_controller as ac,
         )
@@ -64,9 +65,12 @@ class TestParamsConsistency(unittest.TestCase):
             Parameter('fixed_string_no_default', value='happy'),
             Parameter('command_interfaces', value=['position']),
             Parameter('state_interfaces', value=['position', 'velocity']),
-            Parameter('chainable_command_interfaces', value=['position', 'velocity']),
-            Parameter('kinematics.plugin_name', value='kdl_plugin/KDLKinematics'),
-            Parameter('kinematics.plugin_package', value='kinematics_interface_kdl'),
+            Parameter('chainable_command_interfaces',
+                      value=['position', 'velocity']),
+            Parameter('kinematics.plugin_name',
+                      value='kdl_plugin/KDLKinematics'),
+            Parameter('kinematics.plugin_package',
+                      value='kinematics_interface_kdl'),
             Parameter('kinematics.base', value='base_link'),
             Parameter('kinematics.tip', value='ee_link'),
             Parameter('kinematics.group_name', value='manipulator'),
@@ -79,7 +83,10 @@ class TestParamsConsistency(unittest.TestCase):
             Parameter('admittance.selected_axes', value=[True] * 6),
             Parameter('admittance.mass', value=[3.0] * 6),
             Parameter('admittance.damping_ratio', value=[2.828427] * 6),
-            Parameter('admittance.stiffness', value=[50.0, 50.0, 50.0, 1.0, 1.0, 1.0]),
+            Parameter('admittance.stiffness', value=[
+                      50.0, 50.0, 50.0, 1.0, 1.0, 1.0]),
+            Parameter('admittance.acceleration_limits', value=[
+                      1.0, 1.0, 1.0]),
         ]
         self.node = Node(
             'test_admittance_controller',
@@ -243,13 +250,15 @@ class TestParamsConsistency(unittest.TestCase):
     def test_gravity_compensation_frame_external(self):
         self.assertEqual(
             self.params.gravity_compensation.frame.external,
-            self.node.get_parameter('gravity_compensation.frame.external').value,
+            self.node.get_parameter(
+                'gravity_compensation.frame.external').value,
         )
 
     def test_gravity_compensation_cog_force_is_nan(self):
         self.assertTrue(math.isnan(self.params.gravity_compensation.CoG.force))
         self.assertTrue(
-            math.isnan(self.node.get_parameter('gravity_compensation.CoG.force').value)
+            math.isnan(self.node.get_parameter(
+                'gravity_compensation.CoG.force').value)
         )
 
     # -------------------------------------------------------------------------
@@ -273,7 +282,8 @@ class TestParamsConsistency(unittest.TestCase):
             for dof in self.params.dof_names:
                 param_name = f'nested_dynamic.{joint}.{dof}.nested'
                 lib_value = (
-                    self.params.nested_dynamic.get_entry(joint).get_entry(dof).nested
+                    self.params.nested_dynamic.get_entry(
+                        joint).get_entry(dof).nested
                 )
                 ros_value = self.node.get_parameter(param_name).value
                 self.assertAlmostEqual(
@@ -332,7 +342,8 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_interpolation_mode(self):
         new_value = 'linear'
-        self.node.set_parameters([Parameter('interpolation_mode', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('interpolation_mode', value=new_value)])
         updated_params = self.listener.get_params()
         self.assertEqual(updated_params.interpolation_mode, new_value)
         self.assertEqual(
@@ -365,7 +376,8 @@ class TestParamsConsistency(unittest.TestCase):
     def test_update_bool_enable_parameter_update(self):
         new_value = False
         self.node.set_parameters(
-            [Parameter('enable_parameter_update_without_reactivation', value=new_value)]
+            [Parameter(
+                'enable_parameter_update_without_reactivation', value=new_value)]
         )
         updated_params = self.listener.get_params()
         self.assertEqual(
@@ -380,7 +392,8 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_bool_angle_wraparound(self):
         new_value = True
-        self.node.set_parameters([Parameter('angle_wraparound', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('angle_wraparound', value=new_value)])
         updated_params = self.listener.get_params()
         self.assertEqual(updated_params.angle_wraparound, new_value)
         self.assertEqual(
@@ -406,7 +419,8 @@ class TestParamsConsistency(unittest.TestCase):
             [Parameter('scientific_notation_num', value=new_value)]
         )
         updated_params = self.listener.get_params()
-        self.assertAlmostEqual(updated_params.scientific_notation_num, new_value)
+        self.assertAlmostEqual(
+            updated_params.scientific_notation_num, new_value)
         self.assertAlmostEqual(
             updated_params.scientific_notation_num,
             self.node.get_parameter('scientific_notation_num').value,
@@ -434,7 +448,8 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_double_array_admittance_mass(self):
         new_value = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-        self.node.set_parameters([Parameter('admittance.mass', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('admittance.mass', value=new_value)])
         updated_params = self.listener.get_params()
         self.assertEqual(list(updated_params.admittance.mass), new_value)
         self.assertEqual(
@@ -448,7 +463,8 @@ class TestParamsConsistency(unittest.TestCase):
             [Parameter('admittance.selected_axes', value=new_value)]
         )
         updated_params = self.listener.get_params()
-        self.assertEqual(list(updated_params.admittance.selected_axes), new_value)
+        self.assertEqual(
+            list(updated_params.admittance.selected_axes), new_value)
         self.assertEqual(
             list(updated_params.admittance.selected_axes),
             list(self.node.get_parameter('admittance.selected_axes').value),
@@ -456,7 +472,8 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_string_array_subset_selection(self):
         new_value = ['A']
-        self.node.set_parameters([Parameter('subset_selection', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('subset_selection', value=new_value)])
         updated_params = self.listener.get_params()
         self.assertEqual(list(updated_params.subset_selection), new_value)
         self.assertEqual(
@@ -476,7 +493,8 @@ class TestParamsConsistency(unittest.TestCase):
 
     def test_update_int_hover_override(self):
         new_value = 0
-        self.node.set_parameters([Parameter('hover_override', value=new_value)])
+        self.node.set_parameters(
+            [Parameter('hover_override', value=new_value)])
         updated_params = self.listener.get_params()
         self.assertEqual(updated_params.hover_override, new_value)
         self.assertEqual(
@@ -513,7 +531,8 @@ class TestParamsConsistency(unittest.TestCase):
         new_value = 3.14
         self.node.set_parameters([Parameter(param_name, value=new_value)])
         updated_params = self.listener.get_params()
-        lib_value = updated_params.nested_dynamic.get_entry(joint).get_entry(dof).nested
+        lib_value = updated_params.nested_dynamic.get_entry(
+            joint).get_entry(dof).nested
         ros_value = self.node.get_parameter(param_name).value
         self.assertAlmostEqual(lib_value, new_value)
         self.assertAlmostEqual(lib_value, ros_value)

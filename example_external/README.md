@@ -36,6 +36,7 @@ You should see:
 
 ```
 /admittance_controller:
+  admittance.acceleration_limits
   admittance.damping_ratio
   admittance.mass
   admittance.selected_axes

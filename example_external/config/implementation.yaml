@@ -112,6 +112,11 @@ admittance_controller:
         - 1.0 # ry
         - 1.0 # rz
 
+      acceleration_limits:
+        - 1.1 # x
+        - 1.2 # y
+        - 1.3 # z
+
     # general settings
     enable_parameter_update_without_reactivation: true
     use_feedforward_commanded_input: true
