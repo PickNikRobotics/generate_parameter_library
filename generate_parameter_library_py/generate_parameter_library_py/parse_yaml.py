@@ -98,6 +98,26 @@ def int_to_integer_str(value: str):
     return value.replace('int', 'integer')
 
 
+@typechecked
+def validation_base_name(function_name: str):
+    return function_name.replace('<>', '')
+
+
+@typechecked
+def validate_validator_combinations(param_name: str, validations_dict: dict):
+    validation_names = {validation_base_name(name) for name in validations_dict}
+
+    if {
+        'lower_element_bounds',
+        'upper_element_bounds',
+    }.issubset(validation_names):
+        raise compile_error(
+            "Parameter {} cannot combine 'lower_element_bounds' and "
+            "'upper_element_bounds'. Use 'element_bounds' instead so the "
+            'generator emits a single ROS descriptor range.'.format(param_name)
+        )
+
+
 def get_dynamic_parameter_field(yaml_parameter_name: str):
     tmp = yaml_parameter_name.split('.')
     num_nested = [i for i, val in enumerate(tmp) if is_mapped_parameter(val)]
@@ -744,6 +764,8 @@ def preprocess_inputs(language, name, value, nested_name_list):
     validations_dict = value.get('validation', {})
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
+
+    validate_validator_combinations(param_name, validations_dict)
 
     for func_name in validations_dict:
         args = validations_dict[func_name]
