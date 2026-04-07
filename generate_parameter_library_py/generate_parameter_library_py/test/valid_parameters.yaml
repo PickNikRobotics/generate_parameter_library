@@ -34,6 +34,16 @@ admittance_controller:
         type: double
         default_value: 1.0
         description: "derivative gain term"
+
+      limit:
+        type: double_array
+        description: "specifies limit for x, y and z axis"
+        default_value: [0.0, 0.0, 0.0]
+        validation:
+          fixed_size<>: 3
+          lower_element_bounds<>: -10.0
+          upper_element_bounds<>: 10.0
+
   gt_fifteen_lt_eq_twenty:
     type: int
     default_value: 20
