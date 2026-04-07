@@ -76,10 +76,6 @@ def set_up(yaml_test_file):
             'invalid_parameter_type.yaml',
             'conflicting_element_bounds.yaml',
             'conflicting_scalar_bounds_with_bounds.yaml',
-            'conflicting_scalar_bounds_inclusive.yaml',
-            'conflicting_scalar_bounds_exclusive.yaml',
-            'conflicting_scalar_bounds_mixed_1.yaml',
-            'conflicting_scalar_bounds_mixed_2.yaml',
         ]
     ],
 )

@@ -34,6 +34,27 @@ admittance_controller:
         type: double
         default_value: 1.0
         description: "derivative gain term"
+  gt_fifteen_lt_eq_twenty:
+    type: int
+    default_value: 20
+    description: "should be a number greater than 15 and less than or equal to 20"
+    validation:
+      gt<>: [ 15 ]
+      lt_eq<>: [ 20 ]
+  gt_fifteen_lt_twenty:
+    type: int
+    default_value: 16
+    description: "should be a number greater than 15 and less than 20"
+    validation:
+      gt<>: [ 15 ]
+      lt<>: [ 20 ]
+  acceleration_limits:
+    type: double_array
+    description: "specifies maximum acceleration limits for x, y and z axis"
+    validation:
+      fixed_size<>: 3
+      lower_element_bounds<>: -10.0
+      upper_element_bounds<>: 10.0
   fixed_string:
     type: string_fixed_25
     default_value: "string_value"

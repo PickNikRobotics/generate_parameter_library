@@ -107,14 +107,14 @@ def validation_base_name(function_name: str):
 def validate_validator_combinations(param_name: str, validations_dict: dict):
     validation_names = {validation_base_name(name) for name in validations_dict}
 
-    if {
+    if 'element_bounds' in validation_names and {
         'lower_element_bounds',
         'upper_element_bounds',
-    }.issubset(validation_names):
+    }.intersection(validation_names):
         raise compile_error(
-            "Parameter {} cannot combine 'lower_element_bounds' and "
-            "'upper_element_bounds'. Use 'element_bounds' instead so the "
-            'generator emits a single ROS descriptor range.'.format(param_name)
+            "Parameter {} cannot combine 'element_bounds' with 'lower_element_bounds/upper_element_bounds'.".format(
+                param_name
+            )
         )
 
     scalar_bound_validators = {'gt', 'gt_eq', 'lt', 'lt_eq'}
@@ -125,18 +125,6 @@ def validate_validator_combinations(param_name: str, validations_dict: dict):
             "Parameter {} cannot combine 'bounds' with scalar bound validators "
             "(gt/gt_eq/lt/lt_eq). Use only 'bounds<>' for inclusive ranges, "
             'or only scalar bound validators.'.format(param_name)
-        )
-
-    scalar_lower_bounds = {'gt', 'gt_eq'}
-    scalar_upper_bounds = {'lt', 'lt_eq'}
-    if validation_names.intersection(
-        scalar_lower_bounds
-    ) and validation_names.intersection(scalar_upper_bounds):
-        raise compile_error(
-            'Parameter {} cannot combine lower and upper scalar bound validators '
-            '(gt/gt_eq with lt/lt_eq). '
-            "Use 'bounds<>' for inclusive ranges or a custom validator for "
-            'exclusive/mixed bounds.'.format(param_name)
         )
 
 

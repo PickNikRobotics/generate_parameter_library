@@ -4,5 +4,5 @@ admittance_controller:
     description: "specifies maximum acceleration limits for x, y and z axis"
     validation:
       fixed_size<>: 3
-      lower_element_bounds<>: -10.0
+      element_bounds<>: [-10.0, 20.0]
       upper_element_bounds<>: 10.0
