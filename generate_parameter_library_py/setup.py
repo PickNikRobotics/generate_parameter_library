@@ -61,7 +61,33 @@ setup(
         ),
         (
             'share/' + package_name + '/test',
-            ['generate_parameter_library_py/test/conflicting_scalar_bounds.yaml'],
+            [
+                'generate_parameter_library_py/test/conflicting_scalar_bounds_with_bounds.yaml'
+            ],
+        ),
+        (
+            'share/' + package_name + '/test',
+            [
+                'generate_parameter_library_py/test/conflicting_scalar_bounds_inclusive.yaml'
+            ],
+        ),
+        (
+            'share/' + package_name + '/test',
+            [
+                'generate_parameter_library_py/test/conflicting_scalar_bounds_exclusive.yaml'
+            ],
+        ),
+        (
+            'share/' + package_name + '/test',
+            [
+                'generate_parameter_library_py/test/conflicting_scalar_bounds_mixed_1.yaml'
+            ],
+        ),
+        (
+            'share/' + package_name + '/test',
+            [
+                'generate_parameter_library_py/test/conflicting_scalar_bounds_mixed_2.yaml'
+            ],
         ),
         (
             'share/' + package_name + '/test',

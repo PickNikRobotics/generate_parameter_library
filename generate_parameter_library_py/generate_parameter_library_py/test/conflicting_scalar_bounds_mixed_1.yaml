@@ -1,0 +1,8 @@
+admittance_controller:
+  conflicting_mixed_bounds_1:
+    type: int
+    default_value: 16
+    description: "should be a number between 10 and 20"
+    validation:
+      gt_eq<>: [ 10 ]
+      lt<>: [ 20 ]
