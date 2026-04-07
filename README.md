@@ -264,6 +264,8 @@ The built-in validator functions provided by this package are:
 | gt_eq<>  | [value]             | parameter >= value                   |
 | one_of<> | [[val1, val2, ...]] | Value is one of the specified values |
 
+Note: `lt<>`, `gt<>`, `lt_eq<>`, `gt_eq<>`, or `bounds<>` cannot be used together.
+
 **String validators**
 | Function     | Arguments           | Description                                    |
 | ------------ | ------------------- | ---------------------------------------------- |
@@ -285,6 +287,8 @@ The built-in validator functions provided by this package are:
 | element_bounds<>       | [lower, upper]      | Bounds checking each element (inclusive)            |
 | lower_element_bounds<> | [lower]             | Lower bound for each element (inclusive)            |
 | upper_element_bounds<> | [upper]             | Upper bound for each element (inclusive)            |
+
+Note: `element_bounds<>` cannot be mixed with `lower_element_bounds<>`, or `upper_element_bounds<>`.
 
 ### Custom validator functions
 Validators are functions that return a `tl::expected<void, std::string>` type and accept a `rclcpp::Parameter const&` as their first argument and any number of arguments after that can be specified in YAML.
