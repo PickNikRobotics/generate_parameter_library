@@ -15,41 +15,45 @@ param_name = f"{self.prefix_}{% for map in parameter_map%}{value_{{loop.index}}}
 {% endif -%}
 if not self.node_.has_parameter(self.prefix_ + param_name):
 {%- filter indent(width=4) %}
-descriptor = ParameterDescriptor(description="{{parameter_description|valid_string_python}}", read_only = {{parameter_read_only}})
+descriptor = ParameterDescriptor(description=r"{{parameter_description|valid_string_python}}", read_only = {{parameter_read_only}})
 {%- if parameter_additional_constraints|length %}
 descriptor.additional_constraints = "{{parameter_additional_constraints|valid_string_python}}"
 {% endif -%}
-{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if "DOUBLE" in parameter_type %}
+{%- set range = namespace(lower=None, upper=None) %}
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if validation.arguments|length == 2 %}
-descriptor.floating_point_range.append(FloatingPointRange())
-descriptor.floating_point_range[-1].from_value = {{validation.arguments[0]}}
-descriptor.floating_point_range[-1].to_value = {{validation.arguments[1]}}
+{%- set range.lower = validation.arguments[0] %}
+{%- set range.upper = validation.arguments[1] %}
 {%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.floating_point_range.append(FloatingPointRange())
-descriptor.floating_point_range[-1].from_value = {{validation.arguments[0]}}
-descriptor.floating_point_range[-1].to_value = float('inf')
+{%- set range.lower = validation.arguments[0] %}
 {%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.floating_point_range.append(FloatingPointRange())
-descriptor.floating_point_range[-1].from_value = -float('inf')
-descriptor.floating_point_range[-1].to_value = {{validation.arguments[0]}}
-{%- endif %}
-{%- elif "INTEGER" in parameter_type %}
-{%- if validation.arguments|length == 2 %}
-descriptor.integer_range.append(IntegerRange())
-descriptor.integer_range[-1].from_value = {{validation.arguments[0]}}
-descriptor.integer_range[-1].to_value = {{validation.arguments[1]}}
-{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.integer_range.append(IntegerRange())
-descriptor.integer_range[-1].from_value = {{validation.arguments[0]}}
-descriptor.integer_range[-1].to_value = 2**31-1
-{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.integer_range.append(IntegerRange())
-descriptor.integer_range[-1].from_value = -2**31-1
-descriptor.integer_range[-1].to_value = {{validation.arguments[0]}}
-{%- endif %}
+{%- set range.upper = validation.arguments[0] %}
 {%- endif %}
 {%- endfor %}
+{%- if range.lower is not none or range.upper is not none %}
+descriptor.floating_point_range.append(FloatingPointRange())
+descriptor.floating_point_range[-1].from_value = {{range.lower if range.lower is not none else "-float('inf')"}}
+descriptor.floating_point_range[-1].to_value = {{range.upper if range.upper is not none else "float('inf')"}}
+{%- endif %}
+{%- elif "INTEGER" in parameter_type %}
+{%- set range = namespace(lower=None, upper=None) %}
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
+{%- if validation.arguments|length == 2 %}
+{%- set range.lower = validation.arguments[0] %}
+{%- set range.upper = validation.arguments[1] %}
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+{%- set range.lower = validation.arguments[0] %}
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+{%- set range.upper = validation.arguments[0] %}
+{%- endif %}
+{%- endfor %}
+{%- if range.lower is not none or range.upper is not none %}
+descriptor.integer_range.append(IntegerRange())
+descriptor.integer_range[-1].from_value = {{range.lower if range.lower is not none else "-2**31-1"}}
+descriptor.integer_range[-1].to_value = {{range.upper if range.upper is not none else "2**31-1"}}
+{%- endif %}
+{%- endif %}
 {%- if not default_value|length %}
 parameter = rclpy.Parameter.Type.{{parameter_type}}
 {% endif -%}

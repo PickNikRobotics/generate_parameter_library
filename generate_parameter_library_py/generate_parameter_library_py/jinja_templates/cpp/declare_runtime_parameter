@@ -22,37 +22,41 @@ descriptor.read_only = {{parameter_read_only}};
 {%- if parameter_additional_constraints|length %}
 descriptor.additional_constraints = {{parameter_additional_constraints | valid_string_cpp}};
 {% endif -%}
-{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if "DOUBLE" in parameter_type %}
+{%- set range = namespace(lower=None, upper=None) %}
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
 {%- if validation.arguments|length == 2 %}
-descriptor.floating_point_range.resize({{loop.index}});
-descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
-descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
+{%- set range.lower = validation.arguments[0] %}
+{%- set range.upper = validation.arguments[1] %}
 {%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.floating_point_range.resize({{loop.index}});
-descriptor.floating_point_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
-descriptor.floating_point_range.at({{loop.index0}}).to_value = std::numeric_limits<double>::max();
+{%- set range.lower = validation.arguments[0] %}
 {%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.floating_point_range.resize({{loop.index}});
-descriptor.floating_point_range.at({{loop.index0}}).from_value = std::numeric_limits<double>::lowest();
-descriptor.floating_point_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
-{%- endif %}
-{%- elif "INTEGER" in parameter_type %}
-{%- if validation.arguments|length == 2 %}
-descriptor.integer_range.resize({{loop.index}});
-descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
-descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[1]}};
-{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.integer_range.resize({{loop.index}});
-descriptor.integer_range.at({{loop.index0}}).from_value = {{validation.arguments[0]}};
-descriptor.integer_range.at({{loop.index0}}).to_value = std::numeric_limits<int64_t>::max();
-{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
-descriptor.integer_range.resize({{loop.index}});
-descriptor.integer_range.at({{loop.index0}}).from_value = std::numeric_limits<int64_t>::lowest();
-descriptor.integer_range.at({{loop.index0}}).to_value = {{validation.arguments[0]}};
-{%- endif %}
+{%- set range.upper = validation.arguments[0] %}
 {%- endif %}
 {%- endfor %}
+{%- if range.lower is not none or range.upper is not none %}
+descriptor.floating_point_range.resize(1);
+descriptor.floating_point_range.at(0).from_value = {{range.lower if range.lower is not none else "std::numeric_limits<double>::lowest()"}};
+descriptor.floating_point_range.at(0).to_value = {{range.upper if range.upper is not none else "std::numeric_limits<double>::max()"}};
+{%- endif %}
+{%- elif "INTEGER" in parameter_type %}
+{%- set range = namespace(lower=None, upper=None) %}
+{%- for validation in parameter_validations if ("bounds" in validation.function_name or "lt" in validation.function_name or "gt" in validation.function_name) %}
+{%- if validation.arguments|length == 2 %}
+{%- set range.lower = validation.arguments[0] %}
+{%- set range.upper = validation.arguments[1] %}
+{%- elif ("lower" in validation.function_name or "gt" == validation.function_base_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+{%- set range.lower = validation.arguments[0] %}
+{%- elif ("upper" in validation.function_name or "lt" == validation.function_base_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
+{%- set range.upper = validation.arguments[0] %}
+{%- endif %}
+{%- endfor %}
+{%- if range.lower is not none or range.upper is not none %}
+descriptor.integer_range.resize(1);
+descriptor.integer_range.at(0).from_value = {{range.lower if range.lower is not none else "std::numeric_limits<int64_t>::lowest()"}};
+descriptor.integer_range.at(0).to_value = {{range.upper if range.upper is not none else "std::numeric_limits<int64_t>::max()"}};
+{%- endif %}
+{%- endif %}
 {%- if not default_value|length %}
 auto parameter = rclcpp::ParameterType::PARAMETER_{{parameter_type}};
 {% endif -%}

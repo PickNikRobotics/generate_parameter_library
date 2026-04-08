@@ -77,7 +77,10 @@ class MinimalParam(rclpy.node.Node):
 def main(args=None):
     rclpy.init(args=args)
     node = MinimalParam()
-    rclpy.spin(node)
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':
