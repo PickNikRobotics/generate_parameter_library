@@ -201,7 +201,9 @@ class PythonConversions:
 
     @typechecked
     def str_array_fixed_to_str(self, s: Union[None, list]):
-        raise compile_error('not implemented')
+        if s is None:
+            return ''
+        return '[' + ', '.join(self.str_to_str(x) for x in s) + ']'
 
     @typechecked
     def str_fixed_to_str(self, s: Union[None, str]):

@@ -62,6 +62,10 @@ class TestParamsConsistency(unittest.TestCase):
         # calling get_parameter() on them after declare_parameter(type_only).
         required_params = [
             Parameter('fixed_string_no_default', value='happy'),
+            Parameter(
+                'fixed_string_array_no_default',
+                value=['alpha', 'beta', 'gamma', 'delta', 'epsilon'],
+            ),
             Parameter('command_interfaces', value=['position']),
             Parameter('state_interfaces', value=['position', 'velocity']),
             Parameter('chainable_command_interfaces', value=['position', 'velocity']),
