@@ -11,6 +11,13 @@ admittance_controller:
     fixed_string_no_default:
       "happy"
 
+    fixed_string_array_no_default:
+    - "alpha"
+    - "beta"
+    - "gamma"
+    - "delta"
+    - "epsilon"
+
     elbow_joint:
       x:
         weight: 2.0

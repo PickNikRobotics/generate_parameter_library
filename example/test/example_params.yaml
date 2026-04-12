@@ -15,6 +15,12 @@ example_test_node:
 
     # mandatory parameters not relevant for the test
     fixed_string_no_default: "stringy"
+    fixed_string_array_no_default:
+      - "one"
+      - "two"
+      - "three"
+      - "four"
+      - "five"
     command_interfaces:
       - "one"
       - "two"
