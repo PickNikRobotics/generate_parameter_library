@@ -42,6 +42,7 @@ from typing import Any, List, Union
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import os
+import sys
 import yaml
 
 from generate_parameter_library_py.cpp_conversions import CPPConversions
@@ -62,9 +63,20 @@ class YAMLSyntaxError(Exception):
 
 
 # helper functions
+_warned_param_names = set()
+
+
 @typechecked
 def compile_error(msg: str):
     return YAMLSyntaxError('\nERROR: ' + msg)
+
+
+@typechecked
+def compile_warning(param_name: str, msg: str):
+    if param_name in _warned_param_names:
+        return
+    _warned_param_names.add(param_name)
+    print('\nWARNING: ' + msg, file=sys.stderr, flush=True)
 
 
 @typechecked
@@ -111,20 +123,21 @@ def validate_validator_combinations(param_name: str, validations_dict: dict):
         'lower_element_bounds',
         'upper_element_bounds',
     }.intersection(validation_names):
-        raise compile_error(
-            "Parameter {} cannot combine 'element_bounds' with 'lower_element_bounds/upper_element_bounds'.".format(
-                param_name
-            )
+        compile_warning(
+            param_name,
+            "Parameter '{}' combines 'element_bounds' with 'lower_element_bounds/upper_element_bounds'. "
+            "'element_bounds' will take precedence.".format(param_name),
         )
 
     scalar_bound_validators = {'gt', 'gt_eq', 'lt', 'lt_eq'}
     if 'bounds' in validation_names and validation_names.intersection(
         scalar_bound_validators
     ):
-        raise compile_error(
-            "Parameter {} cannot combine 'bounds' with scalar bound validators "
+        compile_warning(
+            param_name,
+            "Parameter '{}' cannot combine 'bounds' with scalar bound validators "
             "(gt/gt_eq/lt/lt_eq). Use only 'bounds<>' for inclusive ranges, "
-            'or only scalar bound validators.'.format(param_name)
+            'or only scalar bound validators.'.format(param_name),
         )
 
 
