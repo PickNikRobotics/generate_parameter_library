@@ -98,6 +98,14 @@ admittance_controller:
   fixed_string_no_default:
     type: string_fixed_25
     description: "test code generation for fixed sized string with no default"
+  fixed_string_array:
+    type: string_array_fixed_5
+    default_value: ["alpha", "beta", "gamma", "delta", "epsilon"]
+    description: "test code generation for fixed sized string array"
+  fixed_string_array_no_default:
+    type: string_array_fixed_5
+    description: "test code generation for fixed sized string array with no default"
+
   command_interfaces:
       type: string_array
       description: "specifies which command interfaces to claim"

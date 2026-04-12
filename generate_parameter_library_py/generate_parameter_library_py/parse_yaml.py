@@ -168,6 +168,10 @@ def is_fixed_type(yaml_type: str):
 @typechecked
 def get_fixed_base_type(yaml_type: str):
     tmp = yaml_type.split('_')
+    if len(tmp) >= 2 and tmp[-1] == 'fixed':
+        return '_'.join(tmp[:-1])
+    if len(tmp) >= 3 and tmp[-2] == 'fixed' and tmp[-1].isdigit():
+        return '_'.join(tmp[:-2])
     return '_'.join(tmp[: -(min(2, len(tmp) - 1))])
 
 
