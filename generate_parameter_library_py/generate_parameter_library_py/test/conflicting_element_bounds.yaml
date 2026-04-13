@@ -1,0 +1,8 @@
+admittance_controller:
+  acceleration_limits:
+    type: double_array
+    description: "specifies maximum acceleration limits for x, y and z axis"
+    validation:
+      fixed_size<>: 3
+      element_bounds<>: [-10.0, 20.0]
+      upper_element_bounds<>: 10.0

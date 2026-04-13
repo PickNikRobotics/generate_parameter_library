@@ -42,6 +42,7 @@ from typing import Any, List, Union
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 import os
+import sys
 import yaml
 
 from generate_parameter_library_py.cpp_conversions import CPPConversions
@@ -62,9 +63,20 @@ class YAMLSyntaxError(Exception):
 
 
 # helper functions
+_warned_param_names = set()
+
+
 @typechecked
 def compile_error(msg: str):
     return YAMLSyntaxError('\nERROR: ' + msg)
+
+
+@typechecked
+def compile_warning(param_name: str, msg: str):
+    if param_name in _warned_param_names:
+        return
+    _warned_param_names.add(param_name)
+    print('\nWARNING: ' + msg, file=sys.stderr, flush=True)
 
 
 @typechecked
@@ -96,6 +108,37 @@ def pascal_case(string: str):
 @typechecked
 def int_to_integer_str(value: str):
     return value.replace('int', 'integer')
+
+
+@typechecked
+def validation_base_name(function_name: str):
+    return function_name.replace('<>', '')
+
+
+@typechecked
+def validate_validator_combinations(param_name: str, validations_dict: dict):
+    validation_names = {validation_base_name(name) for name in validations_dict}
+
+    if 'element_bounds' in validation_names and {
+        'lower_element_bounds',
+        'upper_element_bounds',
+    }.intersection(validation_names):
+        compile_warning(
+            param_name,
+            "Parameter '{}' combines 'element_bounds' with 'lower_element_bounds/upper_element_bounds'. "
+            "'element_bounds' will take precedence.".format(param_name),
+        )
+
+    scalar_bound_validators = {'gt', 'gt_eq', 'lt', 'lt_eq'}
+    if 'bounds' in validation_names and validation_names.intersection(
+        scalar_bound_validators
+    ):
+        compile_warning(
+            param_name,
+            "Parameter '{}' cannot combine 'bounds' with scalar bound validators "
+            "(gt/gt_eq/lt/lt_eq). Use only 'bounds<>' for inclusive ranges, "
+            'or only scalar bound validators.'.format(param_name),
+        )
 
 
 def get_dynamic_parameter_field(yaml_parameter_name: str):
@@ -748,6 +791,8 @@ def preprocess_inputs(language, name, value, nested_name_list):
     validations_dict = value.get('validation', {})
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
+
+    validate_validator_combinations(param_name, validations_dict)
 
     for func_name in validations_dict:
         args = validations_dict[func_name]

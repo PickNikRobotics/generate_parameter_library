@@ -89,6 +89,8 @@ def test_expected(test_input, expected):
     [
         ('valid_parameters.yaml'),
         ('valid_parameters_with_none_type.yaml'),
+        ('conflicting_element_bounds.yaml'),
+        ('conflicting_scalar_bounds_with_bounds.yaml'),
         ('nested_map_test.yaml'),
         ('nested_map_keys.yaml'),
     ],
