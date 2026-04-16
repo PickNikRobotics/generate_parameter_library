@@ -855,8 +855,12 @@ class GenerateCode:
             validations,
             additional_constraints,
         ) = preprocess_inputs(self.language, name, value, nested_name_list)
-        # skip accepted params that do not generate code
-        if code_gen_variable.lang_type is None:
+        # Skip accepted params that do not generate code for code-generation targets.
+        # Documentation targets still need to keep these entries (e.g. type: none).
+        if code_gen_variable.lang_type is None and self.language not in {
+            'markdown',
+            'rst',
+        }:
             return
 
         param_name = code_gen_variable.param_name
