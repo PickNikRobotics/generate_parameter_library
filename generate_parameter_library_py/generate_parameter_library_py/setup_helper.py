@@ -66,6 +66,15 @@ def _source_package_dir(package_name):
     return None
 
 
+def _default_install_base_from_build_root(build_root):
+    build_root_name = os.path.basename(build_root)
+    if build_root_name.startswith('build'):
+        install_root_name = build_root_name.replace('build', 'install', 1)
+    else:
+        install_root_name = 'install'
+    return os.path.join(os.path.dirname(build_root), install_root_name)
+
+
 def generate_parameter_module(
     module_name, yaml_file, validation_module='', install_base=None, merge_install=False
 ):
@@ -83,18 +92,17 @@ def generate_parameter_module(
         path_split = os.path.split(build_arg)
         path_split = os.path.split(path_split[0])
         pkg_name = path_split[1]
-        path_split = os.path.split(path_split[0])
-        colcon_ws = path_split[0]
+        build_base_root = path_split[0]
 
         if not install_base:
-            install_base = os.path.join(colcon_ws, 'install')
+            install_base = _default_install_base_from_build_root(build_base_root)
 
         resolved_install_base = (
             install_base if merge_install else os.path.join(install_base, pkg_name)
         )
         _append_unique(
             output_dirs,
-            os.path.join(colcon_ws, 'build', pkg_name, pkg_name),
+            os.path.join(build_base_root, pkg_name, pkg_name),
         )
         _append_unique(
             output_dirs,
