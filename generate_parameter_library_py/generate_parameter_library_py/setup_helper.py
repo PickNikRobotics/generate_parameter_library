@@ -75,6 +75,21 @@ def _default_install_base_from_build_root(build_root):
     return os.path.join(os.path.dirname(build_root), install_root_name)
 
 
+def _detect_install_layout_from_env(package_name):
+    ament_prefix_path = os.environ.get('AMENT_PREFIX_PATH', '')
+    if not ament_prefix_path:
+        return None, None
+
+    first_prefix = ament_prefix_path.split(':', 1)[0].strip()
+    if not first_prefix:
+        return None, None
+
+    normalized = os.path.normpath(first_prefix)
+    if os.path.basename(normalized) == package_name:
+        return os.path.dirname(normalized), False
+    return normalized, True
+
+
 def generate_parameter_module(
     module_name, yaml_file, validation_module='', install_base=None, merge_install=False
 ):
@@ -94,8 +109,15 @@ def generate_parameter_module(
         pkg_name = path_split[1]
         build_base_root = path_split[0]
 
-        if not install_base:
-            install_base = _default_install_base_from_build_root(build_base_root)
+        if install_base is None:
+            detected_install_base, detected_merge_install = (
+                _detect_install_layout_from_env(pkg_name)
+            )
+            if detected_install_base is not None:
+                install_base = detected_install_base
+                merge_install = detected_merge_install
+            else:
+                install_base = _default_install_base_from_build_root(build_base_root)
 
         resolved_install_base = (
             install_base if merge_install else os.path.join(install_base, pkg_name)
