@@ -75,19 +75,26 @@ def _default_install_base_from_build_root(build_root):
     return os.path.join(os.path.dirname(build_root), install_root_name)
 
 
-def _detect_install_layout_from_env(package_name):
+def _detect_merge_install_from_env(install_base):
     ament_prefix_path = os.environ.get('AMENT_PREFIX_PATH', '')
     if not ament_prefix_path:
-        return None, None
+        return None
 
-    first_prefix = ament_prefix_path.split(':', 1)[0].strip()
-    if not first_prefix:
-        return None, None
+    normalized_install_base = os.path.realpath(install_base)
+    for prefix in ament_prefix_path.split(':'):
+        prefix = prefix.strip()
+        if not prefix:
+            continue
+        normalized_prefix = os.path.realpath(prefix)
+        # Merge-install: prefix is exactly the workspace install root.
+        if normalized_prefix == normalized_install_base:
+            return True
+        # Isolated/non-merge: prefix is a package subdirectory under install root.
+        if _is_within(normalized_prefix, normalized_install_base):
+            return False
 
-    normalized = os.path.normpath(first_prefix)
-    if os.path.basename(normalized) == package_name:
-        return os.path.dirname(normalized), False
-    return normalized, True
+    # No signal for this workspace install root found in environment.
+    return None
 
 
 def generate_parameter_module(
@@ -110,14 +117,11 @@ def generate_parameter_module(
         build_base_root = path_split[0]
 
         if install_base is None:
-            detected_install_base, detected_merge_install = (
-                _detect_install_layout_from_env(pkg_name)
-            )
-            if detected_install_base is not None:
-                install_base = detected_install_base
-                merge_install = detected_merge_install
-            else:
-                install_base = _default_install_base_from_build_root(build_base_root)
+            install_base = _default_install_base_from_build_root(build_base_root)
+
+        detected_merge_install = _detect_merge_install_from_env(install_base)
+        if detected_merge_install is not None:
+            merge_install = detected_merge_install
 
         resolved_install_base = (
             install_base if merge_install else os.path.join(install_base, pkg_name)
