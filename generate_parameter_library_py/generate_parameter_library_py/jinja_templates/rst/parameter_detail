@@ -1,4 +1,4 @@
-{{name}} ({{type}}){%- filter indent(width=2) %}{% if description|length %}
+{{name}}{% if type != 'none' %} ({{type}}){% endif %}{%- filter indent(width=2) %}{% if description|length %}
 {{description}}
 {% endif %}
 {%- if read_only %}

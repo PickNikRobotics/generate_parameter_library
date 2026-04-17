@@ -67,6 +67,14 @@ class ParameterValidationMarkdown:
 
         self.validation = validation
 
+    @staticmethod
+    def format_arguments(arguments):
+        if not arguments:
+            return ''
+        if len(arguments) == 1:
+            return str(arguments[0])
+        return str(arguments)
+
     def get_validation_type(self, function_base_name):
         if function_base_name in self.sentence_conventions:
             return self.sentence_conventions[function_base_name]
@@ -77,9 +85,9 @@ class ParameterValidationMarkdown:
         arguments = self.validation.arguments
         validation = self.get_validation_type(self.validation.function_base_name)
         if validation.__contains__('VALUES'):
-            validation = validation.replace('VALUES', str(arguments[0]))
+            validation = validation.replace('VALUES', self.format_arguments(arguments))
         elif arguments:
-            validation += ': ' + str(arguments[0])
+            validation += ': ' + self.format_arguments(arguments)
 
         return ' - ' + validation
 
