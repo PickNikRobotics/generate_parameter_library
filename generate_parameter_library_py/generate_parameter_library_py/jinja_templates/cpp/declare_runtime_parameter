@@ -31,11 +31,11 @@ descriptor.additional_constraints = {{parameter_additional_constraints | valid_s
 {%- elif ("lower" in validation.function_name or "gt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
 {%- set range.lower = validation.arguments[0] %}
 {%- elif "gt" == validation.function_base_name and validation.arguments|length == 1 %}
-{%- set range.lower = "({} + std::numeric_limits<double>::epsilon())".format(validation.arguments[0]) %}
+{%- set range.lower = "std::nextafter({}, std::numeric_limits<double>::infinity())".format(validation.arguments[0]) %}
 {%- elif ("upper" in validation.function_name or "lt_eq" == validation.function_base_name) and validation.arguments|length == 1 %}
 {%- set range.upper = validation.arguments[0] %}
 {%- elif "lt" == validation.function_base_name and validation.arguments|length == 1 %}
-{%- set range.upper = "({} - std::numeric_limits<double>::epsilon())".format(validation.arguments[0]) %}
+{%- set range.upper = "std::nextafter({}, -std::numeric_limits<double>::infinity())".format(validation.arguments[0]) %}
 {%- endif %}
 {%- endfor %}
 {%- if range.lower is not none or range.upper is not none %}
