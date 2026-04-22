@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library_example_external
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)
+* Contributors: Christoph Fröhlich
+
 0.7.1 (2026-03-22)
 ------------------
 * Fix pre-commit on humble (`#324 <https://github.com/PickNikRobotics/generate_parameter_library/issues/324>`_)

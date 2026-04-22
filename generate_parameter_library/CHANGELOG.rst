@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add repository README.md to generate_parameter_library package docs (backport `#296 <https://github.com/PickNikRobotics/generate_parameter_library/issues/296>`_)
+* Use libexpected-dev instead of tl_expected (`#322 <https://github.com/PickNikRobotics/generate_parameter_library/issues/322>`_) (`#333 <https://github.com/PickNikRobotics/generate_parameter_library/issues/333>`_)
+* Contributors: Christoph Fröhlich, Jonas Otto
+
 0.7.1 (2026-03-22)
 ------------------
 

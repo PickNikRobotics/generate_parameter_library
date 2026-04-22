@@ -2,6 +2,9 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.7.1 (2026-03-22)
 ------------------
 
