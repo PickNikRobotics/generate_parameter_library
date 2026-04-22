@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2026-04-22)
+------------------
 * Add repository README.md to generate_parameter_library package docs (`#296 <https://github.com/PickNikRobotics/generate_parameter_library/issues/296>`_)
 * Remove deprecated parameter_traits (`#294 <https://github.com/PickNikRobotics/generate_parameter_library/issues/294>`_) (`#330 <https://github.com/PickNikRobotics/generate_parameter_library/issues/330>`_)
 * Remove installation to deprecated include path (`#319 <https://github.com/PickNikRobotics/generate_parameter_library/issues/319>`_)
