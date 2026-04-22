@@ -2,6 +2,16 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix markdown generation for bounds/element-bounds (`#337 <https://github.com/PickNikRobotics/generate_parameter_library/issues/337>`_)
+* Generate markdown documentation also for none type (`#345 <https://github.com/PickNikRobotics/generate_parameter_library/issues/345>`_)
+* Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)
+* Fix conflicting validators (`#336 <https://github.com/PickNikRobotics/generate_parameter_library/issues/336>`_)
+* Fix rst syntax parsing in parameter description (`#338 <https://github.com/PickNikRobotics/generate_parameter_library/issues/338>`_)
+* Remove deprecated parameter_traits (`#294 <https://github.com/PickNikRobotics/generate_parameter_library/issues/294>`_) (`#330 <https://github.com/PickNikRobotics/generate_parameter_library/issues/330>`_)
+* Contributors: Christoph Fröhlich, Mat198
+
 0.8.0 (2026-03-22)
 ------------------
 * Fix nested mappings double dot bug (`#329 <https://github.com/PickNikRobotics/generate_parameter_library/issues/329>`_)

@@ -2,6 +2,13 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add repository README.md to generate_parameter_library package docs (`#296 <https://github.com/PickNikRobotics/generate_parameter_library/issues/296>`_)
+* Remove deprecated parameter_traits (`#294 <https://github.com/PickNikRobotics/generate_parameter_library/issues/294>`_) (`#330 <https://github.com/PickNikRobotics/generate_parameter_library/issues/330>`_)
+* Remove installation to deprecated include path (`#319 <https://github.com/PickNikRobotics/generate_parameter_library/issues/319>`_)
+* Contributors: Christoph Fröhlich, Jonas Otto
+
 0.8.0 (2026-03-22)
 ------------------
 * Use libexpected-dev instead of tl_expected (`#322 <https://github.com/PickNikRobotics/generate_parameter_library/issues/322>`_)
