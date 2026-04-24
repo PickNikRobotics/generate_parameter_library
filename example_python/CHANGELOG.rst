@@ -2,6 +2,13 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2026-04-22)
+------------------
+* Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)
+* Fix conflicting validators (`#336 <https://github.com/PickNikRobotics/generate_parameter_library/issues/336>`_)
+* Fix rst syntax parsing in parameter description (`#338 <https://github.com/PickNikRobotics/generate_parameter_library/issues/338>`_)
+* Contributors: Christoph Fröhlich, Mat198
+
 0.8.0 (2026-03-22)
 ------------------
 * Testing consistency of parameters update (Python) (`#327 <https://github.com/PickNikRobotics/generate_parameter_library/issues/327>`_)

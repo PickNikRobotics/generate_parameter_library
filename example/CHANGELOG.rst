@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2026-04-22)
+------------------
+* Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)
+* Fix conflicting validators (`#336 <https://github.com/PickNikRobotics/generate_parameter_library/issues/336>`_)
+* Contributors: Christoph Fröhlich
+
 0.8.0 (2026-03-22)
 ------------------
 * Fix nested mapped parameters map (`#306 <https://github.com/PickNikRobotics/generate_parameter_library/issues/306>`_)
