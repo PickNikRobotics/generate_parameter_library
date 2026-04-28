@@ -9,6 +9,7 @@ from rclpy.clock import Clock
 from rclpy.exceptions import InvalidParameterValueException
 from rclpy.time import Time
 import copy
+import sys
 import rclpy
 import rclpy.parameter
 from generate_parameter_library_py.python_validators import ParameterValidators

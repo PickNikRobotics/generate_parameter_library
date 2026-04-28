@@ -84,7 +84,7 @@ TEST_F(DescriptorTest, check_lt_eq) {
 }
 
 TEST_F(DescriptorTest, check_gt) {
-  EXPECT_EQ(descriptors_[4].integer_range.at(0).from_value, 15);
+  EXPECT_EQ(descriptors_[4].integer_range.at(0).from_value, 16);
   EXPECT_EQ(descriptors_[4].integer_range.at(0).to_value,
             std::numeric_limits<int64_t>::max());
 }
