@@ -48,15 +48,6 @@ class TestParamsConsistency(unittest.TestCase):
         rclpy.shutdown()
 
     def setUp(self):
-        # Reload the module to reset class-level attribute state between tests.
-        # See: https://github.com/PickNikRobotics/generate_parameter_library/issues/313
-        importlib.reload(generate_parameter_module_example.admittance_parameters)
-        from generate_parameter_module_example.admittance_parameters import (
-            admittance_controller as ac,
-        )
-
-        self.ac = ac
-
         # Provide values for required parameters (declared with type-only, no default).
         # Without these, declare_params() raises ParameterUninitializedException when
         # calling get_parameter() on them after declare_parameter(type_only).
