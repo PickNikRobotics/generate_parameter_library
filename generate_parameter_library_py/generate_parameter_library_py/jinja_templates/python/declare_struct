@@ -4,11 +4,14 @@ def __init__(self):
 {%- filter indent(width=4) %}
 {% if struct_fields|length -%}
 {{struct_fields-}}
-{% else -%}
-pass # no explicit fields in a map
 {% endif -%}
-{% endfilter -%}
-{%if sub_structs|length -%}
+{% if sub_struct_python_instances|length -%}
+{{sub_struct_python_instances}}
+{%- elif not struct_fields|length -%}
+pass
+{%- endif -%}
+{% endfilter %}
+{%-if sub_structs|length %}
 {{sub_structs-}}
 {% endif -%}
 {% endfilter -%}

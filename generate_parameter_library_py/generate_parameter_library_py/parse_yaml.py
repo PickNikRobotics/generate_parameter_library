@@ -219,7 +219,6 @@ class CodeGenVariableBase:
         param_name: str,
         defined_type: str,
         default_value: Any,
-        is_struct: bool = False,
     ):
         if language == 'cpp':
             self.conversion = CPPConversions()
@@ -241,12 +240,7 @@ class CodeGenVariableBase:
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
 
-        if is_struct:
-            self.lang_type = self.defined_type
-            self.defined_base_type = self.defined_type
-            self.lang_base_type = self.defined_type
-            self.lang_str_value = self.default_value
-        elif self.defined_type not in self.conversion.defined_type_to_lang_type:
+        if self.defined_type not in self.conversion.defined_type_to_lang_type:
             allowed = ', '.join(
                 key for key in self.conversion.defined_type_to_lang_type
             )
@@ -254,20 +248,19 @@ class CodeGenVariableBase:
                 f'Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: '
                 + allowed
             )
-        else:
-            func = self.conversion.defined_type_to_lang_type[self.defined_type]
-            self.lang_type = func(self.defined_type, template)
-            tmp = defined_type.split('_')
-            self.defined_base_type = tmp[0]
-            func = self.conversion.defined_type_to_lang_type[self.defined_base_type]
-            self.lang_base_type = func(self.defined_base_type, template)
-            func = self.conversion.lang_str_value_func[self.defined_type]
-            try:
-                self.lang_str_value = func(default_value)
-            except TypeCheckError:
-                raise compile_error(
-                    f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
-                )
+        func = self.conversion.defined_type_to_lang_type[self.defined_type]
+        self.lang_type = func(self.defined_type, template)
+        tmp = defined_type.split('_')
+        self.defined_base_type = tmp[0]
+        func = self.conversion.defined_type_to_lang_type[self.defined_base_type]
+        self.lang_base_type = func(self.defined_base_type, template)
+        func = self.conversion.lang_str_value_func[self.defined_type]
+        try:
+            self.lang_str_value = func(default_value)
+        except TypeCheckError:
+            raise compile_error(
+                f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
+            )
 
     def parameter_as_function_str(self):
         if self.defined_type not in self.conversion.yaml_type_to_as_function:
@@ -354,11 +347,24 @@ class DeclareStruct:
         content = ''.join(str(x) for x in self.sub_structs)
         return str(content)
 
+    def python_struct_instance(name):
+        return (
+            ''
+            if is_mapped_parameter(name)
+            else f'self.{name} = self.__{pascal_case(name)}()'
+        )
+
     def __str__(self):
         sub_struct_str = ''.join(str(x) for x in self.sub_structs)
         field_str = ''.join(str(x) for x in self.fields)
         if field_str == '' and sub_struct_str == '':
             return ''
+
+        # Special case for python: Instance must be added separated to be placed in the __init__ call
+        sub_struct_python_instances = '\n'.join(
+            DeclareStruct.python_struct_instance(x.struct_name)
+            for x in self.sub_structs
+        )
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
@@ -374,6 +380,7 @@ class DeclareStruct:
             'struct_instance': self.struct_instance,
             'struct_fields': str(field_str),
             'sub_structs': str(sub_struct_str),
+            'sub_struct_python_instances': sub_struct_python_instances,
             'map_value_type': map_val_type,
             'map_name': map_name,
         }
@@ -741,7 +748,7 @@ def get_all_templates(language: str):
     return template_map
 
 
-def preprocess_inputs(language, name, value, nested_name_list, is_struct=False):
+def preprocess_inputs(language, name, value, nested_name_list):
     # define parameter name
     param_name = ''.join(x + '.' for x in nested_name_list[1:]) + name
 
@@ -771,11 +778,11 @@ def preprocess_inputs(language, name, value, nested_name_list, is_struct=False):
     default_value = value.get('default_value', None)
     if not is_fixed_type(defined_type):
         code_gen_variable = CodeGenVariable(
-            language, name, param_name, defined_type, default_value, is_struct
+            language, name, param_name, defined_type, default_value
         )
     else:
         code_gen_variable = CodeGenFixedVariable(
-            language, name, param_name, defined_type, default_value, is_struct
+            language, name, param_name, defined_type, default_value
         )
 
     description = value.get('description', '')
@@ -978,20 +985,6 @@ class GenerateCode:
                     self.parse_dict(key, root_map[key], nested_name)
                     nested_name.pop()
 
-            # Add structs as fields to be included in the __init__ call
-            is_root: bool = len(nested_name) == 0
-            is_map: bool = len(cur_struct_tree.fields) == 0
-            if not is_root and not is_map:
-                struct_name = f'__{pascal_case(sub_struct.struct_name)}'
-                struct_value = {
-                    'type': struct_name,
-                    'default_value': f'self.{struct_name}()',
-                }
-                struct_variable, *_ = preprocess_inputs(
-                    self.language, name, struct_value, nested_name, is_struct=True
-                )
-                cur_struct_tree.add_field(VariableDeclaration(struct_variable))
-
             self.struct_tree = cur_struct_tree
             self.stack_struct_tree = cur_stack_struct_tree
         else:
@@ -1004,6 +997,12 @@ class GenerateCode:
             'namespace': self.namespace,
             'field_content': self.struct_tree.sub_structs[0].field_content(),
             'sub_struct_content': self.struct_tree.sub_structs[0].sub_struct_content(),
+            'sub_struct_python_instances': '\n'.join(
+                [
+                    DeclareStruct.python_struct_instance(x.struct_name)
+                    for x in self.struct_tree.sub_structs[0].sub_structs
+                ]
+            ),
             'stack_field_content': self.stack_struct_tree.sub_structs[
                 0
             ].field_content(),

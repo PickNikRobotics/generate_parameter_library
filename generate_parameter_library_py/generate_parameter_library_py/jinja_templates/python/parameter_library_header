@@ -28,6 +28,8 @@ def __init__(self):
 self.stamp_ = Time()
 
 {{field_content-}}
+{{sub_struct_python_instances}}
+
 {% endfilter -%}
 {{sub_struct_content-}}
 {%- endfilter %}
