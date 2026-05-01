@@ -219,7 +219,7 @@ class CodeGenVariableBase:
         param_name: str,
         defined_type: str,
         default_value: Any,
-        is_struct: bool = False
+        is_struct: bool = False,
     ):
         if language == 'cpp':
             self.conversion = CPPConversions()
@@ -980,11 +980,16 @@ class GenerateCode:
 
             # Add structs as fields to be included in the __init__ call
             is_root: bool = len(nested_name) == 0
-            is_map:  bool = len(cur_struct_tree.fields) == 0
+            is_map: bool = len(cur_struct_tree.fields) == 0
             if not is_root and not is_map:
                 struct_name = f'__{pascal_case(sub_struct.struct_name)}'
-                struct_value = {'type': struct_name, 'default_value': f'self.{struct_name}()'}
-                struct_variable, *_ = preprocess_inputs(self.language, name, struct_value, nested_name, is_struct=True)
+                struct_value = {
+                    'type': struct_name,
+                    'default_value': f'self.{struct_name}()'
+                }
+                struct_variable, *_ = preprocess_inputs(
+                    self.language, name, struct_value, nested_name, is_struct=True
+                )
                 cur_struct_tree.add_field(VariableDeclaration(struct_variable))
 
             self.struct_tree = cur_struct_tree
