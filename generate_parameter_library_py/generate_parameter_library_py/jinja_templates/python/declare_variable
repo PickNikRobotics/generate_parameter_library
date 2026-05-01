@@ -1,5 +1,5 @@
 {% if value|length -%}
-{{name}} = {{value}}
+self.{{name}} = {{value}}
 {% else -%}
-{{name}} = None
+self.{{name}} = None
 {% endif -%}

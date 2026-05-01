@@ -219,6 +219,7 @@ class CodeGenVariableBase:
         param_name: str,
         defined_type: str,
         default_value: Any,
+        is_struct: bool = False
     ):
         if language == 'cpp':
             self.conversion = CPPConversions()
@@ -240,7 +241,12 @@ class CodeGenVariableBase:
         self.defined_type, template = self.process_type(defined_type)
         self.array_type = array_type(self.defined_type)
 
-        if self.defined_type not in self.conversion.defined_type_to_lang_type:
+        if is_struct:
+            self.lang_type = self.defined_type
+            self.defined_base_type = self.defined_type
+            self.lang_base_type = self.defined_type
+            self.lang_str_value = self.default_value
+        elif self.defined_type not in self.conversion.defined_type_to_lang_type:
             allowed = ', '.join(
                 key for key in self.conversion.defined_type_to_lang_type
             )
@@ -248,19 +254,20 @@ class CodeGenVariableBase:
                 f'Invalid parameter type `{defined_type}` for parameter {param_name}. Allowed types are: '
                 + allowed
             )
-        func = self.conversion.defined_type_to_lang_type[self.defined_type]
-        self.lang_type = func(self.defined_type, template)
-        tmp = defined_type.split('_')
-        self.defined_base_type = tmp[0]
-        func = self.conversion.defined_type_to_lang_type[self.defined_base_type]
-        self.lang_base_type = func(self.defined_base_type, template)
-        func = self.conversion.lang_str_value_func[self.defined_type]
-        try:
-            self.lang_str_value = func(default_value)
-        except TypeCheckError:
-            raise compile_error(
-                f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
-            )
+        else:
+            func = self.conversion.defined_type_to_lang_type[self.defined_type]
+            self.lang_type = func(self.defined_type, template)
+            tmp = defined_type.split('_')
+            self.defined_base_type = tmp[0]
+            func = self.conversion.defined_type_to_lang_type[self.defined_base_type]
+            self.lang_base_type = func(self.defined_base_type, template)
+            func = self.conversion.lang_str_value_func[self.defined_type]
+            try:
+                self.lang_str_value = func(default_value)
+            except TypeCheckError:
+                raise compile_error(
+                    f'Parameter {param_name} has incorrect type. Expected: {defined_type}, got: {self.get_yaml_type_from_python(default_value)}'
+                )
 
     def parameter_as_function_str(self):
         if self.defined_type not in self.conversion.yaml_type_to_as_function:
@@ -734,7 +741,7 @@ def get_all_templates(language: str):
     return template_map
 
 
-def preprocess_inputs(language, name, value, nested_name_list):
+def preprocess_inputs(language, name, value, nested_name_list, is_struct=False):
     # define parameter name
     param_name = ''.join(x + '.' for x in nested_name_list[1:]) + name
 
@@ -764,11 +771,11 @@ def preprocess_inputs(language, name, value, nested_name_list):
     default_value = value.get('default_value', None)
     if not is_fixed_type(defined_type):
         code_gen_variable = CodeGenVariable(
-            language, name, param_name, defined_type, default_value
+            language, name, param_name, defined_type, default_value, is_struct
         )
     else:
         code_gen_variable = CodeGenFixedVariable(
-            language, name, param_name, defined_type, default_value
+            language, name, param_name, defined_type, default_value, is_struct
         )
 
     description = value.get('description', '')
@@ -970,6 +977,15 @@ class GenerateCode:
                     nested_name.append(name)
                     self.parse_dict(key, root_map[key], nested_name)
                     nested_name.pop()
+
+            # Add structs as fields to be included in the __init__ call
+            is_root: bool = len(nested_name) == 0
+            is_map:  bool = len(cur_struct_tree.fields) == 0
+            if not is_root and not is_map:
+                struct_name = f'__{pascal_case(sub_struct.struct_name)}'
+                struct_value = {'type': struct_name, 'default_value': f'self.{struct_name}()'}
+                struct_variable, *_ = preprocess_inputs(self.language, name, struct_value, nested_name, is_struct=True)
+                cur_struct_tree.add_field(VariableDeclaration(struct_variable))
 
             self.struct_tree = cur_struct_tree
             self.stack_struct_tree = cur_stack_struct_tree
