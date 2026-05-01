@@ -985,7 +985,7 @@ class GenerateCode:
                 struct_name = f'__{pascal_case(sub_struct.struct_name)}'
                 struct_value = {
                     'type': struct_name,
-                    'default_value': f'self.{struct_name}()'
+                    'default_value': f'self.{struct_name}()',
                 }
                 struct_variable, *_ = preprocess_inputs(
                     self.language, name, struct_value, nested_name, is_struct=True
