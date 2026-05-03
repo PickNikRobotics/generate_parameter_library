@@ -34,7 +34,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
-import generate_parameter_module_example.admittance_parameters
+from generate_parameter_module_example.admittance_parameters import admittance_controller
 
 
 class TestParamsConsistency(unittest.TestCase):
@@ -81,7 +81,7 @@ class TestParamsConsistency(unittest.TestCase):
             automatically_declare_parameters_from_overrides=True,
             parameter_overrides=required_params,
         )
-        self.listener = self.ac.ParamListener(self.node)
+        self.listener = admittance_controller.ParamListener(self.node)
         self.params = self.listener.get_params()
 
     def tearDown(self):
