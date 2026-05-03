@@ -515,6 +515,35 @@ class TestParamsConsistency(unittest.TestCase):
         self.assertAlmostEqual(lib_value, new_value)
         self.assertAlmostEqual(lib_value, ros_value)
 
+    def test_params_do_not_share_state(self):
+        params1 = self.listener.get_params()
+        params1.pid.rate = 1.0
+        params2 = self.listener.get_params()
+        params2.pid.rate = 2.0
+        self.assertNotEqual(params1.pid.rate, params2.pid.rate)
+        self.node.set_parameters([Parameter('pid.rate', value='3.0')])
+        params2 = self.listener.get_params()
+        self.assertNotEqual(params1.pid.rate, params2.pid.rate)
+
+    def test_maps_do_not_share_state(self):
+        self.node.set_parameters(
+            [
+                Parameter(
+                    'nested_map_struct.A.nested_struct.nested_struct_field',
+                    value='valueA',
+                ),
+                Parameter(
+                    'nested_map_struct.B.nested_struct.nested_struct_field',
+                    value='valueB',
+                ),
+            ]
+        )
+        params = self.listener.get_params()
+        self.assertNotEqual(
+            params.nested_map_struct.get_entry('A').nested_struct.nested_struct_field,
+            params.nested_map_struct.get_entry('B').nested_struct.nested_struct_field,
+        )
+
 
 def main():
     unittest.main()
