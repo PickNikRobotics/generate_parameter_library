@@ -34,7 +34,9 @@ import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
-from generate_parameter_module_example.admittance_parameters import admittance_controller
+from generate_parameter_module_example.admittance_parameters import (
+    admittance_controller,
+)
 
 
 class TestParamsConsistency(unittest.TestCase):
