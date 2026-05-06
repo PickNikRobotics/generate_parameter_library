@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.7.2 (2026-04-22)
 ------------------
 * Warn on conflicting validators (`#344 <https://github.com/PickNikRobotics/generate_parameter_library/issues/344>`_)
