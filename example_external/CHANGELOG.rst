@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_example_external
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.1 (2026-05-06)
+------------------
+
 1.0.0 (2026-04-22)
 ------------------
 * Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)

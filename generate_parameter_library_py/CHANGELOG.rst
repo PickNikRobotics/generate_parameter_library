@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.1 (2026-05-06)
+------------------
+
 1.0.0 (2026-04-22)
 ------------------
 * Fix markdown generation for bounds/element-bounds (`#337 <https://github.com/PickNikRobotics/generate_parameter_library/issues/337>`_)
