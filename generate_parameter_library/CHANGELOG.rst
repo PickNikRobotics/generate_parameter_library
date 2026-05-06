@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.7.3 (2026-05-06)
+------------------
 * Silence deprecation warning for tl_expected (backport `#350 <https://github.com/PickNikRobotics/generate_parameter_library/issues/350>`_)
 * Contributors: Christoph Froehlich
 
