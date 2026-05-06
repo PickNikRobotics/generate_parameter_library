@@ -18,38 +18,14 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  ci:
+  semi-binary:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     strategy:
       fail-fast: false
       matrix:
-        env:
-          - ROS_DISTRO: rolling
-            ROS_REPO: testing
-          - ROS_DISTRO: rolling
-            ROS_REPO: main
-    env:
-      BASEDIR: ${{ github.workspace }}/.work
-      UPSTREAM_WORKSPACE: generate_parameter_library.${{ matrix.env.ROS_DISTRO }}.repos
-
-    name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-semi
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - id: ici
-        name: Run industrial_ci
-        uses: ros-industrial/industrial_ci@master
-        env: ${{ matrix.env }}
-      - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v7
-        if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
-        with:
-          name: test-results-${{ matrix.env.NAME }}
-          path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
-          overwrite: true
-      - name: Upload log artifacts (on failure)
-        uses: actions/upload-artifact@v7
-        if: failure()
-        with:
-          name: logs-${{ matrix.env.NAME }}
-          path: ${{ env.BASEDIR }}/target_ws/log/*
-          overwrite: true
+        ROS_DISTRO: [lyrical, rolling]
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ros_repo: testing
+      upstream_workspace: generate_parameter_library.${{ matrix.ROS_DISTRO }}.repos
+      ref_for_scheduled_build: main
