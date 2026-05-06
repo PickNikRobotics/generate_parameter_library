@@ -22,12 +22,17 @@ class {{namespace}}:
 
 class Params:
 {%- filter indent(width=4) %}
+def __init__(self):
+{%- filter indent(width=4) %}
 # for detecting if the parameter struct has been updated
-stamp_ = Time()
+self.stamp_ = Time()
 
 {{field_content-}}
-{{sub_struct_content-}}
+{{sub_struct_python_instances}}
+
 {% endfilter -%}
+{{sub_struct_content-}}
+{%- endfilter %}
 {%- endfilter %}
 
 
