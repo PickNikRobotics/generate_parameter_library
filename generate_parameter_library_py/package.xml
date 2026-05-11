@@ -12,10 +12,10 @@
   <license>BSD-3-Clause</license>
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
-  <depend>python3</depend>
-  <depend>python3-jinja2</depend>
-  <depend>python3-typeguard</depend>
-  <depend>python3-yaml</depend>
+  <exec_depend>python3</exec_depend>
+  <exec_depend>python3-jinja2</exec_depend>
+  <exec_depend>python3-typeguard</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
 
   <test_depend>python3-pytest</test_depend>
 

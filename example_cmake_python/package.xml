@@ -13,7 +13,8 @@
   <author email="paul.gesel@picknik.ai">Paul Gesel</author>
 
   <depend>generate_parameter_library</depend>
-  <depend>rclpy</depend>
+
+  <exec_depend>rclpy</exec_depend>
 
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
