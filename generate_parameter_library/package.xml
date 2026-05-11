@@ -19,7 +19,6 @@
 
   <depend>fmt</depend>
   <depend>rclcpp</depend>
-  <depend>rclpy</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>rsl</depend>
   <depend>tcb_span</depend>
@@ -29,6 +28,8 @@
   <!-- remove once this redirection is removed -->
   <!-- https://github.com/PickNikRobotics/cpp_polyfills/pull/12 -->
   <depend>tl_expected</depend>
+
+  <exec_depend>rclpy</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

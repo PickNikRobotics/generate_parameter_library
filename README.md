@@ -53,7 +53,7 @@ turtlesim:
 
 **package.xml**
 ```xml
-<build_depend>generate_parameter_library</build_depend>
+<depend>generate_parameter_library</depend>
 ```
 
 **CMakeLists.txt**

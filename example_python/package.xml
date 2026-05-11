@@ -11,7 +11,7 @@
   <maintainer email="paulgesel@gmail.com">paul</maintainer>
   <license>BSD-3-Clause</license>
 
-  <build_depend>generate_parameter_library</build_depend>
+  <depend>generate_parameter_library</depend>
 
   <exec_depend>generate_parameter_library_py</exec_depend>
   <exec_depend>rclpy</exec_depend>
