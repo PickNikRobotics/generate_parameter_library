@@ -17,17 +17,20 @@
 
   <buildtool_export_depend>generate_parameter_library_py</buildtool_export_depend>
 
+  <build_depend>libexpected-dev</build_depend>
+  <build_export_depend>libexpected-dev</build_export_depend>
+
   <depend>fmt</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>rsl</depend>
   <depend>tcb_span</depend>
-  <depend>libexpected-dev</depend>
 
   <!-- for backward compatibility -->
   <!-- remove once this redirection is removed -->
   <!-- https://github.com/PickNikRobotics/cpp_polyfills/pull/12 -->
-  <depend>tl_expected</depend>
+  <build_depend>tl_expected</build_depend>
+  <build_export_depend>tl_expected</build_export_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
