@@ -32,10 +32,5 @@ find_package(rsl REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(tcb_span REQUIRED)
 find_package(tl-expected REQUIRED)
-# for backward compatibility
-# remove once this redirection is removed
-# https://github.com/PickNikRobotics/cpp_polyfills/pull/12
-set(tl_expected_DEPRECATED_QUIET TRUE)
-find_package(tl_expected REQUIRED)
 
 include("${generate_parameter_library_DIR}/generate_parameter_library.cmake")
