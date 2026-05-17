@@ -100,6 +100,18 @@ admittance_controller:
         default_value: 1.0
         description: "A value in the nested map with sibling keys"
 
+  nested_map_struct_entries:
+    type: string_array
+    default_value: [A, B]
+    description: "Keys for nested map structs"
+  nested_map_struct:
+    __map_nested_map_struct_entries:
+      nested_struct:
+        nested_struct_field:
+          type: string
+          default_value: nested_struct_field
+          description: "test fields in deeply nested structs"
+
   fixed_string:
     type: string_fixed_25
     default_value: "string_value"

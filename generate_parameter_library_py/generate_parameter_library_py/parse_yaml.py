@@ -347,11 +347,24 @@ class DeclareStruct:
         content = ''.join(str(x) for x in self.sub_structs)
         return str(content)
 
+    def python_struct_instance(name):
+        return (
+            ''
+            if is_mapped_parameter(name)
+            else f'self.{name} = self.__{pascal_case(name)}()'
+        )
+
     def __str__(self):
         sub_struct_str = ''.join(str(x) for x in self.sub_structs)
         field_str = ''.join(str(x) for x in self.fields)
         if field_str == '' and sub_struct_str == '':
             return ''
+
+        # Special case for python: Instance must be added separated to be placed in the __init__ call
+        sub_struct_python_instances = '\n'.join(
+            DeclareStruct.python_struct_instance(x.struct_name)
+            for x in self.sub_structs
+        )
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
@@ -367,6 +380,7 @@ class DeclareStruct:
             'struct_instance': self.struct_instance,
             'struct_fields': str(field_str),
             'sub_structs': str(sub_struct_str),
+            'sub_struct_python_instances': sub_struct_python_instances,
             'map_value_type': map_val_type,
             'map_name': map_name,
         }
@@ -983,6 +997,12 @@ class GenerateCode:
             'namespace': self.namespace,
             'field_content': self.struct_tree.sub_structs[0].field_content(),
             'sub_struct_content': self.struct_tree.sub_structs[0].sub_struct_content(),
+            'sub_struct_python_instances': '\n'.join(
+                [
+                    DeclareStruct.python_struct_instance(x.struct_name)
+                    for x in self.struct_tree.sub_structs[0].sub_structs
+                ]
+            ),
             'stack_field_content': self.stack_struct_tree.sub_structs[
                 0
             ].field_content(),

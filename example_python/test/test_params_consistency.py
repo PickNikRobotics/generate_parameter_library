@@ -34,7 +34,9 @@ import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
-import generate_parameter_module_example.admittance_parameters
+from generate_parameter_module_example.admittance_parameters import (
+    admittance_controller,
+)
 
 
 class TestParamsConsistency(unittest.TestCase):
@@ -48,15 +50,6 @@ class TestParamsConsistency(unittest.TestCase):
         rclpy.shutdown()
 
     def setUp(self):
-        # Reload the module to reset class-level attribute state between tests.
-        # See: https://github.com/PickNikRobotics/generate_parameter_library/issues/313
-        importlib.reload(generate_parameter_module_example.admittance_parameters)
-        from generate_parameter_module_example.admittance_parameters import (
-            admittance_controller as ac,
-        )
-
-        self.ac = ac
-
         # Provide values for required parameters (declared with type-only, no default).
         # Without these, declare_params() raises ParameterUninitializedException when
         # calling get_parameter() on them after declare_parameter(type_only).
@@ -90,7 +83,7 @@ class TestParamsConsistency(unittest.TestCase):
             automatically_declare_parameters_from_overrides=True,
             parameter_overrides=required_params,
         )
-        self.listener = self.ac.ParamListener(self.node)
+        self.listener = admittance_controller.ParamListener(self.node)
         self.params = self.listener.get_params()
 
     def tearDown(self):
@@ -521,6 +514,35 @@ class TestParamsConsistency(unittest.TestCase):
         ros_value = self.node.get_parameter(param_name).value
         self.assertAlmostEqual(lib_value, new_value)
         self.assertAlmostEqual(lib_value, ros_value)
+
+    def test_params_do_not_share_state(self):
+        params1 = self.listener.get_params()
+        params1.pid.rate = 1.0
+        params2 = self.listener.get_params()
+        params2.pid.rate = 2.0
+        self.assertNotEqual(params1.pid.rate, params2.pid.rate)
+        self.node.set_parameters([Parameter('pid.rate', value='3.0')])
+        params2 = self.listener.get_params()
+        self.assertNotEqual(params1.pid.rate, params2.pid.rate)
+
+    def test_maps_do_not_share_state(self):
+        self.node.set_parameters(
+            [
+                Parameter(
+                    'nested_map_struct.A.nested_struct.nested_struct_field',
+                    value='valueA',
+                ),
+                Parameter(
+                    'nested_map_struct.B.nested_struct.nested_struct_field',
+                    value='valueB',
+                ),
+            ]
+        )
+        params = self.listener.get_params()
+        self.assertNotEqual(
+            params.nested_map_struct.get_entry('A').nested_struct.nested_struct_field,
+            params.nested_map_struct.get_entry('B').nested_struct.nested_struct_field,
+        )
 
 
 def main():
