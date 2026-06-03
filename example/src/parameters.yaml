@@ -183,7 +183,9 @@ admittance_controller:
     frame:
       id:
         type: string
-        description: "world frame, gravity points down (neg. Z) in this frame"
+        description: |-
+          Define the "world frame".
+          Gravity points down (neg. Z) in this frame.
       external:
         type: bool
         default_value: false
