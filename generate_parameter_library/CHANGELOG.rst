@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.0 (2026-05-14)
 ------------------
 * Remove tl_expected (`#355 <https://github.com/PickNikRobotics/generate_parameter_library/issues/355>`_)
