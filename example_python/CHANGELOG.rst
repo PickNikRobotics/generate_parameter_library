@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2026-06-09)
+------------------
 * add gitignore for generated files in example_python (`#356 <https://github.com/PickNikRobotics/generate_parameter_library/issues/356>`_)
 * Made fields in python structs assigned per-instance instead of at the class scope (`#351 <https://github.com/PickNikRobotics/generate_parameter_library/issues/351>`_)
 * Fix ParameterDescription of exclusive bounds (`#339 <https://github.com/PickNikRobotics/generate_parameter_library/issues/339>`_)
