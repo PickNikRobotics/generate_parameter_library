@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library_example_external
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.7.3 (2026-05-06)
 ------------------
 
