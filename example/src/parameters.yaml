@@ -286,30 +286,30 @@ admittance_controller:
       lt<>: [ 20 ]
   lt_eq_fifteen_double:
     type: double
-    default_value: 1
+    default_value: 1.0
     description: "should be a number less than or equal to 15"
     validation:
-      lt_eq<>: [ 15 ]
+      lt_eq<>: [ 15.0 ]
   gt_fifteen_double:
     type: double
-    default_value: 16
+    default_value: 16.0
     description: "should be a number greater than 15"
     validation:
-      gt<>: [ 15 ]
+      gt<>: [ 15.0 ]
   gt_fifteen_lt_eq_twenty_double:
     type: double
-    default_value: 20
+    default_value: 20.0
     description: "should be a number greater than 15 and less than or equal to 20"
     validation:
-      gt<>: [ 15 ]
-      lt_eq<>: [ 20 ]
+      gt<>: [ 15.0 ]
+      lt_eq<>: [ 20.0 ]
   gt_fifteen_lt_twenty_double:
     type: double
-    default_value: 16
+    default_value: 16.0
     description: "should be a number greater than 15 and less than 20"
     validation:
-      gt<>: [ 15 ]
-      lt<>: [ 20 ]
+      gt<>: [ 15.0 ]
+      lt<>: [ 20.0 ]
   one_number:
     type: int
     default_value: 14540
