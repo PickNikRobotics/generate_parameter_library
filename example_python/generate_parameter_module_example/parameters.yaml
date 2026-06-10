@@ -3,6 +3,7 @@ admittance_controller:
     type: double
     default_value: 0.00000000001
     description: "Test scientific notation"
+    additional_constraints: "Any string can be here. For example, you might want to embed JSON schema"
   interpolation_mode:
     type: string
     default_value: "spline"
@@ -61,11 +62,13 @@ admittance_controller:
               description: "test deep nested map params"
               validation:
                 gt_eq<>: [ 0.0001 ]
+
   pid:
     rate:
       type: double
       default_value: 0.005
       description: "update loop period in seconds"
+
     __map_joints:
       p:
         type: double
@@ -134,6 +137,7 @@ admittance_controller:
   command_interfaces:
       type: string_array
       description: "specifies which command interfaces to claim"
+      additional_constraints: "some additional constraints"
       read_only: true
 
   state_interfaces:
