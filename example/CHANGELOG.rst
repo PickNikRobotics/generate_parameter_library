@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.7.4 (2026-06-10)
+------------------
 * Fix floating_point_range numerical values (`#360 <https://github.com/PickNikRobotics/generate_parameter_library/issues/360>`_)
 * Fix ParameterDescription of exclusive bounds (backport `#339 <https://github.com/PickNikRobotics/generate_parameter_library/issues/339>`_)
 * Contributors: Christoph Froehlich, Christoph Fröhlich

@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.7.4 (2026-06-10)
+------------------
 * Fix ParameterDescription of exclusive bounds (backport `#339 <https://github.com/PickNikRobotics/generate_parameter_library/issues/339>`_)
 * Contributors: Christoph Froehlich
 
