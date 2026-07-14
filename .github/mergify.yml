@@ -1,7 +1,7 @@
 pull_request_rules:
   - name: Backport to humble at reviewers discretion
     conditions:
-      - base=master
+      - base=main
       - "label=backport-humble"
     actions:
       backport:
@@ -25,9 +25,9 @@ pull_request_rules:
         comment:
           message: This pull request is in conflict. Could you please fix it @christophfroehlich?
 
-  - name: development targets master branch
+  - name: development targets main branch
     conditions:
-      - base!=master
+      - base!=main
       - author!=bmagyar
       - author!=christophfroehlich
       - author!=nbbrooks
@@ -36,6 +36,6 @@ pull_request_rules:
     actions:
         comment:
           message: |
-            @{{author}}, all pull requests must be targeted towards the `master` development branch.
-            Once merged into `master`, it is possible to backport to `{{base}}`, but it must be in `master`
+            @{{author}}, all pull requests must be targeted towards the `main` development branch.
+            Once merged into `main`, it is possible to backport to `{{base}}`, but it must be in `main`
             to have these changes reflected into new distributions.
