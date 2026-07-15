@@ -57,6 +57,11 @@ if(BUILD_TESTING)
   target_include_directories(test_example_gmock PRIVATE include)
   target_link_libraries(test_example_gmock admittance_controller_parameters rclcpp::rclcpp)
 
+  # test_params_consistency - GMock test verifying consistency between get_params() and ROS2 parameter server
+  ament_add_gmock(test_params_consistency test/test_params_consistency.cpp)
+  target_include_directories(test_params_consistency PRIVATE include)
+  target_link_libraries(test_params_consistency admittance_controller_parameters rclcpp::rclcpp)
+
   find_package(launch_testing_ament_cmake REQUIRED)
   add_launch_test(test/launch.test.py
     TIMEOUT 50
