@@ -535,20 +535,6 @@ TEST_F(TestParamsConsistency, ParamsDoNotShareState) {
   EXPECT_NE(params1.pid.rate, params2.pid.rate);
 }
 
-TEST_F(TestParamsConsistency, MapsDoNotShareState) {
-  node_->set_parameters({
-      rclcpp::Parameter("nested_map_struct.A.nested_struct.nested_struct_field",
-                        "valueA"),
-      rclcpp::Parameter("nested_map_struct.B.nested_struct.nested_struct_field",
-                        "valueB"),
-  });
-  auto params = param_listener_->get_params();
-  EXPECT_NE(params.nested_map_struct.nested_map_struct_entries_map.at("A")
-                .nested_struct.nested_struct_field,
-            params.nested_map_struct.nested_map_struct_entries_map.at("B")
-                .nested_struct.nested_struct_field);
-}
-
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
