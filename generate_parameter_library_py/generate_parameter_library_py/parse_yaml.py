@@ -104,8 +104,33 @@ def validation_base_name(function_name: str):
 
 
 @typechecked
-def validate_validator_combinations(param_name: str, validations_dict: dict):
+def validate_validator_combinations(
+    param_name: str, defined_type: str, validations_dict: dict
+):
     validation_names = {validation_base_name(name) for name in validations_dict}
+
+    scalar_bound_validators = {'bounds', 'gt', 'gt_eq', 'lt', 'lt_eq'}
+    element_bound_validators = {
+        'element_bounds',
+        'lower_element_bounds',
+        'upper_element_bounds',
+    }
+    if array_type(defined_type) and validation_names.intersection(
+        scalar_bound_validators
+    ):
+        raise compile_error(
+            "Parameter {} has array type '{}' but uses a scalar bound validator. "
+            "Use 'element_bounds/lower_element_bounds/upper_element_bounds' instead.".format(
+                param_name, defined_type
+            )
+        )
+    if not array_type(defined_type) and validation_names.intersection(
+        element_bound_validators
+    ):
+        raise compile_error(
+            "Parameter {} has scalar type '{}' but uses an element bound validator. "
+            "Use 'bounds/gt/gt_eq/lt/lt_eq' instead.".format(param_name, defined_type)
+        )
 
     if 'element_bounds' in validation_names and {
         'lower_element_bounds',
@@ -117,9 +142,8 @@ def validate_validator_combinations(param_name: str, validations_dict: dict):
             )
         )
 
-    scalar_bound_validators = {'gt', 'gt_eq', 'lt', 'lt_eq'}
     if 'bounds' in validation_names and validation_names.intersection(
-        scalar_bound_validators
+        scalar_bound_validators - {'bounds'}
     ):
         raise compile_error(
             "Parameter {} cannot combine 'bounds' with scalar bound validators "
@@ -793,7 +817,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
 
-    validate_validator_combinations(param_name, validations_dict)
+    validate_validator_combinations(param_name, defined_type, validations_dict)
 
     for func_name in validations_dict:
         args = validations_dict[func_name]
