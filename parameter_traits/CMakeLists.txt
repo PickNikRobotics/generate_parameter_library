@@ -7,6 +7,10 @@ find_package(fmt REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rsl REQUIRED)
 find_package(tcb_span REQUIRED)
+# for backward compatibility
+# remove once this redirection is removed
+# https://github.com/PickNikRobotics/cpp_polyfills/pull/12
+set(tl_expected_DEPRECATED_QUIET TRUE)
 find_package(tl_expected REQUIRED)
 
 add_library(parameter_traits INTERFACE)
