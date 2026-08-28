@@ -100,6 +100,7 @@ stamp_ = Time()
 
         def update(self, parameters):
             updated_params = self.get_params()
+            any_param_updated = False
 
             for param in parameters:
 {%- filter indent(width=16) %}
@@ -115,10 +116,11 @@ for param in parameters:
 {%- endfilter %}
 {%- endif %}
 
-            updated_params.stamp_ = self.clock_.now()
-            self.update_internal_params(updated_params)
-            if self.user_callback:
-                self.user_callback(self.get_params())
+            if any_param_updated:
+                updated_params.stamp_ = self.clock_.now()
+                self.update_internal_params(updated_params)
+                if self.user_callback:
+                    self.user_callback(self.get_params())
             return SetParametersResult(successful=True)
 
         def update_internal_params(self, updated_params):
