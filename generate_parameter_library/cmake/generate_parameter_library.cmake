@@ -80,12 +80,11 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
     rclcpp_lifecycle::rclcpp_lifecycle
     rsl::rsl
     tcb_span::tcb_span
-    tl::expected
+    rcpputils::rcpputils
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
   ament_export_dependencies(
     fmt rclcpp rclcpp_lifecycle rsl tcb_span
-    tl-expected
   )
 endmacro()
 
