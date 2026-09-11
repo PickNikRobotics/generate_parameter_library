@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(parameter_traits)
 
+set(parameter_traits_CONFIG_EXTRAS
+  cmake/parameter_traits-config-extras.cmake
+)
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(fmt REQUIRED)
@@ -42,4 +46,4 @@ install(
 
 ament_export_targets(export_parameter_traits HAS_LIBRARY_TARGET)
 ament_export_dependencies(fmt rclcpp rsl tcb_span tl_expected)
-ament_package()
+ament_package(CONFIG_EXTRAS ${parameter_traits_CONFIG_EXTRAS})
