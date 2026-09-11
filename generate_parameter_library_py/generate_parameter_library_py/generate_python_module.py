@@ -49,7 +49,10 @@ def run(output_file, yaml_file, validation_module=''):
 
     # Put an __init__.py file if one does not yet exist.
     init_file = os.path.join(os.path.dirname(output_file), '__init__.py')
-    open(init_file, 'a').close()
+    if (not os.path.exists(init_file)) or os.path.getsize(init_file) == 0:
+        with open(init_file, 'w') as f:
+            f.write('from pkgutil import extend_path\n')
+            f.write('__path__ = extend_path(__path__, __name__)\n')
 
 
 def parse_args():

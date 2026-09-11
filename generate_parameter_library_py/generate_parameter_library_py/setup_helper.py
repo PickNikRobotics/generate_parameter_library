@@ -31,47 +31,154 @@ import os
 from generate_parameter_library_py.generate_python_module import run
 
 
+def _get_option_value(args, option_names):
+    for i, arg in enumerate(args):
+        for option_name in option_names:
+            # Handle `--opt value` and `--opt=value` forms.
+            if arg == option_name and i + 1 < len(args):
+                return args[i + 1]
+            if arg.startswith(option_name + '='):
+                return arg.split('=', 1)[1]
+    return None
+
+
+def _append_unique(paths, path):
+    if path and path not in paths:
+        paths.append(path)
+
+
+def _package_name_from_yaml_path(yaml_file):
+    normalized = yaml_file.replace('\\', '/')
+    return normalized.split('/', 1)[0]
+
+
+def _is_within(path, parent):
+    try:
+        return os.path.commonpath([path, parent]) == parent
+    except ValueError:
+        return False
+
+
+def _source_package_dir(package_name):
+    package_path = os.path.join(os.getcwd(), package_name)
+    if os.path.isdir(package_path):
+        return os.path.realpath(package_path)
+    return None
+
+
+def _default_install_base_from_build_root(build_root):
+    build_root_name = os.path.basename(build_root)
+    if build_root_name.startswith('build'):
+        install_root_name = build_root_name.replace('build', 'install', 1)
+    else:
+        install_root_name = 'install'
+    return os.path.join(os.path.dirname(build_root), install_root_name)
+
+
+def _detect_merge_install_from_env(install_base):
+    ament_prefix_path = os.environ.get('AMENT_PREFIX_PATH', '')
+    if not ament_prefix_path:
+        return None
+
+    normalized_install_base = os.path.realpath(install_base)
+    for prefix in ament_prefix_path.split(':'):
+        prefix = prefix.strip()
+        if not prefix:
+            continue
+        normalized_prefix = os.path.realpath(prefix)
+        # Merge-install: prefix is exactly the workspace install root.
+        if normalized_prefix == normalized_install_base:
+            return True
+        # Isolated/non-merge: prefix is a package subdirectory under install root.
+        if _is_within(normalized_prefix, normalized_install_base):
+            return False
+
+    # No signal for this workspace install root found in environment.
+    return None
+
+
 def generate_parameter_module(
     module_name, yaml_file, validation_module='', install_base=None, merge_install=False
 ):
-    # TODO there must be a better way to do this. I need to find the build directory so I can place the python
-    # module there
-    build_dir = None
-    install_dir = None
-    for i, arg in enumerate(sys.argv):
-        # Look for the `--build-directory` option in the command line arguments
-        if arg == '--build-directory' or arg == '--build-base':
-            build_arg = sys.argv[i + 1]
+    package_name = _package_name_from_yaml_path(yaml_file)
+    output_dirs = []
+    src_pkg_dir = _source_package_dir(package_name)
 
-            path_split = os.path.split(build_arg)
-            path_split = os.path.split(path_split[0])
-            pkg_name = path_split[1]
-            path_split = os.path.split(path_split[0])
-            colcon_ws = path_split[0]
+    tmp = sys.version.split()[0]
+    tmp = tmp.split('.')
+    py_version = f'python{tmp[0]}.{tmp[1]}'
 
-            tmp = sys.version.split()[0]
-            tmp = tmp.split('.')
-            py_version = f'python{tmp[0]}.{tmp[1]}'
+    build_arg = _get_option_value(sys.argv, ['--build-directory', '--build-base'])
+    if build_arg:
+        # Typical colcon editable invocation uses --build-directory.
+        path_split = os.path.split(build_arg)
+        path_split = os.path.split(path_split[0])
+        pkg_name = path_split[1]
+        build_base_root = path_split[0]
 
-            if not install_base:
-                install_base = os.path.join(colcon_ws, 'install')
+        if install_base is None:
+            install_base = _default_install_base_from_build_root(build_base_root)
 
-            install_base = (
-                install_base if merge_install else os.path.join(install_base, pkg_name)
-            )
-            install_dir = os.path.join(
-                install_base,
+        detected_merge_install = _detect_merge_install_from_env(install_base)
+        if detected_merge_install is not None:
+            merge_install = detected_merge_install
+
+        resolved_install_base = (
+            install_base if merge_install else os.path.join(install_base, pkg_name)
+        )
+        _append_unique(
+            output_dirs,
+            os.path.join(build_base_root, pkg_name, pkg_name),
+        )
+        _append_unique(
+            output_dirs,
+            os.path.join(
+                resolved_install_base,
                 'lib',
                 py_version,
                 'site-packages',
                 pkg_name,
-            )
-            build_dir = os.path.join(colcon_ws, 'build', pkg_name, pkg_name)
-            break
+            ),
+        )
 
-    if build_dir:
-        run(os.path.join(build_dir, module_name + '.py'), yaml_file, validation_module)
-    if install_dir:
+    # Handle standard setuptools/distutils build and install options used on
+    # buildfarm and by non-editable local builds.
+    build_lib = _get_option_value(sys.argv, ['--build-lib'])
+    if build_lib:
+        _append_unique(output_dirs, os.path.join(build_lib, package_name))
+
+    install_lib = _get_option_value(sys.argv, ['--install-lib'])
+    if install_lib:
+        install_lib_dir = install_lib
+        if os.path.basename(install_lib) != package_name:
+            install_lib_dir = os.path.join(install_lib, package_name)
+        _append_unique(output_dirs, install_lib_dir)
+
+    prefix = _get_option_value(sys.argv, ['--prefix'])
+    if prefix:
+        root = _get_option_value(sys.argv, ['--root'])
+        prefix_base = prefix
+        if root:
+            prefix_base = os.path.join(root, prefix.lstrip(os.sep))
+        _append_unique(
+            output_dirs,
+            os.path.join(
+                prefix_base,
+                'lib',
+                py_version,
+                'site-packages',
+                package_name,
+            ),
+        )
+
+    for output_dir in output_dirs:
+        real_output_dir = os.path.realpath(output_dir)
+        # Avoid writing generated artifacts into source trees. This can happen
+        # in editable/symlink builds where build paths resolve to source.
+        if src_pkg_dir and _is_within(real_output_dir, src_pkg_dir):
+            continue
         run(
-            os.path.join(install_dir, module_name + '.py'), yaml_file, validation_module
+            os.path.join(output_dir, module_name + '.py'),
+            yaml_file,
+            validation_module,
         )
