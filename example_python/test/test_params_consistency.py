@@ -522,6 +522,12 @@ class TestParamsConsistency(unittest.TestCase):
         self.assertAlmostEqual(lib_value, new_value)
         self.assertAlmostEqual(lib_value, ros_value)
 
+    def test_update_unrelated_param_does_not_mark_params_as_old(self):
+        params_before = self.listener.get_params()
+        self.node.declare_parameter('some_other_parameter', 42)
+        self.node.set_parameters([Parameter('some_other_parameter', value=43)])
+        self.assertFalse(self.listener.is_old(params_before))
+
 
 def main():
     unittest.main()
