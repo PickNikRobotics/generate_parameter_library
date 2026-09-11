@@ -21,7 +21,10 @@ from ament_index_python.packages import get_package_share_path
 from generate_parameter_library_py.generate_cpp_header import run as run_cpp
 from generate_parameter_library_py.generate_python_module import run as run_python
 from generate_parameter_library_py.generate_markdown import run as run_md
-from generate_parameter_library_py.parse_yaml import YAMLSyntaxError
+from generate_parameter_library_py.parse_yaml import (
+    YAMLSyntaxError,
+    preprocess_inputs,
+)
 from generate_parameter_library_py.generate_cpp_header import parse_args
 
 
@@ -100,3 +103,46 @@ def test_parse_valid_parameter_files(yaml_test_file):
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f'failed to parse valid file, reason:{e}'
+
+
+@pytest.mark.parametrize(
+    'defined_type,default_value',
+    [
+        ('int_array_fixed_03', [101, 102, 103, 104]),
+        ('double_array_fixed_03', [1.0, 2.0, 3.0, 4.0]),
+        ('string_array_fixed_03', ['a', 'b', 'c', 'd']),
+        ('string_fixed_03', 'abcd'),
+    ],
+)
+def test_fixed_default_cannot_exceed_capacity(defined_type, default_value):
+    with pytest.raises(YAMLSyntaxError, match='exceeds the capacity'):
+        preprocess_inputs(
+            'cpp',
+            'test_param',
+            {'type': defined_type, 'default_value': default_value},
+            ['test_namespace'],
+        )
+
+
+def test_fixed_default_must_satisfy_fixed_size_validator():
+    with pytest.raises(YAMLSyntaxError, match="'fixed_size' validation requires 3"):
+        preprocess_inputs(
+            'cpp',
+            'test_param',
+            {
+                'type': 'int_array_fixed_03',
+                'default_value': [101, 102],
+                'validation': {'fixed_size<>': 3},
+            },
+            ['test_namespace'],
+        )
+
+
+@pytest.mark.parametrize('default_value', [[101, 102], [101, 102, 103]])
+def test_fixed_default_at_or_below_capacity_is_valid(default_value):
+    preprocess_inputs(
+        'cpp',
+        'test_param',
+        {'type': 'int_array_fixed_03', 'default_value': default_value},
+        ['test_namespace'],
+    )
