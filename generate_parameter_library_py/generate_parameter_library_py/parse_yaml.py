@@ -41,6 +41,9 @@ except ImportError as e:
 from typing import Any, List, Union
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
+import ast
+import math
+import operator
 import os
 import yaml
 
@@ -65,6 +68,51 @@ class YAMLSyntaxError(Exception):
 @typechecked
 def compile_error(msg: str):
     return YAMLSyntaxError('\nERROR: ' + msg)
+
+
+def evaluate_math(value, param_name):
+    """Resolve numeric ${...} values without executing Python code."""
+    if isinstance(value, list):
+        return [evaluate_math(item, param_name) for item in value]
+    if not isinstance(value, str) or not value.startswith('${'):
+        return value
+
+    binary_operators = {
+        ast.Add: operator.add,
+        ast.Sub: operator.sub,
+        ast.Mult: operator.mul,
+        ast.Div: operator.truediv,
+        ast.FloorDiv: operator.floordiv,
+        ast.Mod: operator.mod,
+    }
+    constants = {'pi': math.pi, 'tau': math.tau, 'e': math.e}
+
+    def evaluate(node):
+        if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+            return node.value
+        if isinstance(node, ast.Name) and node.id in constants:
+            return constants[node.id]
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+            operand = evaluate(node.operand)
+            return -operand if isinstance(node.op, ast.USub) else operand
+        if isinstance(node, ast.BinOp) and type(node.op) in binary_operators:
+            return binary_operators[type(node.op)](
+                evaluate(node.left), evaluate(node.right)
+            )
+        raise ValueError('unsupported expression')
+
+    try:
+        if not value.endswith('}'):
+            raise ValueError('missing closing brace')
+        expression = ast.parse(value[2:-1].strip(), mode='eval')
+        result = evaluate(expression.body)
+        if not math.isfinite(result):
+            raise ValueError('result must be finite')
+        return result
+    except (SyntaxError, ValueError, ArithmeticError, RecursionError) as error:
+        raise compile_error(
+            f'Parameter {param_name} has invalid math expression {value!r}: {error}'
+        ) from error
 
 
 @typechecked
@@ -274,7 +322,7 @@ class CodeGenVariableBase:
         if isinstance(arg, list):
             return self.conversion.python_list_to_yaml_type[str(type(arg[0]))]
         else:
-            return self.conversion.python_val_to_yaml_type[str(type(arg[0]))]
+            return self.conversion.python_val_to_yaml_type[str(type(arg))]
 
     def process_type(self, defined_type):
         raise NotImplemented()
@@ -776,6 +824,9 @@ def preprocess_inputs(language, name, value, nested_name_list):
 
     # optional attributes
     default_value = value.get('default_value', None)
+    numeric_type = defined_type.split('_')[0] in ('int', 'double')
+    if numeric_type:
+        default_value = evaluate_math(default_value, param_name)
     if not is_fixed_type(defined_type):
         code_gen_variable = CodeGenVariable(
             language, name, param_name, defined_type, default_value
@@ -797,6 +848,8 @@ def preprocess_inputs(language, name, value, nested_name_list):
 
     for func_name in validations_dict:
         args = validations_dict[func_name]
+        if numeric_type:
+            args = evaluate_math(args, param_name)
         if args is not None and not isinstance(args, list):
             args = [args]
         validations.append(ValidationFunction(func_name, args, code_gen_variable))
