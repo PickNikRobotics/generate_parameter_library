@@ -2,8 +2,8 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.1 (2026-10-05)
+------------------
 * fix that if no parameter is updated, the user callback is not called (`#383 <https://github.com/PickNikRobotics/generate_parameter_library/issues/383>`_)
 * Add <fmt/format.h> for fmt 11+ compatibility (`#379 <https://github.com/PickNikRobotics/generate_parameter_library/issues/379>`_)
 * Contributors: Dhruv Patel, Fabian Hirmann
