@@ -2,6 +2,11 @@
 Changelog for package parameter_traits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Silence CMake deprecation warning for transitive inclusions (`#387 <https://github.com/PickNikRobotics/generate_parameter_library/issues/387>`_)
+* Contributors: Christoph Fröhlich
+
 0.7.6 (2026-08-08)
 ------------------
 * Silence CMake deprecation warning (`#375 <https://github.com/PickNikRobotics/generate_parameter_library/issues/375>`_)

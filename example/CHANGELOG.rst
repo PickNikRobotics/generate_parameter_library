@@ -2,6 +2,12 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix that if no parameter is updated, the user callback is not called (backport `#383 <https://github.com/PickNikRobotics/generate_parameter_library/issues/383>`_) (`#386 <https://github.com/PickNikRobotics/generate_parameter_library/issues/386>`_)
+* Add <fmt/format.h> for fmt 11+ compatibility (`#379 <https://github.com/PickNikRobotics/generate_parameter_library/issues/379>`_) (`#380 <https://github.com/PickNikRobotics/generate_parameter_library/issues/380>`_)
+* Contributors: mergify[bot]
+
 0.7.6 (2026-08-08)
 ------------------
 

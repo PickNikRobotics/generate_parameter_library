@@ -2,6 +2,11 @@
 Changelog for package generate_parameter_library_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix that if no parameter is updated, the user callback is not called (backport `#383 <https://github.com/PickNikRobotics/generate_parameter_library/issues/383>`_) (`#386 <https://github.com/PickNikRobotics/generate_parameter_library/issues/386>`_)
+* Contributors: mergify[bot]
+
 0.7.6 (2026-08-08)
 ------------------
 

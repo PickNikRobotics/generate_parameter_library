@@ -2,6 +2,9 @@
 Changelog for package generate_parameter_library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.7.6 (2026-08-08)
 ------------------
 * Silence CMake deprecation warning (`#375 <https://github.com/PickNikRobotics/generate_parameter_library/issues/375>`_)
