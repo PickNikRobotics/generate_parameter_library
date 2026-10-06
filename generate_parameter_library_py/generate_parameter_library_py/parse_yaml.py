@@ -152,6 +152,46 @@ def validation_base_name(function_name: str):
 
 
 @typechecked
+def validate_fixed_default_size(
+    param_name: str,
+    defined_type: str,
+    default_value: Any,
+    validations_dict: dict,
+):
+    capacity = fixed_type_size(defined_type)
+    if capacity is None or default_value is None:
+        return
+    if array_type(defined_type) and not isinstance(default_value, list):
+        return
+    if not array_type(defined_type) and not isinstance(default_value, str):
+        return
+
+    default_size = len(default_value)
+    if default_size > capacity:
+        raise compile_error(
+            'Parameter {} has a default value of size {}, which exceeds '
+            "the capacity of type '{}' ({}).".format(
+                param_name, default_size, defined_type, capacity
+            )
+        )
+
+    for function_name, arguments in validations_dict.items():
+        if validation_base_name(function_name) != 'fixed_size':
+            continue
+
+        expected_size = arguments
+        if isinstance(arguments, list) and len(arguments) == 1:
+            expected_size = arguments[0]
+        if isinstance(expected_size, int) and default_size != expected_size:
+            raise compile_error(
+                'Parameter {} has a default value of size {}, but its '
+                "'fixed_size' validation requires {}.".format(
+                    param_name, default_size, expected_size
+                )
+            )
+
+
+@typechecked
 def validate_validator_combinations(param_name: str, validations_dict: dict):
     validation_names = {validation_base_name(name) for name in validations_dict}
 
@@ -825,8 +865,16 @@ def preprocess_inputs(language, name, value, nested_name_list):
     # optional attributes
     default_value = value.get('default_value', None)
     numeric_type = defined_type.split('_')[0] in ('int', 'double')
+    validations_dict = value.get('validation', {})
     if numeric_type:
         default_value = evaluate_math(default_value, param_name)
+        validations_dict = {
+            name: evaluate_math(args, param_name)
+            for name, args in validations_dict.items()
+        }
+    validate_fixed_default_size(
+        param_name, defined_type, default_value, validations_dict
+    )
     if not is_fixed_type(defined_type):
         code_gen_variable = CodeGenVariable(
             language, name, param_name, defined_type, default_value
@@ -840,7 +888,6 @@ def preprocess_inputs(language, name, value, nested_name_list):
     read_only = bool(value.get('read_only', False))
     validations = []
     additional_constraints = value.get('additional_constraints', '')
-    validations_dict = value.get('validation', {})
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
 
@@ -848,8 +895,6 @@ def preprocess_inputs(language, name, value, nested_name_list):
 
     for func_name in validations_dict:
         args = validations_dict[func_name]
-        if numeric_type:
-            args = evaluate_math(args, param_name)
         if args is not None and not isinstance(args, list):
             args = [args]
         validations.append(ValidationFunction(func_name, args, code_gen_variable))

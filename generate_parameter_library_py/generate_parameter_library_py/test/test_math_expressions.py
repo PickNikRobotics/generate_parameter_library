@@ -92,6 +92,22 @@ def test_integer_expression_type_error(language, defined_type):
 
 
 @pytest.mark.parametrize('language', ['cpp', 'python', 'markdown', 'rst'])
+@pytest.mark.parametrize('arguments', ['${1 + 1}', ['${1 + 1}']])
+def test_fixed_size_validator_expression(language, arguments):
+    definition = {
+        'type': 'double_array_fixed_3',
+        'default_value': ['${pi/2}'],
+        'validation': {'fixed_size<>': arguments},
+    }
+    with pytest.raises(YAMLSyntaxError, match="'fixed_size' validation requires 2"):
+        preprocess_inputs(language, 'angles', definition, ['test'])
+
+    definition['default_value'].append('${-pi/2}')
+    variable, *_ = preprocess_inputs(language, 'angles', definition, ['test'])
+    assert variable.default_value == [math.pi / 2, -math.pi / 2]
+
+
+@pytest.mark.parametrize('language', ['cpp', 'python', 'markdown', 'rst'])
 def test_generated_math_matches_literal_values(tmp_path, language):
     parameters = {
         'max_angle': {
