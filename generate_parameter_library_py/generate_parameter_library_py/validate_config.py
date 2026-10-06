@@ -1,0 +1,652 @@
+#!/usr/bin/env python3
+
+# Copyright 2026 PickNik Inc.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#    * Redistributions of source code must retain the above copyright
+#      notice, this list of conditions and the following disclaimer.
+#
+#    * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+#
+#    * Neither the name of the PickNik Inc. nor the names of its
+#      contributors may be used to endorse or promote products derived from
+#      this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+"""Validate a ROS 2 parameter configuration file against parameter definitions.
+
+This runs without a ROS 2 installation, a colcon workspace or a running node, so
+it can be used as a CI step or by anyone who configures a robot from a laptop.
+"""
+
+import argparse
+import difflib
+import os
+import sys
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+import yaml
+
+from generate_parameter_library_py.parse_yaml import GenerateCode
+from generate_parameter_library_py.python_validators import ParameterValidators
+
+ROS_PARAMETERS_KEY = 'ros__parameters'
+WILDCARD_NODE = '/**'
+
+ERROR = 'ERROR'
+WARNING = 'WARNING'
+
+# Most unknown parameters for which a 'did you mean' suggestion is computed.
+MAX_SUGGESTIONS = 10
+
+# Parameters every node declares for itself, which no definition ever holds.
+BUILT_IN_PARAMETERS = ('use_sim_time', 'start_type_description_service')
+BUILT_IN_PREFIXES = ('qos_overrides.',)
+
+# Words rcl_yaml_param_parser reads as a bool. PyYAML leaves the short ones as
+# strings, so a string parameter given one of those gets a bool at runtime.
+RCL_BOOL_WORDS = frozenset(
+    'y Y yes Yes YES n N no No NO true True TRUE false False FALSE '
+    'on On ON off Off OFF'.split()
+)
+
+
+@dataclass
+class Diagnostic:
+    """One finding, printed as a single line."""
+
+    severity: str
+    location: str
+    message: str
+
+    def __str__(self):
+        return f'{self.severity}: {self.location}: {self.message}'
+
+
+class _ValidatorParam:
+    """The duck type the validators in python_validators.py expect."""
+
+    def __init__(self, name: str, value: Any):
+        self.name = name
+        self.value = value
+
+
+class DeclaredParameter:
+    """A parameter of a definition file, flattened to a dotted name."""
+
+    def __init__(self, declaration, name: Optional[str] = None):
+        variable = declaration.code_gen_variable
+        self.name = name if name is not None else variable.param_name
+        self.scalar_type = variable.defined_base_type
+        self.is_array = variable.array_type
+        self.fixed_size = variable.fixed_size
+        self.default_value = variable.default_value
+        self.validations = declaration.parameter_validations
+
+    @property
+    def has_default(self) -> bool:
+        return self.default_value is not None
+
+
+def yaml_type_name(value: Any) -> str:
+    """Name the type of a value the way a definition file would spell it."""
+    if isinstance(value, bool):
+        return 'bool'
+    if isinstance(value, int):
+        return 'int'
+    if isinstance(value, float):
+        return 'double'
+    if isinstance(value, str):
+        return 'string'
+    if isinstance(value, list):
+        return 'array'
+    if value is None:
+        return 'null'
+    return type(value).__name__
+
+
+def reads_as_number(value: Any, expected: str) -> bool:
+    """Would rcl_yaml_param_parser read this text as the expected number?
+
+    PyYAML only resolves a float when the text has both a decimal point and a
+    signed exponent, so '1e5' and '1e-3' arrive here as strings while ROS 2
+    reads them as doubles.
+    """
+    if not isinstance(value, str):
+        return False
+    try:
+        if expected == 'int':
+            int(value, 10)
+        elif expected == 'double':
+            float(value)
+        else:
+            return False
+    except ValueError:
+        return False
+    return True
+
+
+def check_scalar_type(expected: str, value: Any) -> Optional[str]:
+    actual = yaml_type_name(value)
+    if actual == expected:
+        return None
+    if expected == 'double' and actual == 'int':
+        return (
+            f"expected type 'double', got 'int' ({value}); ROS 2 does not convert "
+            f'integers to doubles, write {value}.0'
+        )
+    if reads_as_number(value, expected):
+        return None
+    return f"expected type '{expected}', got '{actual}'"
+
+
+def check_quoting(parameter: 'DeclaredParameter', value: Any) -> Optional[str]:
+    """Warn about text rcl_yaml_param_parser reads as a bool.
+
+    The loader does not keep the quoting style, so a quoted string and a bare
+    word arrive here the same way and this can only be a warning.
+    """
+    if parameter.scalar_type != 'string' or parameter.is_array:
+        return None
+    if isinstance(value, str) and value in RCL_BOOL_WORDS:
+        return (
+            f'ROS 2 reads {value} as a bool unless it is quoted, and this '
+            f'parameter is declared as a string'
+        )
+    return None
+
+
+def coerce_value(parameter: 'DeclaredParameter', value: Any) -> Any:
+    """Read a scalar the way rcl_yaml_param_parser would before validating it.
+
+    PyYAML leaves '1e5' as a string, so a validator such as gt would be handed
+    text and raise. The node sees a double, and so should the validators.
+    """
+    scalar = parameter.scalar_type
+    if scalar not in ('int', 'double'):
+        return value
+    convert = (lambda text: int(text, 10)) if scalar == 'int' else float
+    if isinstance(value, str) and reads_as_number(value, scalar):
+        return convert(value)
+    if isinstance(value, list):
+        return [
+            (
+                convert(item)
+                if isinstance(item, str) and reads_as_number(item, scalar)
+                else item
+            )
+            for item in value
+        ]
+    return value
+
+
+def check_type(parameter: DeclaredParameter, value: Any) -> Optional[str]:
+    """Return an error message when a value does not match the declared type."""
+    scalar = parameter.scalar_type
+    size = parameter.fixed_size
+
+    if not parameter.is_array:
+        problem = check_scalar_type(scalar, value)
+        if problem is not None:
+            return problem
+        if size is not None and scalar == 'string' and len(value) > size:
+            return f'string is longer than the fixed size of {size}'
+        return None
+
+    if not isinstance(value, list):
+        return f"expected type '{scalar}_array', got '{yaml_type_name(value)}'"
+    if not value:
+        return (
+            'an empty sequence gives the node no value at all; ROS 2 reads it '
+            'as PARAMETER_NOT_SET rather than as an empty array'
+        )
+    if size is not None and len(value) > size:
+        return f'array has {len(value)} elements, more than the fixed size of {size}'
+    for index, element in enumerate(value):
+        problem = check_scalar_type(scalar, element)
+        if problem is not None:
+            return f'element {index} of the array: {problem}'
+    return None
+
+
+def run_validations(parameter: DeclaredParameter, value: Any) -> List[Tuple[str, str]]:
+    """Replay the definition's validators and return (severity, message) pairs.
+
+    A validator that rejects the value is an error. A validator that cannot run
+    here, because it is written in C++ or because it raised, is a warning: the
+    value may well be correct and only the check is missing.
+    """
+    results = []
+    for validation in parameter.validations:
+        name = validation.function_base_name
+        function = getattr(ParameterValidators, name, None)
+        if function is None:
+            results.append(
+                (
+                    WARNING,
+                    f'custom validator {validation.function_name} is C++ and '
+                    f'cannot be evaluated here, not checked',
+                )
+            )
+            continue
+        try:
+            result = function(
+                _ValidatorParam(parameter.name, value), *validation.arguments
+            )
+        except Exception as error:  # noqa: BLE001 - a validator must not stop the run
+            results.append(
+                (
+                    WARNING,
+                    f'validator {name} raised {type(error).__name__}: {error}, '
+                    f'not checked',
+                )
+            )
+            continue
+        if result:
+            results.append((ERROR, result))
+    return results
+
+
+def node_name_of(section: str) -> str:
+    """Reduce a configuration section name to the node name it refers to.
+
+    A section may be written with a leading slash or under a namespace, while a
+    definition's root element is always the bare node name.
+    """
+    return section.strip('/').rsplit('/', 1)[-1]
+
+
+def join_name(prefix: str, part: Any) -> str:
+    """Join a dotted parameter name, tolerating an empty prefix."""
+    return f'{prefix}.{part}' if prefix else str(part)
+
+
+def flatten(tree: Dict, prefix: str = '') -> Dict[str, Any]:
+    """Flatten a nested mapping into dotted names."""
+    flat = {}
+    for key, value in tree.items():
+        name = join_name(prefix, key)
+        if isinstance(value, dict):
+            flat.update(flatten(value, name))
+        else:
+            flat[name] = value
+    return flat
+
+
+def expand_mapped_name(
+    name: str,
+    mapped_params: List[str],
+    values: Dict[str, Any],
+    declared: Dict[str, 'DeclaredParameter'],
+) -> Optional[List[str]]:
+    """Resolve the __map_ segments of a name using the keys found in the config.
+
+    Returns None when a map's key list is missing from the configuration, since
+    the set of parameters to expect cannot be known in that case.
+    """
+    names = ['']
+    index = 0
+    for segment in name.split('.'):
+        if segment.startswith('__map_'):
+            if index >= len(mapped_params):
+                return None
+            key_name = mapped_params[index]
+            index += 1
+            keys = values.get(key_name)
+            if keys is None and key_name in declared:
+                # The node expands the map over the effective value, which is
+                # the declared default when the configuration sets nothing.
+                keys = declared[key_name].default_value
+            if not isinstance(keys, list):
+                return None
+            names = [join_name(base, key) for base in names for key in keys]
+        else:
+            names = [join_name(base, segment) for base in names]
+    return names
+
+
+def load_definition(path: str):
+    """Parse a parameter definition file and return the generator holding it."""
+    generator = GenerateCode('markdown')
+    generator.parse(path, '')
+    return generator
+
+
+def definition_namespace(path: str) -> Optional[str]:
+    """Read the root element of a definition without parsing its parameters.
+
+    Raises ConfigError when the file does not have exactly one root element.
+    """
+    document = load_yaml(path)
+    keys = list(document)
+    if len(keys) != 1:
+        raise ConfigError(
+            f'{path}: a parameter definition must have exactly one root '
+            f'element, found {len(keys)}'
+        )
+    return keys[0]
+
+
+def load_definitions(
+    paths: List[str], used: Set[str]
+) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    """Parse the definitions whose namespace a configuration actually uses.
+
+    Parsing a definition runs the same per parameter work as code generation, so
+    with many definitions on the command line only the ones a configuration
+    refers to are parsed. A single definition is always parsed, because it is
+    applied to every section. Returns the parsed definitions and the paths that
+    were left out, which the caller reports so that skipping stays visible.
+    """
+    if len(paths) == 1:
+        generator = read_definition(paths[0])
+        return {generator.namespace: generator}, [], []
+    generators = {}
+    sources = {}
+    unused = []
+    duplicates = []
+    for path in paths:
+        namespace = definition_namespace(path)
+        if namespace in used:
+            generator = read_definition(path)
+            if generator.namespace in generators:
+                duplicates.append(
+                    f'{generator.namespace} is declared by both '
+                    f'{sources[generator.namespace]} and {path}'
+                )
+                continue
+            generators[generator.namespace] = generator
+            sources[generator.namespace] = path
+        else:
+            unused.append(path)
+    return generators, unused, duplicates
+
+
+def declared_parameters(
+    generator, values: Dict[str, Any]
+) -> Tuple[Dict[str, DeclaredParameter], List[str]]:
+    """Flatten a definition into dotted names, expanding mapped parameters.
+
+    Parameters of type none are left out. The generator declares nothing for
+    them, so the node neither requires them nor gives them a type; their names
+    are returned separately so that the strict check can leave their subtree
+    alone.
+    """
+    parameters = {}
+    free_form = []
+    for declaration in generator.declare_parameters:
+        parameter = DeclaredParameter(declaration)
+        if parameter.scalar_type == 'none':
+            free_form.append(parameter.name)
+            continue
+        parameters[parameter.name] = parameter
+    for declaration in generator.declare_dynamic_parameters:
+        template = DeclaredParameter(declaration)
+        if template.scalar_type == 'none':
+            free_form.append(template.name)
+            continue
+        names = expand_mapped_name(
+            template.name, declaration.mapped_params, values, parameters
+        )
+        if names is None:
+            continue
+        for name in names:
+            parameters[name] = DeclaredParameter(declaration, name=name)
+    return parameters, free_form
+
+
+def node_sections(document: Dict) -> Dict[str, Dict[str, Any]]:
+    """Return the parameter tree of every node in a ROS parameter file.
+
+    Supports both `node: ros__parameters:` and a namespace level above it. A file
+    without any `ros__parameters` key is treated as a single unnamed section, so
+    that plain parameter trees can be validated too.
+    """
+    sections = {}
+    for key, value in document.items():
+        if not isinstance(value, dict):
+            continue
+        if ROS_PARAMETERS_KEY in value:
+            sections[str(key)] = value[ROS_PARAMETERS_KEY] or {}
+            continue
+        for nested_key, nested_value in value.items():
+            if isinstance(nested_value, dict) and ROS_PARAMETERS_KEY in nested_value:
+                sections[f'{key}/{nested_key}'] = nested_value[ROS_PARAMETERS_KEY] or {}
+    if not sections:
+        return {'': document}
+    return sections
+
+
+def is_exempt(name: str, free_form: List[str]) -> bool:
+    """Is this configuration key one the definition is not expected to declare?
+
+    Every node declares a few parameters for itself, and the subtree under a
+    parameter of type none is free form by construction.
+    """
+    if name in BUILT_IN_PARAMETERS or name.startswith(BUILT_IN_PREFIXES):
+        return True
+    return any(name == root or name.startswith(f'{root}.') for root in free_form)
+
+
+def validate_section(
+    location: str,
+    generator,
+    values: Dict[str, Any],
+    strict: bool,
+) -> List[Diagnostic]:
+    """Validate one node's parameters against one definition."""
+    diagnostics = []
+    parameters, free_form = declared_parameters(generator, values)
+
+    for name, parameter in sorted(parameters.items()):
+        where = join_name(location, name)
+        if name not in values:
+            if not parameter.has_default:
+                diagnostics.append(
+                    Diagnostic(
+                        ERROR,
+                        where,
+                        'missing from config and the definition sets no '
+                        'default_value, the node will fail to start',
+                    )
+                )
+            elif strict:
+                diagnostics.append(
+                    Diagnostic(
+                        WARNING,
+                        where,
+                        f'missing from config, will use default_value '
+                        f'{parameter.default_value}',
+                    )
+                )
+            continue
+
+        value = values[name]
+        problem = check_type(parameter, value)
+        if problem is not None:
+            diagnostics.append(Diagnostic(ERROR, where, problem))
+            continue
+        quoting = check_quoting(parameter, value)
+        if quoting is not None:
+            diagnostics.append(Diagnostic(WARNING, where, quoting))
+        value = coerce_value(parameter, value)
+        for severity, message in run_validations(parameter, value):
+            diagnostics.append(Diagnostic(severity, where, message))
+
+    if strict:
+        unknown = [
+            name
+            for name in sorted(values)
+            if name not in parameters and not is_exempt(name, free_form)
+        ]
+        # Every suggestion compares the name against every declared parameter, so
+        # they are only worth computing while there are few names to suggest for.
+        # A configuration that has drifted wholesale is not helped by a list of
+        # guesses anyway.
+        suggest = len(unknown) <= MAX_SUGGESTIONS
+        for name in unknown:
+            where = join_name(location, name)
+            close = (
+                difflib.get_close_matches(name, parameters.keys(), n=1)
+                if suggest
+                else []
+            )
+            hint = f" (did you mean '{close[0]}'?)" if close else ''
+            diagnostics.append(Diagnostic(ERROR, where, f'unknown parameter{hint}'))
+
+    return diagnostics
+
+
+class ConfigError(Exception):
+    """A file could not be read or parsed, reported without a traceback."""
+
+
+def load_yaml(path: str) -> Dict:
+    try:
+        with open(path) as handle:
+            document = yaml.safe_load(handle)
+    except OSError as error:
+        raise ConfigError(f'{path}: {error.strerror or error}')
+    except yaml.YAMLError as error:
+        raise ConfigError(f'{path}: {error}')
+    if document is None:
+        return {}
+    if not isinstance(document, dict):
+        raise ConfigError(f'{path}: the document is not a mapping')
+    return document
+
+
+def read_definition(path: str):
+    """Parse a definition, reporting a bad file without a traceback."""
+    try:
+        return load_definition(path)
+    except ConfigError:
+        raise
+    except Exception as error:  # noqa: BLE001 - the parser raises several types
+        raise ConfigError(f'{path}: {error}')
+
+
+def validate(
+    definition_paths: List[str],
+    config_paths: List[str],
+    strict: bool = False,
+) -> List[Diagnostic]:
+    """Validate every config against the definitions whose namespace matches."""
+    diagnostics = []
+    configs = [(path, node_sections(load_yaml(path))) for path in config_paths]
+    used = {node_name_of(name) for _, sections in configs for name in sections}
+    definitions, unused, duplicates = load_definitions(definition_paths, used)
+    single_definition = len(definition_paths) == 1
+
+    for message in duplicates:
+        diagnostics.append(Diagnostic(ERROR, 'parameter definitions', message))
+    if unused:
+        shown = ', '.join(os.path.basename(path) for path in unused[:5])
+        if len(unused) > 5:
+            shown += f' and {len(unused) - 5} more'
+        diagnostics.append(
+            Diagnostic(
+                WARNING,
+                'parameter definitions',
+                f'{len(unused)} matched no configuration section and were not '
+                f'checked: {shown}',
+            )
+        )
+
+    for config_path, sections in configs:
+        wildcard_tree = sections.pop(WILDCARD_NODE, None)
+        wildcard = flatten(wildcard_tree or {})
+        if wildcard_tree is not None and not sections:
+            # A file whose only section is the wildcard still describes a node,
+            # and is the usual shape when the node name is not pinned.
+            sections[WILDCARD_NODE] = {}
+        matched = any(node_name_of(name) in definitions for name in sections)
+        for section_name, tree in sections.items():
+            values = dict(wildcard)
+            values.update(flatten(tree))
+            node_name = node_name_of(section_name)
+            if node_name in definitions:
+                generator = definitions[node_name]
+            elif single_definition and not matched:
+                generator = next(iter(definitions.values()))
+            else:
+                diagnostics.append(
+                    Diagnostic(
+                        WARNING,
+                        f'{config_path}:{section_name}',
+                        'no parameter definition has this namespace, not checked',
+                    )
+                )
+                continue
+            diagnostics.extend(
+                validate_section(section_name, generator, values, strict)
+            )
+    return diagnostics
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        prog='generate_parameter_library_validate',
+        description='Validate ROS 2 parameter configuration files against '
+        'generate_parameter_library parameter definitions, without a ROS 2 '
+        'installation or a built workspace.',
+    )
+    parser.add_argument(
+        '--param-definition',
+        action='append',
+        required=True,
+        metavar='FILE',
+        help='a parameter definition YAML, may be given more than once',
+    )
+    parser.add_argument(
+        '--config',
+        action='append',
+        required=True,
+        metavar='FILE',
+        help='a parameter configuration YAML to validate, may be given more '
+        'than once',
+    )
+    parser.add_argument(
+        '--strict',
+        action='store_true',
+        help='also report parameters that no definition declares and '
+        'parameters missing from the config that will take their default',
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    try:
+        diagnostics = validate(args.param_definition, args.config, args.strict)
+    except ConfigError as error:
+        print(f'{ERROR}: {error}', file=sys.stderr)
+        return 1
+    # One stream keeps errors and warnings in the order they were found.
+    for diagnostic in diagnostics:
+        print(diagnostic, file=sys.stderr)
+    errors = sum(1 for d in diagnostics if d.severity == ERROR)
+    if errors:
+        print(f'{errors} error(s) found', file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

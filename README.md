@@ -167,6 +167,7 @@ when using `gmock` test library.
 * [Example Project](#example-project)
 * [Generated code output](#generated-code-output)
 * [Generate markdown documentation](#generate-markdown-documentation)
+* [Validate a configuration file](#validate-a-configuration-file)
 
 ### Cpp namespace
 The root element of the YAML file determines the namespace used in the generated C++ code.
@@ -577,6 +578,77 @@ generate_parameter_library_markdown --input_yaml example/src/parameters.yaml --o
 
 This will generate a file `parameters.md` in the current folder that contains a markdown
 representation of the `parameters.yaml` file that you can directly include into your documentation.
+
+### Validate a configuration file
+
+`generate_parameter_library_validate` checks a ROS 2 parameter configuration
+file against one or more parameter definition files. It needs no ROS 2
+installation, no built workspace and no running node, so it can run as a CI step
+or on the laptop of somebody configuring a robot.
+
+```
+generate_parameter_library_validate \
+  --param-definition example/src/parameters.yaml \
+  --config config/robot.yaml
+```
+
+Pass `--param-definition` and `--config` more than once to check several
+definitions or several configuration files in one run. A configuration section
+is matched to the definition whose root element has the same name; when exactly
+one definition is given it is used for every section.
+
+A configuration section may be written as `node:`, `/node:`, under a namespace,
+or as `/**:`, and a file may hold several nodes. Values under `/**` apply to
+every section with lower precedence than a section's own.
+
+Without further options the tool reports what makes a node fail to start or
+behave unexpectedly:
+
+* a value whose type does not match the declared type, including an integer
+  written where a `double` is declared, which ROS 2 does not convert
+* an empty sequence, which `rcl_yaml_param_parser` cannot give a type and reads
+  as `PARAMETER_NOT_SET` rather than as an empty array
+* a value rejected by a built-in validator such as `bounds<>` or `one_of<>`
+* a parameter that is declared without a `default_value` and that the
+  configuration does not set
+* two definitions that declare the same root element
+
+Scalars are read the way `rcl_yaml_param_parser` reads them rather than the way
+PyYAML does, so `1e5` counts as a `double`. One difference cannot be resolved:
+the loader does not keep the quoting style, so a value such as `y`, which ROS 2
+reads as a bool unless it is quoted, is reported as a warning rather than an
+error.
+
+Adding `--strict` also reports parameters the configuration sets that no
+definition declares, with a suggestion when the name is close to a declared one,
+and parameters absent from the configuration that will take their default. The
+parameters every node declares for itself, such as `use_sim_time`, and the
+subtree under a parameter of type `none`, are not reported.
+
+```
+ERROR: my_node.background.r: Parameter 'my_node.background.r' with the value 300 must be within bounds [0, 255]
+ERROR: my_node.background.colour: unknown parameter (did you mean 'background.r'?)
+ERROR: my_node.pid.rate: expected type 'double', got 'string'
+WARNING: my_node.background.b: missing from config, will use default_value 0
+```
+
+The exit status is 1 when any error was reported and 0 otherwise, so the tool
+can gate a pipeline:
+
+```yaml
+- name: Validate robot config
+  run: |
+    pip install generate_parameter_library_py
+    generate_parameter_library_validate \
+      --param-definition src/navigation/config/nav_parameters.yaml \
+      --param-definition src/behavior/config/behavior_parameters.yaml \
+      --config deploy/config/robot_production.yaml \
+      --strict
+```
+
+Custom validator functions are C++ and cannot run outside a build, so they are
+reported as skipped rather than silently ignored. `read_only` describes
+behaviour at runtime and is not checked.
 
 # FAQ
 
