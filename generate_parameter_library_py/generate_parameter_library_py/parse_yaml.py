@@ -104,6 +104,46 @@ def validation_base_name(function_name: str):
 
 
 @typechecked
+def validate_fixed_default_size(
+    param_name: str,
+    defined_type: str,
+    default_value: Any,
+    validations_dict: dict,
+):
+    capacity = fixed_type_size(defined_type)
+    if capacity is None or default_value is None:
+        return
+    if array_type(defined_type) and not isinstance(default_value, list):
+        return
+    if not array_type(defined_type) and not isinstance(default_value, str):
+        return
+
+    default_size = len(default_value)
+    if default_size > capacity:
+        raise compile_error(
+            'Parameter {} has a default value of size {}, which exceeds '
+            "the capacity of type '{}' ({}).".format(
+                param_name, default_size, defined_type, capacity
+            )
+        )
+
+    for function_name, arguments in validations_dict.items():
+        if validation_base_name(function_name) != 'fixed_size':
+            continue
+
+        expected_size = arguments
+        if isinstance(arguments, list) and len(arguments) == 1:
+            expected_size = arguments[0]
+        if isinstance(expected_size, int) and default_size != expected_size:
+            raise compile_error(
+                'Parameter {} has a default value of size {}, but its '
+                "'fixed_size' validation requires {}.".format(
+                    param_name, default_size, expected_size
+                )
+            )
+
+
+@typechecked
 def validate_validator_combinations(param_name: str, validations_dict: dict):
     validation_names = {validation_base_name(name) for name in validations_dict}
 
@@ -347,11 +387,24 @@ class DeclareStruct:
         content = ''.join(str(x) for x in self.sub_structs)
         return str(content)
 
+    def python_struct_instance(name):
+        return (
+            ''
+            if is_mapped_parameter(name)
+            else f'self.{name} = self.__{pascal_case(name)}()'
+        )
+
     def __str__(self):
         sub_struct_str = ''.join(str(x) for x in self.sub_structs)
         field_str = ''.join(str(x) for x in self.fields)
         if field_str == '' and sub_struct_str == '':
             return ''
+
+        # Special case for python: Instance must be added separated to be placed in the __init__ call
+        sub_struct_python_instances = '\n'.join(
+            DeclareStruct.python_struct_instance(x.struct_name)
+            for x in self.sub_structs
+        )
 
         if is_mapped_parameter(self.struct_name):
             map_val_type = pascal_case(self.struct_name)
@@ -367,6 +420,7 @@ class DeclareStruct:
             'struct_instance': self.struct_instance,
             'struct_fields': str(field_str),
             'sub_structs': str(sub_struct_str),
+            'sub_struct_python_instances': sub_struct_python_instances,
             'map_value_type': map_val_type,
             'map_name': map_name,
         }
@@ -762,6 +816,10 @@ def preprocess_inputs(language, name, value, nested_name_list):
 
     # optional attributes
     default_value = value.get('default_value', None)
+    validations_dict = value.get('validation', {})
+    validate_fixed_default_size(
+        param_name, defined_type, default_value, validations_dict
+    )
     if not is_fixed_type(defined_type):
         code_gen_variable = CodeGenVariable(
             language, name, param_name, defined_type, default_value
@@ -775,7 +833,6 @@ def preprocess_inputs(language, name, value, nested_name_list):
     read_only = bool(value.get('read_only', False))
     validations = []
     additional_constraints = value.get('additional_constraints', '')
-    validations_dict = value.get('validation', {})
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
 
@@ -983,6 +1040,12 @@ class GenerateCode:
             'namespace': self.namespace,
             'field_content': self.struct_tree.sub_structs[0].field_content(),
             'sub_struct_content': self.struct_tree.sub_structs[0].sub_struct_content(),
+            'sub_struct_python_instances': '\n'.join(
+                [
+                    DeclareStruct.python_struct_instance(x.struct_name)
+                    for x in self.struct_tree.sub_structs[0].sub_structs
+                ]
+            ),
             'stack_field_content': self.stack_struct_tree.sub_structs[
                 0
             ].field_content(),

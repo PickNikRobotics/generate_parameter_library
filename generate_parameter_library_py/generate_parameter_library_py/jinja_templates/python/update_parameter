@@ -4,5 +4,6 @@ if param.name == self.prefix_ + "{{parameter_name}}":
 {{parameter_validations-}}
 {% endif -%}
 updated_params.{{parameter_name}} = param.{{parameter_as_function}}
+any_param_updated = True
 self.logger_.debug(param.name + ": " + param.type_.name + " = " + str(param.value))
 {% endfilter -%}

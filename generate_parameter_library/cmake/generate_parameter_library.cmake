@@ -81,19 +81,11 @@ macro(generate_parameter_library LIB_NAME YAML_FILE)
     rsl::rsl
     tcb_span::tcb_span
     tl::expected
-    # for backward compatibility
-    # remove once this redirection is removed
-    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
-    tl_expected::tl_expected
   )
   install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION include)
   ament_export_dependencies(
     fmt rclcpp rclcpp_lifecycle rsl tcb_span
     tl-expected
-    # for backward compatibility
-    # remove once this redirection is removed
-    # https://github.com/PickNikRobotics/cpp_polyfills/pull/12
-    tl_expected
   )
 endmacro()
 

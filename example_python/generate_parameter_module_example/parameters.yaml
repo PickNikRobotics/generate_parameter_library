@@ -3,6 +3,7 @@ admittance_controller:
     type: double
     default_value: 0.00000000001
     description: "Test scientific notation"
+    additional_constraints: "Any string can be here. For example, you might want to embed JSON schema"
   interpolation_mode:
     type: string
     default_value: "spline"
@@ -61,11 +62,13 @@ admittance_controller:
               description: "test deep nested map params"
               validation:
                 gt_eq<>: [ 0.0001 ]
+
   pid:
     rate:
       type: double
       default_value: 0.005
       description: "update loop period in seconds"
+
     __map_joints:
       p:
         type: double
@@ -100,6 +103,18 @@ admittance_controller:
         default_value: 1.0
         description: "A value in the nested map with sibling keys"
 
+  nested_map_struct_entries:
+    type: string_array
+    default_value: [A, B]
+    description: "Keys for nested map structs"
+  nested_map_struct:
+    __map_nested_map_struct_entries:
+      nested_struct:
+        nested_struct_field:
+          type: string
+          default_value: nested_struct_field
+          description: "test fields in deeply nested structs"
+
   fixed_string:
     type: string_fixed_25
     default_value: "string_value"
@@ -122,6 +137,7 @@ admittance_controller:
   command_interfaces:
       type: string_array
       description: "specifies which command interfaces to claim"
+      additional_constraints: "some additional constraints"
       read_only: true
 
   state_interfaces:
@@ -186,7 +202,9 @@ admittance_controller:
     frame:
       id:
         type: string
-        description: "world frame, gravity points down (neg. Z) in this frame"
+        description: |-
+          Define the "world frame".
+          Gravity points down (neg. Z) in this frame.
       external:
         type: bool
         default_value: false
@@ -287,6 +305,32 @@ admittance_controller:
     validation:
       gt<>: [ 15 ]
       lt<>: [ 20 ]
+  lt_eq_fifteen_double:
+    type: double
+    default_value: 1.0
+    description: "should be a number less than or equal to 15"
+    validation:
+      lt_eq<>: [ 15.0 ]
+  gt_fifteen_double:
+    type: double
+    default_value: 16.0
+    description: "should be a number greater than 15"
+    validation:
+      gt<>: [ 15.0 ]
+  gt_fifteen_lt_eq_twenty_double:
+    type: double
+    default_value: 20.0
+    description: "should be a number greater than 15 and less than or equal to 20"
+    validation:
+      gt<>: [ 15.0 ]
+      lt_eq<>: [ 20.0 ]
+  gt_fifteen_lt_twenty_double:
+    type: double
+    default_value: 16.0
+    description: "should be a number greater than 15 and less than 20"
+    validation:
+      gt<>: [ 15.0 ]
+      lt<>: [ 20.0 ]
   one_number:
     type: int
     default_value: 14540

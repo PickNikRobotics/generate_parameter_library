@@ -2,6 +2,38 @@
 Changelog for package generate_parameter_module_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.1 (2026-10-05)
+------------------
+* fix that if no parameter is updated, the user callback is not called (`#383 <https://github.com/PickNikRobotics/generate_parameter_library/issues/383>`_)
+* Contributors: Fabian Hirmann
+
+1.3.0 (2026-07-24)
+------------------
+* Accept quotes in description and additional constraints (`#357 <https://github.com/PickNikRobotics/generate_parameter_library/issues/357>`_)
+* Use a shared symlinked parameter file in all examples (`#361 <https://github.com/PickNikRobotics/generate_parameter_library/issues/361>`_)
+* Fix floating_point_range numerical values (`#360 <https://github.com/PickNikRobotics/generate_parameter_library/issues/360>`_)
+* Contributors: Christoph Fröhlich, Hugal31
+
+1.2.0 (2026-06-09)
+------------------
+* add gitignore for generated files in example_python (`#356 <https://github.com/PickNikRobotics/generate_parameter_library/issues/356>`_)
+* Made fields in python structs assigned per-instance instead of at the class scope (`#351 <https://github.com/PickNikRobotics/generate_parameter_library/issues/351>`_)
+* Fix ParameterDescription of exclusive bounds (`#339 <https://github.com/PickNikRobotics/generate_parameter_library/issues/339>`_)
+* Contributors: Alex Navarro, Christoph Fröhlich, Jonas Otto
+
+1.1.0 (2026-05-14)
+------------------
+
+1.0.1 (2026-05-06)
+------------------
+
+1.0.0 (2026-04-22)
+------------------
+* Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)
+* Fix conflicting validators (`#336 <https://github.com/PickNikRobotics/generate_parameter_library/issues/336>`_)
+* Fix rst syntax parsing in parameter description (`#338 <https://github.com/PickNikRobotics/generate_parameter_library/issues/338>`_)
+* Contributors: Christoph Fröhlich, Mat198
+
 0.8.0 (2026-03-22)
 ------------------
 * Testing consistency of parameters update (Python) (`#327 <https://github.com/PickNikRobotics/generate_parameter_library/issues/327>`_)

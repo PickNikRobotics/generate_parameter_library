@@ -82,6 +82,18 @@ TEST_F(ExampleTest, try_get_params) {
   ASSERT_EQ(params_.interpolation_mode, "linear");
 }
 
+TEST_F(ExampleTest, update_unrelated_param) {
+  ASSERT_TRUE(param_listener_->try_get_params(params_));
+
+  // if some unrelated parameter is updated, the params_ should not be
+  // updated/considered as old
+  example_test_node_->declare_parameter("some_other_parameter", 42);
+  ASSERT_FALSE(param_listener_->is_old(params_));
+  const rclcpp ::Parameter new_param("some_other_parameter", 43);
+  example_test_node_->set_parameter(new_param);
+  ASSERT_FALSE(param_listener_->is_old(params_));
+}
+
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);

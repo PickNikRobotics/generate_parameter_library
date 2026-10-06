@@ -1,0 +1,13 @@
+repositories:
+  rsl:
+    type: git
+    url: https://github.com/picknikrobotics/RSL
+    version: main
+  cpp_polyfills:
+    type: git
+    url: https://github.com/PickNikRobotics/cpp_polyfills.git
+    version: main
+  ros2_control_cmake:
+    type: git
+    url: https://github.com/ros-controls/ros2_control_cmake.git
+    version: master

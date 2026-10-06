@@ -2,6 +2,35 @@
 Changelog for package generate_parameter_library_example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.1 (2026-10-05)
+------------------
+* fix that if no parameter is updated, the user callback is not called (`#383 <https://github.com/PickNikRobotics/generate_parameter_library/issues/383>`_)
+* Add <fmt/format.h> for fmt 11+ compatibility (`#379 <https://github.com/PickNikRobotics/generate_parameter_library/issues/379>`_)
+* Contributors: Dhruv Patel, Fabian Hirmann
+
+1.3.0 (2026-07-24)
+------------------
+* Use a shared symlinked parameter file in all examples (`#361 <https://github.com/PickNikRobotics/generate_parameter_library/issues/361>`_)
+* Fix floating_point_range numerical values (`#360 <https://github.com/PickNikRobotics/generate_parameter_library/issues/360>`_)
+* Contributors: Christoph Fröhlich
+
+1.2.0 (2026-06-09)
+------------------
+* Fix ParameterDescription of exclusive bounds (`#339 <https://github.com/PickNikRobotics/generate_parameter_library/issues/339>`_)
+* Contributors: Christoph Fröhlich
+
+1.1.0 (2026-05-14)
+------------------
+
+1.0.1 (2026-05-06)
+------------------
+
+1.0.0 (2026-04-22)
+------------------
+* Implement string_array_fixed_XX (`#341 <https://github.com/PickNikRobotics/generate_parameter_library/issues/341>`_)
+* Fix conflicting validators (`#336 <https://github.com/PickNikRobotics/generate_parameter_library/issues/336>`_)
+* Contributors: Christoph Fröhlich
+
 0.8.0 (2026-03-22)
 ------------------
 * Fix nested mapped parameters map (`#306 <https://github.com/PickNikRobotics/generate_parameter_library/issues/306>`_)

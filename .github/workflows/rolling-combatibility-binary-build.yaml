@@ -1,7 +1,6 @@
-# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
-# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
-
-name: Rolling Semi-Binary Build
+name: Rolling Compatibility Binary Build
+# author: Christoph Froehlich <christoph.froehlich@ait.ac.at>
+# description: 'Build & test the rolling version on stable distros.'
 
 on:
   workflow_dispatch:
@@ -18,14 +17,13 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  semi-binary:
+  ci:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [lyrical, rolling]
+        ROS_DISTRO: [kilted, jazzy, humble]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing
-      upstream_workspace: generate_parameter_library.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: main
