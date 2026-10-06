@@ -1,0 +1,17 @@
+[book]
+title = "generate_parameter_library"
+description = "Generate ROS 2 parameter libraries in C++ and Python from declarative YAML."
+authors = ["generate_parameter_library contributors"]
+language = "en"
+src = "src"
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/PickNikRobotics/generate_parameter_library"
+edit-url-template = "https://github.com/PickNikRobotics/generate_parameter_library/edit/main/docs/src/{path}"
+site-url = "/generate_parameter_library/"
+
+[output.html.search]
+enable = true

@@ -1,0 +1,69 @@
+name: Documentation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/documentation.yml'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/documentation.yml'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: documentation-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  MDBOOK_VERSION: '0.5.4'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install mdBook
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/mdbook"
+          gh release download "v${MDBOOK_VERSION}" \
+            --repo rust-lang/mdBook \
+            --pattern "mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            --dir "$RUNNER_TEMP/mdbook"
+          tar -xzf "$RUNNER_TEMP/mdbook/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            -C "$RUNNER_TEMP/mdbook"
+          echo "$RUNNER_TEMP/mdbook" >> "$GITHUB_PATH"
+      - name: Build book
+        run: mdbook build docs
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/book
+
+  deploy:
+    if: github.repository == 'PickNikRobotics/generate_parameter_library' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
