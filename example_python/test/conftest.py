@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright 2023 PickNik Inc.
+# Copyright 2026 Marq Rasmussen
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -12,7 +10,7 @@
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
 #
-#    * Neither the name of the PickNik Inc. nor the names of its
+#    * Neither the name of the copyright holder nor the names of its
 #      contributors may be used to endorse or promote products derived from
 #      this software without specific prior written permission.
 #
@@ -28,39 +26,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from setuptools import setup
+"""Run the tests against the installed package, not the source tree.
 
-from generate_parameter_library_py.setup_helper import parameter_cmdclass
+The package must be built and installed before the tests run.
+"""
 
-package_name = 'generate_parameter_module_example'
+import os
+import sys
 
-setup(
-    name=package_name,
-    version='1.3.1',
-    packages=[package_name],
-    cmdclass=parameter_cmdclass(
-        'admittance_parameters',
-        'generate_parameter_module_example/parameters.yaml',
-        validation_module='generate_parameter_module_example.custom_validation',
-    ),
-    data_files=[
-        ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
-    ],
-    install_requires=['setuptools'],
-    zip_safe=True,
-    maintainer='Paul Gesel',
-    maintainer_email='paulgesel@gmail.com',
-    description='Example usage of generate_parameter_library for a python module',
-    license='BSD-3-Clause',
-    extras_require={
-        'test': [
-            'pytest',
-        ],
-    },
-    entry_points={
-        'console_scripts': [
-            'test_node = generate_parameter_module_example.minimal_publisher:main'
-        ],
-    },
-)
+# `python -m pytest` from the package directory puts the source tree first on
+# sys.path. A regular build generates the parameter module into the installed
+# copy only, so drop the source root before the tests import the package.
+_SOURCE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path[:] = [p for p in sys.path if os.path.abspath(p or '.') != _SOURCE_ROOT]

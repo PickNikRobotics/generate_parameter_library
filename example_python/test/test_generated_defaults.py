@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2023 PickNik Inc.
+# Copyright 2026 Marq Rasmussen
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -12,7 +12,7 @@
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
 #
-#    * Neither the name of the PickNik Inc. nor the names of its
+#    * Neither the name of the copyright holder nor the names of its
 #      contributors may be used to endorse or promote products derived from
 #      this software without specific prior written permission.
 #
@@ -28,39 +28,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from setuptools import setup
-
-from generate_parameter_library_py.setup_helper import parameter_cmdclass
-
-package_name = 'generate_parameter_module_example'
-
-setup(
-    name=package_name,
-    version='1.3.1',
-    packages=[package_name],
-    cmdclass=parameter_cmdclass(
-        'admittance_parameters',
-        'generate_parameter_module_example/parameters.yaml',
-        validation_module='generate_parameter_module_example.custom_validation',
-    ),
-    data_files=[
-        ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
-    ],
-    install_requires=['setuptools'],
-    zip_safe=True,
-    maintainer='Paul Gesel',
-    maintainer_email='paulgesel@gmail.com',
-    description='Example usage of generate_parameter_library for a python module',
-    license='BSD-3-Clause',
-    extras_require={
-        'test': [
-            'pytest',
-        ],
-    },
-    entry_points={
-        'console_scripts': [
-            'test_node = generate_parameter_module_example.minimal_publisher:main'
-        ],
-    },
+import generate_parameter_module_example
+from generate_parameter_module_example.admittance_parameters import (
+    admittance_controller,
 )
+
+
+def test_generated_module_has_yaml_defaults():
+    params = admittance_controller.Params()
+
+    assert params.interpolation_mode == 'spline'
+    assert params.joints == ['joint1', 'joint2', 'joint3']
+
+
+def test_package_keeps_source_init():
+    assert generate_parameter_module_example.INIT_MARKER == (
+        'generate_parameter_module_example'
+    )
