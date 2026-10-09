@@ -255,7 +255,28 @@ def pip_available():
     return result.returncode == 0
 
 
+def setuptools_supports_pep660():
+    # PEP 660 editable wheels need setuptools' build_editable hook, added in 64.
+    import setuptools
+    from packaging.version import Version
+
+    return Version(setuptools.__version__) >= Version('64')
+
+
+def pip_supports_break_system_packages():
+    # --break-system-packages bypasses PEP 668; pip added it in 23.1, alongside
+    # PEP 668 support itself, so older pip neither needs nor accepts it.
+    result = subprocess.run(
+        [sys.executable, '-m', 'pip', 'install', '--help'], capture_output=True
+    )
+    return b'--break-system-packages' in result.stdout
+
+
 @pytest.mark.skipif(not pip_available(), reason='pip is not installed')
+@pytest.mark.skipif(
+    not setuptools_supports_pep660(),
+    reason='setuptools < 64 has no PEP 660 editable support',
+)
 def test_pip_editable_generates_into_source(tmp_path):
     # PEP 660 editable wheels run build_py in editable mode; the source tree is
     # what gets imported.
@@ -266,22 +287,24 @@ def test_pip_editable_generates_into_source(tmp_path):
     env['PYTHONPATH'] = os.pathsep.join(
         [LIBRARY_PATH] + [p for p in [env.get('PYTHONPATH')] if p]
     )
+    pip_args = [
+        sys.executable,
+        '-m',
+        'pip',
+        'install',
+        '--editable',
+        '.',
+        '--use-pep517',
+        '--no-build-isolation',
+        '--no-deps',
+        '--no-index',
+        '--prefix',
+        str(tmp_path / 'prefix'),
+    ]
+    if pip_supports_break_system_packages():
+        pip_args.insert(-2, '--break-system-packages')
     result = subprocess.run(
-        [
-            sys.executable,
-            '-m',
-            'pip',
-            'install',
-            '--editable',
-            '.',
-            '--use-pep517',
-            '--no-build-isolation',
-            '--no-deps',
-            '--no-index',
-            '--break-system-packages',
-            '--prefix',
-            str(tmp_path / 'prefix'),
-        ],
+        pip_args,
         cwd=root,
         env=env,
         capture_output=True,
