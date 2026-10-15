@@ -116,8 +116,77 @@ def validation_base_name(function_name: str):
 
 
 @typechecked
+<<<<<<< HEAD
 def validate_validator_combinations(param_name: str, validations_dict: dict):
+=======
+def validate_fixed_default_size(
+    param_name: str,
+    defined_type: str,
+    default_value: Any,
+    validations_dict: dict,
+):
+    capacity = fixed_type_size(defined_type)
+    if capacity is None or default_value is None:
+        return
+    if array_type(defined_type) and not isinstance(default_value, list):
+        return
+    if not array_type(defined_type) and not isinstance(default_value, str):
+        return
+
+    default_size = len(default_value)
+    if default_size > capacity:
+        raise compile_error(
+            'Parameter {} has a default value of size {}, which exceeds '
+            "the capacity of type '{}' ({}).".format(
+                param_name, default_size, defined_type, capacity
+            )
+        )
+
+    for function_name, arguments in validations_dict.items():
+        if validation_base_name(function_name) != 'fixed_size':
+            continue
+
+        expected_size = arguments
+        if isinstance(arguments, list) and len(arguments) == 1:
+            expected_size = arguments[0]
+        if isinstance(expected_size, int) and default_size != expected_size:
+            raise compile_error(
+                'Parameter {} has a default value of size {}, but its '
+                "'fixed_size' validation requires {}.".format(
+                    param_name, default_size, expected_size
+                )
+            )
+
+
+@typechecked
+def validate_validator_combinations(
+    param_name: str, defined_type: str, validations_dict: dict
+):
+>>>>>>> 71fe677 (Validate bound validators against parameter types (#373))
     validation_names = {validation_base_name(name) for name in validations_dict}
+
+    scalar_bound_validators = {'bounds', 'gt', 'gt_eq', 'lt', 'lt_eq'}
+    element_bound_validators = {
+        'element_bounds',
+        'lower_element_bounds',
+        'upper_element_bounds',
+    }
+    if array_type(defined_type) and validation_names.intersection(
+        scalar_bound_validators
+    ):
+        raise compile_error(
+            "Parameter {} has array type '{}' but uses a scalar bound validator. "
+            "Use 'element_bounds/lower_element_bounds/upper_element_bounds' instead.".format(
+                param_name, defined_type
+            )
+        )
+    if not array_type(defined_type) and validation_names.intersection(
+        element_bound_validators
+    ):
+        raise compile_error(
+            "Parameter {} has scalar type '{}' but uses an element bound validator. "
+            "Use 'bounds/gt/gt_eq/lt/lt_eq' instead.".format(param_name, defined_type)
+        )
 
     if 'element_bounds' in validation_names and {
         'lower_element_bounds',
@@ -129,9 +198,8 @@ def validate_validator_combinations(param_name: str, validations_dict: dict):
             "'element_bounds' will take precedence.".format(param_name),
         )
 
-    scalar_bound_validators = {'gt', 'gt_eq', 'lt', 'lt_eq'}
     if 'bounds' in validation_names and validation_names.intersection(
-        scalar_bound_validators
+        scalar_bound_validators - {'bounds'}
     ):
         compile_warning(
             param_name,
@@ -792,7 +860,7 @@ def preprocess_inputs(language, name, value, nested_name_list):
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
 
-    validate_validator_combinations(param_name, validations_dict)
+    validate_validator_combinations(param_name, defined_type, validations_dict)
 
     for func_name in validations_dict:
         args = validations_dict[func_name]
