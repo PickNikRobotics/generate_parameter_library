@@ -143,6 +143,12 @@ def parameter_cmdclass(
                 add_missing_init=True,
             )
 
+        def get_source_files(self):
+            # sdist collects its pure-Python inputs from here.
+            return super().get_source_files() + [
+                yaml_file for _, yaml_file, _, _ in specs
+            ]
+
         def get_outputs(self, *args, **kwargs):
             return super().get_outputs(*args, **kwargs) + getattr(
                 self, '_generated', []

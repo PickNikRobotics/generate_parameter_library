@@ -29,6 +29,7 @@
 import os
 import subprocess
 import sys
+import tarfile
 import types
 
 import pytest
@@ -162,6 +163,20 @@ def test_build_src_layout(tmp_path):
     assert os.path.isfile(os.path.join(build_lib, 'probe', 'probe_parameters.py'))
     assert default_frame(build_lib) == 'probe_frame'
     assert read(os.path.join(build_lib, 'probe', '__init__.py')) == 'VALUE = 2\n'
+
+
+def test_sdist_rebuilds_from_unpacked_archive(tmp_path):
+    root = write_package(
+        str(tmp_path / 'src'), 'probe/parameters.yaml', init_content=''
+    )
+    dist_dir = str(tmp_path / 'dist')
+    run_setup(root, 'sdist', '--dist-dir', dist_dir, '--formats', 'gztar')
+    unpacked = tmp_path / 'unpacked'
+    with tarfile.open(os.path.join(dist_dir, 'probe-0.0.0.tar.gz')) as archive:
+        archive.extractall(unpacked)
+    build_lib = build(str(unpacked / 'probe-0.0.0'), str(tmp_path / 'rebuild'))
+
+    assert default_frame(build_lib) == 'probe_frame'
 
 
 def test_develop_through_symlink_resolves_yaml_against_source(tmp_path):
