@@ -102,7 +102,41 @@ cmdclass=parameter_cmdclass(modules=[
 ```
 
 If the package has its own `__init__.py`, `colcon test` imports the source tree before the installed package, so tests must drop the package's source directory from `sys.path`; see [example_python/test/conftest.py](example_python/test/conftest.py).
-The older `generate_parameter_module()` call still works.
+The older `generate_parameter_module()` call in `setup.py` still works.
+
+For a Python package built with `ament_cmake_python`, use `generate_parameter_module()`
+in `CMakeLists.txt` and install the Python package with `ament_python_install_package()`:
+
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(turtlesim)
+
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(generate_parameter_library REQUIRED)
+
+generate_parameter_module(turtlesim_parameters
+  src/turtlesim_parameters.yaml
+  # Optional third argument: turtlesim.custom_validation
+)
+
+ament_python_install_package(${PROJECT_NAME})
+ament_package()
+```
+
+This example expects a Python package directory named `turtlesim` alongside
+`CMakeLists.txt`. In addition to the `generate_parameter_library` dependency above,
+declare `ament_cmake_python` as a build tool dependency in `package.xml` and use
+`ament_cmake` as the package's build type:
+
+```xml
+<buildtool_depend>ament_cmake_python</buildtool_depend>
+<export>
+  <build_type>ament_cmake</build_type>
+</export>
+```
+
+See [example_cmake_python](example_cmake_python) for the complete package.
 
 ### Use generated struct in project source code
 
