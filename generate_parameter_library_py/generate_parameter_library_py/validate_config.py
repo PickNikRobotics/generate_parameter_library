@@ -65,6 +65,30 @@ RCL_BOOL_WORDS = frozenset(
     'y Y yes Yes YES n N no No NO true True TRUE false False FALSE '
     'on On ON off Off OFF'.split()
 )
+RCL_TRUE_WORDS = frozenset('y yes true on'.split())
+
+
+class Quoted(str):
+    """Text that was written with quotes in the YAML source.
+
+    ROS 2 keeps a quoted scalar a string whatever it contains, while the same
+    text unquoted may be read as a number or a bool. Subclassing str keeps
+    every consumer working; only the type check looks at the quoting.
+    """
+
+    __slots__ = ()
+
+
+def _construct_scalar_text(loader, node):
+    text = loader.construct_scalar(node)
+    return Quoted(text) if node.style else text
+
+
+class ConfigLoader(yaml.SafeLoader):
+    """A SafeLoader that remembers which scalars were written with quotes."""
+
+
+ConfigLoader.add_constructor('tag:yaml.org,2002:str', _construct_scalar_text)
 
 
 @dataclass
@@ -126,9 +150,10 @@ def reads_as_number(value: Any, expected: str) -> bool:
 
     PyYAML only resolves a float when the text has both a decimal point and a
     signed exponent, so '1e5' and '1e-3' arrive here as strings while ROS 2
-    reads them as doubles.
+    reads them as doubles. Quoted text is never a number: ROS 2 keeps a quoted
+    scalar a string, whatever it contains.
     """
-    if not isinstance(value, str):
+    if not isinstance(value, str) or isinstance(value, Quoted):
         return False
     try:
         if expected == 'int':
@@ -142,62 +167,80 @@ def reads_as_number(value: Any, expected: str) -> bool:
     return True
 
 
+def reads_as_bool(value: Any) -> bool:
+    """Would rcl_yaml_param_parser read this text as a bool?
+
+    PyYAML resolves most of the YAML 1.1 bool words itself, so the only text
+    that arrives here as a string is 'y' and 'n'. A quoted scalar is never a
+    bool.
+    """
+    return (
+        isinstance(value, str)
+        and not isinstance(value, Quoted)
+        and value in RCL_BOOL_WORDS
+    )
+
+
 def check_scalar_type(expected: str, value: Any) -> Optional[str]:
     actual = yaml_type_name(value)
     if actual == expected:
+        return None
+    if expected == 'bool' and reads_as_bool(value):
+        # ROS 2 reads 'y' and 'n' as bools even though PyYAML calls them strings.
         return None
     if expected == 'double' and actual == 'int':
         return (
             f"expected type 'double', got 'int' ({value}); ROS 2 does not convert "
             f'integers to doubles, write {value}.0'
         )
+    if isinstance(value, Quoted):
+        return (
+            f"expected type '{expected}', got a quoted '{actual}'; ROS 2 keeps "
+            f'quoted scalars as strings'
+        )
     if reads_as_number(value, expected):
         return None
     return f"expected type '{expected}', got '{actual}'"
-
-
-def check_quoting(parameter: 'DeclaredParameter', value: Any) -> Optional[str]:
-    """Warn about text rcl_yaml_param_parser reads as a bool.
-
-    The loader does not keep the quoting style, so a quoted string and a bare
-    word arrive here the same way and this can only be a warning.
-    """
-    if parameter.scalar_type != 'string' or parameter.is_array:
-        return None
-    if isinstance(value, str) and value in RCL_BOOL_WORDS:
-        return (
-            f'ROS 2 reads {value} as a bool unless it is quoted, and this '
-            f'parameter is declared as a string'
-        )
-    return None
 
 
 def coerce_value(parameter: 'DeclaredParameter', value: Any) -> Any:
     """Read a scalar the way rcl_yaml_param_parser would before validating it.
 
     PyYAML leaves '1e5' as a string, so a validator such as gt would be handed
-    text and raise. The node sees a double, and so should the validators.
+    text and raise. The node sees a double, and so should the validators. Plain
+    bool words such as 'y' are converted for the same reason, while a quoted
+    scalar stays text because that is what the node sees.
     """
     scalar = parameter.scalar_type
-    if scalar not in ('int', 'double'):
-        return value
-    convert = (lambda text: int(text, 10)) if scalar == 'int' else float
-    if isinstance(value, str) and reads_as_number(value, scalar):
-        return convert(value)
-    if isinstance(value, list):
-        return [
-            (
-                convert(item)
-                if isinstance(item, str) and reads_as_number(item, scalar)
-                else item
-            )
-            for item in value
-        ]
+    if scalar in ('int', 'double'):
+        convert = (lambda text: int(text, 10)) if scalar == 'int' else float
+        if reads_as_number(value, scalar):
+            return convert(value)
+        if isinstance(value, list):
+            return [
+                convert(item) if reads_as_number(item, scalar) else item
+                for item in value
+            ]
+    if scalar == 'bool':
+        if reads_as_bool(value):
+            return value.lower() in RCL_TRUE_WORDS
+        if isinstance(value, list):
+            return [
+                item.lower() in RCL_TRUE_WORDS if reads_as_bool(item) else item
+                for item in value
+            ]
     return value
 
 
-def check_type(parameter: DeclaredParameter, value: Any) -> Optional[str]:
-    """Return an error message when a value does not match the declared type."""
+def check_type(
+    parameter: DeclaredParameter, value: Any, from_config: bool = True
+) -> Optional[str]:
+    """Return an error message when a value does not match the declared type.
+
+    The bool words are only read as a bool when rcl_yaml_param_parser parses
+    the text, so a definition's default_value, which is compiled into the node
+    as a literal, is exempt from that check.
+    """
     scalar = parameter.scalar_type
     size = parameter.fixed_size
 
@@ -205,6 +248,11 @@ def check_type(parameter: DeclaredParameter, value: Any) -> Optional[str]:
         problem = check_scalar_type(scalar, value)
         if problem is not None:
             return problem
+        if from_config and scalar == 'string' and reads_as_bool(value):
+            return (
+                f'ROS 2 reads {value} as a bool unless it is quoted, and this '
+                f'parameter is declared as a string'
+            )
         if size is not None and scalar == 'string' and len(value) > size:
             return f'string is longer than the fixed size of {size}'
         return None
@@ -222,6 +270,12 @@ def check_type(parameter: DeclaredParameter, value: Any) -> Optional[str]:
         problem = check_scalar_type(scalar, element)
         if problem is not None:
             return f'element {index} of the array: {problem}'
+        if from_config and scalar == 'string' and reads_as_bool(element):
+            return (
+                f'element {index} of the array: ROS 2 reads {element} as a bool '
+                f'unless it is quoted, and this parameter is declared as a '
+                f'string_array'
+            )
     return None
 
 
@@ -414,20 +468,26 @@ def declared_parameters(
 def node_sections(document: Dict) -> Dict[str, Dict[str, Any]]:
     """Return the parameter tree of every node in a ROS parameter file.
 
-    Supports both `node: ros__parameters:` and a namespace level above it. A file
-    without any `ros__parameters` key is treated as a single unnamed section, so
-    that plain parameter trees can be validated too.
+    A `ros__parameters` key may sit under any number of namespace levels, as
+    in `robot: {arm: {my_node: {ros__parameters: ...}}}`, so the mapping is
+    walked recursively and the levels are joined into the section name. A file
+    without any `ros__parameters` key is treated as a single unnamed section,
+    so that plain parameter trees can be validated too.
     """
-    sections = {}
-    for key, value in document.items():
-        if not isinstance(value, dict):
-            continue
-        if ROS_PARAMETERS_KEY in value:
-            sections[str(key)] = value[ROS_PARAMETERS_KEY] or {}
-            continue
-        for nested_key, nested_value in value.items():
-            if isinstance(nested_value, dict) and ROS_PARAMETERS_KEY in nested_value:
-                sections[f'{key}/{nested_key}'] = nested_value[ROS_PARAMETERS_KEY] or {}
+
+    def walk(tree: Dict[str, Any], namespace: List[str]) -> None:
+        for key, value in tree.items():
+            if not isinstance(value, dict):
+                continue
+            if ROS_PARAMETERS_KEY in value:
+                sections['/'.join(namespace + [str(key)])] = (
+                    value[ROS_PARAMETERS_KEY] or {}
+                )
+                continue
+            walk(value, namespace + [str(key)])
+
+    sections: Dict[str, Dict[str, Any]] = {}
+    walk(document, [])
     if not sections:
         return {'': document}
     return sections
@@ -466,7 +526,31 @@ def validate_section(
                         'default_value, the node will fail to start',
                     )
                 )
-            elif strict:
+                continue
+            # The node validates the effective value, which is the declared
+            # default when the configuration sets nothing, so the default has
+            # to pass the same checks a configured value would. A default is
+            # compiled into the node as a literal, so the checks that only
+            # apply to text rcl_yaml_param_parser parses are skipped.
+            problem = check_type(parameter, parameter.default_value, from_config=False)
+            if problem is None:
+                for severity, message in run_validations(
+                    parameter, coerce_value(parameter, parameter.default_value)
+                ):
+                    if severity == ERROR:
+                        problem = message
+                        break
+            if problem is not None:
+                diagnostics.append(
+                    Diagnostic(
+                        ERROR,
+                        where,
+                        f'not set by the config and the default_value '
+                        f'{parameter.default_value} is invalid: {problem}',
+                    )
+                )
+                continue
+            if strict:
                 diagnostics.append(
                     Diagnostic(
                         WARNING,
@@ -482,9 +566,6 @@ def validate_section(
         if problem is not None:
             diagnostics.append(Diagnostic(ERROR, where, problem))
             continue
-        quoting = check_quoting(parameter, value)
-        if quoting is not None:
-            diagnostics.append(Diagnostic(WARNING, where, quoting))
         value = coerce_value(parameter, value)
         for severity, message in run_validations(parameter, value):
             diagnostics.append(Diagnostic(severity, where, message))
@@ -520,7 +601,9 @@ class ConfigError(Exception):
 def load_yaml(path: str) -> Dict:
     try:
         with open(path) as handle:
-            document = yaml.safe_load(handle)
+            # The custom loader remembers which scalars were quoted, which is
+            # what decides the type ROS 2 gives them at runtime.
+            document = yaml.load(handle, Loader=ConfigLoader)
     except OSError as error:
         raise ConfigError(f'{path}: {error.strerror or error}')
     except yaml.YAMLError as error:

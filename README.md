@@ -597,27 +597,31 @@ definitions or several configuration files in one run. A configuration section
 is matched to the definition whose root element has the same name; when exactly
 one definition is given it is used for every section.
 
-A configuration section may be written as `node:`, `/node:`, under a namespace,
-or as `/**:`, and a file may hold several nodes. Values under `/**` apply to
-every section with lower precedence than a section's own.
+A configuration section may be written as `node:`, `/node:`, under any
+number of namespace levels, or as `/**:`, and a file may hold several nodes.
+Values under `/**` apply to every section with lower precedence than a
+section's own.
 
 Without further options the tool reports what makes a node fail to start or
 behave unexpectedly:
 
 * a value whose type does not match the declared type, including an integer
   written where a `double` is declared, which ROS 2 does not convert
+* a quoted scalar where a number or a bool is declared, which ROS 2 keeps a
+  string, or a plain `y` or `on` where a string is declared, which ROS 2
+  reads as a bool
 * an empty sequence, which `rcl_yaml_param_parser` cannot give a type and reads
   as `PARAMETER_NOT_SET` rather than as an empty array
 * a value rejected by a built-in validator such as `bounds<>` or `one_of<>`
 * a parameter that is declared without a `default_value` and that the
   configuration does not set
+* a parameter the configuration omits whose `default_value` fails the same
+  checks, because the node validates the effective value
 * two definitions that declare the same root element
 
 Scalars are read the way `rcl_yaml_param_parser` reads them rather than the way
-PyYAML does, so `1e5` counts as a `double`. One difference cannot be resolved:
-the loader does not keep the quoting style, so a value such as `y`, which ROS 2
-reads as a bool unless it is quoted, is reported as a warning rather than an
-error.
+PyYAML does, so `1e5` counts as a `double` while a quoted `"2.0"` stays a
+`string`, exactly as at runtime.
 
 Adding `--strict` also reports parameters the configuration sets that no
 definition declares, with a suggestion when the name is close to a declared one,

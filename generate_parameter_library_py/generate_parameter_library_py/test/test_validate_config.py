@@ -62,12 +62,28 @@ DEFINITION = """my_node:
     default_value: 3
     validation:
       "my_project::integer_equal_value": [3]
+  enabled:
+    type: bool
+    default_value: true
   background:
     r:
       type: int
       default_value: 0
       validation:
         bounds<>: [0, 255]
+"""
+
+BAD_DEFAULT_DEFINITION = """default_node:
+  items:
+    type: string_array
+    default_value: []
+    validation:
+      not_empty<>: null
+  bad_number:
+    type: double
+    default_value: -1.0
+    validation:
+      gt<>: [0.0]
 """
 
 MAPPED_DEFINITION = """mapped_node:
@@ -168,7 +184,7 @@ def test_wrong_scalar_type_is_reported(workspace, definition):
 """,
     )
     found = errors(validate([definition], [config]))
-    assert "expected type 'double', got 'string'" in found[0].message
+    assert "expected type 'double', got a quoted 'string'" in found[0].message
 
 
 def test_value_out_of_bounds_is_reported(workspace, definition):
@@ -512,16 +528,147 @@ def test_scientific_notation_is_a_double(workspace, definition):
     assert validate([definition], [config]) == []
 
 
-def test_word_that_ros_reads_as_a_bool_is_reported(workspace, definition):
-    """The loader drops the quoting style, so this can only be a warning."""
+def test_word_that_ros_reads_as_a_bool_is_an_error(workspace, definition):
+    """ROS 2 reads a plain y as a bool, so a string parameter gets a bool."""
     config = write(
         workspace,
         'config.yaml',
         'my_node:\n  ros__parameters:\n    mandatory_gain: 1.5\n    name: y\n',
     )
-    diagnostics = validate([definition], [config])
-    assert errors(diagnostics) == []
-    assert any('reads y as a bool' in d.message for d in diagnostics)
+    found = errors(validate([definition], [config]))
+    assert len(found) == 1
+    assert 'reads y as a bool' in found[0].message
+
+
+def test_quoted_bool_word_stays_a_string(workspace, definition):
+    config = write(
+        workspace,
+        'config.yaml',
+        'my_node:\n  ros__parameters:\n    mandatory_gain: 1.5\n    name: "y"\n',
+    )
+    assert validate([definition], [config]) == []
+
+
+def test_plain_bool_word_is_a_bool(workspace, definition):
+    """ROS 2 reads a plain y as a bool, so a bool parameter accepts it."""
+    config = write(
+        workspace,
+        'config.yaml',
+        'my_node:\n  ros__parameters:\n    mandatory_gain: 1.5\n    enabled: y\n',
+    )
+    assert validate([definition], [config]) == []
+
+
+def test_quoted_number_is_not_a_double(workspace, definition):
+    """ROS 2 keeps a quoted scalar a string, so the node would reject it."""
+    config = write(
+        workspace,
+        'config.yaml',
+        'my_node:\n  ros__parameters:\n    rate: "2.0"\n    mandatory_gain: 1.5\n',
+    )
+    found = errors(validate([definition], [config]))
+    assert len(found) == 1
+    assert found[0].location == 'my_node.rate'
+    assert 'quoted' in found[0].message
+
+
+def test_quoted_scientific_notation_stays_a_string(workspace, definition):
+    config = write(
+        workspace,
+        'config.yaml',
+        'my_node:\n  ros__parameters:\n    rate: "1e5"\n    mandatory_gain: 1.5\n',
+    )
+    found = errors(validate([definition], [config]))
+    assert len(found) == 1
+    assert found[0].location == 'my_node.rate'
+
+
+def test_quoted_number_element_is_not_a_double(workspace, definition):
+    config = write(
+        workspace,
+        'config.yaml',
+        'my_node:\n  ros__parameters:\n    mandatory_gain: 1.5\n    offsets: ["1.0", 2.0]\n',
+    )
+    found = errors(validate([definition], [config]))
+    assert len(found) == 1
+    assert 'element 0' in found[0].message
+
+
+def test_invalid_default_is_reported_when_the_parameter_is_omitted(workspace):
+    """The node validates the effective value, which is the default when omitted."""
+    definition = write(workspace, 'definition.yaml', BAD_DEFAULT_DEFINITION)
+    config = write(
+        workspace,
+        'config.yaml',
+        'default_node:\n  ros__parameters: {}\n',
+    )
+    found = errors(validate([definition], [config]))
+    assert {d.location for d in found} == {
+        'default_node.items',
+        'default_node.bad_number',
+    }
+
+
+def test_invalid_default_is_not_reported_when_the_config_sets_the_parameter(workspace):
+    definition = write(workspace, 'definition.yaml', BAD_DEFAULT_DEFINITION)
+    config = write(
+        workspace,
+        'config.yaml',
+        'default_node:\n'
+        '  ros__parameters:\n'
+        '    items: ["a"]\n'
+        '    bad_number: 1.0\n',
+    )
+    assert validate([definition], [config]) == []
+
+
+def test_node_section_is_found_through_nested_namespaces(workspace, definition):
+    """A node may sit under any number of namespace levels."""
+    config = write(
+        workspace,
+        'config.yaml',
+        'robot:\n'
+        '  arm:\n'
+        '    my_node:\n'
+        '      ros__parameters:\n'
+        '        rate: -5.0\n'
+        '        mandatory_gain: 1.5\n',
+    )
+    found = errors(validate([definition], [config], strict=True))
+    assert len(found) == 1
+    assert found[0].location == 'robot/arm/my_node.rate'
+
+
+def test_valid_config_in_a_nested_namespace_reports_nothing(workspace, definition):
+    config = write(
+        workspace,
+        'config.yaml',
+        'robot:\n'
+        '  arm:\n'
+        '    my_node:\n'
+        '      ros__parameters:\n'
+        '        rate: 20.0\n'
+        '        mandatory_gain: 1.5\n',
+    )
+    assert validate([definition], [config]) == []
+
+
+def test_bool_word_in_a_default_is_a_string(workspace):
+    """A default_value is compiled into the node, not parsed as config text."""
+    definition = write(
+        workspace,
+        'definition.yaml',
+        'default_node:\n'
+        '  axes:\n'
+        '    type: string_array\n'
+        '    default_value: ["x", "y", "rz"]\n',
+    )
+    config = write(
+        workspace,
+        'config.yaml',
+        'default_node:\n  ros__parameters: {}\n',
+    )
+    assert validate([definition], [config]) == []
 
 
 def test_empty_array_is_reported(workspace, definition):
