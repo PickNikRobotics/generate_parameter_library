@@ -116,46 +116,6 @@ def validation_base_name(function_name: str):
 
 
 @typechecked
-def validate_fixed_default_size(
-    param_name: str,
-    defined_type: str,
-    default_value: Any,
-    validations_dict: dict,
-):
-    capacity = fixed_type_size(defined_type)
-    if capacity is None or default_value is None:
-        return
-    if array_type(defined_type) and not isinstance(default_value, list):
-        return
-    if not array_type(defined_type) and not isinstance(default_value, str):
-        return
-
-    default_size = len(default_value)
-    if default_size > capacity:
-        raise compile_error(
-            'Parameter {} has a default value of size {}, which exceeds '
-            "the capacity of type '{}' ({}).".format(
-                param_name, default_size, defined_type, capacity
-            )
-        )
-
-    for function_name, arguments in validations_dict.items():
-        if validation_base_name(function_name) != 'fixed_size':
-            continue
-
-        expected_size = arguments
-        if isinstance(arguments, list) and len(arguments) == 1:
-            expected_size = arguments[0]
-        if isinstance(expected_size, int) and default_size != expected_size:
-            raise compile_error(
-                'Parameter {} has a default value of size {}, but its '
-                "'fixed_size' validation requires {}.".format(
-                    param_name, default_size, expected_size
-                )
-            )
-
-
-@typechecked
 def validate_validator_combinations(
     param_name: str, defined_type: str, validations_dict: dict
 ):
@@ -853,9 +813,6 @@ def preprocess_inputs(language, name, value, nested_name_list):
     validations = []
     additional_constraints = value.get('additional_constraints', '')
     validations_dict = value.get('validation', {})
-    validate_fixed_default_size(
-        param_name, defined_type, default_value, validations_dict
-    )
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
 
