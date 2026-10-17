@@ -21,7 +21,10 @@ from ament_index_python.packages import get_package_share_path
 from generate_parameter_library_py.generate_cpp_header import run as run_cpp
 from generate_parameter_library_py.generate_python_module import run as run_python
 from generate_parameter_library_py.generate_markdown import run as run_md
-from generate_parameter_library_py.parse_yaml import YAMLSyntaxError
+from generate_parameter_library_py.parse_yaml import (
+    YAMLSyntaxError,
+    validate_validator_combinations,
+)
 from generate_parameter_library_py.generate_cpp_header import parse_args
 
 
@@ -100,3 +103,48 @@ def test_parse_valid_parameter_files(yaml_test_file):
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f'failed to parse valid file, reason:{e}'
+
+
+@pytest.mark.parametrize(
+    'defined_type,validations,expected_message',
+    [
+        (
+            'double_array',
+            {'bounds<>': [0.0, 1.0]},
+            'uses a scalar bound validator',
+        ),
+        (
+            'int_array_fixed_03',
+            {'gt_eq<>': [0]},
+            'uses a scalar bound validator',
+        ),
+        (
+            'double',
+            {'element_bounds<>': [0.0, 1.0]},
+            'uses an element bound validator',
+        ),
+        (
+            'int',
+            {'upper_element_bounds<>': [10]},
+            'uses an element bound validator',
+        ),
+    ],
+)
+def test_bound_validator_matches_parameter_type(
+    defined_type, validations, expected_message
+):
+    with pytest.raises(YAMLSyntaxError, match=expected_message):
+        validate_validator_combinations('test_param', defined_type, validations)
+
+
+@pytest.mark.parametrize(
+    'defined_type,validations',
+    [
+        ('double_array', {'element_bounds<>': [0.0, 1.0]}),
+        ('int_array_fixed_03', {'lower_element_bounds<>': [0]}),
+        ('double', {'bounds<>': [0.0, 1.0]}),
+        ('int', {'gt_eq<>': [0]}),
+    ],
+)
+def test_bound_validator_accepts_matching_parameter_type(defined_type, validations):
+    validate_validator_combinations('test_param', defined_type, validations)
