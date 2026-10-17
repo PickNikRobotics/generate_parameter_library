@@ -21,15 +21,11 @@ from ament_index_python.packages import get_package_share_path
 from generate_parameter_library_py.generate_cpp_header import run as run_cpp
 from generate_parameter_library_py.generate_python_module import run as run_python
 from generate_parameter_library_py.generate_markdown import run as run_md
-<<<<<<< HEAD
-from generate_parameter_library_py.parse_yaml import YAMLSyntaxError
-=======
 from generate_parameter_library_py.parse_yaml import (
     YAMLSyntaxError,
     validate_validator_combinations,
     preprocess_inputs,
 )
->>>>>>> 71fe677 (Validate bound validators against parameter types (#373))
 from generate_parameter_library_py.generate_cpp_header import parse_args
 
 
@@ -108,8 +104,6 @@ def test_parse_valid_parameter_files(yaml_test_file):
         set_up(yaml_test_file)
     except Exception as e:
         assert False, f'failed to parse valid file, reason:{e}'
-<<<<<<< HEAD
-=======
 
 
 @pytest.mark.parametrize(
@@ -198,4 +192,3 @@ def test_fixed_default_at_or_below_capacity_is_valid(default_value):
         {'type': 'int_array_fixed_03', 'default_value': default_value},
         ['test_namespace'],
     )
->>>>>>> 71fe677 (Validate bound validators against parameter types (#373))

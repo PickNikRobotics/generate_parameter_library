@@ -116,9 +116,6 @@ def validation_base_name(function_name: str):
 
 
 @typechecked
-<<<<<<< HEAD
-def validate_validator_combinations(param_name: str, validations_dict: dict):
-=======
 def validate_fixed_default_size(
     param_name: str,
     defined_type: str,
@@ -162,7 +159,6 @@ def validate_fixed_default_size(
 def validate_validator_combinations(
     param_name: str, defined_type: str, validations_dict: dict
 ):
->>>>>>> 71fe677 (Validate bound validators against parameter types (#373))
     validation_names = {validation_base_name(name) for name in validations_dict}
 
     scalar_bound_validators = {'bounds', 'gt', 'gt_eq', 'lt', 'lt_eq'}
@@ -857,6 +853,9 @@ def preprocess_inputs(language, name, value, nested_name_list):
     validations = []
     additional_constraints = value.get('additional_constraints', '')
     validations_dict = value.get('validation', {})
+    validate_fixed_default_size(
+        param_name, defined_type, default_value, validations_dict
+    )
     if is_fixed_type(defined_type):
         validations_dict['size_lt<>'] = fixed_type_size(defined_type) + 1
 
